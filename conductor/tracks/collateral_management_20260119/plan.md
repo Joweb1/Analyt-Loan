@@ -4,7 +4,7 @@ This plan outlines the steps to implement the "Collateral Management (Vault)" fe
 
 ---
 
-## Phase 1: Backend Setup & Logic
+## Phase 1: Backend Setup & Logic [checkpoint: 4b9eeb9]
 
 This phase focuses on establishing the core data model, API endpoints, and business logic for collateral management.
 

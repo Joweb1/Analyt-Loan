@@ -49,7 +49,7 @@ This phase focuses on building the user-facing components for managing and viewi
     - [ ] Implement the Blade view for a single collateral card, including styling with Tailwind CSS.
     - [ ] Run and verify tests.
 
-- [~] **Task: Implement Collateral Detail Drawer UI**
+- [x] **Task: Implement Collateral Detail Drawer UI** [92af70c]
     - [ ] Write tests for the "Drawer UI" that slides out from the right, ensuring it displays detailed collateral information upon card click.
     - [ ] Implement the Livewire/Alpine.js components for the collateral detail drawer, including data fetching and display.
     - [ ] Run and verify tests.

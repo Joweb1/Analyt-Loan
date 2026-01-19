@@ -39,7 +39,7 @@ This phase focuses on establishing the core data model, API endpoints, and busin
 
 This phase focuses on building the user-facing components for managing and viewing collateral.
 
-- [ ] **Task: Create Digital Shelf Livewire Component**
+- [~] **Task: Create Digital Shelf Livewire Component**
     - [ ] Write tests for the Livewire component that displays a grid of collateral items, ensuring it fetches and renders data correctly.
     - [ ] Implement the Livewire component for the "Digital Shelf" UI, including fetching collateral data and displaying it in a grid of cards.
     - [ ] Run and verify tests.

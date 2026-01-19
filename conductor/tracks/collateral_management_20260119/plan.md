@@ -54,7 +54,7 @@ This phase focuses on building the user-facing components for managing and viewi
     - [ ] Implement the Livewire/Alpine.js components for the collateral detail drawer, including data fetching and display.
     - [ ] Run and verify tests.
 
-- [ ] **Task: Integrate Collateral Management into Loan Creation/Edit Forms**
+- [~] **Task: Integrate Collateral Management into Loan Creation/Edit Forms**
     - [ ] Write tests for the loan creation/edit forms, ensuring users can associate collateral and the 50% rule is visually communicated (e.g., warnings, disable submit).
     - [ ] Modify existing loan creation/edit forms to include the ability to add/select collateral items, integrating the 50% rule validation feedback.
     - [ ] Run and verify tests.

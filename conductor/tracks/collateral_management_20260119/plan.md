@@ -44,7 +44,7 @@ This phase focuses on building the user-facing components for managing and viewi
     - [ ] Implement the Livewire component for the "Digital Shelf" UI, including fetching collateral data and displaying it in a grid of cards.
     - [ ] Run and verify tests.
 
-- [~] **Task: Develop Collateral Card UI**
+- [x] **Task: Develop Collateral Card UI** [af04bb2]
     - [ ] Write tests for the individual collateral card component, ensuring it displays the image, name, and estimated value correctly.
     - [ ] Implement the Blade view for a single collateral card, including styling with Tailwind CSS.
     - [ ] Run and verify tests.

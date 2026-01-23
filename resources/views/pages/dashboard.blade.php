@@ -1,5 +1,5 @@
 <x-app-layout>
-    <div class="bg-blue-500 flex flex-col gap-4">
+    <div class="flex flex-col gap-4">
     <!-- Welcome/Context -->
     <div class="flex justify-between items-end">
         <div>

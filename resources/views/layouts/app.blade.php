@@ -58,11 +58,11 @@
     </div>
     <nav id="sidebar-nav" class="flex-1 flex flex-col gap-2 p-4 overflow-hidden">
         <!-- Active Item -->
-        <a class="flex items-center gap-3 px-3 py-3 rounded-xl bg-primary text-white shadow-lg shadow-primary/30 group transition-all" href="#">
+        <a class="flex items-center gap-3 px-3 py-3 rounded-xl bg-primary text-white shadow-lg shadow-primary/30 group transition-all" href="{{ route('dashboard') }}">
             <span class="material-symbols-outlined icon-fill">dashboard</span>
             <span class="sidebar-nav-text text-sm font-medium hidden">Dashboard</span>
         </a>
-        <a class="flex items-center gap-3 px-3 py-3 rounded-xl text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400 transition-all group hover:text-primary" href="#">
+        <a class="flex items-center gap-3 px-3 py-3 rounded-xl text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400 transition-all group hover:text-primary" href="{{ route('loan') }}">
             <span class="material-symbols-outlined group-hover:scale-110 transition-transform">monetization_on</span>
             <span class="sidebar-nav-text text-sm font-medium hidden">Loans</span>
         </a>

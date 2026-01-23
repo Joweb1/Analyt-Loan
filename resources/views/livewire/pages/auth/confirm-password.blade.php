@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Layout;
 use Livewire\Volt\Component;
 
@@ -10,53 +9,49 @@ new #[Layout('layouts.guest')] class extends Component
     public string $password = '';
 
     /**
-     * Confirm the current user's password.
+     * Confirm the user's password.
      */
     public function confirmPassword(): void
     {
         $this->validate([
-            'password' => ['required', 'string'],
+            'password' => ['required', 'string', 'current_password'],
         ]);
 
-        if (! Auth::guard('web')->validate([
-            'email' => Auth::user()->email,
-            'password' => $this->password,
-        ])) {
-            throw ValidationException::withMessages([
-                'password' => __('auth.password'),
-            ]);
-        }
+        session()->put('auth.password_confirmed_at', time());
 
-        session(['auth.password_confirmed_at' => time()]);
-
-        $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
+        $this->redirect(
+            session('url.intended', '/'),
+            navigate: true
+        );
     }
 }; ?>
 
-<div>
-    <div class="mb-4 text-sm text-gray-600">
-        {{ __('This is a secure area of the application. Please confirm your password before continuing.') }}
+<div class="max-w-[440px] w-full mx-auto">
+    <div class="mb-10 text-center lg:text-left">
+        <h1 class="text-[#131416] dark:text-white text-3xl font-bold tracking-tight mb-2">Confirm Password</h1>
+        <p class="text-[#6b7180] text-base">
+            This is a secure area of the application. Please confirm your password before continuing.
+        </p>
     </div>
 
-    <form wire:submit="confirmPassword">
-        <!-- Password -->
-        <div>
-            <x-input-label for="password" :value="__('Password')" />
-
-            <x-text-input wire:model="password"
-                          id="password"
-                          class="block mt-1 w-full"
-                          type="password"
-                          name="password"
-                          required autocomplete="current-password" />
-
+    <form wire:submit="confirmPassword" class="space-y-5">
+        <!-- Password Field -->
+        <div class="flex flex-col gap-2">
+            <label for="password" class="text-[#131416] dark:text-white text-sm font-semibold">Password</label>
+            <div class="relative flex items-center">
+                <input wire:model.defer="password" id="password" type="password" class="form-input w-full rounded-lg border border-[#dedfe3] dark:border-white/10 dark:bg-white/5 dark:text-primary h-14 px-4 pr-12 focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all placeholder:text-[#6b7180]" required autocomplete="current-password" />
+                <button onclick="togglePasswordVisibility('password', 'password_icon_confirm')" class="absolute right-4 text-[#6b7180] flex items-center justify-center" type="button">
+                    <span id="password_icon_confirm" class="material-symbols-outlined text-[20px]">visibility</span>
+                </button>
+            </div>
             <x-input-error :messages="$errors->get('password')" class="mt-2" />
         </div>
 
-        <div class="flex justify-end mt-4">
-            <x-primary-button>
-                {{ __('Confirm') }}
-            </x-primary-button>
-        </div>
+        <button type="submit" wire:loading.attr="disabled" wire:loading.class="opacity-75" class="w-full bg-primary text-white rounded-lg h-14 font-bold text-base shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all active:scale-[0.98] mt-4 inline-flex items-center justify-center">
+            <span wire:loading.remove>Confirm</span>
+            <span wire:loading class="flex items-center justify-center">
+                <span class="material-symbols-outlined animate-spin text-[20px] text-white">progress_activity</span>
+            </span>
+        </button>
     </form>
 </div>

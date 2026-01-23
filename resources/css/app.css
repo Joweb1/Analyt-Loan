@@ -1,3 +1,79 @@
+@import '@fontsource/inter/100.css';
+@import '@fontsource/inter/200.css';
+@import '@fontsource/inter/300.css';
+@import '@fontsource/inter/400.css';
+@import '@fontsource/inter/500.css';
+@import '@fontsource/inter/600.css';
+@import '@fontsource/inter/700.css';
+@import '@fontsource/inter/800.css';
+@import '@fontsource/inter/900.css';
+@import '@fontsource/manrope/200.css'; /* Manrope weights */
+@import '@fontsource/manrope/300.css';
+@import '@fontsource/manrope/400.css';
+@import '@fontsource/manrope/500.css';
+@import '@fontsource/manrope/600.css';
+@import '@fontsource/manrope/700.css';
+@import '@fontsource/manrope/800.css';
+@import 'material-symbols/outlined.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* Custom CSS from dashboard template */
+.icon-fill {
+    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+/* Custom scrollbar for webkit */
+::-webkit-scrollbar {
+    width: 6px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+@keyframes custom-spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.custom-spin {
+    animation: custom-spin 1s linear infinite;
+}
+
+/* Sidebar animation classes */
+.sidebar-hidden {
+    width: 0 !important; /* Force width to 0 */
+    transform: translateX(-100%) !important; /* Slide out completely */
+    overflow: hidden; /* Hide content during transition */
+}
+/* Ensure the sidebar transitions width and transform */
+#sidebar {
+    transition: all 0.3s ease-in-out; /* Match JS duration */
+}
+
+/* FAB animation classes */
+.fab-visible {
+    opacity: 1 !important;
+    transform: scale(1) !important;
+}
+.fab-hidden {
+    opacity: 0 !important;
+    transform: scale(0) !important;
+}
+/* Ensure FAB transitions opacity and transform */
+#showSidebarFab {
+    transition: all 0.3s ease-in-out; /* Match JS duration */
+}

@@ -27,6 +27,6 @@ class CollateralDetailDrawer extends Component
 
     public function render()
     {
-        return view('livewire.collateral-detail-drawer');
+        return view('livewire.components.collateral-detail-drawer');
     }
 }

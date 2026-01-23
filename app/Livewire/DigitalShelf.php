@@ -16,6 +16,6 @@ class DigitalShelf extends Component
 
     public function render()
     {
-        return view('livewire.digital-shelf');
+        return view('livewire.components.digital-shelf');
     }
 }

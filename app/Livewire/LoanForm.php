@@ -65,6 +65,6 @@ class LoanForm extends Component
 
     public function render()
     {
-        return view('livewire.loan-form');
+        return view('livewire.components.loan-form');
     }
 }

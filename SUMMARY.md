@@ -1,231 +1,35 @@
-# Analyt Loan 2.0 - Development Environment Initialization
+Based on the documents provided, Analyt Loan is a specialized SaaS (Software as a Service) platform designed as a "Self-Driving Operating System" for micro-lenders and cooperative societies. Its primary goal is to replace manual processes—like spreadsheets and physical notebooks—with an automated, intelligent system that manages the entire lending lifecycle.
 
-## Commands to install the stack:
-```bash
-composer create-project laravel/laravel analyt-loan-2.0
-cd analyt-loan-2.0
-composer require livewire/livewire
-composer require --dev phpstan/phpstan phpstan/extension-installer
-composer require laravel/pennant
-php artisan vendor:publish --provider="Laravel\Pennant\PennantServiceProvider"
-php artisan migrate
-npm install -D tailwindcss postcss autoprefixer
-# The following command might fail, if so, create the files manually
-npx tailwindcss init -p
-```
+## 1. The Core Philosophy: "Self-Driving Money"
+The concept centers on the idea that the software should do the heavy lifting so the lender doesn't have to. It operates on three main pillars:
+- **The Memory:** It perfectly tracks every loan, borrower, and due date.
+- **The Nudge:** It automatically contacts borrowers via Email(PHP Mailer) to remind them of payments, reducing the "forgetfulness" that leads to bad debt.
+- **The Engine:** A calculation system that automates interest rates (flat or reducing balance), fees, and penalties with zero manual input.
 
-## `config/auth.php` guard configuration:
-```php
-'guards' => [
-    'web' => [
-        'driver' => 'session',
-        'provider' => 'users',
-    ],
-    'borrower' => [
-        'driver' => 'session',
-        'provider' => 'borrowers',
-    ],
-],
+## 2. Problems It Solves
+The documentation highlights that small lenders often lose up to 20% of their capital due to poor organization. Analyt Loan addresses:
+- **Blind Spots:** Eliminates the need to manually check books to see who owes money.
+- **Manual Labor:** Automates "chasing" borrowers, which is usually the most time-consuming part of lending.
+- **Risk Management:** Calculates a "Trust Score" for borrowers based on their payment history to help lenders make better decisions.
 
-'providers' => [
-    'users' => [
-        'driver' => 'eloquent',
-        'model' => App\Models\User::class,
-    ],
+## 3. Key Features & Tools
+| Feature | Function |
+|---|---|
+| Automated Email | Acts as an automated collections agent, sending reminders and updates. |
+| Trust Score | A proprietary metric that identifies high-risk vs. reliable borrowers. |
+| Omnibar Search | A "Google-like" search bar to find any borrower or loan instantly. |
+| Nightly Cron Jobs | Backend automation that updates loan statuses and triggers penalties overnight. |
 
-    'borrowers' => [
-        'driver' => 'eloquent',
-        'model' => App\Models\Borrower::class,
-    ],
-],
-```
+## 4. Technical Structure
+The system is built for speed and scale using a MYSQL database for data integrity and Material Design (Roboto Flex) for a clean, intuitive user interface. It is structured into five core sections:
+- **Dashboard (Home):** For instant business insights and charts.
+- **People (CRM):** To manage borrower profiles.
+- **Loans (Portfolio):** To track active and historical lending.
+- **Tasks (Collections):** A focused view of who needs to be contacted.
+- **Settings (Admin):** For system configuration.
 
-## Migration Schema Code:
+## 5. Frontend Development
+To ensure the application remains lightweight and performs optimally, we will be using vanilla Javascript for all frontend interactions. The use of Alpine.js is strictly prohibited. This approach gives us full control over the user experience and avoids unnecessary dependencies.
 
-### `create_users_table.php`
-```php
-<?php
-
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
-
-return new class extends Migration
-{
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
-    {
-        Schema::create('users', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->string('email')->unique();
-            $table->enum('role', ['admin', 'collector']);
-            $table->uuid('branch_id')->nullable();
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
-            $table->rememberToken();
-            $table->timestamps();
-        });
-
-        Schema::create('password_reset_tokens', function (Blueprint $table) {
-            $table->string('email')->primary();
-            $table->string('token');
-            $table->timestamp('created_at')->nullable();
-        });
-
-        Schema::create('sessions', function (Blueprint $table) {
-            $table->string('id')->primary();
-            $table->foreignId('user_id')->nullable()->index();
-            $table->string('ip_address', 45)->nullable();
-            $table->text('user_agent')->nullable();
-            $table->longText('payload');
-            $table->integer('last_activity')->index();
-        });
-    }
-
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::dropIfExists('users');
-        Schema::dropIfExists('password_reset_tokens');
-        Schema::dropIfExists('sessions');
-    }
-};
-```
-
-### `create_borrowers_table.php`
-```php
-<?php
-
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
-
-return new class extends Migration
-{
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
-    {
-        Schema::create('borrowers', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->string('phone')->unique();
-            $table->integer('trust_score')->default(0);
-            $table->boolean('portal_access')->default(false);
-            $table->string('photo_url')->nullable();
-            $table->timestamps();
-        });
-    }
-
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::dropIfExists('borrowers');
-    }
-};
-```
-
-### `create_collaterals_table.php`
-```php
-<?php
-
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
-
-return new class extends Migration
-{
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
-    {
-        Schema::create('collaterals', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->foreignUuid('borrower_id')->constrained('borrowers')->cascadeOnDelete();
-            $table->decimal('market_value', 10, 2);
-            $table->enum('status', ['deposited', 'released', 'liquidated']);
-            $table->json('images')->nullable();
-            $table->timestamps();
-        });
-    }
-
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::dropIfExists('collaterals');
-    }
-};
-```
-
-### `create_loans_table.php`
-```php
-<?php
-
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
-
-return new class extends Migration
-{
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
-    {
-        Schema::create('loans', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->decimal('amount_principal', 10, 2);
-            $table->decimal('collateral_coverage', 5, 2);
-            $table->enum('status', ['pending_collateral', 'active', 'overdue']);
-            $table->timestamps();
-        });
-    }
-
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::dropIfExists('loans');
-    }
-};
-```
-
-## `LoanEngine.php` service code block:
-```php
-<?php
-
-namespace App\Services;
-
-use App\Exceptions\CollateralInsufficientException;
-use App\Models\Loan;
-use App\Models\Collateral;
-
-class LoanEngine
-{
-    public function activateLoan(Loan $loan)
-    {
-        $totalCollateralValue = Collateral::where('borrower_id', $loan->borrower_id)
-            ->where('status', 'deposited')
-            ->sum('market_value');
-
-        if (($totalCollateralValue / $loan->amount_principal) < 0.5) {
-            throw new CollateralInsufficientException('Insufficient collateral to activate the loan.');
-        }
-
-        $loan->status = 'active';
-        $loan->save();
-
-        return $loan;
-    }
-}
-```
+## Summary
+Analyt Loan is designed to make lending "as simple as sending an email." It targets the "missing middle" of finance—lenders who are too big for a notebook but too small for high-end enterprise banking software.

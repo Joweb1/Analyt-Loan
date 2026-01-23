@@ -2,13 +2,13 @@
 
 use Illuminate\Support\Facades\Route;
 
-Route::view('/', 'welcome');
+Route::view('/', 'pages.welcome');
 
-Route::view('dashboard', 'dashboard')
+Route::view('dashboard', 'pages.dashboard')
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
-Route::view('profile', 'profile')
+Route::view('profile', 'pages.profile')
     ->middleware(['auth'])
     ->name('profile');
 

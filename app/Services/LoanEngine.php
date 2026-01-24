@@ -3,8 +3,8 @@
 namespace App\Services;
 
 use App\Exceptions\CollateralInsufficientException;
-use App\Models\Loan;
 use App\Models\Collateral;
+use App\Models\Loan;
 
 class LoanEngine
 {

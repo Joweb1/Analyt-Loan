@@ -17,9 +17,15 @@ window.togglePasswordVisibility = function(inputId, iconId) {
 
 function setupSidebarToggle() {
     const sidebar = document.getElementById('sidebar');
+    const mainContent = document.getElementById('main-content');
+
+    // Only run the sidebar script if both the sidebar and main content elements exist
+    if (!sidebar || !mainContent) {
+        return;
+    }
+
     const hideSidebarBtn = document.getElementById('hideSidebarBtn');
     const showSidebarFab = document.getElementById('showSidebarFab');
-    const mainContent = document.getElementById('main-content');
     const hideSidebarBtnIcon = hideSidebarBtn ? hideSidebarBtn.querySelector('.material-symbols-outlined') : null;
     const hideSidebarBtnText = hideSidebarBtn ? hideSidebarBtn.querySelector('.sidebar-nav-text') : null;
     const sidebarNavTexts = document.querySelectorAll('.sidebar-nav-text');
@@ -101,5 +107,6 @@ function setupSidebarToggle() {
 }
 
 document.addEventListener('DOMContentLoaded', setupSidebarToggle);
+document.addEventListener('livewire:navigated', setupSidebarToggle);
 
 

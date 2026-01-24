@@ -32,7 +32,7 @@ class CollateralApiTest extends TestCase
     {
         $collateral = Collateral::factory()->create();
 
-        $response = $this->getJson('/api/collaterals/' . $collateral->id);
+        $response = $this->getJson('/api/collaterals/'.$collateral->id);
 
         $response->assertStatus(200);
         $response->assertJsonFragment(['id' => $collateral->id]);
@@ -43,7 +43,7 @@ class CollateralApiTest extends TestCase
         $collateral = Collateral::factory()->create();
         $updateData = ['name' => 'Updated Name'];
 
-        $response = $this->putJson('/api/collaterals/' . $collateral->id, $updateData);
+        $response = $this->putJson('/api/collaterals/'.$collateral->id, $updateData);
 
         $response->assertStatus(200);
         $this->assertDatabaseHas('collaterals', ['id' => $collateral->id, 'name' => 'Updated Name']);
@@ -53,7 +53,7 @@ class CollateralApiTest extends TestCase
     {
         $collateral = Collateral::factory()->create();
 
-        $response = $this->deleteJson('/api/collaterals/' . $collateral->id);
+        $response = $this->deleteJson('/api/collaterals/'.$collateral->id);
 
         $response->assertStatus(204);
         $this->assertDatabaseMissing('collaterals', ['id' => $collateral->id]);

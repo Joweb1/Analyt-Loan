@@ -4,21 +4,19 @@
     <div class="flex justify-between items-end">
         <div>
             <h2 class="text-2xl font-bold text-primary dark:text-white tracking-tight">Financial Pulse</h2>
-            <p class="text-slate-500 text-sm mt-1">Real-time overview of your lending portfolio.</p>
+            <p class="text-slate-500 text-sm mt-1">System Lending Overview</p>
         </div>
         <div class="flex gap-2">
-            <button class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-[#1a1f2b] border border-slate-100 dark:border-slate-700 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-50 transition-colors shadow-sm">
-                <span class="material-symbols-outlined text-base">download</span> Export
-            </button>
-            <button class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-xs font-medium hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20">
+
+            <button class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20">
                 <span class="material-symbols-outlined text-base">add</span> New Loan
             </button>
         </div>
     </div>
     <!-- Health Cards Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <!-- Principal Card -->
-        <div class="bg-white dark:bg-[#1a1f2b] rounded-2xl p-6 shadow-soft hover:shadow-lg transition-all duration-300 border border-transparent hover:border-brand-blue/10 relative overflow-hidden group">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <!-- Total Loaned Card -->
+        <div class="md:col-span-1 bg-white dark:bg-[#1a1f2b] rounded-2xl p-6 shadow-soft hover:shadow-lg transition-all duration-300 border border-transparent hover:border-brand-blue/10 relative overflow-hidden group">
             <div class="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
                 <span class="material-symbols-outlined text-[80px] text-brand-blue">account_balance_wallet</span>
             </div>
@@ -27,21 +25,18 @@
                     <div class="w-8 h-8 rounded-full bg-brand-blue/10 flex items-center justify-center text-brand-blue">
                         <span class="material-symbols-outlined text-sm font-bold">payments</span>
                     </div>
-                    <p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Principal Outstanding</p>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Total Loaned</p>
+                    <span class="bg-brand-blue/10 text-brand-blue text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[10px]">arrow_upward</span> 12%
+                    </span>
                 </div>
                 <div>
                     <h3 class="text-primary dark:text-white text-3xl font-extrabold tracking-tight">₦ 45,230,000</h3>
-                    <div class="flex items-center gap-2 mt-2">
-                        <span class="bg-brand-blue/10 text-brand-blue text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
-                            <span class="material-symbols-outlined text-[10px]">arrow_upward</span> 12%
-                        </span>
-                        <span class="text-slate-400 text-xs">vs last month</span>
-                    </div>
                 </div>
             </div>
         </div>
-        <!-- Interest Card -->
-        <div class="bg-white dark:bg-[#1a1f2b] rounded-2xl p-6 shadow-soft hover:shadow-lg transition-all duration-300 border border-transparent hover:border-brand-green/10 relative overflow-hidden group">
+        <!-- Total Collected Card -->
+        <div class="md:col-span-1 bg-white dark:bg-[#1a1f2b] rounded-2xl p-6 shadow-soft hover:shadow-lg transition-all duration-300 border border-transparent hover:border-brand-green/10 relative overflow-hidden group">
             <div class="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
                 <span class="material-symbols-outlined text-[80px] text-brand-green">savings</span>
             </div>
@@ -50,39 +45,88 @@
                     <div class="w-8 h-8 rounded-full bg-brand-green/10 flex items-center justify-center text-brand-green">
                         <span class="material-symbols-outlined text-sm font-bold">trending_up</span>
                     </div>
-                    <p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Interest Generated</p>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Total Collected</p>
+                    <span class="bg-brand-green/10 text-brand-green text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                        <span class="material-symbols-outlined text-[10px]">arrow_upward</span> 5%
+                    </span>
                 </div>
                 <div>
                     <h3 class="text-primary dark:text-white text-3xl font-extrabold tracking-tight">₦ 8,450,500</h3>
-                    <div class="flex items-center gap-2 mt-2">
-                        <span class="bg-brand-green/10 text-brand-green text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
-                            <span class="material-symbols-outlined text-[10px]">arrow_upward</span> 5%
-                        </span>
-                        <span class="text-slate-400 text-xs">vs last month</span>
-                    </div>
                 </div>
             </div>
         </div>
-        <!-- Risk Card -->
-        <div class="bg-white dark:bg-[#1a1f2b] rounded-2xl p-6 shadow-soft hover:shadow-lg transition-all duration-300 border border-transparent hover:border-brand-red/10 relative overflow-hidden group">
-            <div class="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
-                <span class="material-symbols-outlined text-[80px] text-brand-red">warning</span>
-            </div>
-            <div class="flex flex-col gap-4 relative z-10">
-                <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 rounded-full bg-brand-red/10 flex items-center justify-center text-brand-red">
-                        <span class="material-symbols-outlined text-sm font-bold">error</span>
-                    </div>
-                    <p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Risk / Default (PAR 30)</p>
+        <!-- Stats Grid -->
+        <div class="md:col-span-2 grid grid-cols-2 gap-4">
+            <!-- Total Customers -->
+            <div class="bg-white dark:bg-[#1a1f2b] rounded-xl p-4 shadow-soft hover:shadow-lg transition-all duration-300 border border-transparent hover:border-brand-purple/10 relative overflow-hidden group">
+                <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                    <span class="material-symbols-outlined text-[60px] text-brand-purple">groups</span>
                 </div>
-                <div>
-                    <h3 class="text-primary dark:text-white text-3xl font-extrabold tracking-tight">₦ 1,200,000</h3>
-                    <div class="flex items-center gap-2 mt-2">
-                        <span class="bg-brand-red/10 text-brand-red text-xs font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
-                            <span class="material-symbols-outlined text-[10px]">arrow_downward</span> 2%
+                <div class="flex flex-col gap-2 relative z-10">
+                    <div class="flex items-center gap-2">
+                        <div class="w-7 h-7 rounded-full bg-brand-purple/10 flex items-center justify-center text-brand-purple">
+                            <span class="material-symbols-outlined text-xs font-bold">groups</span>
+                        </div>
+                        <p class="text-slate-500 dark:text-slate-400 text-xs font-medium">Total Customers</p>
+                        <span class="bg-brand-purple/10 text-brand-purple text-[10px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[8px]">arrow_upward</span> 8%
                         </span>
-                        <span class="text-slate-400 text-xs">Improved vs last month</span>
                     </div>
+                    <h3 class="text-purple-800 dark:text-white text-3xl font-extrabold tracking-tight text-center">1,250</h3>
+                </div>
+            </div>
+            <!-- Total Active Loans -->
+            <div class="bg-white dark:bg-[#1a1f2b] rounded-xl p-4 shadow-soft hover:shadow-lg transition-all duration-300 border border-transparent hover:border-brand-orange/10 relative overflow-hidden group">
+                <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                    <span class="material-symbols-outlined text-[60px] text-brand-orange">donut_large</span>
+                </div>
+                <div class="flex flex-col gap-2 relative z-10">
+                    <div class="flex items-center gap-2">
+                        <div class="w-7 h-7 rounded-full bg-brand-orange/10 flex items-center justify-center text-brand-orange">
+                            <span class="material-symbols-outlined text-xs font-bold">donut_large</span>
+                        </div>
+                        <p class="text-slate-500 dark:text-slate-400 text-xs font-medium">Active Loans</p>
+                        <span class="bg-brand-orange/10 text-brand-orange text-[10px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[8px]">arrow_upward</span> 3%
+                        </span>
+                    </div>
+                    <h3 class="text-orange-800 dark:text-white text-3xl font-extrabold tracking-tight text-center">312</h3>
+                </div>
+            </div>
+            <!-- Fully Paid Loans -->
+            <div class="bg-white dark:bg-[#1a1f2b] rounded-xl p-4 shadow-soft hover:shadow-lg transition-all duration-300 border border-transparent hover:border-brand-green/10 relative overflow-hidden group">
+                <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                    <span class="material-symbols-outlined text-[60px] text-brand-green">check_circle</span>
+                </div>
+                <div class="flex flex-col gap-2 relative z-10">
+                    <div class="flex items-center gap-2">
+                        <div class="w-7 h-7 rounded-full bg-brand-green/10 flex items-center justify-center text-brand-green">
+                            <span class="material-symbols-outlined text-xs font-bold">check_circle</span>
+                        </div>
+                        <p class="text-slate-500 dark:text-slate-400 text-xs font-medium">Paid Loans</p>
+                        <span class="bg-brand-green/10 text-brand-green text-[10px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[8px]">arrow_upward</span> 15%
+                        </span>
+                    </div>
+                    <h3 class="text-emerald-800 dark:text-white text-3xl font-extrabold tracking-tight text-center">890</h3>
+                </div>
+            </div>
+            <!-- Risk/Default Loans -->
+            <div class="bg-white dark:bg-[#1a1f2b] rounded-xl p-4 shadow-soft hover:shadow-lg transition-all duration-300 border border-transparent hover:border-brand-red/10 relative overflow-hidden group">
+                <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                    <span class="material-symbols-outlined text-[60px] text-brand-red">cancel</span>
+                </div>
+                <div class="flex flex-col gap-2 relative z-10">
+                    <div class="flex items-center gap-2">
+                        <div class="w-7 h-7 rounded-full bg-brand-red/10 flex items-center justify-center text-brand-red">
+                            <span class="material-symbols-outlined text-xs font-bold">cancel</span>
+                        </div>
+                        <p class="text-slate-500 dark:text-slate-400 text-xs font-medium">Defaulted Loans</p>
+                        <span class="bg-brand-red/10 text-brand-red text-[10px] font-bold px-1.5 py-0.5 rounded-full flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[8px]">arrow_upward</span> 1%
+                        </span>
+                    </div>
+                    <h3 class="text-red-800 dark:text-white text-3xl font-extrabold tracking-tight text-center">48</h3>
                 </div>
             </div>
         </div>

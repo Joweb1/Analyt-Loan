@@ -1,45 +1,4 @@
-<?php
-
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Session;
-use Livewire\Attributes\Layout;
-use Livewire\Volt\Component;
-use App\Providers\RouteServiceProvider;
-
-new #[Layout('layouts.guest')] class extends Component
-{
-    /**
-     * Send an email verification notification to the user.
-     */
-    public function sendVerification(): void
-    {
-        if (Auth::user()->hasVerifiedEmail()) {
-            $this->redirect(
-                session('url.intended', RouteServiceProvider::HOME),
-                navigate: true
-            );
-
-            return;
-        }
-
-        Auth::user()->sendEmailVerificationNotification();
-
-        Session::flash('status', 'verification-link-sent');
-    }
-
-    /**
-     * Log the current user out of the application.
-     */
-    public function logout(): void
-    {
-        Auth::logout();
-        Session::invalidate();
-        Session::regenerateToken();
-
-        $this->redirect('/', navigate: true);
-    }
-}; ?>
-
+<x-guest-layout>
 <div class="max-w-[440px] w-full mx-auto">
     <div class="mb-10 text-center lg:text-left">
         <h1 class="text-[#131416] dark:text-white text-3xl font-bold tracking-tight mb-2">Verify Your Email</h1>
@@ -68,3 +27,4 @@ new #[Layout('layouts.guest')] class extends Component
         </form>
     </div>
 </div>
+</x-guest-layout>

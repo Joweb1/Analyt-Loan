@@ -1,32 +1,5 @@
-<?php
-
-use Illuminate\Support\Facades\Auth;
-use Livewire\Attributes\Layout;
-use Livewire\Volt\Component;
-
-new #[Layout('layouts.guest')] class extends Component
-{
-    public string $password = '';
-
-    /**
-     * Confirm the user's password.
-     */
-    public function confirmPassword(): void
-    {
-        $this->validate([
-            'password' => ['required', 'string', 'current_password'],
-        ]);
-
-        session()->put('auth.password_confirmed_at', time());
-
-        $this->redirect(
-            session('url.intended', '/'),
-            navigate: true
-        );
-    }
-}; ?>
-
-<div class="max-w-[440px] w-full mx-auto">
+<x-guest-layout>
+    <div class="max-w-[440px] w-full mx-auto">
     <div class="mb-10 text-center lg:text-left">
         <h1 class="text-[#131416] dark:text-white text-3xl font-bold tracking-tight mb-2">Confirm Password</h1>
         <p class="text-[#6b7180] text-base">
@@ -55,3 +28,4 @@ new #[Layout('layouts.guest')] class extends Component
         </button>
     </form>
 </div>
+</x-guest-layout>

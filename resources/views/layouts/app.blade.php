@@ -66,15 +66,20 @@
             <span class="material-symbols-outlined group-hover:scale-110 transition-transform">monetization_on</span>
             <span class="sidebar-nav-text text-sm font-medium hidden">Loans</span>
         </a>
-        <a class="flex items-center gap-3 px-3 py-3 rounded-xl text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400 transition-all group hover:text-primary" href="#">
+        <a class="flex items-center gap-3 px-3 py-3 rounded-xl text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400 transition-all group hover:text-primary" href="{{ route('collections') }}">
             <span class="material-symbols-outlined group-hover:scale-110 transition-transform">trending_up</span>
             <span class="sidebar-nav-text text-sm font-medium hidden">Collections</span>
         </a>
-        <a class="flex items-center gap-3 px-3 py-3 rounded-xl text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400 transition-all group hover:text-primary" href="#">
+
+        <a class="flex items-center gap-3 px-3 py-3 rounded-xl text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400 transition-all group hover:text-primary" href="{{ route('customer') }}">
             <span class="material-symbols-outlined group-hover:scale-110 transition-transform">group</span>
             <span class="sidebar-nav-text text-sm font-medium hidden">Customers</span>
         </a>
-        <a class="flex items-center gap-3 px-3 py-3 rounded-xl text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400 transition-all group hover:text-primary" href="#">
+        <a class="flex items-center gap-3 px-3 py-3 rounded-xl text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400 transition-all group hover:text-primary" href="{{ route('vault') }}">
+            <span class="material-symbols-outlined group-hover:scale-110 transition-transform">shield</span>
+            <span class="sidebar-nav-text text-sm font-medium hidden">Vault</span>
+        </a>
+        <a class="flex items-center gap-3 px-3 py-3 rounded-xl text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400 transition-all group hover:text-primary" href="{{ route('settings') }}">
             <span class="material-symbols-outlined group-hover:scale-110 transition-transform">settings</span>
             <span class="sidebar-nav-text text-sm font-medium hidden">Settings</span>
         </a>
@@ -131,5 +136,6 @@
 <button id="showSidebarFab" class="fixed bottom-8 right-8 w-14 h-14 rounded-full bg-primary text-white flex items-center justify-center shadow-lg transform transition-all duration-300 z-50" style="display: block !important;">
     <span class="material-symbols-outlined text-2xl">menu</span>
 </button>
+@stack('scripts')
 </body>
 </html>

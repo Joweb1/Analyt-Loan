@@ -2,7 +2,6 @@
 
 namespace App\Rules;
 
-use Closure;
 use Illuminate\Contracts\Validation\Rule;
 
 class FiftyPercentRule implements Rule
@@ -15,7 +14,6 @@ class FiftyPercentRule implements Rule
     /**
      * Create a new rule instance.
      *
-     * @param float $loanAmount
      * @return void
      */
     public function __construct(float $loanAmount)

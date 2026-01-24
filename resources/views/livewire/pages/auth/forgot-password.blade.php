@@ -17,9 +17,7 @@ new #[Layout('layouts.guest')] class extends Component
             'email' => ['required', 'email'],
         ]);
 
-        $status = Password::sendResetLink(
-            ['email' => $this->email],
-        );
+        $status = Password::sendResetLink(['email' => $this->email]);
 
         if ($status === Password::RESET_LINK_SENT) {
             session()->flash('status', __($status));
@@ -28,7 +26,6 @@ new #[Layout('layouts.guest')] class extends Component
         }
     }
 }; ?>
-
 <div class="max-w-[440px] w-full mx-auto">
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />

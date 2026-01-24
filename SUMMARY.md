@@ -28,8 +28,60 @@ The system is built for speed and scale using a MYSQL database for data integrit
 - **Tasks (Collections):** A focused view of who needs to be contacted.
 - **Settings (Admin):** For system configuration.
 
-## 5. Frontend Development
-To ensure the application remains lightweight and performs optimally, we will be using vanilla Javascript for all frontend interactions. The use of Alpine.js is strictly prohibited. This approach gives us full control over the user experience and avoids unnecessary dependencies.
+## 6. Customer Directory
+A new page that provides a comprehensive overview of all customers (borrowers). It features a card-based layout where each card represents a borrower and displays key information such as their name, location, total debt, and repayment score.
 
-## Summary
-Analyt Loan is designed to make lending "as simple as sending an email." It targets the "missing middle" of finance—lenders who are too big for a notebook but too small for high-end enterprise banking software.
+### Key Features:
+- **Filters:** Allows filtering borrowers by risk level and region.
+- **Grid/List View:** Option to switch between a grid view of borrower cards and a list view.
+- **Quick Actions:** On hover, each borrower card reveals quick actions to issue a loan, send a message, or view the borrower's profile.
+- **Pagination:** The page includes pagination to navigate through the list of borrowers.
+
+## Recent Feature Implementations and Updates
+
+### Vault Page
+- **File:** `resources/views/pages/vault.blade.php` created.
+- **Layout:** Integrated into `app.blade.php` layout.
+- **Route:** New route `/vault` (`name('vault')`) added to `routes/web.php`.
+- **Responsiveness:** Improved mobile responsiveness by reducing side padding to `p-0` on sections, and wrapping the main table with `overflow-x-auto`.
+- **UI:** "Add Collateral" button moved to the top of the page.
+
+### Customer Registration Page
+- **File:** `resources/views/pages/customer-registration.blade.php` created.
+- **Layout:** Integrated into `app.blade.php` layout.
+- **Route:** New route `/customer/create` (`name('customer.create')`) added to `routes/web.php`.
+- **Navigation:** "Add Customer" link removed from main navigation. Existing "Add New Customer/Borrower" button on `resources/views/pages/customer.blade.php` modified to navigate to this page.
+
+### Loan Application Page
+- **File:** `resources/views/pages/loan-application.blade.php` created.
+- **Layout:** Integrated into `app.blade.php` layout.
+- **Route:** New route `/loan/create` (`name('loan.create')`) added to `routes/web.php`.
+- **Navigation:** "New Loan" button on `resources/views/pages/loan.blade.php` modified to navigate to this page.
+
+### Add Collateral Form Page
+- **File:** `resources/views/pages/add-collateral.blade.php` created.
+- **Layout:** Integrated into `app.blade.php` layout.
+- **Route:** New route `/collateral/create` (`name('collateral.create')`) added to `routes/web.php`.
+- **Navigation:** "Add Collateral" button on `resources/views/pages/vault.blade.php` modified to navigate to this page.
+
+### Collections Page
+- **File:** `resources/views/pages/collections.blade.php` created.
+- **Layout:** Integrated into `app.blade.php` layout.
+- **Route:** New route `/collections` (`name('collections')`) added to `routes/web.php`.
+- **Navigation:** "Collections" link added to main navigation in `app.blade.php` with `trending_up` icon.
+- **Responsiveness:** Improved mobile responsiveness by reducing side padding to `p-0` on the main content div.
+- **UI:** "Collection Health (Weekly Progress)" chart section removed.
+
+### Settings Page
+- **File:** `resources/views/pages/settings.blade.php` created.
+- **Layout:** Integrated into `app.blade.php` layout.
+- **Route:** New route `/settings` (`name('settings')`) added to `routes/web.php`.
+- **Navigation:** Existing "Settings" link in main navigation (`app.blade.php`) modified to point to this page.
+
+### Team Members Page
+- **File:** `resources/views/pages/team-members.blade.php` created.
+- **Layout:** Integrated into `app.blade.php` layout.
+- **Route:** New route `/settings/team-members` (`name('settings.team-members')`) added to `routes/web.php`.
+- **Navigation:** "Team Members" link in `resources/views/pages/settings.blade.php` sub-navigation modified to point to this page.
+- **Responsiveness:** Improved mobile responsiveness by reducing side padding to `p-0` on the main content div.
+- **UI:** "Invite Team Member Modal" component (`resources/views/components/invite-member-modal.blade.php`) created and integrated into `team-members.blade.php` with Alpine.js for show/hide functionality. The modal's close and cancel buttons were updated to control its visibility.

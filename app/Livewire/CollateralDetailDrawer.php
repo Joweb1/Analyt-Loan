@@ -8,7 +8,9 @@ use Livewire\Component;
 class CollateralDetailDrawer extends Component
 {
     public $isOpen = false;
+
     public $collateralId;
+
     public $collateral;
 
     public function openDrawer($collateralId)

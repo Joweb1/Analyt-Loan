@@ -20,6 +20,10 @@ export default {
                 "brand-blue": "#3B82F6",
                 "brand-green": "#10B981",
                 "brand-red": "#EF4444",
+                "brand-purple": "#8B5CF6",
+                "brand-orange": "#F97316",
+                "brand-yellow": "#EAB308",
+                "brand-teal": "#2DD4BF",
             },
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],

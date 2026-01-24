@@ -11,10 +11,13 @@ use Livewire\Component;
 class LoanForm extends Component
 {
     public $borrowerId;
+
     public $amount;
+
     public $collateralId;
 
     public $borrowers;
+
     public $collaterals;
 
     protected $rules = [

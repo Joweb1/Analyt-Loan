@@ -58,29 +58,29 @@
     </div>
     <nav id="sidebar-nav" class="flex-1 flex flex-col gap-2 p-4 overflow-hidden">
         <!-- Active Item -->
-        <a class="flex items-center gap-3 px-3 py-3 rounded-xl bg-primary text-white shadow-lg shadow-primary/30 group transition-all" href="{{ route('dashboard') }}">
-            <span class="material-symbols-outlined icon-fill">dashboard</span>
+        <a class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all group {{ request()->routeIs('dashboard') ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400' }}" href="{{ route('dashboard') }}">
+            <span class="material-symbols-outlined group-hover:scale-110 transition-transform {{ request()->routeIs('dashboard') ? 'icon-fill' : '' }}">dashboard</span>
             <span class="sidebar-nav-text text-sm font-medium hidden">Dashboard</span>
         </a>
-        <a class="flex items-center gap-3 px-3 py-3 rounded-xl text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400 transition-all group hover:text-primary" href="{{ route('loan') }}">
-            <span class="material-symbols-outlined group-hover:scale-110 transition-transform">monetization_on</span>
+        <a class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all group {{ request()->routeIs('loan') || request()->routeIs('loan.*') || request()->routeIs('status-board') || request()->routeIs('loan-application') ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400' }}" href="{{ route('loan') }}">
+            <span class="material-symbols-outlined group-hover:scale-110 transition-transform {{ request()->routeIs('loan') || request()->routeIs('loan.*') || request()->routeIs('status-board') || request()->routeIs('loan-application') ? 'icon-fill' : '' }}">monetization_on</span>
             <span class="sidebar-nav-text text-sm font-medium hidden">Loans</span>
         </a>
-        <a class="flex items-center gap-3 px-3 py-3 rounded-xl text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400 transition-all group hover:text-primary" href="{{ route('collections') }}">
-            <span class="material-symbols-outlined group-hover:scale-110 transition-transform">trending_up</span>
+        <a class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all group {{ request()->routeIs('collections') ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400' }}" href="{{ route('collections') }}">
+            <span class="material-symbols-outlined group-hover:scale-110 transition-transform {{ request()->routeIs('collections') ? 'icon-fill' : '' }}">trending_up</span>
             <span class="sidebar-nav-text text-sm font-medium hidden">Collections</span>
         </a>
 
-        <a class="flex items-center gap-3 px-3 py-3 rounded-xl text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400 transition-all group hover:text-primary" href="{{ route('customer') }}">
-            <span class="material-symbols-outlined group-hover:scale-110 transition-transform">group</span>
+        <a class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all group {{ request()->routeIs('customer') || request()->routeIs('customer.create') ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400' }}" href="{{ route('customer') }}">
+            <span class="material-symbols-outlined group-hover:scale-110 transition-transform {{ request()->routeIs('customer') || request()->routeIs('customer.create') ? 'icon-fill' : '' }}">group</span>
             <span class="sidebar-nav-text text-sm font-medium hidden">Customers</span>
         </a>
-        <a class="flex items-center gap-3 px-3 py-3 rounded-xl text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400 transition-all group hover:text-primary" href="{{ route('vault') }}">
-            <span class="material-symbols-outlined group-hover:scale-110 transition-transform">shield</span>
+        <a class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all group {{ request()->routeIs('vault') || request()->routeIs('collateral.create') ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400' }}" href="{{ route('vault') }}">
+            <span class="material-symbols-outlined group-hover:scale-110 transition-transform {{ request()->routeIs('vault') || request()->routeIs('collateral.create') ? 'icon-fill' : '' }}">shield</span>
             <span class="sidebar-nav-text text-sm font-medium hidden">Vault</span>
         </a>
-        <a class="flex items-center gap-3 px-3 py-3 rounded-xl text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400 transition-all group hover:text-primary" href="{{ route('settings') }}">
-            <span class="material-symbols-outlined group-hover:scale-110 transition-transform">settings</span>
+        <a class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all group {{ request()->routeIs('settings') || request()->routeIs('settings.team-members') ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400' }}" href="{{ route('settings') }}">
+            <span class="material-symbols-outlined group-hover:scale-110 transition-transform {{ request()->routeIs('settings') || request()->routeIs('settings.team-members') ? 'icon-fill' : '' }}">settings</span>
             <span class="sidebar-nav-text text-sm font-medium hidden">Settings</span>
         </a>
         <a id="hideSidebarBtn" class="flex items-center gap-3 px-3 py-3 rounded-xl text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400 transition-all group hover:text-primary">
@@ -136,6 +136,7 @@
 <button id="showSidebarFab" class="fixed bottom-8 right-8 w-14 h-14 rounded-full bg-primary text-white flex items-center justify-center shadow-lg transform transition-all duration-300 z-50" style="display: block !important;">
     <span class="material-symbols-outlined text-2xl">menu</span>
 </button>
+<x-custom-alert />
 @stack('scripts')
 </body>
 </html>

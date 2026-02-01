@@ -30,7 +30,13 @@ class FiftyPercentRule implements Rule
      */
     public function passes($attribute, $value)
     {
-        return $value >= ($this->loanAmount / 2);
+        $collateral = \App\Models\Collateral::find($value);
+        
+        if (!$collateral) {
+            return false;
+        }
+
+        return $collateral->value >= ($this->loanAmount / 2);
     }
 
     /**

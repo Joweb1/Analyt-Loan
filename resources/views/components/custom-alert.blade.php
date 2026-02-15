@@ -1,6 +1,6 @@
 @props(['type' => 'success', 'message'])
 
-<div id="custom-alert-container" class="fixed top-0 right-0 w-full max-w-sm p-4 z-50 transition-all duration-300 ease-in-out transform -translate-y-full opacity-0">
+<div id="custom-alert-container" class="fixed top-0 right-0 w-full max-w-sm p-4 z-[150] transition-all duration-300 ease-in-out transform -translate-y-full opacity-0">
     <div id="custom-alert-box" class="rounded-2xl shadow-lg p-4 w-full flex items-center space-x-3">
         <div class="flex-shrink-0">
             <span id="custom-alert-icon" class="material-symbols-outlined text-white text-lg"></span>

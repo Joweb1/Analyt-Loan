@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class User extends Authenticatable
 {
@@ -20,8 +21,10 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
+        'organization_id',
         'name',
         'email',
+        'phone',
         'password',
         'branch_id',
     ];
@@ -49,8 +52,28 @@ class User extends Authenticatable
         ];
     }
 
+    public function organization(): BelongsTo
+    {
+        return $this->belongsTo(Organization::class);
+    }
+
     public function borrower()
     {
         return $this->hasOne(Borrower::class);
+    }
+
+    public function assignedLoans(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Loan::class, 'loan_officer_id');
+    }
+
+    public function isAppOwner(): bool
+    {
+        return $this->email === 'nahjonah00@gmail.com';
+    }
+
+    public function isOrgOwner(): bool
+    {
+        return $this->organization && $this->organization->owner_id === $this->id;
     }
 }

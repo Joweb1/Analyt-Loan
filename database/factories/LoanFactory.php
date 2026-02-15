@@ -19,7 +19,13 @@ class LoanFactory extends Factory
     {
         return [
             'borrower_id' => Borrower::factory(),
-            'amount' => $this->faker->randomFloat(2, 100, 5000),
+            'loan_number' => 'LN-' . $this->faker->unique()->numerify('#####'),
+            'amount' => $this->faker->randomFloat(2, 50000, 5000000),
+            'loan_product' => $this->faker->randomElement(['Personal Loan', 'Business Loan', 'Mortgage']),
+            'interest_rate' => $this->faker->randomFloat(2, 5, 20),
+            'duration' => $this->faker->numberBetween(1, 12),
+            'duration_unit' => 'month',
+            'status' => 'applied',
         ];
     }
 }

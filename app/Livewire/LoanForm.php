@@ -39,35 +39,82 @@ class LoanForm extends Component
     public $insurance_fee;
     public $description;
     public $attachments; // File upload
+    public $loan_officer_id;
 
     // Collateral
     public $collateralId;
     public $collaterals;
+    public $staffMembers;
 
-    protected $rules = [
-        'borrowerId' => 'required|exists:borrowers,id',
-        'loan_number' => 'required|unique:loans,loan_number',
-        'loan_product' => 'required|string',
-        'release_date' => 'required|date',
-        'amount' => 'required|numeric|min:1',
-        'interest_rate' => 'required|numeric|min:0',
-        'interest_type' => 'required|in:year,month,week,day',
-        'duration' => 'required|integer|min:1',
-        'duration_unit' => 'required|in:year,month,week,day',
-        'repayment_cycle' => 'required|in:daily,weekly,biweekly,monthly,yearly',
-        'num_repayments' => 'required|integer|min:1',
-        'processing_fee' => 'nullable|numeric|min:0',
-        'processing_fee_type' => 'nullable|in:fixed,percentage',
-        'insurance_fee' => 'nullable|numeric|min:0',
-        'description' => 'nullable|string',
-        'collateralId' => 'nullable|exists:collaterals,id',
-        'attachments' => 'nullable|file|max:10240', // 10MB max
-    ];
+    // Edit Mode State
+    public $loanId;
+    public $isEditMode = false;
 
-    public function mount()
+    protected function rules() 
     {
-        $this->collaterals = Collateral::whereNull('loan_id')->get();
-        $this->release_date = now()->format('Y-m-d');
+        return [
+            'borrowerId' => 'required|exists:borrowers,id',
+            'loan_officer_id' => 'nullable|exists:users,id',
+            'loan_number' => 'required|unique:loans,loan_number' . ($this->isEditMode ? ',' . $this->loanId : ''),
+            'loan_product' => 'required|string',
+            'release_date' => 'required|date',
+            'amount' => 'required|numeric|min:1',
+            'interest_rate' => 'required|numeric|min:0',
+            'interest_type' => 'required|in:year,month,week,day',
+            'duration' => 'required|integer|min:1',
+            'duration_unit' => 'required|in:year,month,week,day',
+            'repayment_cycle' => 'required|in:daily,weekly,biweekly,monthly,yearly',
+            'num_repayments' => 'required|integer|min:1',
+            'processing_fee' => 'nullable|numeric|min:0',
+            'processing_fee_type' => 'nullable|in:fixed,percentage',
+            'insurance_fee' => 'nullable|numeric|min:0',
+            'description' => 'nullable|string',
+            'collateralId' => ['nullable', 'exists:collaterals,id'],
+            'attachments' => 'nullable|file|max:10240', // 10MB max
+        ];
+    }
+
+    public function mount(Loan $loan = null)
+    {
+        if ($loan && $loan->exists) {
+            $this->isEditMode = true;
+            $this->loanId = $loan->id;
+            $this->borrowerId = $loan->borrower_id;
+            $this->selectedBorrower = $loan->borrower()->with('user')->first();
+            $this->loan_number = $loan->loan_number;
+            $this->loan_product = $loan->loan_product;
+            $this->release_date = $loan->release_date ? $loan->release_date->format('Y-m-d') : now()->format('Y-m-d');
+            $this->amount = $loan->amount;
+            $this->interest_rate = $loan->interest_rate;
+            $this->interest_type = $loan->interest_type;
+            $this->duration = $loan->duration;
+            $this->duration_unit = $loan->duration_unit;
+            $this->repayment_cycle = $loan->repayment_cycle;
+            $this->num_repayments = $loan->num_repayments;
+            $this->processing_fee = $loan->processing_fee;
+            $this->processing_fee_type = $loan->processing_fee_type;
+            $this->insurance_fee = $loan->insurance_fee;
+            $this->description = $loan->description;
+            $this->collateralId = $loan->collateral?->id;
+            $this->loan_officer_id = $loan->loan_officer_id;
+        } else {
+            $this->release_date = now()->format('Y-m-d');
+            
+            // Check for borrower_id in query string
+            if ($borrowerId = request()->query('borrower_id')) {
+                $this->selectBorrower($borrowerId);
+            }
+        }
+
+        $this->collaterals = Collateral::whereNull('loan_id')
+            ->when($this->loanId, function($query) {
+                return $query->orWhere('loan_id', $this->loanId);
+            })
+            ->get();
+
+        $this->staffMembers = \App\Models\User::where('organization_id', \Illuminate\Support\Facades\Auth::user()->organization_id)
+            ->whereHas('roles', function($q) { $q->whereNotIn('name', ['Borrower']); })
+            ->get();
     }
 
     // Search Logic
@@ -96,7 +143,9 @@ class LoanForm extends Component
     {
         $this->borrowerId = $id;
         $this->selectedBorrower = Borrower::with('user')->find($id);
-        $this->generateLoanNumber();
+        if (!$this->isEditMode) {
+            $this->generateLoanNumber();
+        }
         $this->showBorrowerModal = false;
         $this->search = '';
         $this->searchResults = [];
@@ -108,9 +157,9 @@ class LoanForm extends Component
         $this->selectedBorrower = null;
         $this->search = '';
         $this->searchResults = [];
-        // Optionally reset loan number if it depends on borrower, but usually tracking IDs persist or regenerate.
-        // Let's regenerate or clear it.
-        $this->loan_number = null; 
+        if (!$this->isEditMode) {
+            $this->loan_number = null; 
+        }
     }
 
     public function generateLoanNumber()
@@ -133,31 +182,13 @@ class LoanForm extends Component
 
             $this->validateOnly($propertyName, $rules);
         } else {
-            $this->validateOnly($propertyName);
+            $this->validateOnly($propertyName, $this->rules());
         }
     }
 
     public function saveLoan()
     {
-        $rules = [
-            'borrowerId' => 'required|exists:borrowers,id',
-            'loan_number' => 'required|unique:loans,loan_number',
-            'loan_product' => 'required|string',
-            'release_date' => 'required|date',
-            'amount' => 'required|numeric|min:1',
-            'interest_rate' => 'required|numeric|min:0',
-            'interest_type' => 'required|in:year,month,week,day',
-            'duration' => 'required|integer|min:1',
-            'duration_unit' => 'required|in:year,month,week,day',
-            'repayment_cycle' => 'required|in:daily,weekly,biweekly,monthly,yearly',
-            'num_repayments' => 'required|integer|min:1',
-            'processing_fee' => 'nullable|numeric|min:0',
-            'processing_fee_type' => 'nullable|in:fixed,percentage',
-            'insurance_fee' => 'nullable|numeric|min:0',
-            'description' => 'nullable|string',
-            'collateralId' => ['nullable', 'exists:collaterals,id'],
-            'attachments' => 'nullable|file|max:10240',
-        ];
+        $rules = $this->rules();
 
         if ($this->collateralId) {
             $rules['collateralId'][] = new FiftyPercentRule((float)($this->amount ?? 0));
@@ -170,12 +201,7 @@ class LoanForm extends Component
             throw $e;
         }
 
-        $attachmentPath = null;
-        if ($this->attachments) {
-            $attachmentPath = $this->attachments->store('loan-attachments', 'public');
-        }
-
-        $loan = Loan::create([
+        $data = [
             'borrower_id' => $this->borrowerId,
             'loan_number' => $this->loan_number,
             'loan_product' => $this->loan_product,
@@ -191,10 +217,32 @@ class LoanForm extends Component
             'processing_fee_type' => $this->processing_fee_type,
             'insurance_fee' => $this->insurance_fee,
             'description' => $this->description,
-            'attachments' => $attachmentPath ? [$attachmentPath] : null,
-        ]);
+            'loan_officer_id' => $this->loan_officer_id,
+            'organization_id' => \Illuminate\Support\Facades\Auth::user()->organization_id,
+        ];
+
+        if ($this->attachments) {
+            $attachmentPath = $this->attachments->store('loan-attachments', 'public');
+            $data['attachments'] = [$attachmentPath];
+        }
+
+        if ($this->isEditMode) {
+            $loan = Loan::find($this->loanId);
+            $loan->update($data);
+            $message = 'Loan details updated successfully.';
+        } else {
+            $loan = Loan::create($data);
+            $message = 'Loan created successfully with Number: ' . $this->loan_number;
+        }
 
         // Link Collateral
+        // First, detach any previous collateral if changed
+        if ($this->isEditMode && $loan->collateral && $loan->collateral->id != $this->collateralId) {
+            $oldCollateral = $loan->collateral;
+            $oldCollateral->loan_id = null;
+            $oldCollateral->save();
+        }
+
         $collateral = Collateral::find($this->collateralId);
         if ($collateral) {
             $collateral->loan_id = $loan->id;
@@ -202,15 +250,18 @@ class LoanForm extends Component
             $collateral->save();
         }
 
-        $this->dispatch('custom-alert', ['message' => 'Loan created successfully with Number: ' . $this->loan_number, 'type' => 'success']);
+        $this->dispatch('custom-alert', ['message' => $message, 'type' => 'success']);
 
-        $this->reset([
-            'borrowerId', 'selectedBorrower', 'loan_number', 'loan_product', 'amount', 
-            'interest_rate', 'processing_fee', 'insurance_fee', 'description', 
-            'attachments', 'collateralId'
-        ]);
-        
-        $this->mount(); // Refresh collaterals
+        if (!$this->isEditMode) {
+            $this->reset([
+                'borrowerId', 'selectedBorrower', 'loan_number', 'loan_product', 'amount', 
+                'interest_rate', 'processing_fee', 'insurance_fee', 'description', 
+                'attachments', 'collateralId'
+            ]);
+            $this->mount();
+        } else {
+            return redirect()->route('loan.show', $this->loanId);
+        }
     }
 
     public function render()

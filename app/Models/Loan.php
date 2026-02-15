@@ -14,7 +14,9 @@ class Loan extends Model
     use HasFactory, HasUuids;
 
     protected $fillable = [
+        'organization_id',
         'borrower_id',
+        'loan_officer_id',
         'amount',
         'loan_number',
         'loan_product',
@@ -28,14 +30,41 @@ class Loan extends Model
         'processing_fee',
         'processing_fee_type',
         'insurance_fee',
+        'penalty_value',
+        'penalty_type',
+        'penalty_frequency',
+        'override_system_penalty',
         'description',
         'attachments',
+        'status',
     ];
 
     protected $casts = [
         'release_date' => 'date',
         'attachments' => 'array',
+        'override_system_penalty' => 'boolean',
+        'penalty_value' => 'decimal:2',
     ];
+
+    public function organization(): BelongsTo
+    {
+        return $this->belongsTo(Organization::class);
+    }
+
+    public function repayments(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Repayment::class);
+    }
+
+    public function scheduledRepayments(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(ScheduledRepayment::class)->orderBy('due_date');
+    }
+
+    public function comments(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    {
+        return $this->morphMany(Comment::class, 'commentable')->oldest();
+    }
 
     public function collateral(): HasOne
     {
@@ -45,5 +74,10 @@ class Loan extends Model
     public function borrower(): BelongsTo
     {
         return $this->belongsTo(Borrower::class);
+    }
+
+    public function loanOfficer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'loan_officer_id');
     }
 }

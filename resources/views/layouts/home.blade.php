@@ -25,9 +25,10 @@
 <nav class="hidden md:flex items-center gap-10">
 <a class="text-sm font-medium opacity-70 hover:opacity-100 transition-opacity" href="#">Features</a>
 <a class="text-sm font-medium opacity-70 hover:opacity-100 transition-opacity" href="#">Solutions</a>
-<a class="text-sm font-medium opacity-70 hover:opacity-100 transition-opacity" href="#">Pricing</a>
+<a class="text-sm font-medium opacity-70 hover:opacity-100 transition-opacity" href="{{ route('register.org') }}" wire:navigate>Register Org</a>
+<a class="text-sm font-medium opacity-70 hover:opacity-100 transition-opacity" href="{{ route('register') }}" wire:navigate>Register Customer</a>
 <a class="text-sm font-medium opacity-70 hover:opacity-100 transition-opacity" href="{{ route('login') }}" wire:navigate>Login</a>
-<a href="{{ route('register') }}" wire:navigate>
+<a href="{{ route('register.org') }}" wire:navigate>
     <button class="flex min-w-[110px] items-center justify-center rounded-lg bg-primary dark:bg-white px-5 py-2.5 text-sm font-bold text-white dark:text-primary transition-all hover:shadow-lg active:scale-95">
                             Get Started
                         </button>
@@ -85,10 +86,10 @@
     </div>
     <nav class="flex flex-col items-center gap-10">
         <a class="text-lg font-medium opacity-70 hover:opacity-100 transition-opacity" href="#">Features</a>
-        <a class="text-lg font-medium opacity-70 hover:opacity-100 transition-opacity" href="#">Solutions</a>
-        <a class="text-lg font-medium opacity-70 hover:opacity-100 transition-opacity" href="#">Pricing</a>
+        <a class="text-lg font-medium opacity-70 hover:opacity-100 transition-opacity" href="{{ route('register.org') }}" wire:navigate>Register Org</a>
+        <a class="text-lg font-medium opacity-70 hover:opacity-100 transition-opacity" href="{{ route('register') }}" wire:navigate>Register Customer</a>
         <a class="text-lg font-medium opacity-70 hover:opacity-100 transition-opacity" href="{{ route('login') }}" wire:navigate>Login</a>
-<a href="{{ route('register') }}" class="w-full" wire:navigate>
+<a href="{{ route('register.org') }}" class="w-full" wire:navigate>
     <button class="flex w-full items-center justify-center rounded-lg bg-primary dark:bg-white px-5 py-3 text-base font-bold text-white dark:text-primary transition-all hover:shadow-lg active:scale-95">
                 Get Started
             </button>

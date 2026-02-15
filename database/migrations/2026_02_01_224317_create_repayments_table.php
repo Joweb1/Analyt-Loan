@@ -12,7 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('repayments', function (Blueprint $table) {
-            $table->id();
+            $table->uuid('id')->primary();
+            $table->foreignUuid('loan_id')->constrained('loans')->cascadeOnDelete();
+            $table->decimal('amount', 10, 2);
+            $table->date('paid_at'); // keeping it simple as date for "Repaid Today"
             $table->timestamps();
         });
     }

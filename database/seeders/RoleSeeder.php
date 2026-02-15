@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
 
 class RoleSeeder extends Seeder
 {
@@ -13,11 +13,31 @@ class RoleSeeder extends Seeder
      */
     public function run(): void
     {
-        Role::create(['name' => 'Admin']);
-        Role::create(['name' => 'Borrower']);
-        Role::create(['name' => 'Loan Analyst']);
-        Role::create(['name' => 'Vault Manager']);
-        Role::create(['name' => 'Credit Analyst']);
-        Role::create(['name' => 'Collection Specialist']);
+        $permissions = [
+            'view_dashboard',
+            'manage_borrowers',
+            'manage_loans',
+            'approve_loans',
+            'manage_collections',
+            'view_reports',
+            'manage_vault',
+            'manage_settings',
+        ];
+
+        foreach ($permissions as $p) {
+            Permission::firstOrCreate(['name' => $p]);
+        }
+
+        $admin = Role::firstOrCreate(['name' => 'Admin']);
+        $admin->syncPermissions($permissions);
+
+        Role::firstOrCreate(['name' => 'Borrower']);
+        
+        $analyst = Role::firstOrCreate(['name' => 'Loan Analyst']);
+        $analyst->syncPermissions(['view_dashboard', 'manage_loans']);
+
+        Role::firstOrCreate(['name' => 'Vault Manager'])->syncPermissions(['view_dashboard', 'manage_vault']);
+        Role::firstOrCreate(['name' => 'Credit Analyst'])->syncPermissions(['view_dashboard', 'approve_loans']);
+        Role::firstOrCreate(['name' => 'Collection Specialist'])->syncPermissions(['view_dashboard', 'manage_collections']);
     }
 }

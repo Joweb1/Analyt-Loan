@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('loans', function (Blueprint $table) {
-            //
+            $table->string('status')->default('applied')->after('loan_number'); // applied, approved, declined, disbursed, repaid, overdue
         });
     }
 
@@ -22,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('loans', function (Blueprint $table) {
-            //
+            $table->dropColumn('status');
         });
     }
 };

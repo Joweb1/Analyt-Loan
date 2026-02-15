@@ -86,24 +86,32 @@ function setupSidebarToggle() {
         setSidebarState(sidebar.classList.contains('sidebar-collapsed'));
     };
 
-    // Event listeners
-    if (hideSidebarBtn) {
+    // Event listeners - Prevent duplicates using data attribute
+    if (hideSidebarBtn && !hideSidebarBtn.dataset.hasSidebarListener) {
         hideSidebarBtn.addEventListener('click', toggleSidebar);
+        hideSidebarBtn.dataset.hasSidebarListener = 'true';
     }
 
-    if (showSidebarFab) {
-        showSidebarFab.addEventListener('click', toggleSidebar); // FAB now toggles sidebar
+    if (showSidebarFab && !showSidebarFab.dataset.hasSidebarListener) {
+        showSidebarFab.addEventListener('click', toggleSidebar);
+        showSidebarFab.dataset.hasSidebarListener = 'true';
     }
 
-    // Initial setup on DOMContentLoaded and resize
-    const handleInitialAndResize = () => {
-        setSidebarState(false); // Always start collapsed
-        if (showSidebarFabIcon) showSidebarFabIcon.textContent = 'menu'; // Set initial FAB icon
-        // FAB always visible, so no class manipulation here
+    // Initial setup on DOMContentLoaded
+    const initializeSidebar = () => {
+        // Only force collapse on initial load if needed, but user interaction should persist.
+        // For now, defaulting to collapsed is fine on page load.
+        if (!sidebar.classList.contains('sidebar-expanded')) {
+             setSidebarState(false);
+        } else {
+             // If somehow already expanded (e.g. preserved state in future), sync UI
+             setSidebarState(true);
+        }
+        
+        if (showSidebarFabIcon) showSidebarFabIcon.textContent = 'menu';
     };
 
-    handleInitialAndResize();
-    window.addEventListener('resize', handleInitialAndResize);
+    initializeSidebar();
 }
 
 document.addEventListener('DOMContentLoaded', setupSidebarToggle);

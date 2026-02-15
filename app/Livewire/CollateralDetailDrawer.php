@@ -16,7 +16,7 @@ class CollateralDetailDrawer extends Component
     public function openDrawer($collateralId)
     {
         $this->collateralId = $collateralId;
-        $this->collateral = Collateral::find($collateralId);
+        $this->collateral = Collateral::with('loan')->find($collateralId);
         $this->isOpen = true;
     }
 

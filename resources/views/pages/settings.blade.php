@@ -19,6 +19,12 @@
                 <a class="flex items-center justify-between px-4 py-3 text-gray-500 hover:text-accent-blue transition-colors" href="{{ route('settings.team-members') }}">
                     <span class="font-semibold text-sm">Team Members</span>
                 </a>
+                <a class="flex items-center justify-between px-4 py-3 text-gray-500 hover:text-accent-blue transition-colors" href="{{ route('settings.roles') }}">
+                    <span class="font-semibold text-sm">Roles & Permissions</span>
+                </a>
+                <a class="flex items-center justify-between px-4 py-3 text-gray-500 hover:text-accent-blue transition-colors" href="{{ route('settings.form-builder') }}">
+                    <span class="font-semibold text-sm">Form Customization</span>
+                </a>
                 <a class="flex items-center justify-between px-4 py-3 text-gray-500 hover:text-accent-blue transition-colors" href="#">
                     <span class="font-semibold text-sm">Notifications</span>
                 </a>

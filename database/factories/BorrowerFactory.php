@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -17,7 +18,9 @@ class BorrowerFactory extends Factory
     public function definition(): array
     {
         return [
+            'user_id' => User::factory(),
             'phone' => $this->faker->phoneNumber,
+            'bvn' => $this->faker->numerify('###########'),
             'trust_score' => $this->faker->numberBetween(0, 100),
             'portal_access' => $this->faker->boolean,
             'photo_url' => $this->faker->imageUrl(),

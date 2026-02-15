@@ -18,12 +18,16 @@ class CollateralFactory extends Factory
     public function definition(): array
     {
         return [
+            'organization_id' => \App\Models\Organization::factory(),
             'name' => $this->faker->words(3, true),
             'description' => $this->faker->sentence,
-            'value' => $this->faker->randomFloat(2, 100, 1000),
-            'image_path' => $this->faker->imageUrl(),
-            'loan_id' => Loan::factory(),
+            'value' => $this->faker->randomFloat(2, 50000, 500000), // More realistic Naira values
+            'image_path' => null,
+            'loan_id' => null,
             'status' => $this->faker->randomElement(['in_vault', 'returned']),
+            'type' => $this->faker->randomElement(['Vehicle', 'Real Estate', 'Jewelry', 'Electronics', 'Other']),
+            'condition' => $this->faker->randomElement(['New', 'Used', 'Good', 'Poor']),
+            'registered_date' => $this->faker->date(),
         ];
     }
 }

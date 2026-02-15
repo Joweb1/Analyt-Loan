@@ -72,7 +72,7 @@
                     <thead>
                     <tr class="bg-slate-50 dark:bg-slate-900/50 text-slate-500 text-[10px] font-bold uppercase tracking-widest">
                         <th class="px-6 py-4">Borrower</th>
-                        <th class="px-6 py-4">Loan ID</th>
+                        <th class="px-6 py-4">Tracking Number</th>
                         <th class="px-6 py-4">Days Overdue</th>
                         <th class="px-6 py-4 text-right">Amount Due</th>
                         <th class="px-6 py-4 text-center">Quick Actions</th>

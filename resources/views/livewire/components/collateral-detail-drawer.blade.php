@@ -28,7 +28,7 @@
                                     <img src="{{ $collateral->image_path }}" alt="{{ $collateral->name }}" class="mt-4 rounded-md">
                                 @endif
                                 <p class="text-gray-800 mt-2">Status: {{ $collateral->status }}</p>
-                                <p class="text-gray-800">Loan ID: {{ $collateral->loan_id }}</p>
+                                <p class="text-gray-800">Tracking Number: {{ $collateral->loan->loan_number ?? 'N/A' }}</p>
                             @else
                                 <p>No collateral selected.</p>
                             @endif

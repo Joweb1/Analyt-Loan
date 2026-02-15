@@ -13,6 +13,7 @@ class Borrower extends Model
     use HasFactory, HasUuids;
 
     protected $fillable = [
+        'organization_id',
         'user_id',
         'guarantor_id',
         'phone',
@@ -34,7 +35,17 @@ class Borrower extends Model
         'marital_status',
         'dependents',
         'next_of_kin_details',
+        'custom_data',
     ];
+
+    protected $casts = [
+        'custom_data' => 'array',
+    ];
+
+    public function organization(): BelongsTo
+    {
+        return $this->belongsTo(Organization::class);
+    }
 
     public function user(): BelongsTo
     {
@@ -50,5 +61,9 @@ class Borrower extends Model
     {
         return $this->hasMany(Loan::class);
     }
-}
 
+    public function savingsAccount(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(SavingsAccount::class);
+    }
+}

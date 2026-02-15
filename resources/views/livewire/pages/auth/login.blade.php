@@ -37,11 +37,11 @@ new #[Layout('layouts.guest')] class extends Component
     </div>
 
     <form wire:submit="login" class="space-y-5">
-        <!-- Email Field -->
+        <!-- Login Field (Phone or Email) -->
         <div class="flex flex-col gap-2">
-            <label for="email" class="text-[#131416] dark:text-white text-sm font-semibold">Email Address</label>
-            <input wire:model="form.email" id="email" type="email" class="form-input w-full rounded-lg border border-[#dedfe3] dark:border-white/10 dark:bg-white/5 dark:text-primary h-14 px-4 focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all placeholder:text-[#6b7180]" placeholder="name@company.com" required autofocus autocomplete="username" />
-            <x-input-error :messages="$errors->get('form.email')" class="mt-2" />
+            <label for="login" class="text-[#131416] dark:text-white text-sm font-semibold">Phone Number or Email</label>
+            <input wire:model="form.login" id="login" type="text" class="form-input w-full rounded-lg border border-[#dedfe3] dark:border-white/10 dark:bg-white/5 dark:text-primary h-14 px-4 focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all placeholder:text-[#6b7180]" placeholder="08012345678 or name@company.com" required autofocus autocomplete="username" />
+            <x-input-error :messages="$errors->get('form.login')" class="mt-2" />
         </div>
 
         <!-- Password Field -->

@@ -7,10 +7,9 @@
             <p class="text-slate-500 text-sm mt-1">System Lending Overview</p>
         </div>
         <div class="flex gap-2">
-
-            <button class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20">
+            <a href="{{ route('loan.create') }}" class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20">
                 <span class="material-symbols-outlined text-base">add</span> New Loan
-            </button>
+            </a>
         </div>
     </div>
     <!-- Health Cards Grid -->
@@ -240,6 +239,5 @@
                 </button>
             </div>
         </div>
-    </div>
     </div>
 </x-app-layout>

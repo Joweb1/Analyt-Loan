@@ -182,6 +182,9 @@
                         Borrower
                     </th>
                     <th scope="col" class="px-6 py-3">
+                        Tracking Number
+                    </th>
+                    <th scope="col" class="px-6 py-3">
                         Amount
                     </th>
                     <th scope="col" class="px-6 py-3">

@@ -4,12 +4,13 @@ namespace App\Notifications;
 
 use App\Models\SystemNotification;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Storage;
 use NotificationChannels\WebPush\WebPushChannel;
 use NotificationChannels\WebPush\WebPushMessage;
 
-class PushSystemNotification extends Notification
+class PushSystemNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 

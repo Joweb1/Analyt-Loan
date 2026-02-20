@@ -76,10 +76,9 @@ This project is configured for automated deployment via GitHub Actions. Since SS
 3.  **Database:** Create a MySQL database and user in cPanel.
 4.  **Environment:** Manually upload your `.env` file to the server root or ensure the GitHub Action includes it.
 5.  **Post-Deployment Setup:** After the files are uploaded, visit the following URL in your browser to run migrations and link storage:
-    *   `https://yourdomain.com/deploy-setup.php?token=setup_XXXXX`
+    *   `https://yourdomain.com/deploy-setup.php?token=YOUR_DB_PASSWORD`
     *   **To Seed the Database:** If this is your first time setting up, add `&seed=true` to the URL to create roles and the default admin account:
-        *   `https://yourdomain.com/deploy-setup.php?token=setup_XXXXX&seed=true`
-    *   *(Check the script `public/deploy-setup.php` for the token logic or use the hint on the page).*
+        *   `https://yourdomain.com/deploy-setup.php?token=YOUR_DB_PASSWORD&seed=true`
 6.  **Cleanup:** **IMPORTANT!** Delete `public/deploy-setup.php` from your server immediately after the setup is complete.
 
 ### **Shared Hosting Tips:**

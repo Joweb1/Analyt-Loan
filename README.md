@@ -48,5 +48,10 @@ This project is configured for automated deployment via GitHub Actions. Since SS
     *   *(Check the script `public/deploy-setup.php` for the token logic or use the hint on the page).*
 6.  **Cleanup:** **IMPORTANT!** Delete `public/deploy-setup.php` from your server immediately after the setup is complete.
 
+### **Shared Hosting Tips:**
+*   **Folder Structure:** It is recommended to upload the entire project to a folder outside `public_html` (e.g., `/home/username/analyt-loan`) and then create a symbolic link from `public_html` to the `public` folder of your project. 
+    *   Command: `ln -s /home/username/analyt-loan/public /home/username/public_html` (If you have terminal access) or use the File Manager.
+*   **Database access:** Ensure your hosting allows the web server to connect to `sql100.iceiy.com`.
+
 ## Summary
 Analyt Loan is designed to make lending "as simple as sending an email." It targets the "missing middle" of finance—lenders who are too big for a notebook but too small for high-end enterprise banking software.

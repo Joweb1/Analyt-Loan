@@ -31,6 +31,38 @@ The system is built for speed and scale using a MYSQL database for data integrit
 ## 5. Frontend Development
 To ensure the application remains lightweight and performs optimally, we will be using vanilla Javascript for all frontend interactions. The use of Alpine.js is strictly prohibited. This approach gives us full control over the user experience and avoids unnecessary dependencies.
 
+## Environment Configuration
+
+Ensure your `.env` file contains the following essential fields:
+
+### **General Application Settings**
+*   `APP_NAME`: The name of your application.
+*   `APP_ENV`: Set to `production` for live servers, `local` for development.
+*   `APP_KEY`: Required for encryption. Generate using `php artisan key:generate`.
+*   `APP_DEBUG`: Set to `false` in production.
+*   `APP_URL`: Your application's full URL (e.g., `https://yourdomain.com`).
+*   `APP_OWNER`: The email address of the platform owner (e.g., `nahjonah00@gmail.com`).
+
+### **Database Configuration (MySQL)**
+*   `DB_CONNECTION`: Set to `mysql`.
+*   `DB_HOST`: Your database host (e.g., `sql100.iceiy.com`).
+*   `DB_PORT`: Default is `3306`.
+*   `DB_DATABASE`: Your database name (e.g., `icei_41195783_analytloan`).
+*   `DB_USERNAME`: Your database username (e.g., `icei_41195783`).
+*   `DB_PASSWORD`: Your database password.
+
+### **Mail Configuration**
+*   `MAIL_MAILER`: The mail driver (e.g., `smtp`).
+*   `MAIL_HOST`: SMTP host.
+*   `MAIL_PORT`: SMTP port (e.g., `587`).
+*   `MAIL_USERNAME`: Your mail account username.
+*   `MAIL_PASSWORD`: Your mail account password.
+*   `MAIL_FROM_ADDRESS`: The "From" email address.
+*   `MAIL_FROM_NAME`: The "From" name (usually `${APP_NAME}`).
+
+### **Security & Automation**
+*   `CRON_TOKEN`: A secure random string used to trigger web-based cron jobs.
+
 ## Deployment (cPanel / Shared Hosting without SSH)
 
 This project is configured for automated deployment via GitHub Actions. Since SSH is not available, follow these steps to set up your shared hosting:

@@ -49,7 +49,12 @@ function runCommand($command, $params = [])
 // 1. Run Migrations
 runCommand('migrate', ['--force' => true]);
 
-// 2. Create Storage Symbolic Link
+// 2. Run Database Seeding (Optional - run once for initial setup)
+if (isset($_GET['seed']) && $_GET['seed'] === 'true') {
+    runCommand('db:seed', ['--force' => true]);
+}
+
+// 3. Create Storage Symbolic Link
 // On shared hosting, you might need to use absolute paths if the default fails.
 runCommand('storage:link');
 

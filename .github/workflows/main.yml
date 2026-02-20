@@ -112,7 +112,7 @@ jobs:
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
         local-dir: ./
-        server-dir: ./
+        server-dir: ${{ secrets.FTP_SERVER_DIR || './' }}
         # Exclude files that shouldn't be on the server
         exclude: |
           **/.git*
@@ -126,17 +126,3 @@ jobs:
           **/vite.config.js
           **/postcss.config.js
           **/package*.json
-
-    - name: Run Remote Commands via SSH
-      uses: appleboy/ssh-action@v1.0.3
-      with:
-        host: ${{ secrets.SSH_HOST }}
-        username: ${{ secrets.SSH_USERNAME }}
-        key: ${{ secrets.SSH_KEY }}
-        script: |
-          cd ${{ secrets.REMOTE_APP_DIR }}
-          php artisan migrate --force
-          php artisan storage:link
-          php artisan config:cache
-          php artisan route:cache
-          php artisan view:cache

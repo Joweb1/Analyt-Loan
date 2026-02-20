@@ -31,5 +31,22 @@ The system is built for speed and scale using a MYSQL database for data integrit
 ## 5. Frontend Development
 To ensure the application remains lightweight and performs optimally, we will be using vanilla Javascript for all frontend interactions. The use of Alpine.js is strictly prohibited. This approach gives us full control over the user experience and avoids unnecessary dependencies.
 
+## Deployment (cPanel / Shared Hosting without SSH)
+
+This project is configured for automated deployment via GitHub Actions. Since SSH is not available, follow these steps to set up your shared hosting:
+
+1.  **FTP Setup:** Create an FTP account in cPanel and point its root to your project directory (e.g., `/home/username/analyt-loan`).
+2.  **GitHub Secrets:** Add the following secrets to your GitHub repository (`Settings > Secrets and variables > Actions`):
+    *   `FTP_SERVER`: Your hosting FTP host (e.g., `ftp.yourdomain.com`).
+    *   `FTP_USERNAME`: Your FTP username.
+    *   `FTP_PASSWORD`: Your FTP password.
+    *   `FTP_SERVER_DIR`: The remote directory path where the app is uploaded (default is `./`).
+3.  **Database:** Create a MySQL database and user in cPanel.
+4.  **Environment:** Manually upload your `.env` file to the server root or ensure the GitHub Action includes it.
+5.  **Post-Deployment Setup:** After the files are uploaded, visit the following URL in your browser to run migrations and link storage:
+    *   `https://yourdomain.com/deploy-setup.php?token=setup_XXXXX`
+    *   *(Check the script `public/deploy-setup.php` for the token logic or use the hint on the page).*
+6.  **Cleanup:** **IMPORTANT!** Delete `public/deploy-setup.php` from your server immediately after the setup is complete.
+
 ## Summary
 Analyt Loan is designed to make lending "as simple as sending an email." It targets the "missing middle" of finance—lenders who are too big for a notebook but too small for high-end enterprise banking software.

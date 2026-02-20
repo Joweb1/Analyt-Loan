@@ -45,7 +45,10 @@ jobs:
         coverage: none
 
     - name: Install Dependencies
-      run: composer install --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+      run: |
+        composer install --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+        npm install
+        npm run build
 
     - name: Copy .env
       run: php -r "file_exists('.env') || copy('.env.example', '.env');"

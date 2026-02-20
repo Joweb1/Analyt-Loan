@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \App\Models\Loan $loan
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ScheduledRepayment newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ScheduledRepayment newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ScheduledRepayment query()
@@ -34,6 +35,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ScheduledRepayment wherePrincipalAmount($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ScheduledRepayment whereStatus($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ScheduledRepayment whereUpdatedAt($value)
+ *
  * @mixin \Eloquent
  */
 class ScheduledRepayment extends Model

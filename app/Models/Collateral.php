@@ -25,6 +25,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|null $organization_id
  * @property-read \App\Models\Loan|null $loan
  * @property-read \App\Models\Organization|null $organization
+ *
  * @method static \Database\Factories\CollateralFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Collateral newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Collateral newQuery()
@@ -43,6 +44,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Collateral whereType($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Collateral whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Collateral whereValue($value)
+ *
  * @mixin \Eloquent
  */
 class Collateral extends Model

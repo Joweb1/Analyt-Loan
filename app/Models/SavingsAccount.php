@@ -23,6 +23,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read \App\Models\Organization $organization
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\SavingsTransaction> $transactions
  * @property-read int|null $transactions_count
+ *
  * @method static \Database\Factories\SavingsAccountFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SavingsAccount newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SavingsAccount newQuery()
@@ -36,6 +37,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SavingsAccount whereOrganizationId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SavingsAccount whereStatus($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SavingsAccount whereUpdatedAt($value)
+ *
  * @mixin \Eloquent
  */
 class SavingsAccount extends Model

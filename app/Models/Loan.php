@@ -46,6 +46,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property-read int|null $repayments_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ScheduledRepayment> $scheduledRepayments
  * @property-read int|null $scheduled_repayments_count
+ *
  * @method static \Database\Factories\LoanFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Loan newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Loan newQuery()
@@ -76,6 +77,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Loan whereRepaymentCycle($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Loan whereStatus($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Loan whereUpdatedAt($value)
+ *
  * @mixin \Eloquent
  */
 class Loan extends Model

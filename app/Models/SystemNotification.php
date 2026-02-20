@@ -30,6 +30,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property-read \App\Models\User|null $recipient
  * @property-read Model|\Eloquent|null $subject
  * @property-read \App\Models\User|null $user
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SystemNotification newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SystemNotification newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SystemNotification query()
@@ -50,6 +51,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SystemNotification whereType($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SystemNotification whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SystemNotification whereUserId($value)
+ *
  * @mixin \Eloquent
  */
 class SystemNotification extends Model

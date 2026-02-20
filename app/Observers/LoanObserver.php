@@ -35,7 +35,7 @@ class LoanObserver
         // Notify the Borrower
         SystemLogger::success(
             'Application Submitted',
-            "Your application for a loan of ₦".number_format($loan->amount)." (Loan #{$loan->loan_number}) has been submitted successfully.",
+            'Your application for a loan of ₦'.number_format($loan->amount)." (Loan #{$loan->loan_number}) has been submitted successfully.",
             'loan',
             $loan,
             false,

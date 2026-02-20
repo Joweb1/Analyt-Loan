@@ -22,6 +22,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \App\Models\Organization $organization
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|FormFieldConfig newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|FormFieldConfig newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|FormFieldConfig query()
@@ -38,6 +39,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|FormFieldConfig whereSortOrder($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|FormFieldConfig whereType($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|FormFieldConfig whereUpdatedAt($value)
+ *
  * @mixin \Eloquent
  */
 class FormFieldConfig extends Model

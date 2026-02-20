@@ -21,6 +21,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property numeric $extra_amount
  * @property-read \App\Models\User|null $collector
  * @property-read \App\Models\Loan $loan
+ *
  * @method static \Database\Factories\RepaymentFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Repayment newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Repayment newQuery()
@@ -36,6 +37,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Repayment wherePaymentMethod($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Repayment wherePrincipalAmount($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Repayment whereUpdatedAt($value)
+ *
  * @mixin \Eloquent
  */
 class Repayment extends Model

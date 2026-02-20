@@ -11,6 +11,7 @@ class ExampleTest extends TestCase
      */
     public function test_that_true_is_true(): void
     {
-        $this->assertTrue(count([1]) === 1);
+        $result = 1 + 1;
+        $this->assertEquals(2, $result);
     }
 }

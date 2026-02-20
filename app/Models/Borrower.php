@@ -46,6 +46,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read \App\Models\Organization|null $organization
  * @property-read \App\Models\SavingsAccount|null $savingsAccount
  * @property-read \App\Models\User $user
+ *
  * @method static \Database\Factories\BorrowerFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Borrower newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Borrower newQuery()
@@ -80,6 +81,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Borrower whereTrustScore($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Borrower whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Borrower whereUserId($value)
+ *
  * @mixin \Eloquent
  */
 class Borrower extends Model

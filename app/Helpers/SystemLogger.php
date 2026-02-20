@@ -20,7 +20,7 @@ class SystemLogger
             if ($subject instanceof \App\Models\Organization) {
                 $orgId = $subject->id;
             } else {
-                $orgId = data_get($subject, 'organization_id') 
+                $orgId = data_get($subject, 'organization_id')
                     ?? data_get($subject, 'loan.organization_id')
                     ?? data_get($subject, 'borrower.organization_id')
                     ?? Auth::user()?->organization_id;

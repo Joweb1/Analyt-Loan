@@ -12,6 +12,10 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/borrowers', BorrowerList::class)->name('borrowers.index');
 
+// Secure Cron & Queue Triggers (for Shared Hosting)
+Route::get('/cron/schedule', [\App\Http\Controllers\CronController::class, 'runSchedule']);
+Route::get('/cron/queue', [\App\Http\Controllers\CronController::class, 'runQueue']);
+
 // General Application Routes
 Route::view('/', 'pages.welcome');
 Route::get('/register-org', OrgRegistrationForm::class)->name('register.org');

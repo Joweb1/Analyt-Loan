@@ -120,6 +120,8 @@ return [
 
     'owner' => env('APP_OWNER', 'nahjonah00@gmail.com'),
 
+    'cron_token' => env('CRON_TOKEN'),
+
     'maintenance' => [
         'driver' => env('APP_MAINTENANCE_DRIVER', 'file'),
         'store' => env('APP_MAINTENANCE_STORE', 'database'),

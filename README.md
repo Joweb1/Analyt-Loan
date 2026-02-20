@@ -53,5 +53,18 @@ This project is configured for automated deployment via GitHub Actions. Since SS
     *   Command: `ln -s /home/username/analyt-loan/public /home/username/public_html` (If you have terminal access) or use the File Manager.
 *   **Database access:** Ensure your hosting allows the web server to connect to `sql100.iceiy.com`.
 
+### **Automation (Cron Jobs & Queues)**
+Since you are on shared hosting, you can use an external cron service (like [cron-job.org](https://cron-job.org)) to trigger system tasks:
+
+1.  **Scheduler (Every Minute):** 
+    *   URL: `https://yourdomain.com/cron/schedule?token=YOUR_CRON_TOKEN`
+    *   Frequency: Every 1 minute.
+2.  **Queue Worker (Every Minute or 5 Minutes):**
+    *   URL: `https://yourdomain.com/cron/queue?token=YOUR_CRON_TOKEN`
+    *   Frequency: Every 1 minute (recommended for fast processing).
+    *   *Note: This processes pending jobs and stops when empty.*
+
+Set `CRON_TOKEN` in your `.env` file to a secure random string.
+
 ## Summary
 Analyt Loan is designed to make lending "as simple as sending an email." It targets the "missing middle" of finance—lenders who are too big for a notebook but too small for high-end enterprise banking software.

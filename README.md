@@ -33,7 +33,21 @@ To ensure the application remains lightweight and performs optimally, we will be
 
 ## Environment Configuration
 
-Ensure your `.env` file contains the following essential fields:
+The project is configured to use **SQLite for local development** and **MySQL for production**.
+
+### **Local Development (SQLite)**
+Ensure your `.env` contains:
+*   `DB_CONNECTION=sqlite`
+*   *(No other DB fields are required; it will use `database/database.sqlite` automatically).*
+
+### **Production / Deployment (MySQL)**
+Set these in your server's `.env` file:
+*   `DB_CONNECTION=mysql`
+*   `DB_HOST=sql100.iceiy.com`
+*   `DB_PORT=3306`
+*   `DB_DATABASE=icei_41195783_analytloan`
+*   `DB_USERNAME=icei_41195783`
+*   `DB_PASSWORD`: Your MySQL password.
 
 ### **General Application Settings**
 *   `APP_NAME`: The name of your application.

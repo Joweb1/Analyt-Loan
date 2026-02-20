@@ -2,13 +2,13 @@
 
 namespace Database\Seeders;
 
-use App\Models\Organization;
-use App\Models\User;
 use App\Models\Borrower;
 use App\Models\Loan;
+use App\Models\Organization;
+use App\Models\User;
 use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
 
 class OrganizationSeeder extends Seeder
 {
@@ -27,7 +27,7 @@ class OrganizationSeeder extends Seeder
                 'organization_id' => null, // Super Admin doesn't belong to a specific org context usually, or belongs to a System Org
             ]
         );
-        
+
         // Ensure App Owner has Admin role (or a specific Super Admin role if we had one)
         // For now, let's give them Admin role so they can access things, but the logic will rely on email
         $adminRole = Role::findByName('Admin');
@@ -43,9 +43,12 @@ class OrganizationSeeder extends Seeder
                 'email' => 'demo@analyt.com',
                 'status' => 'active',
                 'kyc_status' => 'approved',
-                'owner_id' => $appOwner->id, // Just for testing, normally a specific Org Admin
+                'owner_id' => $appOwner->id,
             ]
         );
+
+        // Update App Owner to belong to this org
+        $appOwner->update(['organization_id' => $defaultOrg->id]);
 
         // 3. Migrate existing data to this organization
         User::where('email', '!=', $appOwnerEmail)->update(['organization_id' => $defaultOrg->id]);

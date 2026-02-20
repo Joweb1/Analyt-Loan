@@ -2,14 +2,14 @@
 
 namespace Database\Seeders;
 
+use App\Models\Borrower;
+use App\Models\Loan;
+use App\Models\Organization;
+use App\Models\SystemNotification;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
-use App\Models\Organization;
-use App\Models\User;
-use App\Models\Borrower;
-use App\Models\Loan;
-use App\Models\SystemNotification;
 
 class MasterSeeder extends Seeder
 {
@@ -32,7 +32,7 @@ class MasterSeeder extends Seeder
         DB::table('collaterals')->truncate();
         DB::table('comments')->truncate();
         DB::table('system_notifications')->truncate();
-        
+
         // Truncate Permission tables (Spatie)
         DB::table('model_has_permissions')->truncate();
         DB::table('model_has_roles')->truncate();
@@ -46,6 +46,7 @@ class MasterSeeder extends Seeder
         $this->call([
             RoleSeeder::class,
             OrganizationSeeder::class, // Creates App Owner and Demo Org
+            LoanProductSeeder::class,
         ]);
 
         $demoOrg = Organization::where('slug', 'analyt-demo')->first();
@@ -63,7 +64,7 @@ class MasterSeeder extends Seeder
         User::whereNull('organization_id')->where('email', '!=', 'nahjonah00@gmail.com')->update(['organization_id' => $demoOrg->id]);
         Borrower::whereNull('organization_id')->update(['organization_id' => $demoOrg->id]);
         Loan::whereNull('organization_id')->update(['organization_id' => $demoOrg->id]);
-        
+
         // IMPORTANT: Also fix system_notifications organization_id
         SystemNotification::whereNull('organization_id')->update(['organization_id' => $demoOrg->id]);
     }

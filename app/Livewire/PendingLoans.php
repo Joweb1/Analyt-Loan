@@ -18,7 +18,7 @@ class PendingLoans extends Component
             ->paginate(10);
 
         return view('livewire.pending-loans', [
-            'loans' => $loans
-        ])->layout('layouts.app');
+            'loans' => $loans,
+        ])->layout('layouts.app', ['title' => 'Pending Loans']);
     }
 }

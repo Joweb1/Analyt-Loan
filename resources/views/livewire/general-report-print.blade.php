@@ -1,14 +1,14 @@
-<div class="relative min-h-[1000px] flex flex-col font-sans">
+<div class="relative min-h-[1000px] flex flex-col font-sans pt-8">
     <!-- Action Button -->
-    <div class="no-print absolute -top-12 right-0 flex gap-3">
+    <div class="no-print absolute top-0 right-0 flex gap-3">
         <button onclick="window.print()" class="flex items-center gap-2 px-6 py-2 bg-primary text-white rounded-xl font-bold shadow-lg hover:bg-blue-700 transition-all">
             <span class="material-symbols-outlined">print</span>
             Print Report
         </button>
-        <button onclick="window.history.back()" class="flex items-center gap-2 px-6 py-2 bg-slate-100 text-slate-600 rounded-xl font-bold hover:bg-slate-200 transition-all">
+        <a href="{{ route('reports') }}" class="flex items-center gap-2 px-6 py-2 bg-slate-100 text-slate-600 rounded-xl font-bold hover:bg-slate-200 transition-all">
             <span class="material-symbols-outlined">arrow_back</span>
             Back
-        </button>
+        </a>
     </div>
 
     <!-- Header -->
@@ -38,30 +38,33 @@
     </header>
 
     <!-- Executive Summary Stats -->
+    @if($type !== 'staff_activity')
     <div class="grid grid-cols-4 gap-6 mb-12">
         <div class="p-6 bg-slate-50 border border-slate-100 rounded-2xl">
             <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Disbursed Capital</p>
-            <p class="text-2xl font-black text-slate-900">₦{{ number_format($metrics['total_disbursed'], 2) }}</p>
-            <p class="text-[10px] font-bold text-slate-500 mt-1 uppercase tracking-tighter">{{ $metrics['disbursement_count'] }} New Loan(s)</p>
+            <p class="text-2xl font-black text-slate-900">₦{{ number_format($metrics['total_disbursed'] ?? 0, 2) }}</p>
+            <p class="text-[10px] font-bold text-slate-500 mt-1 uppercase tracking-tighter">{{ $metrics['disbursement_count'] ?? 0 }} New Loan(s)</p>
         </div>
         <div class="p-6 bg-slate-50 border border-slate-100 rounded-2xl">
             <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Recovered Funds</p>
-            <p class="text-2xl font-black text-green-600">₦{{ number_format($metrics['total_collected'], 2) }}</p>
-            <p class="text-[10px] font-bold text-slate-500 mt-1 uppercase tracking-tighter">{{ $metrics['collection_count'] }} Payment(s)</p>
+            <p class="text-2xl font-black text-green-600">₦{{ number_format($metrics['total_collected'] ?? 0, 2) }}</p>
+            <p class="text-[10px] font-bold text-slate-500 mt-1 uppercase tracking-tighter">{{ $metrics['collection_count'] ?? 0 }} Payment(s)</p>
         </div>
         <div class="p-6 bg-slate-50 border border-slate-100 rounded-2xl">
             <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Overdue Exposure</p>
-            <p class="text-2xl font-black text-red-600">₦{{ number_format($metrics['overdue_amount'], 2) }}</p>
+            <p class="text-2xl font-black text-red-600">₦{{ number_format($metrics['overdue_amount'] ?? 0, 2) }}</p>
             <p class="text-[10px] font-bold text-slate-500 mt-1 uppercase tracking-tighter">Immediate Attention</p>
         </div>
         <div class="p-6 bg-slate-50 border border-slate-100 rounded-2xl">
             <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Growth Metric</p>
-            <p class="text-2xl font-black text-primary">{{ $metrics['new_customers'] }}</p>
+            <p class="text-2xl font-black text-primary">{{ $metrics['new_customers'] ?? 0 }}</p>
             <p class="text-[10px] font-bold text-slate-500 mt-1 uppercase tracking-tighter">New Borrower(s)</p>
         </div>
     </div>
+    @endif
 
     <!-- Detailed Analysis Grid -->
+    @if($type !== 'staff_activity')
     <div class="grid grid-cols-2 gap-12 mb-12">
         <!-- Portfolio Snapshot -->
         <section>
@@ -69,16 +72,18 @@
             <div class="space-y-4">
                 <div class="flex justify-between items-end border-b border-slate-100 pb-3">
                     <p class="text-xs font-bold text-slate-500 uppercase">Active Loan Count</p>
-                    <p class="text-sm font-black text-slate-900">{{ $metrics['active_loans'] }} Loans</p>
+                    <p class="text-sm font-black text-slate-900">{{ $metrics['active_loans'] ?? 0 }} Loans</p>
                 </div>
                 <div class="flex justify-between items-end border-b border-slate-100 pb-3">
                     <p class="text-xs font-bold text-slate-500 uppercase">Asset Vault Valuation</p>
-                    <p class="text-sm font-black text-slate-900">₦{{ number_format($metrics['vault_value'], 2) }}</p>
+                    <p class="text-sm font-black text-slate-900">₦{{ number_format($metrics['vault_value'] ?? 0, 2) }}</p>
                 </div>
                 <div class="flex justify-between items-end border-b border-slate-100 pb-3">
                     <p class="text-xs font-bold text-slate-500 uppercase">Recovery Efficiency</p>
                     @php 
-                        $efficiency = ($metrics['total_disbursed'] > 0) ? ($metrics['total_collected'] / $metrics['total_disbursed']) * 100 : 0;
+                        $totalDisbursed = $metrics['total_disbursed'] ?? 0;
+                        $totalCollected = $metrics['total_collected'] ?? 0;
+                        $efficiency = ($totalDisbursed > 0) ? ($totalCollected / $totalDisbursed) * 100 : 0;
                     @endphp
                     <p class="text-sm font-black text-slate-900">{{ number_format($efficiency, 1) }}% Ratio</p>
                 </div>
@@ -94,9 +99,39 @@
             </div>
         </section>
     </div>
+    @endif
+
+    <!-- Personal Activity Log -->
+    @if($type === 'staff_activity')
+    <section class="flex-1 mb-12">
+        <h2 class="text-xs font-black bg-slate-900 text-white px-4 py-1.5 uppercase tracking-[0.2em] mb-6 inline-block">Personal Action History</h2>
+        <table class="w-full text-left border-collapse border border-slate-200">
+            <thead>
+                <tr class="bg-slate-50 text-[10px] font-black uppercase tracking-wider border-b border-slate-200">
+                    <th class="px-6 py-4 border-r border-slate-200 w-32">Date & Time</th>
+                    <th class="px-6 py-4 border-r border-slate-200 w-48">Action Category</th>
+                    <th class="px-6 py-4">Detailed Description</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200">
+                @forelse($activityLogs as $log)
+                    <tr class="text-xs">
+                        <td class="px-6 py-4 border-r border-slate-200 font-bold text-slate-900">{{ $log->created_at->format('M d, H:i') }}</td>
+                        <td class="px-6 py-4 border-r border-slate-200 uppercase font-bold text-primary">{{ $log->title }}</td>
+                        <td class="px-6 py-4 text-slate-600 leading-relaxed">{{ $log->message }}</td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="3" class="px-6 py-12 text-center text-slate-400 font-bold italic">No records found for this period.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </section>
+    @endif
 
     <!-- Staff Performance (Expanded for 'staff' type) -->
-    @if(count($staffData) > 0)
+    @if(count($staffData) > 0 && $type !== 'staff_activity')
     <section class="flex-1 mb-12">
         <h2 class="text-xs font-black bg-slate-900 text-white px-4 py-1.5 uppercase tracking-[0.2em] mb-6 inline-block">Staff Activity Analytics</h2>
         <table class="w-full text-left border-collapse border border-slate-200">

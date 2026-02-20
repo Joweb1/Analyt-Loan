@@ -70,6 +70,22 @@
                             <span class="material-symbols-outlined text-sm">account_circle</span> View User Profile
                         </a>
                     </div>
+
+                    <div class="mt-8 grid grid-cols-2 gap-2">
+                        @can('communicate_with_customers')
+                            <a href="tel:{{ $borrower->phone }}" class="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors text-xs font-bold">
+                                <span class="material-symbols-outlined text-sm">call</span> Call
+                            </a>
+                            <a href="sms:{{ $borrower->phone }}" class="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-green-50 text-green-600 hover:bg-green-100 transition-colors text-xs font-bold">
+                                <span class="material-symbols-outlined text-sm">sms</span> SMS
+                            </a>
+                        @endcan
+                        @can('send_customer_messages')
+                            <button wire:click="$dispatchTo('borrower.message-modal', 'openMessageModal', { borrowerId: '{{ $borrower->id }}' })" class="col-span-2 flex items-center justify-center gap-2 py-2.5 rounded-xl border border-primary/20 text-primary hover:bg-primary/5 transition-colors text-xs font-bold">
+                                <span class="material-symbols-outlined text-sm">chat_bubble</span> Send Message
+                            </button>
+                        @endcan
+                    </div>
                 </div>
                 <div class="bg-slate-50 dark:bg-slate-800/50 p-4 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center">
                     <span class="text-xs font-bold text-slate-500 uppercase">Profile Status</span>
@@ -157,4 +173,6 @@
             </div>
         </div>
     </div>
+
+    <livewire:borrower.message-modal :borrower="$borrower" />
 </div>

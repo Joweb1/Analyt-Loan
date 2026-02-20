@@ -102,16 +102,18 @@
                             </span>
                         </button>
                         <div wire:ignore class="hidden absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-xl py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm dd-menu">
-                            @foreach(['Personal Loan', 'Business Loan', 'Student Loan', 'Agri Loan'] as $product)
-                                <div onclick="selectOption('loan_product', '{{ $product }}')" class="cursor-pointer select-none relative py-3 pl-4 pr-9 hover:bg-blue-50 text-gray-900 hover:text-blue-900">
-                                    <span class="block truncate font-normal">{{ $product }}</span>
-                                    @if($loan_product === $product)
+                            @forelse($loanProducts as $product)
+                                <div onclick="selectOption('loan_product', '{{ $product->name }}')" class="cursor-pointer select-none relative py-3 pl-4 pr-9 hover:bg-blue-50 text-gray-900 hover:text-blue-900">
+                                    <span class="block truncate font-normal">{{ $product->name }}</span>
+                                    @if($loan_product === $product->name)
                                         <span class="absolute inset-y-0 right-0 flex items-center pr-4 text-blue-700">
                                             <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
                                         </span>
                                     @endif
                                 </div>
-                            @endforeach
+                            @empty
+                                <div class="px-4 py-3 text-sm text-gray-500 italic">No products configured.</div>
+                            @endforelse
                         </div>
                     </div>
                     @error('loan_product') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror

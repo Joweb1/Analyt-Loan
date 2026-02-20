@@ -16,9 +16,9 @@ class CollateralDetailDrawerTest extends TestCase
     {
         $collateral = Collateral::factory()->create();
 
-        Livewire::test(CollateralDetailDrawer::class)
-            ->assertStatus(200)
-            ->call('openDrawer', $collateral->id)
+        $testable = Livewire::test(CollateralDetailDrawer::class);
+        $testable->assertStatus(200);
+        $testable->call('openDrawer', $collateral->id)
             ->assertSee($collateral->name)
             ->assertSee(number_format($collateral->value, 2));
     }

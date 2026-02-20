@@ -31,8 +31,8 @@ class FiftyPercentRule implements Rule
     public function passes($attribute, $value)
     {
         $collateral = \App\Models\Collateral::find($value);
-        
-        if (!$collateral) {
+
+        if (! $collateral) {
             return false;
         }
 

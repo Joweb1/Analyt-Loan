@@ -18,7 +18,7 @@ class CheckOrganizationStatus
     {
         if (Auth::check()) {
             $user = Auth::user();
-            
+
             // Skip check for App Owner
             if ($user->isAppOwner()) {
                 return $next($request);
@@ -29,6 +29,7 @@ class CheckOrganizationStatus
             if ($organization) {
                 if ($organization->status === 'suspended') {
                     Auth::logout();
+
                     return redirect()->route('login')->with('error', 'Your organization account has been suspended. Please contact support.');
                 }
             }

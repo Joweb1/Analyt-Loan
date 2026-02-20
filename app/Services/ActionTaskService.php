@@ -2,11 +2,11 @@
 
 namespace App\Services;
 
-use App\Models\Loan;
-use App\Models\User;
-use App\Models\SystemNotification;
 use App\Helpers\SystemLogger;
-use Illuminate\Support\Facades\Auth;
+use App\Models\Loan;
+use App\Models\Organization;
+use App\Models\SystemNotification;
+use App\Models\User;
 
 class ActionTaskService
 {
@@ -26,7 +26,7 @@ class ActionTaskService
                 ->whereNull('read_at')
                 ->exists();
 
-            if (!$exists) {
+            if (! $exists) {
                 SystemLogger::action(
                     'Critical Overdue',
                     "Loan #{$loan->loan_number} is significantly overdue. Recovery needed.",
@@ -40,7 +40,9 @@ class ActionTaskService
 
         // 2. Check for Inactive Staff (Created > 3 days ago, never logged in)
         $inactiveStaff = User::where('organization_id', $orgId)
-            ->whereHas('roles', function($q) { $q->whereNotIn('name', ['Borrower']); })
+            ->whereHas('roles', function ($q) {
+                $q->whereNotIn('name', ['Borrower']);
+            })
             ->whereNull('last_login_at')
             ->where('created_at', '<', now()->subDays(3))
             ->get();
@@ -53,7 +55,7 @@ class ActionTaskService
                 ->whereNull('read_at')
                 ->exists();
 
-            if (!$exists) {
+            if (! $exists) {
                 SystemLogger::action(
                     'Inactive Staff Member',
                     "Staff {$staff->name} has not accessed the system yet.",
@@ -72,13 +74,14 @@ class ActionTaskService
             ->whereDate('created_at', $today)
             ->exists();
 
-        if (!$exists) {
+        if (! $exists) {
+            $organization = Organization::find($orgId);
             SystemLogger::action(
                 'Review Daily Report',
-                "The daily performance report for " . $today->format('M d, Y') . " is ready for review.",
+                'The daily performance report for '.$today->format('M d, Y').' is ready for review.',
                 route('reports', [], false),
                 'report',
-                null,
+                $organization,
                 'low'
             );
         }

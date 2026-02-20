@@ -17,77 +17,86 @@
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const alertContainer = document.getElementById('custom-alert-container');
-        if (!alertContainer) return;
-
-        const alertBox = document.getElementById('custom-alert-box');
-        const alertIcon = document.getElementById('custom-alert-icon');
-        const alertMessage = document.getElementById('custom-alert-message');
-        const closeButton = document.getElementById('custom-alert-close-button');
-
+    (function() {
         let alertTimeout;
 
         function showAlert(message, type) {
+            const alertContainer = document.getElementById('custom-alert-container');
+            const alertBox = document.getElementById('custom-alert-box');
+            const alertIcon = document.getElementById('custom-alert-icon');
+            const alertMessage = document.getElementById('custom-alert-message');
+
             if (!alertContainer || !alertBox || !alertIcon || !alertMessage) return;
 
-            // Clear any existing timeout
             if (alertTimeout) {
                 clearTimeout(alertTimeout);
             }
 
-            // Set message and icon
             alertMessage.textContent = message || 'No message provided.';
             if (type === 'success') {
                 alertIcon.textContent = 'check_circle';
             } else if (type === 'error') {
                 alertIcon.textContent = 'error';
+            } else if (type === 'warning') {
+                alertIcon.textContent = 'warning';
             } else {
                 alertIcon.textContent = 'info';
             }
 
-            // Set background color
-            alertBox.classList.remove('bg-green-500', 'bg-red-500', 'bg-gray-700');
+            alertBox.classList.remove('bg-green-500', 'bg-red-500', 'bg-amber-500', 'bg-gray-700');
             if (type === 'success') {
                 alertBox.classList.add('bg-green-500');
             } else if (type === 'error') {
                 alertBox.classList.add('bg-red-500');
+            } else if (type === 'warning') {
+                alertBox.classList.add('bg-amber-500');
             } else {
                 alertBox.classList.add('bg-gray-700');
             }
             
-            // Show the alert
             alertContainer.classList.remove('opacity-0', '-translate-y-full');
             alertContainer.classList.add('opacity-100', 'translate-y-0');
 
-            // Set timeout to hide the alert
             alertTimeout = setTimeout(() => {
                 hideAlert();
             }, 5000);
         }
 
         function hideAlert() {
+            const alertContainer = document.getElementById('custom-alert-container');
             if (!alertContainer) return;
             alertContainer.classList.remove('opacity-100', 'translate-y-0');
             alertContainer.classList.add('opacity-0', '-translate-y-full');
         }
 
-        // Listen for Livewire event
-        window.addEventListener('custom-alert', event => {
-            // Livewire 3 passes the payload in event.detail[0] when it's an array
-            const payload = event.detail[0] || {};
-            showAlert(payload.message, payload.type);
-        });
+        function initAlert() {
+            const closeButton = document.getElementById('custom-alert-close-button');
+            if (closeButton) {
+                closeButton.onclick = () => {
+                    if (alertTimeout) clearTimeout(alertTimeout);
+                    hideAlert();
+                };
+            }
 
-        // Close button functionality
-        if (closeButton) {
-            closeButton.addEventListener('click', () => {
-                if (alertTimeout) {
-                    clearTimeout(alertTimeout);
-                }
-                hideAlert();
-            });
+            // Check for session flash alert on load and clear it
+            const sessionAlert = @js(session()->pull('custom-alert'));
+            if (sessionAlert && sessionAlert.message) {
+                showAlert(sessionAlert.message, sessionAlert.type);
+            }
         }
-    });
+
+        // Use a single listener approach that works with Livewire navigation
+        if (!window.customAlertInitialized) {
+            document.addEventListener('livewire:navigated', initAlert);
+            window.addEventListener('custom-alert', event => {
+                const payload = event.detail[0] || {};
+                showAlert(payload.message, payload.type);
+            });
+            window.customAlertInitialized = true;
+        }
+        
+        // Also run once on initial load
+        initAlert();
+    })();
 </script>
 

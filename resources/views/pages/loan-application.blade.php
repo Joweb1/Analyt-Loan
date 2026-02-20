@@ -1,5 +1,4 @@
-<x-app-layout>
-    @section('title', isset($loan) ? 'Edit Loan Application' : 'New Loan Application')
+<x-app-layout :title="isset($loan) ? 'Edit Loan Application' : 'New Loan Application'">
     <div class="w-full px-0">
         <div class="flex items-center justify-between mb-6 px-4 md:px-6">
             <div class="flex items-center gap-2">

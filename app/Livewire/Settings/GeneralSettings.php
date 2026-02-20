@@ -2,40 +2,67 @@
 
 namespace App\Livewire\Settings;
 
-use App\Models\Organization;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithFileUploads;
-use Illuminate\Support\Facades\Auth;
 
 class GeneralSettings extends Component
 {
     use WithFileUploads;
 
-    public $name;
-    public $rc_number;
-    public $email;
-    public $phone;
-    public $address;
-    public $website;
-    public $logo;
-    public $signature;
-    public $kyc_document;
-    public $currentLogo;
-    public $currentSignature;
-    public $currentKyc;
-
     public $organization;
+
+    // Basic Info
+    public $name;
+
+    public $tagline; // NEW
+
+    public $rc_number;
+
+    public $email;
+
+    public $phone;
+
+    public $address;
+
+    public $website;
+
+    public $logo;
+
+    public $signature;
+
+    public $currentLogo;
+
+    public $currentSignature;
+
+    public $kyc_document;
+
+    // Branding
+    public $brand_color = '#0f172a'; // NEW
+
+    // Repayment Bank Details (NEW)
+    public $repayment_bank_name;
+
+    public $repayment_account_number;
+
+    public $repayment_account_name;
 
     // Preferences
     public $interest_rate;
+
     public $grace_period;
+
     public $currency = 'NGN';
+
+    public $allow_flexible_repayments = false;
 
     public function mount()
     {
         $this->organization = Auth::user()->organization;
+
         if ($this->organization) {
             $this->name = $this->organization->name;
+            $this->tagline = $this->organization->tagline;
             $this->rc_number = $this->organization->rc_number;
             $this->email = $this->organization->email;
             $this->phone = $this->organization->phone;
@@ -43,71 +70,67 @@ class GeneralSettings extends Component
             $this->website = $this->organization->website;
             $this->currentLogo = $this->organization->logo_path;
             $this->currentSignature = $this->organization->signature_path;
-            
+
+            $this->brand_color = $this->organization->brand_color ?? '#0f172a';
+
+            $this->repayment_bank_name = $this->organization->repayment_bank_name;
+            $this->repayment_account_number = $this->organization->repayment_account_number;
+            $this->repayment_account_name = $this->organization->repayment_account_name;
+
             $this->interest_rate = $this->organization->default_interest_rate;
             $this->grace_period = $this->organization->grace_period_days;
-            $this->currency = $this->organization->currency_code;
+            $this->currency = $this->organization->currency_code ?? 'NGN';
+            $this->allow_flexible_repayments = $this->organization->allow_flexible_repayments;
         }
     }
 
     public function save()
     {
-        if (!$this->organization) {
-            $this->dispatch('custom-alert', ['type' => 'error', 'message' => 'No organization associated with this account.']);
-            return;
-        }
-
         $this->validate([
             'name' => 'required|string|max:255',
-            'rc_number' => 'nullable|string|max:50',
-            'email' => 'required|email|max:255',
-            'phone' => 'nullable|string|max:20',
-            'logo' => 'nullable|image|max:2048',
-            'signature' => 'nullable|image|max:2048',
-            'kyc_document' => 'nullable|file|max:5120',
+            'tagline' => 'nullable|string|max:100',
+            'brand_color' => 'required|string|max:7',
+            'repayment_bank_name' => 'nullable|string|max:100',
+            'repayment_account_number' => 'nullable|string|max:20',
+            'repayment_account_name' => 'nullable|string|max:100',
             'interest_rate' => 'required|numeric|min:0',
-            'grace_period' => 'required|integer|min:0',
-            'currency' => 'required|string|max:10',
         ]);
 
-        $org = Auth::user()->organization;
-        
         $data = [
             'name' => $this->name,
+            'tagline' => $this->tagline,
             'rc_number' => $this->rc_number,
             'email' => $this->email,
             'phone' => $this->phone,
             'address' => $this->address,
             'website' => $this->website,
+            'brand_color' => $this->brand_color,
+            'repayment_bank_name' => $this->repayment_bank_name,
+            'repayment_account_number' => $this->repayment_account_number,
+            'repayment_account_name' => $this->repayment_account_name,
             'default_interest_rate' => $this->interest_rate,
             'grace_period_days' => $this->grace_period,
-            'currency_code' => $this->currency,
+            'allow_flexible_repayments' => $this->allow_flexible_repayments,
         ];
 
         if ($this->logo) {
-            $path = $this->logo->store('logos', 'public');
-            $data['logo_path'] = $path;
+            $data['logo_path'] = $this->logo->store('logos', 'public');
         }
 
         if ($this->signature) {
-            $path = $this->signature->store('signatures', 'public');
-            $data['signature_path'] = $path;
+            $data['signature_path'] = $this->signature->store('signatures', 'public');
         }
 
         if ($this->kyc_document) {
-            // Using a generic documents field or adding a new column
-            // For now, let's just store it and assume the column exists or I'll add it.
-            $path = $this->kyc_document->store('kyc-docs', 'public');
-            $data['kyc_document_path'] = $path;
+            $data['kyc_document_path'] = $this->kyc_document->store('kyc-docs', 'public');
         }
 
-        $org->update($data);
-
-        $this->dispatch('custom-alert', ['type' => 'success', 'message' => 'Organization settings updated.']);
+        $this->organization->update($data);
+        $this->dispatch('custom-alert', ['type' => 'success', 'message' => 'Settings updated successfully.']);
     }
 
     public function render()
     {
-        return view('livewire.settings.general-settings')->layout('layouts.app');
+        return view('livewire.settings.general-settings')->layout('layouts.app', ['title' => 'General Settings']);
     }
 }

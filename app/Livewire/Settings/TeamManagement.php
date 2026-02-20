@@ -2,34 +2,40 @@
 
 namespace App\Livewire\Settings;
 
-use App\Models\User;
 use App\Models\Borrower;
+use App\Models\User;
+use App\Traits\SterilizesPhone;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Spatie\Permission\Models\Role;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 
 class TeamManagement extends Component
 {
-    use WithPagination;
+    use SterilizesPhone, WithPagination;
 
     public $showInviteModal = false;
-    
+
     // Invite/Edit Form State
     public $memberId;
+
     public $name;
+
     public $email;
+
     public $phone;
+
     public $role;
-    
+
     // Search for existing borrowers to promote
     public $searchBorrower = '';
+
     public $borrowerResults = [];
 
     protected $rules = [
         'name' => 'required|string|max:255',
-        'phone' => 'required|string|max:20',
+        'phone' => 'required|string|size:13',
         'email' => 'nullable|email',
         'role' => 'required|exists:roles,name',
     ];
@@ -38,15 +44,16 @@ class TeamManagement extends Component
     {
         if (strlen($this->searchBorrower) < 3) {
             $this->borrowerResults = [];
+
             return;
         }
 
         $orgId = Auth::user()->organization_id;
         $this->borrowerResults = User::role('Borrower')
             ->where('organization_id', $orgId)
-            ->where(function($q) {
-                $q->where('name', 'like', '%' . $this->searchBorrower . '%')
-                  ->orWhere('phone', 'like', '%' . $this->searchBorrower . '%');
+            ->where(function ($q) {
+                $q->where('name', 'like', '%'.$this->searchBorrower.'%')
+                    ->orWhere('phone', 'like', '%'.$this->searchBorrower.'%');
             })
             ->take(5)
             ->get();
@@ -64,7 +71,15 @@ class TeamManagement extends Component
 
     public function inviteMember()
     {
-        $this->validate();
+        $this->phone = $this->sterilize($this->phone);
+
+        $this->validate([
+            'name' => 'required|string|max:255',
+            'phone' => 'required|string|size:13',
+            'email' => 'nullable|email',
+            'role' => 'required|exists:roles,name',
+        ]);
+
         $orgId = Auth::user()->organization_id;
 
         // Check if user exists by phone
@@ -73,6 +88,7 @@ class TeamManagement extends Component
         if ($user) {
             if ($user->organization_id !== $orgId) {
                 $this->addError('phone', 'This user belongs to another organization.');
+
                 return;
             }
             // Update role if exists
@@ -103,20 +119,37 @@ class TeamManagement extends Component
         $user = User::find($id);
         if ($user->id === Auth::id()) {
             $this->dispatch('custom-alert', ['type' => 'error', 'message' => 'You cannot delete yourself.']);
+
             return;
         }
-        
+
         // Don't actually delete, just strip roles or move to borrower?
         // For simplicity in this prompt, we'll strip administrative roles
         $user->syncRoles(['Borrower']);
         $this->dispatch('custom-alert', ['type' => 'warning', 'message' => 'Member administrative access revoked.']);
     }
 
+    public function togglePush($userId)
+    {
+        $user = User::findOrFail($userId);
+        if ($user->organization_id !== Auth::user()->organization_id) {
+            return;
+        }
+
+        $settings = $user->settings ?? [];
+        $settings['push_enabled'] = ! ($settings['push_enabled'] ?? true);
+        $user->settings = $settings;
+        $user->save();
+
+        $status = $settings['push_enabled'] ? 'enabled' : 'disabled';
+        $this->dispatch('custom-alert', ['type' => 'success', 'message' => "Push notifications {$status} for {$user->name}."]);
+    }
+
     public function render()
     {
         $orgId = Auth::user()->organization_id;
         $members = User::where('organization_id', $orgId)
-            ->whereHas('roles', function($q) {
+            ->whereHas('roles', function ($q) {
                 $q->whereNotIn('name', ['Borrower']);
             })
             ->withCount(['assignedLoans as assigned_loans_count'])
@@ -126,7 +159,7 @@ class TeamManagement extends Component
 
         return view('livewire.settings.team-management', [
             'members' => $members,
-            'roles' => $roles
-        ])->layout('layouts.app');
+            'roles' => $roles,
+        ])->layout('layouts.app', ['title' => 'Team Management']);
     }
 }

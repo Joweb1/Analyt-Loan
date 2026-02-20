@@ -75,16 +75,17 @@
                     </div>
                     <div class="flex flex-col text-left">
                         <div class="flex justify-between items-center">
-                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Phone</span>
+                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                                Phone <span class="material-symbols-outlined text-[12px]">lock</span>
+                            </span>
                             @if($isEditing)
-                                <input wire:model="phone" type="text" class="w-2/3 px-3 py-1.5 bg-slate-50 dark:bg-slate-800 border-none rounded-lg text-xs font-bold focus:ring-2 focus:ring-primary/20">
+                                <input wire:model="phone" type="text" readonly class="w-2/3 px-3 py-1.5 bg-slate-50 dark:bg-zinc-800/50 border-none rounded-lg text-xs font-bold text-slate-400 cursor-not-allowed">
                             @else
                                 <span class="text-xs font-bold text-slate-700 dark:text-slate-300">{{ $phone }}</span>
                             @endif
                         </div>
                         @if($isEditing)
-                            <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-1 text-right">Phone Number (Required, Max 20)</p>
-                            @error('phone') <span class="text-[10px] font-bold text-red-500 mt-1 block text-right">{{ $message }}</span> @enderror
+                            <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-1 text-right italic">Phone cannot be modified</p>
                         @endif
                     </div>
                 </div>
@@ -118,6 +119,45 @@
                     </div>
                 </div>
             </div>
+
+            <!-- KYC Decision (Only if pending) -->
+            @if($kyc_status === 'pending')
+                <div class="bg-white dark:bg-[#1a1f2b] rounded-2xl border border-yellow-200 dark:border-yellow-900/30 shadow-sm p-6 space-y-4">
+                    <h4 class="text-sm font-black uppercase tracking-widest text-yellow-600 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-lg">pending_actions</span>
+                        KYC DECISION
+                    </h4>
+                    <p class="text-xs text-slate-500 font-medium leading-relaxed">Please review the documents carefully before making a decision.</p>
+                    
+                    <div class="flex flex-col gap-3 pt-2">
+                        <button wire:click="approveKyc" class="w-full flex items-center justify-center gap-2 py-3 bg-green-600 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-green-700 transition-all shadow-lg shadow-green-600/20">
+                            <span class="material-symbols-outlined text-sm">check_circle</span>
+                            Approve Verification
+                        </button>
+                        
+                        <div x-data="{ confirming: false }">
+                            <button @click="confirming = true" x-show="!confirming" class="w-full flex items-center justify-center gap-2 py-3 bg-white dark:bg-slate-800 border border-red-200 dark:border-red-900/30 text-red-600 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-red-50 dark:hover:bg-red-900/10 transition-all">
+                                <span class="material-symbols-outlined text-sm">cancel</span>
+                                Decline Submission
+                            </button>
+                            
+                            <div x-show="confirming" class="space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
+                                <textarea wire:model="rejection_reason" rows="3" placeholder="State reason for rejection..." class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-xs font-medium focus:ring-2 focus:ring-red-500/20"></textarea>
+                                @error('rejection_reason') <span class="text-[10px] font-bold text-red-500 block">{{ $message }}</span> @enderror
+                                <div class="flex gap-2">
+                                    <button wire:click="declineKyc" class="flex-1 py-2.5 bg-red-600 text-white rounded-lg text-[10px] font-black uppercase tracking-widest">Confirm Decline</button>
+                                    <button @click="confirming = false" class="flex-1 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-500 rounded-lg text-[10px] font-black uppercase tracking-widest">Cancel</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @elseif($kyc_status === 'rejected')
+                <div class="bg-red-50 dark:bg-red-900/10 rounded-2xl border border-red-100 dark:border-red-900/20 p-6">
+                    <h4 class="text-[10px] font-black uppercase tracking-widest text-red-600 mb-2">Rejection History</h4>
+                    <p class="text-xs text-red-700 dark:text-red-400 font-medium leading-relaxed italic">"{{ $borrower->rejection_reason }}"</p>
+                </div>
+            @endif
         </div>
 
         <!-- Right Column: Detailed Info & KYC -->
@@ -207,6 +247,36 @@
             <div class="bg-white dark:bg-[#1a1f2b] rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
                 <div class="px-6 py-5 border-b border-slate-100 dark:border-slate-800">
                     <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">account_balance</span>
+                        Disbursement Bank Details
+                    </h3>
+                </div>
+                <div class="p-8">
+                    @php $bank_details = $borrower->bank_account_details; @endphp
+                    @if(is_array($bank_details))
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div>
+                                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Bank Name</label>
+                                <p class="text-sm font-bold text-slate-900 dark:text-white">{{ $bank_details['bank_name'] ?? 'N/A' }}</p>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Account Number</label>
+                                <p class="text-sm font-black text-slate-900 dark:text-white font-mono tracking-widest">{{ $bank_details['account_number'] ?? 'N/A' }}</p>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Account Name</label>
+                                <p class="text-sm font-bold text-slate-900 dark:text-white uppercase">{{ $bank_details['account_name'] ?? 'N/A' }}</p>
+                            </div>
+                        </div>
+                    @else
+                        <p class="text-sm font-medium text-slate-700 dark:text-slate-300 leading-relaxed">{{ $bank_details ?? 'NO BANK DATA RECORDED' }}</p>
+                    @endif
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-[#1a1f2b] rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+                <div class="px-6 py-5 border-b border-slate-100 dark:border-slate-800">
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
                         <span class="material-symbols-outlined text-primary">work</span>
                         Employment & Income
                     </h3>
@@ -215,11 +285,30 @@
                     <div>
                         <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Employment Information</label>
                         @if($isEditing)
-                            <textarea wire:model="employment_information" rows="3" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-sm font-medium focus:ring-2 focus:ring-primary/20" placeholder="E.g. Senior Software Engineer at Google..."></textarea>
-                            <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-1">Employer, Role, and duration</p>
+                            @if(is_array($employment_information))
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <input wire:model="employment_information.employer_name" type="text" placeholder="Employer Name" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-sm font-medium focus:ring-2 focus:ring-primary/20">
+                                    <input wire:model="employment_information.job_title" type="text" placeholder="Job Title" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-sm font-medium focus:ring-2 focus:ring-primary/20">
+                                    <input wire:model="employment_information.monthly_income" type="number" placeholder="Monthly Income" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-sm font-medium focus:ring-2 focus:ring-primary/20">
+                                    <input wire:model="employment_information.employment_status" type="text" placeholder="Status" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-sm font-medium focus:ring-2 focus:ring-primary/20">
+                                </div>
+                            @else
+                                <textarea wire:model="employment_information" rows="3" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-sm font-medium focus:ring-2 focus:ring-primary/20" placeholder="E.g. Senior Software Engineer at Google..."></textarea>
+                            @endif
+                            <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-1">Employer, Role, and income</p>
                             @error('employment_information') <span class="text-[10px] font-bold text-red-500 mt-1 block">{{ $message }}</span> @enderror
                         @else
-                            <p class="text-sm font-medium text-slate-700 dark:text-slate-300 leading-relaxed">{{ $employment_information ?? 'NO EMPLOYMENT DATA RECORDED' }}</p>
+                            @if(is_array($employment_information))
+                                <div class="space-y-2">
+                                    <p class="text-sm font-bold text-slate-900 dark:text-white">{{ $employment_information['job_title'] ?? 'N/A' }} at {{ $employment_information['employer_name'] ?? 'N/A' }}</p>
+                                    <p class="text-xs text-slate-500 uppercase font-black tracking-tighter">Income: ₦{{ number_format($employment_information['monthly_income'] ?? 0, 2) }} ({{ $employment_information['employment_status'] ?? 'N/A' }})</p>
+                                    @if(isset($employment_information['employer_address']))
+                                        <p class="text-xs text-slate-400 mt-1 italic">{{ $employment_information['employer_address'] }}</p>
+                                    @endif
+                                </div>
+                            @else
+                                <p class="text-sm font-medium text-slate-700 dark:text-slate-300 leading-relaxed">{{ $employment_information ?? 'NO EMPLOYMENT DATA RECORDED' }}</p>
+                            @endif
                         @endif
                     </div>
                 </div>

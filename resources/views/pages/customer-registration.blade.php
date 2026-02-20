@@ -1,11 +1,10 @@
-<x-app-layout>
-    @section('title', 'Add New Borrower')
+<x-app-layout title="Add New Borrower">
     <div class="max-w-4xl mx-auto">
         <!-- Breadcrumbs -->
         <div class="flex items-center gap-2 mb-6">
-            <a class="text-sm font-semibold text-zinc-400 hover:text-primary transition-colors" href="#">Dashboard</a>
+            <a class="text-sm font-semibold text-zinc-400 hover:text-primary transition-colors" href="{{ route('dashboard') }}">Dashboard</a>
             <span class="material-symbols-outlined text-zinc-300 text-sm">chevron_right</span>
-            <a class="text-sm font-semibold text-zinc-400 hover:text-primary transition-colors" href="#">Borrowers</a>
+            <a class="text-sm font-semibold text-zinc-400 hover:text-primary transition-colors" href="{{ route('customer') }}">Borrowers</a>
             <span class="material-symbols-outlined text-zinc-300 text-sm">chevron_right</span>
             <span class="text-sm font-bold text-primary dark:text-white">Add New Borrower</span>
         </div>

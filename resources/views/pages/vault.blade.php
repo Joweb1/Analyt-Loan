@@ -1,5 +1,4 @@
-<x-app-layout>
-    @section('title', 'Collateral Vault Inventory')
+<x-app-layout title="Collateral Vault Inventory">
     <div class="px-0 pt-4">
         <a href="{{ route('collateral.create') }}" class="flex items-center gap-3 px-6 py-3 bg-primary text-white rounded-full shadow-md hover:scale-105 active:scale-95 transition-all">
                 <span class="material-symbols-outlined">add</span>

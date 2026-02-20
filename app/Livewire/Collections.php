@@ -13,11 +13,16 @@ class Collections extends Component
     use WithPagination;
 
     public $filter = 'today';
+
     public $showSummary = false;
+
     public $stats = [];
 
     public function mount()
     {
+        if (auth()->user()->hasRole('Collection Officer')) {
+            $this->showSummary = false;
+        }
         $this->calculateStats();
     }
 
@@ -35,18 +40,18 @@ class Collections extends Component
         // Since we don't track historical overdue snapshots, we use the current live state for the value.
         // For comparison, we'll just leave it static or 0 for now as requested by user logic limitations.
         $currentOverdue = Loan::where('status', 'overdue')->sum('amount'); // Or status 'repayment'? User said "Overdue".
-        
+
         // 2. Collected (Flow - Dynamic based on date)
         $collectedCurrent = Repayment::whereBetween('paid_at', [$dates['start'], $dates['end']])->sum('amount');
         $collectedPrev = Repayment::whereBetween('paid_at', [$prevDates['start'], $prevDates['end']])->sum('amount');
-        
+
         $collectedChange = $collectedPrev > 0 ? (($collectedCurrent - $collectedPrev) / $collectedPrev) * 100 : 0;
 
         // 3. Recovery Rate
         // Logic: Collected / (Collected + Remaining Overdue) roughly represents what % of the "at risk" pot was recovered.
         $totalAtRisk = $collectedCurrent + $currentOverdue;
         $recoveryRate = $totalAtRisk > 0 ? ($collectedCurrent / $totalAtRisk) * 100 : 0;
-        
+
         // Prev Recovery Rate (Approximate)
         $prevOverdue = $currentOverdue; // Assuming static overdue for prev calc to avoid complexity
         $prevTotalAtRisk = $collectedPrev + $prevOverdue;
@@ -67,14 +72,15 @@ class Collections extends Component
             'recovery' => [
                 'value' => $recoveryRate,
                 'change' => $recoveryChange,
-            ]
+            ],
         ];
     }
 
     private function getDateRange($filter)
     {
         $now = Carbon::now();
-        return match($filter) {
+
+        return match ($filter) {
             'today' => ['start' => $now->copy()->startOfDay(), 'end' => $now->copy()->endOfDay()],
             'yesterday' => ['start' => $now->copy()->subDay()->startOfDay(), 'end' => $now->copy()->subDay()->endOfDay()],
             'this_week' => ['start' => $now->copy()->startOfWeek(), 'end' => $now->copy()->endOfWeek()],
@@ -91,6 +97,7 @@ class Collections extends Component
     {
         $dates = $this->getDateRange($filter);
         $diff = $dates['start']->diffInDays($dates['end']) + 1;
+
         return [
             'start' => $dates['start']->copy()->subDays($diff),
             'end' => $dates['end']->copy()->subDays($diff),
@@ -105,7 +112,7 @@ class Collections extends Component
             ->paginate(10);
 
         return view('livewire.collections', [
-            'overdueLoans' => $overdueLoans
-        ])->layout('layouts.app');
+            'overdueLoans' => $overdueLoans,
+        ])->layout('layouts.app', ['title' => 'Collections']);
     }
 }

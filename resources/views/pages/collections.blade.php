@@ -1,5 +1,4 @@
-<x-app-layout>
-    @section('title', 'Loan Collections Dashboard')
+<x-app-layout title="Loan Collections Dashboard">
     <div class="p-0 space-y-8">
         <!-- Summary Stats -->
         <div>

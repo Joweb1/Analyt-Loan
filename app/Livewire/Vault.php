@@ -11,10 +11,12 @@ class Vault extends Component
     use WithPagination;
 
     public $filter = 'all';
+
     public $search = '';
-    
+
     // View Modal State
     public $viewingAsset = null;
+
     public $showViewModal = false;
 
     public function setFilter($filter)
@@ -57,23 +59,23 @@ class Vault extends Component
             $query->where('status', 'returned');
         }
 
-        if (!empty($this->search)) {
+        if (! empty($this->search)) {
             $search = $this->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('type', 'like', "%{$search}%")
-                  ->orWhereHas('loan', function($q) use ($search) {
-                      $q->where('loan_number', 'like', "%{$search}%")
-                        ->orWhereHas('borrower', function($q) use ($search) {
-                            $q->where('national_identity_number', 'like', "%{$search}%")
-                              ->orWhere('bvn', 'like', "%{$search}%")
-                              ->orWhere('phone', 'like', "%{$search}%")
-                              ->orWhereHas('user', function($q) use ($search) {
-                                  $q->where('name', 'like', "%{$search}%")
-                                    ->orWhere('email', 'like', "%{$search}%");
-                              });
-                        });
-                  });
+                    ->orWhere('type', 'like', "%{$search}%")
+                    ->orWhereHas('loan', function ($q) use ($search) {
+                        $q->where('loan_number', 'like', "%{$search}%")
+                            ->orWhereHas('borrower', function ($q) use ($search) {
+                                $q->where('national_identity_number', 'like', "%{$search}%")
+                                    ->orWhere('bvn', 'like', "%{$search}%")
+                                    ->orWhere('phone', 'like', "%{$search}%")
+                                    ->orWhereHas('user', function ($q) use ($search) {
+                                        $q->where('name', 'like', "%{$search}%")
+                                            ->orWhere('email', 'like', "%{$search}%");
+                                    });
+                            });
+                    });
             });
         }
 
@@ -88,6 +90,6 @@ class Vault extends Component
             'totalValue' => $totalValue,
             'inVaultCount' => $inVaultCount,
             'returnedCount' => $returnedCount,
-        ])->layout('layouts.app');
+        ])->layout('layouts.app', ['title' => 'Collateral Vault']);
     }
 }

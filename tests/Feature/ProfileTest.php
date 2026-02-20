@@ -19,9 +19,9 @@ class ProfileTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertSeeVolt('profile.update-profile-information-form')
-            ->assertSeeVolt('profile.update-password-form')
-            ->assertSeeVolt('profile.delete-user-form');
+            ->assertSee('My Activity History') // From UserProfile view
+            ->assertSee('Edit Personal Details')
+            ->assertSee('Change Password');
     }
 
     public function test_profile_information_can_be_updated(): void
@@ -76,7 +76,7 @@ class ProfileTest extends TestCase
 
         $component
             ->assertHasNoErrors()
-            ->assertRedirect('/');
+            ->assertRedirect('/login');
 
         $this->assertGuest();
         $this->assertNull($user->fresh());

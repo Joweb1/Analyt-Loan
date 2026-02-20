@@ -13,7 +13,7 @@
                                 <div class="flex items-center space-x-3">
                                     <div class="h-12 w-12 rounded-full bg-gray-200 dark:bg-zinc-700 flex items-center justify-center overflow-hidden">
                                         @if($org->logo_path)
-                                            <img src="{{ asset('storage/' . $org->logo_path) }}" alt="{{ $org->name }}" class="h-full w-full object-cover">
+                                            <img src="{{ Storage::url($org->logo_path) }}" alt="{{ $org->name }}" class="h-full w-full object-cover">
                                         @else
                                             <span class="text-lg font-bold text-gray-500">{{ substr($org->name, 0, 1) }}</span>
                                         @endif
@@ -40,6 +40,10 @@
                                 <div class="flex justify-between border-t border-gray-100 dark:border-zinc-700 pt-2">
                                     <span>Active Customers:</span>
                                     <span class="font-medium">{{ $org->borrowers_count }}</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Active Staff:</span>
+                                    <span class="font-medium">{{ $org->staff_count }}</span>
                                 </div>
                                 <div class="flex justify-between">
                                     <span>Active Loans:</span>
@@ -83,45 +87,81 @@
     </div>
 
     <!-- Contact Modal -->
-    <div x-data="{ contactModal: false, selectedOrg: {} }" x-show="contactModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4" x-cloak>
-        <div class="bg-white dark:bg-zinc-900 w-full max-w-[400px] rounded-2xl shadow-2xl overflow-hidden p-8">
-            <div class="flex justify-between items-start mb-6">
-                <h3 class="text-xl font-black dark:text-white" x-text="selectedOrg.name"></h3>
-                <button @click="contactModal = false" class="text-gray-400 hover:text-primary">
+    <div x-show="contactModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4" x-cloak>
+        <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="contactModal = false"></div>
+        <div class="relative w-full max-w-2xl bg-white dark:bg-[#1a1f2b] rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in duration-200">
+            <!-- Modal Header -->
+            <div class="p-8 border-b border-slate-50 dark:border-slate-800 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="w-14 h-14 bg-slate-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center">
+                        <template x-if="selectedOrg.logo_path">
+                            <img :src="'/storage/' + selectedOrg.logo_path" class="w-full h-full object-contain rounded-2xl">
+                        </template>
+                        <template x-if="!selectedOrg.logo_path">
+                            <span class="material-symbols-outlined text-2xl text-slate-400">business</span>
+                        </template>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-slate-800 dark:text-white" x-text="selectedOrg.name"></h3>
+                        <p class="text-sm text-slate-500 uppercase tracking-widest font-medium" x-text="selectedOrg.rc_number ? 'RC: ' + selectedOrg.rc_number : 'RC: N/A'"></p>
+                    </div>
+                </div>
+                <button @click="contactModal = false" class="p-2 text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full">
                     <span class="material-symbols-outlined">close</span>
                 </button>
             </div>
-            
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest">Email Address</label>
-                    <p class="text-sm font-medium dark:text-white" x-text="selectedOrg.email || 'N/A'"></p>
+
+            <!-- Modal Content -->
+            <div class="p-8 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                <div class="mb-8">
+                    <h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-4">Organization Contact</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="flex items-center gap-3 text-sm text-slate-600 dark:text-slate-300">
+                            <span class="material-symbols-outlined text-primary text-lg">mail</span>
+                            <span x-text="selectedOrg.email"></span>
+                        </div>
+                        <div class="flex items-center gap-3 text-sm text-slate-600 dark:text-slate-300">
+                            <span class="material-symbols-outlined text-primary text-lg">call</span>
+                            <span x-text="selectedOrg.phone || 'N/A'"></span>
+                        </div>
+                    </div>
                 </div>
+
                 <div>
-                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest">Phone Number</label>
-                    <p class="text-sm font-medium dark:text-white" x-text="selectedOrg.phone || 'N/A'"></p>
-                </div>
-                <div>
-                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest">Website</label>
-                    <a :href="selectedOrg.website" class="text-sm font-medium text-primary hover:underline" x-text="selectedOrg.website || 'N/A'"></a>
-                </div>
-                <div>
-                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest">Address</label>
-                    <p class="text-sm font-medium dark:text-white" x-text="selectedOrg.address || 'N/A'"></p>
-                </div>
-                <div x-show="selectedOrg.kyc_document_path">
-                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest">KYC Document</label>
-                    <a :href="'/storage/' + selectedOrg.kyc_document_path" target="_blank" class="text-xs font-bold text-primary flex items-center gap-1 mt-1">
-                        <span class="material-symbols-outlined text-sm">description</span>
-                        View Document
-                    </a>
+                    <h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-4">Staff Members & Admins</h4>
+                    <div class="flex flex-col gap-4">
+                        <template x-for="user in selectedOrg.users" :key="user.id">
+                            <div class="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-transparent hover:border-slate-200 dark:hover:border-slate-700 transition-all">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center border border-slate-100 dark:border-slate-700">
+                                        <span class="material-symbols-outlined text-slate-400">person</span>
+                                    </div>
+                                    <div>
+                                        <h5 class="text-sm font-bold text-slate-800 dark:text-white" x-text="user.name"></h5>
+                                        <p class="text-xs text-slate-500" x-text="user.email"></p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-4">
+                                    <a :href="'mailto:' + user.email" class="p-2 text-primary bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 hover:scale-110 transition-transform">
+                                        <span class="material-symbols-outlined text-sm">mail</span>
+                                    </a>
+                                    <template x-if="user.phone">
+                                        <a :href="'tel:' + user.phone" class="p-2 text-emerald-500 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 hover:scale-110 transition-transform">
+                                            <span class="material-symbols-outlined text-sm">call</span>
+                                        </a>
+                                    </template>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
                 </div>
             </div>
-            
-            <div class="mt-8">
-                <a :href="'mailto:' + selectedOrg.email" class="w-full inline-flex items-center justify-center px-6 py-3 bg-primary text-white rounded-xl font-bold text-sm shadow-lg shadow-primary/20">
-                    Send Email
-                </a>
+
+            <!-- Modal Footer -->
+            <div class="p-8 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-700 flex justify-end">
+                <button @click="contactModal = false" class="px-6 py-2 bg-primary text-white rounded-xl text-sm font-bold shadow-lg shadow-primary/20 hover:scale-105 active:scale-95 transition-all">
+                    Done
+                </button>
             </div>
         </div>
     </div>

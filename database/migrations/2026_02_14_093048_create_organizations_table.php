@@ -20,7 +20,7 @@ return new class extends Migration
             $table->string('phone')->nullable();
             $table->string('email')->nullable(); // Contact email
             $table->string('website')->nullable();
-            
+
             // Statuses
             $table->enum('status', ['active', 'suspended'])->default('active');
             $table->enum('kyc_status', ['pending', 'approved', 'rejected'])->default('pending');

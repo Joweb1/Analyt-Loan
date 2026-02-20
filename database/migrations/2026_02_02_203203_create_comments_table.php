@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('commentable_type');
             $table->text('body');
             $table->timestamps();
-            
+
             $table->index(['commentable_id', 'commentable_type']);
         });
     }

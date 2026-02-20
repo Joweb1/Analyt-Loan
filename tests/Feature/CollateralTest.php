@@ -24,15 +24,21 @@ class CollateralTest extends TestCase
 
     public function test_collateral_relationships_and_fillable_properties(): void
     {
-        $collateral = Collateral::factory()->create();
+        $loan = Loan::factory()->create();
+        $collateral = Collateral::factory()->create(['loan_id' => $loan->id]);
 
         $this->assertInstanceOf(Loan::class, $collateral->loan);
 
         $expectedFillable = [
+            'organization_id',
             'name',
+            'type',
+            'condition',
             'description',
             'value',
             'image_path',
+            'documents',
+            'registered_date',
             'loan_id',
             'status',
         ];

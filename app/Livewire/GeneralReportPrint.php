@@ -2,24 +2,30 @@
 
 namespace App\Livewire;
 
+use App\Models\Borrower;
+use App\Models\Collateral;
 use App\Models\Loan;
 use App\Models\Repayment;
-use App\Models\Borrower;
 use App\Models\User;
-use App\Models\Collateral;
-use App\Models\Organization;
-use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Carbon;
+use Livewire\Component;
 
 class GeneralReportPrint extends Component
 {
     public $type;
+
     public $title;
+
     public $startDate;
+
     public $endDate;
+
     public $metrics = [];
+
     public $staffData = [];
+
+    public $activityLogs = [];
+
     public $organization;
 
     public function mount($type = 'daily')
@@ -33,36 +39,41 @@ class GeneralReportPrint extends Component
     protected function calculatePeriod()
     {
         $now = now();
-        match($this->type) {
+        match ($this->type) {
             'daily' => [
                 $this->startDate = $now->copy()->startOfDay(),
                 $this->endDate = $now->copy()->endOfDay(),
-                $this->title = "Daily Performance Report"
+                $this->title = 'Daily Performance Report',
             ],
             'weekly' => [
                 $this->startDate = $now->copy()->startOfWeek(),
                 $this->endDate = $now->copy()->endOfWeek(),
-                $this->title = "Weekly Operations Report"
+                $this->title = 'Weekly Operations Report',
             ],
             'monthly' => [
                 $this->startDate = $now->copy()->startOfMonth(),
                 $this->endDate = $now->copy()->endOfMonth(),
-                $this->title = "Monthly Business Review"
+                $this->title = 'Monthly Business Review',
             ],
             'yearly' => [
                 $this->startDate = $now->copy()->startOfYear(),
                 $this->endDate = $now->copy()->endOfYear(),
-                $this->title = "Annual Financial Report"
+                $this->title = 'Annual Financial Report',
             ],
             'staff' => [
                 $this->startDate = $now->copy()->startOfMonth(), // Default to month for staff
                 $this->endDate = $now->copy()->endOfMonth(),
-                $this->title = "Staff Performance Analytics"
+                $this->title = 'Staff Performance Analytics',
+            ],
+            'staff_activity' => [
+                $this->startDate = $now->copy()->subDays(30)->startOfDay(),
+                $this->endDate = $now->copy()->endOfDay(),
+                $this->title = 'Personal Activity Log - '.Auth::user()->name,
             ],
             default => [
                 $this->startDate = $now->copy()->startOfDay(),
                 $this->endDate = $now->copy()->endOfDay(),
-                $this->title = "Organization Report"
+                $this->title = 'Organization Report',
             ]
         };
     }
@@ -71,25 +82,35 @@ class GeneralReportPrint extends Component
     {
         $orgId = $this->organization->id;
 
+        // 1. Personal Activity Log
+        if ($this->type === 'staff_activity') {
+            $this->activityLogs = \App\Models\SystemNotification::where('user_id', Auth::id())
+                ->whereBetween('created_at', [$this->startDate, $this->endDate])
+                ->latest()
+                ->get();
+
+            return;
+        }
+
         // 1. Disbursement Metrics
         $this->metrics['total_disbursed'] = Loan::where('organization_id', $orgId)
             ->whereBetween('release_date', [$this->startDate, $this->endDate])
             ->sum('amount');
-        
+
         $this->metrics['disbursement_count'] = Loan::where('organization_id', $orgId)
             ->whereBetween('release_date', [$this->startDate, $this->endDate])
             ->count();
 
         // 2. Collection Metrics
-        $this->metrics['total_collected'] = Repayment::whereHas('loan', function($q) use ($orgId) {
-                $q->where('organization_id', $orgId);
-            })
+        $this->metrics['total_collected'] = Repayment::whereHas('loan', function ($q) use ($orgId) {
+            $q->where('organization_id', $orgId);
+        })
             ->whereBetween('paid_at', [$this->startDate, $this->endDate])
             ->sum('amount');
-        
-        $this->metrics['collection_count'] = Repayment::whereHas('loan', function($q) use ($orgId) {
-                $q->where('organization_id', $orgId);
-            })
+
+        $this->metrics['collection_count'] = Repayment::whereHas('loan', function ($q) use ($orgId) {
+            $q->where('organization_id', $orgId);
+        })
             ->whereBetween('paid_at', [$this->startDate, $this->endDate])
             ->count();
 
@@ -97,7 +118,7 @@ class GeneralReportPrint extends Component
         $this->metrics['active_loans'] = Loan::where('organization_id', $orgId)
             ->whereIn('status', ['active', 'approved', 'overdue'])
             ->count();
-        
+
         $this->metrics['overdue_amount'] = Loan::where('organization_id', $orgId)
             ->where('status', 'overdue')
             ->sum('amount');
@@ -113,26 +134,28 @@ class GeneralReportPrint extends Component
             ->sum('value');
 
         // 6. Staff Performance (If requested)
-        if ($this->type === 'staff' || true) {
+        if ($this->type === 'staff') {
             $staffUsers = User::where('organization_id', $orgId)
-                ->whereHas('roles', function($q) { $q->whereNotIn('name', ['Borrower']); })
+                ->whereHas('roles', function ($q) {
+                    $q->whereNotIn('name', ['Borrower']);
+                })
                 ->get();
 
             foreach ($staffUsers as $user) {
                 $collected = Repayment::where('collected_by', $user->id)
                     ->whereBetween('paid_at', [$this->startDate, $this->endDate])
                     ->sum('amount');
-                
+
                 $count = Repayment::where('collected_by', $user->id)
                     ->whereBetween('paid_at', [$this->startDate, $this->endDate])
                     ->count();
 
-                if ($count > 0 || $this->type === 'staff') {
+                if ($count > 0) {
                     $this->staffData[] = [
                         'name' => $user->name,
                         'role' => $user->getRoleNames()->first() ?? 'Staff',
                         'collected' => $collected,
-                        'count' => $count
+                        'count' => $count,
                     ];
                 }
             }

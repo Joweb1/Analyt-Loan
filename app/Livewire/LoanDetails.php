@@ -13,31 +13,47 @@ use Livewire\Component;
 class LoanDetails extends Component
 {
     public Loan $loan;
+
     public $staffs;
+
+    public $pendingProofs = [];
 
     // Repayment Modal State
     public $showRepaymentsModal = false;
+
     public $showAddForm = false;
+
     public $editingRepaymentId = null;
 
     // Schedule Modal State
     public $showScheduleModal = false;
+
     public $editingScheduleId = null;
+
     public $schedulePrincipal;
+
     public $scheduleInterest;
+
     public $schedulePenalty;
 
     // Fees Modal State
     public $showFeesModal = false;
+
     public $feeProcessing;
+
     public $feeInsurance;
+
     public $feePenaltyValue;
+
     public $feePenaltyType = 'fixed';
+
     public $feePenaltyFrequency = 'one_time';
+
     public $overridePenalty = false;
 
     // Comments Modal State
     public $showCommentsModal = false;
+
     public $newComment = '';
 
     // Collateral Modal State
@@ -48,29 +64,110 @@ class LoanDetails extends Component
 
     // Repayment Form Defaults
     public $suggestedPrincipal = 0;
+
     public $suggestedInterest = 0;
 
     // Repayment Form Fields
     public $amount;
+
     public $payment_method = 'Cash';
+
     public $collected_by;
+
     public $paid_at;
+
     public $principal_amount = 0;
+
     public $interest_amount = 0;
+
     public $extra_amount = 0;
 
     public function mount(Loan $loan)
     {
         $this->loan = $loan->load(['borrower.user', 'repayments.collector', 'collateral', 'scheduledRepayments', 'comments.user']);
-        
+
         $orgId = Auth::user()->organization_id;
         $this->staffs = User::where('organization_id', $orgId)
             ->role(['Admin', 'Loan Analyst', 'Vault Manager', 'Credit Analyst', 'Collection Specialist'])
             ->get();
-            
+
         $this->paid_at = now()->format('Y-m-d');
-        
+
         $this->calculateSuggestions();
+        $this->loadPendingProofs();
+    }
+
+    public function loadPendingProofs()
+    {
+        $this->pendingProofs = \App\Models\PaymentProof::where('loan_id', $this->loan->id)
+            ->where('status', 'pending')
+            ->latest()
+            ->get();
+    }
+
+    public function approveProof($id)
+    {
+        $proof = \App\Models\PaymentProof::findOrFail($id);
+
+        if ($proof->status !== 'pending') {
+            return;
+        }
+
+        // Distribution Logic (Match with PaymentVerifications logic)
+        $amount = $proof->amount;
+        $nextSchedule = $this->loan->scheduledRepayments()
+            ->whereIn('status', ['pending', 'overdue', 'partial'])
+            ->orderBy('due_date')
+            ->first();
+
+        $interestPart = 0;
+        $principalPart = 0;
+        $extraPart = 0;
+
+        if ($nextSchedule) {
+            /** @var \App\Models\ScheduledRepayment $nextSchedule */
+            $interestPart = min($amount, $nextSchedule->interest_amount);
+            $remaining = $amount - $interestPart;
+            $principalPart = min($remaining, $nextSchedule->principal_amount);
+            $extraPart = $remaining - $principalPart;
+        } else {
+            $principalPart = $amount;
+        }
+
+        // Create Repayment
+        $this->loan->repayments()->create([
+            'amount' => $amount,
+            'payment_method' => $proof->payment_method ?? 'Bank Transfer',
+            'collected_by' => Auth::id(),
+            'paid_at' => $proof->paid_at ?? now(),
+            'principal_amount' => $principalPart,
+            'interest_amount' => $interestPart,
+            'extra_amount' => $extraPart,
+        ]);
+
+        $proof->update([
+            'status' => 'approved',
+            'admin_notes' => 'Approved by '.Auth::user()->name.' via Loan Details',
+        ]);
+
+        $this->loan->load('repayments');
+        $this->loan->refreshRepaymentStatus();
+        $this->loadPendingProofs();
+        $this->calculateSuggestions();
+
+        $this->dispatch('custom-alert', ['type' => 'success', 'message' => 'Payment proof approved and repayment recorded.']);
+    }
+
+    public function declineProof($id)
+    {
+        $proof = \App\Models\PaymentProof::findOrFail($id);
+        $proof->update([
+            'status' => 'rejected',
+            'admin_notes' => 'Rejected by '.Auth::user()->name.' via Loan Details',
+        ]);
+
+        $this->loadPendingProofs();
+        $this->dispatch('custom-alert', ['type' => 'warning', 'message' => 'Payment proof declined.']);
     }
 
     private function calculateSuggestions()
@@ -85,19 +182,19 @@ class LoanDetails extends Component
             // Calculate remaining interest + penalty needed
             $totalDueForSchedule = $nextSchedule->principal_amount + $nextSchedule->interest_amount + $nextSchedule->penalty_amount;
             $remainingDue = max(0, $totalDueForSchedule - $nextSchedule->paid_amount);
-            
+
             // We attribute the 'suggested interest' to be the remaining amount needed after principal
             // This is a simplification for the UI suggestion
             $this->suggestedInterest = max(0, $remainingDue - $this->suggestedPrincipal);
         } else {
             $numRepayments = max(1, $this->loan->num_repayments ?? 1);
             $this->suggestedPrincipal = $this->loan->amount / $numRepayments;
-            
+
             $totalInterestNaira = $this->loan->amount * (($this->loan->interest_rate ?? 0) / 100);
             $this->suggestedInterest = $totalInterestNaira / $numRepayments;
         }
-        
-        if (!$this->editingRepaymentId) {
+
+        if (! $this->editingRepaymentId) {
             $this->principal_amount = round($this->suggestedPrincipal, 2);
             $this->interest_amount = round($this->suggestedInterest, 2);
             $this->amount = $this->principal_amount + $this->interest_amount;
@@ -109,7 +206,7 @@ class LoanDetails extends Component
         if ($this->loan->scheduledRepayments->isEmpty()) {
             $this->generateSchedule();
         }
-        $this->syncScheduleStatuses();
+        $this->loan->refreshRepaymentStatus();
         $this->showScheduleModal = true;
     }
 
@@ -119,13 +216,13 @@ class LoanDetails extends Component
         $principalShare = $this->loan->amount / $numRepayments;
         $totalInterest = $this->loan->amount * (($this->loan->interest_rate ?? 0) / 100);
         $interestShare = $totalInterest / $numRepayments;
-        
+
         $startDate = Carbon::parse($this->loan->release_date ?? now());
         $cycle = $this->loan->repayment_cycle ?? 'monthly';
 
         for ($i = 1; $i <= $numRepayments; $i++) {
             $dueDate = $startDate->copy();
-            
+
             match ($cycle) {
                 'daily' => $dueDate->addDays($i),
                 'weekly' => $dueDate->addWeeks($i),
@@ -147,7 +244,7 @@ class LoanDetails extends Component
         }
 
         $this->loan->load('scheduledRepayments');
-        $this->syncScheduleStatuses();
+        $this->loan->refreshRepaymentStatus();
     }
 
     public function editSchedule($id)
@@ -183,7 +280,7 @@ class LoanDetails extends Component
 
         $this->cancelEditSchedule();
         $this->loan->load('scheduledRepayments');
-        $this->syncScheduleStatuses();
+        $this->loan->refreshRepaymentStatus();
         $this->dispatch('custom-alert', ['type' => 'success', 'message' => 'Schedule updated successfully.']);
     }
 
@@ -265,8 +362,8 @@ class LoanDetails extends Component
 
     public function toggleAddForm()
     {
-        $this->showAddForm = !$this->showAddForm;
-        if (!$this->showAddForm) {
+        $this->showAddForm = ! $this->showAddForm;
+        if (! $this->showAddForm) {
             $this->editingRepaymentId = null;
             $this->resetRepaymentForm();
         }
@@ -279,30 +376,56 @@ class LoanDetails extends Component
 
     public function addRepayment()
     {
+        $allowFlexible = Auth::user()->organization->allow_flexible_repayments ?? false;
         $minRequired = $this->suggestedPrincipal + $this->suggestedInterest;
-        
-        $this->validate([
-            'amount' => 'required|numeric|min:' . $minRequired,
+
+        $rules = [
+            'amount' => 'required|numeric|min:'.($allowFlexible ? 1 : $minRequired),
             'payment_method' => 'required|string',
             'collected_by' => 'required|exists:users,id',
             'paid_at' => 'required|date',
-        ], [
-            'amount.min' => 'The amount must cover at least the principal and interest (₦' . number_format($minRequired, 2) . ').'
-        ]);
+        ];
 
-        $this->extra_amount = $this->amount - $minRequired;
+        $messages = [
+            'amount.min' => $allowFlexible
+                ? 'The amount must be at least ₦1.00.'
+                : 'The amount must cover at least the principal and interest (₦'.number_format($minRequired, 2).').',
+        ];
+
+        $this->validate($rules, $messages);
+
+        if ($allowFlexible) {
+            // Distribute flexible amount: prioritize interest, then principal, then extra
+            $remaining = $this->amount;
+
+            // Interest share
+            $intPart = min($remaining, $this->suggestedInterest);
+            $this->interest_amount = $intPart;
+            $remaining -= $intPart;
+
+            // Principal share
+            $priPart = min($remaining, $this->suggestedPrincipal);
+            $this->principal_amount = $priPart;
+            $remaining -= $priPart;
+
+            // Extra
+            $this->extra_amount = $remaining;
+        } else {
+            $this->extra_amount = $this->amount - $minRequired;
+            $this->principal_amount = $this->suggestedPrincipal;
+            $this->interest_amount = $this->suggestedInterest;
+        }
 
         $this->loan->repayments()->create([
             'amount' => $this->amount,
             'payment_method' => $this->payment_method,
             'collected_by' => $this->collected_by,
             'paid_at' => $this->paid_at,
-            'principal_amount' => $this->suggestedPrincipal,
-            'interest_amount' => $this->suggestedInterest,
+            'principal_amount' => $this->principal_amount,
+            'interest_amount' => $this->interest_amount,
             'extra_amount' => $this->extra_amount,
         ]);
 
-        $this->syncLoanStatus();
         $this->loan->load(['repayments.collector', 'scheduledRepayments']);
         $this->calculateSuggestions();
         $this->resetRepaymentForm();
@@ -326,30 +449,45 @@ class LoanDetails extends Component
 
     public function saveRepayment()
     {
+        $allowFlexible = Auth::user()->organization->allow_flexible_repayments ?? false;
         $minRequired = $this->suggestedPrincipal + $this->suggestedInterest;
 
-        $this->validate([
-            'amount' => 'required|numeric|min:' . $minRequired,
+        $rules = [
+            'amount' => 'required|numeric|min:'.($allowFlexible ? 1 : $minRequired),
             'payment_method' => 'required|string',
             'collected_by' => 'required|exists:users,id',
             'paid_at' => 'required|date',
-        ]);
+        ];
+
+        $this->validate($rules);
 
         $repayment = Repayment::find($this->editingRepaymentId);
-        
-        $this->extra_amount = $this->amount - $minRequired;
+
+        if ($allowFlexible) {
+            $remaining = $this->amount;
+            $intPart = min($remaining, $this->suggestedInterest);
+            $this->interest_amount = $intPart;
+            $remaining -= $intPart;
+            $priPart = min($remaining, $this->suggestedPrincipal);
+            $this->principal_amount = $priPart;
+            $remaining -= $priPart;
+            $this->extra_amount = $remaining;
+        } else {
+            $this->extra_amount = $this->amount - $minRequired;
+            $this->principal_amount = $this->suggestedPrincipal;
+            $this->interest_amount = $this->suggestedInterest;
+        }
 
         $repayment->update([
             'amount' => $this->amount,
             'payment_method' => $this->payment_method,
             'collected_by' => $this->collected_by,
             'paid_at' => $this->paid_at,
-            'principal_amount' => $this->suggestedPrincipal,
-            'interest_amount' => $this->suggestedInterest,
+            'principal_amount' => $this->principal_amount,
+            'interest_amount' => $this->interest_amount,
             'extra_amount' => $this->extra_amount,
         ]);
 
-        $this->syncLoanStatus();
         $this->editingRepaymentId = null;
         $this->showAddForm = false;
         $this->loan->load(['repayments.collector', 'scheduledRepayments']);
@@ -361,52 +499,9 @@ class LoanDetails extends Component
     public function deleteRepayment($id)
     {
         Repayment::destroy($id);
-        $this->syncLoanStatus();
         $this->loan->load(['repayments.collector', 'scheduledRepayments']);
         $this->calculateSuggestions();
         $this->dispatch('custom-alert', ['type' => 'warning', 'message' => 'Repayment deleted.']);
-    }
-
-    private function syncLoanStatus()
-    {
-        $totalInterest = $this->loan->amount * (($this->loan->interest_rate ?? 0) / 100);
-        $totalPayable = $this->loan->amount + $totalInterest;
-        $totalPaid = $this->loan->repayments()->sum('amount');
-
-        if ($totalPaid >= $totalPayable) {
-            $this->loan->update(['status' => 'repaid']);
-        } elseif ($this->loan->status === 'repaid') {
-            $this->loan->update(['status' => 'active']);
-        }
-
-        $this->syncScheduleStatuses();
-    }
-
-    private function syncScheduleStatuses()
-    {
-        $repayments = $this->loan->repayments()->orderBy('paid_at')->get();
-        $schedules = $this->loan->scheduledRepayments()->orderBy('due_date')->get();
-
-        $totalPaid = $repayments->sum('amount');
-        $remaining = $totalPaid;
-
-        foreach ($schedules as $s) {
-            $totalDue = $s->principal_amount + $s->interest_amount + $s->penalty_amount;
-            
-            if ($remaining >= $totalDue) {
-                $s->paid_amount = $totalDue;
-                $s->status = 'paid';
-                $remaining -= $totalDue;
-            } elseif ($remaining > 0) {
-                $s->paid_amount = $remaining;
-                $s->status = 'partial';
-                $remaining = 0;
-            } else {
-                $s->paid_amount = 0;
-                $s->status = $s->due_date->isPast() ? 'overdue' : 'pending';
-            }
-            $s->save();
-        }
     }
 
     private function resetRepaymentForm()
@@ -436,11 +531,12 @@ class LoanDetails extends Component
     {
         $this->loan->delete();
         session()->flash('custom-alert', ['type' => 'warning', 'message' => 'Loan record deleted permanently.']);
+
         return redirect()->route('loan');
     }
 
     public function render()
     {
-        return view('livewire.loan-details')->layout('layouts.app');
+        return view('livewire.loan-details')->layout('layouts.app', ['title' => 'Loan Details #'.$this->loan->loan_number]);
     }
 }

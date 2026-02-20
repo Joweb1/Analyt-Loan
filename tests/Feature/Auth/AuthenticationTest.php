@@ -17,7 +17,7 @@ class AuthenticationTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertSeeVolt('pages.auth.login');
+            ->assertSee('Welcome Back'); // From login.blade.php
     }
 
     public function test_users_can_authenticate_using_the_login_screen(): void
@@ -25,7 +25,7 @@ class AuthenticationTest extends TestCase
         $user = User::factory()->create();
 
         $component = Volt::test('pages.auth.login')
-            ->set('form.email', $user->email)
+            ->set('form.login', $user->email)
             ->set('form.password', 'password');
 
         $component->call('login');
@@ -42,7 +42,7 @@ class AuthenticationTest extends TestCase
         $user = User::factory()->create();
 
         $component = Volt::test('pages.auth.login')
-            ->set('form.email', $user->email)
+            ->set('form.login', $user->email)
             ->set('form.password', 'wrong-password');
 
         $component->call('login');
@@ -58,13 +58,17 @@ class AuthenticationTest extends TestCase
     {
         $user = User::factory()->create();
 
+        // Seed roles and assign Admin
+        $this->seed(\Database\Seeders\RoleSeeder::class);
+        $user->assignRole('Admin');
+
         $this->actingAs($user);
 
         $response = $this->get('/dashboard');
 
         $response
             ->assertOk()
-            ->assertSeeVolt('layout.navigation');
+            ->assertSee('Dashboard'); // navigation.blade.php contains Dashboard link
     }
 
     public function test_users_can_logout(): void
@@ -79,7 +83,7 @@ class AuthenticationTest extends TestCase
 
         $component
             ->assertHasNoErrors()
-            ->assertRedirect('/');
+            ->assertRedirect('/login');
 
         $this->assertGuest();
     }

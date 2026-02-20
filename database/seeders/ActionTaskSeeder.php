@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Models\Borrower;
+use App\Models\Loan;
 use App\Models\Organization;
 use App\Models\SystemNotification;
-use App\Models\Loan;
-use App\Models\Borrower;
 use Illuminate\Database\Seeder;
 
 class ActionTaskSeeder extends Seeder
@@ -16,7 +16,9 @@ class ActionTaskSeeder extends Seeder
     public function run(): void
     {
         $org = Organization::where('slug', 'analyt-demo')->first();
-        if (!$org) return;
+        if (! $org) {
+            return;
+        }
 
         // 1. Pending Loan Approvals
         $pendingLoans = Loan::where('organization_id', $org->id)->where('status', 'applied')->take(2)->get();
@@ -24,7 +26,7 @@ class ActionTaskSeeder extends Seeder
             SystemNotification::create([
                 'organization_id' => $org->id,
                 'title' => 'Approve Disbursement',
-                'message' => "Loan #{$loan->loan_number} for ₦ " . number_format($loan->amount) . " is pending approval.",
+                'message' => "Loan #{$loan->loan_number} for ₦ ".number_format($loan->amount).' is pending approval.',
                 'type' => 'info',
                 'category' => 'loan',
                 'is_actionable' => true,

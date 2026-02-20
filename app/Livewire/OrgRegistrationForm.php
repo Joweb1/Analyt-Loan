@@ -4,34 +4,43 @@ namespace App\Livewire;
 
 use App\Models\Organization;
 use App\Models\User;
+use App\Traits\SterilizesPhone;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Livewire\Component;
 use Livewire\WithFileUploads;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Auth;
 use Spatie\Permission\Models\Role;
 
 class OrgRegistrationForm extends Component
 {
-    use WithFileUploads;
+    use SterilizesPhone, WithFileUploads;
 
     public $orgName;
+
     public $orgEmail;
+
     public $orgLogo;
-    
+
     public $adminName;
+
     public $phone;
+
     public $email;
+
     public $password;
+
     public $password_confirmation;
 
     public function save()
     {
+        $this->phone = $this->sterilize($this->phone);
+
         $this->validate([
             'orgName' => 'required|string|max:255',
             'orgEmail' => 'required|email|max:255',
             'orgLogo' => 'nullable|image|max:2048',
             'adminName' => 'required|string|max:255',
-            'phone' => 'required|string|max:20|unique:users,phone',
+            'phone' => 'required|string|size:13|unique:users,phone',
             'email' => 'nullable|email|unique:users,email',
             'password' => 'required|string|confirmed|min:8',
         ]);
@@ -59,13 +68,14 @@ class OrgRegistrationForm extends Component
             'email' => $this->email,
             'password' => Hash::make($this->password),
         ]);
-        
+
         // Link owner
         $org->owner_id = $user->id;
         $org->save();
 
         // Assign Role
-        $adminRole = Role::findByName('Admin');
+        /** @var \Spatie\Permission\Models\Role|null $adminRole */
+        $adminRole = Role::where('name', 'Admin')->first();
         if ($adminRole) {
             $user->assignRole($adminRole);
         }

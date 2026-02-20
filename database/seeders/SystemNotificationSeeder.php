@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
+use App\Models\Loan;
 use App\Models\SystemNotification;
 use App\Models\User;
-use App\Models\Loan;
 use Illuminate\Database\Seeder;
 
 class SystemNotificationSeeder extends Seeder

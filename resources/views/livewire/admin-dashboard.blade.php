@@ -14,7 +14,7 @@
     <!-- Health Cards Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Total Loaned Card -->
-        <div class="md:col-span-1 bg-white dark:bg-[#1a1f2b] rounded-2xl p-6 shadow-soft hover:shadow-lg transition-all duration-300 border border-transparent hover:border-brand-blue/10 relative overflow-hidden group">
+        <a href="{{ route('loan') }}" class="md:col-span-1 bg-white dark:bg-[#1a1f2b] rounded-2xl p-6 shadow-soft hover:shadow-lg transition-all duration-300 border border-transparent hover:border-brand-blue/10 relative overflow-hidden group block">
             <div class="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
                 <span class="material-symbols-outlined text-[80px] text-brand-blue">account_balance_wallet</span>
             </div>
@@ -29,9 +29,9 @@
                     <h3 class="text-primary dark:text-white text-3xl font-extrabold tracking-tight">₦ {{ number_format($totalLoaned, 2) }}</h3>
                 </div>
             </div>
-        </div>
+        </a>
         <!-- Total Collected Card -->
-        <div class="md:col-span-1 bg-white dark:bg-[#1a1f2b] rounded-2xl p-6 shadow-soft hover:shadow-lg transition-all duration-300 border border-transparent hover:border-brand-green/10 relative overflow-hidden group">
+        <a href="{{ route('collections') }}" class="md:col-span-1 bg-white dark:bg-[#1a1f2b] rounded-2xl p-6 shadow-soft hover:shadow-lg transition-all duration-300 border border-transparent hover:border-brand-green/10 relative overflow-hidden group block">
             <div class="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
                 <span class="material-symbols-outlined text-[80px] text-brand-green">savings</span>
             </div>
@@ -46,11 +46,11 @@
                     <h3 class="text-primary dark:text-white text-3xl font-extrabold tracking-tight">₦ {{ number_format($totalCollected, 2) }}</h3>
                 </div>
             </div>
-        </div>
+        </a>
         <!-- Stats Grid -->
         <div class="md:col-span-2 grid grid-cols-2 lg:grid-cols-4 gap-4">
             <!-- Total Customers -->
-            <div class="bg-white dark:bg-[#1a1f2b] rounded-xl p-4 shadow-soft hover:shadow-lg transition-all duration-300 border border-transparent hover:border-brand-purple/10 relative overflow-hidden group">
+            <a href="{{ route('customer') }}" class="bg-white dark:bg-[#1a1f2b] rounded-xl p-4 shadow-soft hover:shadow-lg transition-all duration-300 border border-transparent hover:border-brand-purple/10 relative overflow-hidden group block">
                 <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
                     <span class="material-symbols-outlined text-[60px] text-brand-purple">groups</span>
                 </div>
@@ -63,9 +63,9 @@
                     </div>
                     <h3 class="text-purple-800 dark:text-white text-3xl font-extrabold tracking-tight text-center">{{ number_format($totalCustomers) }}</h3>
                 </div>
-            </div>
+            </a>
             <!-- Total Active Loans -->
-            <div class="bg-white dark:bg-[#1a1f2b] rounded-xl p-4 shadow-soft hover:shadow-lg transition-all duration-300 border border-transparent hover:border-brand-orange/10 relative overflow-hidden group">
+            <a href="{{ route('status-board') }}" class="bg-white dark:bg-[#1a1f2b] rounded-xl p-4 shadow-soft hover:shadow-lg transition-all duration-300 border border-transparent hover:border-brand-orange/10 relative overflow-hidden group block">
                 <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
                     <span class="material-symbols-outlined text-[60px] text-brand-orange">donut_large</span>
                 </div>
@@ -78,9 +78,9 @@
                     </div>
                     <h3 class="text-orange-800 dark:text-white text-3xl font-extrabold tracking-tight text-center">{{ number_format($activeLoansCount) }}</h3>
                 </div>
-            </div>
+            </a>
             <!-- Fully Paid Loans -->
-            <div class="bg-white dark:bg-[#1a1f2b] rounded-xl p-4 shadow-soft hover:shadow-lg transition-all duration-300 border border-transparent hover:border-brand-green/10 relative overflow-hidden group">
+            <a href="{{ route('status-board') }}" class="bg-white dark:bg-[#1a1f2b] rounded-xl p-4 shadow-soft hover:shadow-lg transition-all duration-300 border border-transparent hover:border-brand-green/10 relative overflow-hidden group block">
                 <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
                     <span class="material-symbols-outlined text-[60px] text-brand-green">check_circle</span>
                 </div>
@@ -93,9 +93,9 @@
                     </div>
                     <h3 class="text-emerald-800 dark:text-white text-3xl font-extrabold tracking-tight text-center">{{ number_format($paidLoansCount) }}</h3>
                 </div>
-            </div>
+            </a>
             <!-- Risk/Default Loans -->
-            <div class="bg-white dark:bg-[#1a1f2b] rounded-xl p-4 shadow-soft hover:shadow-lg transition-all duration-300 border border-transparent hover:border-brand-red/10 relative overflow-hidden group">
+            <a href="{{ route('status-board') }}" class="bg-white dark:bg-[#1a1f2b] rounded-xl p-4 shadow-soft hover:shadow-lg transition-all duration-300 border border-transparent hover:border-brand-red/10 relative overflow-hidden group block">
                 <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
                     <span class="material-symbols-outlined text-[60px] text-brand-red">cancel</span>
                 </div>
@@ -108,88 +108,142 @@
                     </div>
                     <h3 class="text-red-800 dark:text-white text-3xl font-extrabold tracking-tight text-center">{{ number_format($defaultedLoansCount) }}</h3>
                 </div>
-            </div>
+            </a>
         </div>
     </div>
     <!-- Main Section: Chart & Inbox -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Collections Pulse Chart -->
-        <div class="lg:col-span-2 bg-white dark:bg-[#1a1f2b] rounded-2xl p-6 shadow-soft flex flex-col">
-            <div class="flex items-center justify-between mb-6">
+        <div class="lg:col-span-2 bg-white dark:bg-[#1a1f2b] rounded-2xl p-6 shadow-soft flex flex-col min-h-[420px]" x-data="{ activePoint: null }">
+            <div class="flex items-center justify-between mb-8">
                 <div>
-                    <h3 class="text-primary dark:text-white text-lg font-bold">Collections Pulse</h3>
-                    <p class="text-slate-500 text-xs">Portfolio Value Composition</p>
+                    <h3 class="text-primary dark:text-white text-lg font-black tracking-tight flex items-center gap-2">
+                        <span class="relative flex h-3 w-3">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-blue opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-3 w-3 bg-brand-blue"></span>
+                        </span>
+                        Collections Pulse
+                    </h3>
+                    <p class="text-slate-500 text-xs font-medium uppercase tracking-wider">7-Day Recovery Trend</p>
                 </div>
-                <div class="flex gap-4">
-                    <div class="flex items-center gap-1.5">
-                        <span class="w-3 h-3 rounded-full bg-brand-blue"></span>
-                        <span class="text-[10px] font-bold text-slate-500 uppercase">Active</span>
-                    </div>
-                    <div class="flex items-center gap-1.5">
-                        <span class="w-3 h-3 rounded-full bg-brand-green"></span>
-                        <span class="text-[10px] font-bold text-slate-500 uppercase">Repaid</span>
-                    </div>
-                    <div class="flex items-center gap-1.5">
-                        <span class="w-3 h-3 rounded-full bg-brand-red"></span>
-                        <span class="text-[10px] font-bold text-slate-500 uppercase">Overdue</span>
-                    </div>
+                <div class="flex flex-col text-right">
+                    <span class="text-2xl font-black text-primary dark:text-white leading-none">₦ {{ number_format(collect($pulseData)->sum('amount')) }}</span>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase">Total This Week</span>
                 </div>
             </div>
             
             @php
-                $totalValue = $activeAmount + $repaidAmount + $overdueAmount;
-                $activePct = $totalValue > 0 ? ($activeAmount / $totalValue) * 100 : 33;
-                $repaidPct = $totalValue > 0 ? ($repaidAmount / $totalValue) * 100 : 33;
-                $overduePct = $totalValue > 0 ? ($overdueAmount / $totalValue) * 100 : 33;
-
-                // Create dynamic coordinates for the wavy line based on percentages
-                // We'll map the percentages to Y-axis (height 200, so 0 is top, 200 is bottom)
-                $y1 = 150; // Start
-                $y2 = 150 - ($repaidPct * 1.2); // Collection height
-                $y3 = 150 - ($activePct * 1.2);  // Active height
-                $y4 = 150 - ($overduePct * 1.2); // Overdue height
-                $y5 = 150; // End
+                $maxVal = collect($pulseData)->max('amount') ?: 1000;
+                $height = 200;
+                $width = 800;
+                $padding = 40;
+                $chartHeight = $height - ($padding * 2);
+                
+                $points = [];
+                foreach($pulseData as $index => $data) {
+                    $x = ($width / 6) * $index;
+                    $y = $height - $padding - (($data['amount'] / $maxVal) * $chartHeight);
+                    $points[] = "$x,$y";
+                }
+                $pathData = "M " . implode(" L ", $points);
+                
+                // For the area fill
+                $fillPoints = $points;
+                $fillPoints[] = ($width) . "," . $height;
+                $fillPoints[] = "0," . $height;
+                $fillPath = "M " . implode(" L ", $fillPoints) . " Z";
             @endphp
 
-            <div class="relative flex-1 min-h-[250px] w-full flex flex-col justify-center">
-                <!-- SVG Chart (Dynamic Wavy Line) -->
-                <svg class="w-full h-40" preserveAspectRatio="none" viewBox="0 0 800 200">
+            <div class="relative flex-1 w-full mt-4 group">
+                <!-- Tooltip -->
+                <div 
+                    x-show="activePoint !== null" 
+                    x-cloak
+                    class="absolute z-30 bg-primary text-white p-3 rounded-xl shadow-2xl pointer-events-none transition-all duration-200 -translate-x-1/2 -translate-y-full mb-4 border border-white/10"
+                    :style="`left: ${activePoint?.x}px; top: ${activePoint?.y}px`"
+                >
+                    <div class="flex flex-col gap-0.5">
+                        <span class="text-[10px] font-black uppercase text-slate-400" x-text="activePoint?.day"></span>
+                        <span class="text-sm font-black" x-text="'₦ ' + activePoint?.formatted"></span>
+                    </div>
+                    <div class="absolute bottom-[-6px] left-1/2 -translate-x-1/2 w-3 h-3 bg-primary rotate-45 border-r border-b border-white/10"></div>
+                </div>
+
+                <!-- SVG Chart -->
+                <svg class="w-full h-full overflow-visible" viewBox="0 0 800 200" preserveAspectRatio="none">
                     <defs>
-                        <linearGradient id="pulse-gradient" x1="0" x2="0" y1="0" y2="1">
-                            <stop offset="0%" stop-color="#0f1729" stop-opacity="0.1"></stop>
-                            <stop offset="100%" stop-color="#0f1729" stop-opacity="0"></stop>
+                        <linearGradient id="pulse-area-gradient" x1="0" x2="0" y1="0" y2="1">
+                            <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.2"></stop>
+                            <stop offset="100%" stop-color="#3b82f6" stop-opacity="0"></stop>
                         </linearGradient>
+                        <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                            <feGaussianBlur stdDeviation="4" result="blur"></feGaussianBlur>
+                            <feComposite in="SourceGraphic" in2="blur" operator="over"></feComposite>
+                        </filter>
                     </defs>
-                    <!-- Grid Lines -->
-                    <line stroke="#f1f5f9" stroke-dasharray="4 4" stroke-width="1" x1="0" x2="800" y1="50" y2="50"></line>
-                    <line stroke="#f1f5f9" stroke-dasharray="4 4" stroke-width="1" x1="0" x2="800" y1="100" y2="100"></line>
-                    <line stroke="#f1f5f9" stroke-dasharray="4 4" stroke-width="1" x1="0" x2="800" y1="150" y2="150"></line>
-                    
-                    <!-- Chart Area -->
-                    <path d="M0 150 C 100 {{ $y1 }}, 200 {{ $y2 }}, 400 {{ $y3 }} S 600 {{ $y4 }}, 800 150 V 200 H 0 Z" fill="url(#pulse-gradient)"></path>
-                    <!-- Chart Line -->
-                    <path d="M0 150 C 100 {{ $y1 }}, 200 {{ $y2 }}, 400 {{ $y3 }} S 600 {{ $y4 }}, 800 150" fill="none" stroke="#0f1729" stroke-linecap="round" stroke-width="4"></path>
-                    
-                    <!-- Data Points -->
-                    <circle cx="200" cy="{{ $y2 }}" r="6" fill="#10b981" stroke="white" stroke-width="2"></circle>
-                    <circle cx="400" cy="{{ $y3 }}" r="6" fill="#3b82f6" stroke="white" stroke-width="2"></circle>
-                    <circle cx="600" cy="{{ $y4 }}" r="6" fill="#ef4444" stroke="white" stroke-width="2"></circle>
+
+                    <!-- Horizontal Grid Lines -->
+                    @foreach(range(0, 4) as $i)
+                        @php $gridY = $padding + ($i * ($chartHeight / 4)); @endphp
+                        <line x1="0" y1="{{ $gridY }}" x2="800" y2="{{ $gridY }}" stroke="currentColor" class="text-slate-100 dark:text-slate-800/50" stroke-width="1" stroke-dasharray="4 4"></line>
+                    @endforeach
+
+                    <!-- Area Fill -->
+                    <path d="{{ $fillPath }}" fill="url(#pulse-area-gradient)" class="transition-all duration-700"></path>
+
+                    <!-- Main Line -->
+                    <path d="{{ $pathData }}" fill="none" stroke="#3b82f6" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" class="transition-all duration-700" filter="url(#glow)"></path>
+
+                    <!-- Interactive Markers -->
+                    @foreach($pulseData as $index => $data)
+                        @php
+                            $x = ($width / 6) * $index;
+                            $y = $height - $padding - (($data['amount'] / $maxVal) * $chartHeight);
+                        @endphp
+                        <circle 
+                            cx="{{ $x }}" 
+                            cy="{{ $y }}" 
+                            r="6" 
+                            fill="#3b82f6" 
+                            stroke="white" 
+                            stroke-width="3"
+                            class="cursor-pointer transition-all duration-300 hover:r-8 hover:fill-primary dark:hover:fill-white"
+                            @mouseenter="activePoint = { x: ({{ $index }} * (100/6)) * ($el.closest('div').clientWidth/100), y: ({{ $y }}/200) * $el.closest('div').clientHeight, day: '{{ $data['day'] }}', formatted: '{{ $data['formatted'] }}' }"
+                            @mouseleave="activePoint = null"
+                        ></circle>
+                    @endforeach
                 </svg>
 
-                <!-- Legend / Labels -->
-                <div class="grid grid-cols-3 gap-4 mt-6">
-                    <div class="text-center">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Repaid</p>
-                        <h4 class="text-sm font-black text-brand-green">₦ {{ number_format($repaidAmount) }}</h4>
+                <!-- X-Axis Labels -->
+                <div class="flex justify-between mt-6 px-1">
+                    @foreach($pulseData as $data)
+                        <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">{{ $data['day'] }}</span>
+                    @endforeach
+                </div>
+            </div>
+
+            <!-- Portfolio Composition Cards -->
+            <div class="grid grid-cols-3 gap-4 mt-10 pt-6 border-t border-slate-100 dark:border-slate-800">
+                <div class="flex flex-col gap-1">
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-brand-green"></span>
+                        <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider">Repaid</span>
                     </div>
-                    <div class="text-center border-x border-slate-100 dark:border-slate-800">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Active</p>
-                        <h4 class="text-sm font-black text-brand-blue">₦ {{ number_format($activeAmount) }}</h4>
+                    <span class="text-sm font-black text-primary dark:text-white">₦ {{ number_format($repaidAmount) }}</span>
+                </div>
+                <div class="flex flex-col gap-1 border-x border-slate-100 dark:border-slate-800 px-4">
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-brand-blue"></span>
+                        <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider">Active</span>
                     </div>
-                    <div class="text-center">
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Overdue</p>
-                        <h4 class="text-sm font-black text-brand-red">₦ {{ number_format($overdueAmount) }}</h4>
+                    <span class="text-sm font-black text-primary dark:text-white">₦ {{ number_format($activeAmount) }}</span>
+                </div>
+                <div class="flex flex-col gap-1 pl-4">
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-brand-red"></span>
+                        <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider">Overdue</span>
                     </div>
+                    <span class="text-sm font-black text-primary dark:text-white">₦ {{ number_format($overdueAmount) }}</span>
                 </div>
             </div>
         </div>

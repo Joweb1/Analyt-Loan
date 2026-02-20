@@ -1,4 +1,64 @@
-<x-guest-layout>
+<?php
+
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rules;
+use Livewire\Attributes\Layout;
+use Livewire\Volt\Component;
+
+new #[Layout('layouts.guest')] class extends Component
+{
+    public string $token = '';
+    public string $email = '';
+    public string $password = '';
+    public string $password_confirmation = '';
+
+    /**
+     * Mount the component.
+     */
+    public function mount(string $token): void
+    {
+        $this->token = $token;
+        $this->email = request()->query('email', '');
+    }
+
+    /**
+     * Handle an incoming password reset request.
+     */
+    public function resetPassword(): void
+    {
+        $this->validate([
+            'token' => ['required'],
+            'email' => ['required', 'email'],
+            'password' => ['required', 'string', 'confirmed', Rules\Password::defaults()],
+        ]);
+
+        $status = Password::reset(
+            [
+                'token' => $this->token,
+                'email' => $this->email,
+                'password' => $this->password,
+                'password_confirmation' => $this->password_confirmation,
+            ],
+            function ($user, $password) {
+                $user->forceFill([
+                    'password' => Hash::make($password),
+                    'remember_token' => Str::random(60),
+                ])->save();
+            }
+        );
+
+        if ($status === Password::PASSWORD_RESET) {
+            session()->flash('status', __($status));
+
+            $this->redirect(route('login', absolute: false), navigate: true);
+        } else {
+            $this->addError('email', __($status));
+        }
+    }
+}; ?>
+
 <div class="max-w-[440px] w-full mx-auto">
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
@@ -48,4 +108,3 @@
         </button>
     </form>
 </div>
-</x-guest-layout>

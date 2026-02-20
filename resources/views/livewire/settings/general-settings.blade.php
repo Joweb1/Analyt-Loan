@@ -1,35 +1,13 @@
-<div class="max-w-6xl mx-auto">
+<div class="max-w-5xl mx-auto w-full">
     <div class="mb-8">
         <h1 class="text-primary dark:text-white text-3xl font-extrabold tracking-tight">Organization Settings</h1>
         <p class="text-gray-500 mt-1">Manage your organization profile and contact information.</p>
     </div>
 
-    <div class="grid grid-cols-12 gap-8">
-        <!-- Sidebar Navigation (Reusable or logic-based) -->
-        <nav class="col-span-12 lg:col-span-3 flex flex-col gap-1">
-            <a class="flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-800 border-l-4 border-primary rounded-r-lg shadow-sm" href="{{ route('settings') }}">
-                <span class="text-primary dark:text-white font-bold text-sm">General</span>
-                <span class="material-symbols-outlined text-primary dark:text-white text-[18px]">chevron_right</span>
-            </a>
-            <a class="flex items-center justify-between px-4 py-3 text-gray-500 hover:text-primary transition-colors" href="{{ route('settings.security') }}">
-                <span class="font-semibold text-sm">Security</span>
-            </a>
-            <a class="flex items-center justify-between px-4 py-3 text-gray-500 hover:text-primary transition-colors" href="{{ route('settings.team-members') }}">
-                <span class="font-semibold text-sm">Team Members</span>
-            </a>
-            <a class="flex items-center justify-between px-4 py-3 text-gray-500 hover:text-primary transition-colors" href="{{ route('settings.roles') }}">
-                <span class="font-semibold text-sm">Roles & Permissions</span>
-            </a>
-            <a class="flex items-center justify-between px-4 py-3 text-gray-500 hover:text-primary transition-colors" href="{{ route('settings.form-builder') }}">
-                <span class="font-semibold text-sm">Form Customization</span>
-            </a>
-            <a class="flex items-center justify-between px-4 py-3 text-gray-500 hover:text-primary transition-colors" href="{{ route('settings.notifications') }}">
-                <span class="font-semibold text-sm">Notifications</span>
-            </a>
-        </nav>
+    <x-settings-nav active="general" />
 
-        <div class="col-span-12 lg:col-span-9 space-y-6">
-            @if(!$organization)
+    <div class="space-y-6">
+        @if(!$organization)
                 <div class="bg-white dark:bg-zinc-900 rounded-xl p-12 text-center shadow-sm border border-gray-100 dark:border-zinc-800">
                     <span class="material-symbols-outlined text-6xl text-gray-300 mb-4">business_center</span>
                     <h2 class="text-xl font-bold text-primary dark:text-white">No Organization Found</h2>
@@ -133,6 +111,40 @@
                     </div>
                 </div>
 
+                <!-- Borrower App Settings -->
+                <div class="bg-white dark:bg-zinc-900 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-zinc-800">
+                    <h2 class="text-lg font-bold text-primary dark:text-white mb-6">Borrower App Configuration</h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="flex flex-col gap-2">
+                            <label class="text-sm font-bold text-gray-700 dark:text-gray-300">App Tagline</label>
+                            <input wire:model="tagline" type="text" class="rounded-xl border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white focus:ring-primary focus:border-primary text-sm" placeholder="e.g. Fast loans. Zero stress.">
+                        </div>
+                        <div class="flex flex-col gap-2">
+                            <label class="text-sm font-bold text-gray-700 dark:text-gray-300">Brand Color (Hex)</label>
+                            <input wire:model="brand_color" type="color" class="h-10 w-full rounded-xl border-gray-200 dark:border-zinc-700 cursor-pointer">
+                        </div>
+                        
+                        <div class="md:col-span-2 border-t border-gray-100 dark:border-zinc-800 pt-6 mt-2">
+                            <h3 class="text-sm font-bold text-primary dark:text-white mb-4">Repayment Bank Details</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div class="flex flex-col gap-2">
+                                    <label class="text-xs font-bold text-gray-500 uppercase">Bank Name</label>
+                                    <input wire:model="repayment_bank_name" type="text" class="rounded-xl border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white focus:ring-primary focus:border-primary text-sm">
+                                </div>
+                                <div class="flex flex-col gap-2">
+                                    <label class="text-xs font-bold text-gray-500 uppercase">Account Number</label>
+                                    <input wire:model="repayment_account_number" type="text" class="rounded-xl border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white focus:ring-primary focus:border-primary text-sm">
+                                </div>
+                                <div class="flex flex-col gap-2">
+                                    <label class="text-xs font-bold text-gray-500 uppercase">Account Name</label>
+                                    <input wire:model="repayment_account_name" type="text" class="rounded-xl border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white focus:ring-primary focus:border-primary text-sm">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Regional Settings -->
                 <div class="bg-white dark:bg-zinc-900 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-zinc-800">
                     <h2 class="text-lg font-bold text-primary dark:text-white mb-6">Regional Settings</h2>
@@ -160,6 +172,21 @@
                             <label class="text-sm font-bold text-gray-700 dark:text-gray-300">Grace Period (Days)</label>
                             <input wire:model="grace_period" type="number" class="rounded-xl border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white focus:ring-primary focus:border-primary text-sm">
                         </div>
+                        
+                        <!-- Flexible Repayment Toggle -->
+                        <div class="md:col-span-2 flex items-center justify-between p-4 bg-gray-50 dark:bg-zinc-800/50 rounded-xl border border-gray-100 dark:border-zinc-800">
+                            <div class="flex flex-col gap-1">
+                                <span class="text-sm font-bold text-primary dark:text-white">Allow Flexible Repayment Amounts</span>
+                                <span class="text-xs text-gray-500">If enabled, staff can record repayments of any amount (partial or extra). If disabled, repayments must cover at least the scheduled principal and interest.</span>
+                            </div>
+                            <button 
+                                type="button" 
+                                @click="$wire.set('allow_flexible_repayments', !@js($allow_flexible_repayments))"
+                                class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none {{ $allow_flexible_repayments ? 'bg-primary' : 'bg-gray-200 dark:bg-zinc-700' }}"
+                            >
+                                <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {{ $allow_flexible_repayments ? 'translate-x-5' : 'translate-x-0' }}"></span>
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -170,6 +197,5 @@
                 </div>
             </form>
             @endif
-        </div>
     </div>
 </div>

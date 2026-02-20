@@ -3,8 +3,8 @@
 namespace App\Livewire;
 
 use App\Models\SystemNotification;
-use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Component;
 
 class ActionCenter extends Component
 {
@@ -17,12 +17,17 @@ class ActionCenter extends Component
 
     public function loadTasks()
     {
-        $orgId = Auth::user()->organization_id;
+        $user = Auth::user();
+        $orgId = $user->organization_id;
 
         // Query real "Actions" from system_notifications table
         $this->tasks = SystemNotification::where('organization_id', $orgId)
             ->where('is_actionable', true)
             ->whereNull('read_at')
+            ->where(function ($q) use ($user) {
+                $q->whereNull('recipient_id')
+                    ->orWhere('recipient_id', $user->id);
+            })
             ->latest()
             ->get()
             ->map(function ($notif) {
@@ -40,8 +45,15 @@ class ActionCenter extends Component
 
     public function markAsResolved($id)
     {
-        $notif = SystemNotification::find($id);
-        if ($notif && $notif->organization_id === Auth::user()->organization_id) {
+        $user = Auth::user();
+        $notif = SystemNotification::where('organization_id', $user->organization_id)
+            ->where(function ($q) use ($user) {
+                $q->whereNull('recipient_id')
+                    ->orWhere('recipient_id', $user->id);
+            })
+            ->find($id);
+
+        if ($notif) {
             $notif->read_at = now();
             $notif->save();
             $this->loadTasks();
@@ -51,6 +63,6 @@ class ActionCenter extends Component
 
     public function render()
     {
-        return view('livewire.action-center')->layout('layouts.app');
+        return view('livewire.action-center')->layout('layouts.app', ['title' => 'Action Center']);
     }
 }

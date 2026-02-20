@@ -7,6 +7,37 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property string $id
+ * @property string $loan_id
+ * @property numeric $amount
+ * @property \Illuminate\Support\Carbon $paid_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property string|null $payment_method
+ * @property string|null $collected_by
+ * @property numeric $principal_amount
+ * @property numeric $interest_amount
+ * @property numeric $extra_amount
+ * @property-read \App\Models\User|null $collector
+ * @property-read \App\Models\Loan $loan
+ * @method static \Database\Factories\RepaymentFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Repayment newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Repayment newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Repayment query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Repayment whereAmount($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Repayment whereCollectedBy($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Repayment whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Repayment whereExtraAmount($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Repayment whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Repayment whereInterestAmount($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Repayment whereLoanId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Repayment wherePaidAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Repayment wherePaymentMethod($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Repayment wherePrincipalAmount($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Repayment whereUpdatedAt($value)
+ * @mixin \Eloquent
+ */
 class Repayment extends Model
 {
     use HasFactory, HasUuids;

@@ -10,10 +10,12 @@
             <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Savings Account</h2>
         </div>
         <div class="flex gap-3">
-             <button class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-white rounded-xl text-sm font-bold shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
-                <span class="material-symbols-outlined text-lg">print</span>
-                Statement
-            </button>
+            @can('export_and_print')
+                <a href="{{ route('savings.print', $borrower->id) }}" target="_blank" class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-white rounded-xl text-sm font-bold shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
+                    <span class="material-symbols-outlined text-lg">print</span>
+                    Statement
+                </a>
+            @endcan
             <button wire:click="openTransactionModal('deposit')" class="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-green-600/30 hover:bg-green-700 transition-all">
                 <span class="material-symbols-outlined text-lg">add_circle</span>
                 Add Deposit
@@ -71,8 +73,21 @@
                         </a>
                     </div>
                     
-                    <div class="mt-8 grid grid-cols-1 gap-2">
-                        <button wire:click="openTransactionModal('withdrawal')" class="flex items-center justify-center gap-2 py-2.5 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 transition-colors text-xs font-bold">
+                    <div class="mt-8 grid grid-cols-2 gap-2">
+                        @can('communicate_with_customers')
+                            <a href="tel:{{ $borrower->phone }}" class="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors text-xs font-bold">
+                                <span class="material-symbols-outlined text-sm">call</span> Call
+                            </a>
+                            <a href="sms:{{ $borrower->phone }}" class="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-green-50 text-green-600 hover:bg-green-100 transition-colors text-xs font-bold">
+                                <span class="material-symbols-outlined text-sm">sms</span> SMS
+                            </a>
+                        @endcan
+                        @can('send_customer_messages')
+                            <button wire:click="$dispatchTo('borrower.message-modal', 'openMessageModal', { borrowerId: '{{ $borrower->id }}' })" class="col-span-2 flex items-center justify-center gap-2 py-2.5 rounded-xl border border-primary/20 text-primary hover:bg-primary/5 transition-colors text-xs font-bold">
+                                <span class="material-symbols-outlined text-sm">chat_bubble</span> Send Message
+                            </button>
+                        @endcan
+                        <button wire:click="openTransactionModal('withdrawal')" class="col-span-2 flex items-center justify-center gap-2 py-2.5 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 transition-colors text-xs font-bold">
                             <span class="material-symbols-outlined text-sm">account_balance_wallet</span> Request Withdrawal
                         </button>
                     </div>
@@ -242,4 +257,6 @@
             </div>
         </div>
     </div>
+
+    <livewire:borrower.message-modal :borrower="$borrower" />
 </div>

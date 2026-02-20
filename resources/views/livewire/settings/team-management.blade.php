@@ -11,6 +11,8 @@
         </button>
     </div>
 
+    <x-settings-nav active="team" />
+
     <!-- Data Table Card -->
     <div class="bg-white dark:bg-zinc-900 rounded-2xl border border-[#dfdee3] dark:border-zinc-800 shadow-sm overflow-hidden">
         <div class="overflow-x-auto">
@@ -19,6 +21,7 @@
                 <tr class="bg-primary/5 dark:bg-zinc-800/50">
                     <th class="px-6 py-4 text-xs font-bold text-primary dark:text-white uppercase tracking-wider">Member</th>
                     <th class="px-6 py-4 text-xs font-bold text-primary dark:text-white uppercase tracking-wider">Role</th>
+                    <th class="px-6 py-4 text-xs font-bold text-primary dark:text-white uppercase tracking-wider text-center">Push Notifs</th>
                     <th class="px-6 py-4 text-xs font-bold text-primary dark:text-white uppercase tracking-wider text-right">Assigned Loans</th>
                     <th class="px-6 py-4 text-xs font-bold text-primary dark:text-white uppercase tracking-wider text-right">Actions</th>
                 </tr>
@@ -28,8 +31,9 @@
                     <tr class="hover:bg-background-light/50 dark:hover:bg-zinc-800/50 transition-colors">
                         <td class="px-6 py-5">
                             <div class="flex items-center gap-3">
-                                <div class="size-10 rounded-full bg-primary flex items-center justify-center text-white font-bold">
+                                <div class="size-10 rounded-full bg-primary flex items-center justify-center text-white font-bold relative">
                                     {{ substr($member->name, 0, 1) }}
+                                    <div class="absolute -bottom-0.5 -right-0.5 size-3.5 rounded-full border-2 border-white dark:border-zinc-900 {{ $member->isOnline() ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]' : 'bg-gray-300' }}"></div>
                                 </div>
                                 <div class="flex flex-col">
                                     <p class="text-sm font-bold dark:text-white">{{ $member->name }}</p>
@@ -41,6 +45,12 @@
                             <span class="px-3 py-1 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 rounded-full text-xs font-bold">
                                 {{ $member->getRoleNames()->first() }}
                             </span>
+                        </td>
+                        <td class="px-6 py-5 text-center">
+                            @php $isPushEnabled = $member->pushEnabled(); @endphp
+                            <button wire:click="togglePush('{{ $member->id }}')" class="relative inline-flex h-5 w-10 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none {{ $isPushEnabled ? 'bg-primary' : 'bg-gray-200 dark:bg-zinc-700' }}">
+                                <span class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {{ $isPushEnabled ? 'translate-x-5' : 'translate-x-0' }}"></span>
+                            </button>
                         </td>
                         <td class="px-6 py-5 text-right">
                             <p class="text-sm font-bold dark:text-white">{{ $member->assigned_loans_count }} Loans</p>

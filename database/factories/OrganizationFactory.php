@@ -18,9 +18,10 @@ class OrganizationFactory extends Factory
     public function definition(): array
     {
         $name = $this->faker->company;
+
         return [
             'name' => $name,
-            'slug' => Str::slug($name) . '-' . Str::random(4),
+            'slug' => Str::slug($name).'-'.Str::random(4),
             'email' => $this->faker->companyEmail,
             'phone' => $this->faker->phoneNumber,
             'address' => $this->faker->address,

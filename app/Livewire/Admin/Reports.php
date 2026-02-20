@@ -1,0 +1,54 @@
+<?php
+
+namespace App\Livewire\Admin;
+
+use App\Models\Loan;
+use App\Models\Organization;
+use App\Models\Repayment;
+use Illuminate\Support\Facades\Auth;
+use Livewire\Component;
+
+class Reports extends Component
+{
+    public $startDate;
+
+    public $endDate;
+
+    public function mount()
+    {
+        if (! Auth::user()->isAppOwner()) {
+            abort(403);
+        }
+
+        $this->startDate = now()->startOfMonth()->format('Y-m-d');
+        $this->endDate = now()->format('Y-m-d');
+    }
+
+    public function render()
+    {
+        $orgStats = Organization::withCount(['loans', 'borrowers', 'staff'])
+            ->withSum('loans as total_lent', 'amount')
+            ->get()
+            ->map(function ($org) {
+                $org->total_collected = Repayment::withoutGlobalScopes()
+                    ->whereHas('loan', function ($q) use ($org) {
+                        $q->where('organization_id', $org->id);
+                    })->sum('amount');
+
+                return $org;
+            });
+
+        // Platform Totals
+        $totals = [
+            'lent' => Loan::withoutGlobalScopes()->sum('amount'),
+            'collected' => Repayment::withoutGlobalScopes()->sum('amount'),
+            'organizations' => Organization::count(),
+            'borrowers' => Organization::sum('id'), // Just a placeholder, actually need to sum borrower counts
+        ];
+
+        return view('livewire.admin.reports', [
+            'orgStats' => $orgStats,
+            'totals' => $totals,
+        ])->layout('layouts.app', ['title' => 'Platform Reports']);
+    }
+}

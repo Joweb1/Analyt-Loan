@@ -12,23 +12,36 @@ class CollateralForm extends Component
     use WithFileUploads;
 
     public $loan_id;
+
     public $collateral_id;
-    
+
     public $name;
+
     public $type = 'Vehicle';
+
     public $condition = 'Good';
+
     public $value;
+
     public $description;
+
     public $registered_date;
+
     public $status = 'in_vault';
+
     public $image;
+
     public $current_image;
+
     public $documents = [];
 
     // Search & Selection State
     public $searchQuery = '';
+
     public $searchedLoans = [];
+
     public $isBranchAsset = false;
+
     public $selectedLoan = null;
 
     public function mount()
@@ -45,22 +58,23 @@ class CollateralForm extends Component
     {
         if (strlen($this->searchQuery) < 2) {
             $this->searchedLoans = [];
+
             return;
         }
 
         $orgId = \Illuminate\Support\Facades\Auth::user()->organization_id;
         $this->searchedLoans = Loan::with('borrower.user')
             ->where('organization_id', $orgId)
-            ->where(function($q) {
+            ->where(function ($q) {
                 $q->where('loan_number', 'like', "%{$this->searchQuery}%")
-                  ->orWhereHas('borrower.user', function ($q) {
-                      $q->where('name', 'like', "%{$this->searchQuery}%")
-                        ->orWhere('email', 'like', "%{$this->searchQuery}%");
-                  })
-                  ->orWhereHas('borrower', function ($q) {
-                      $q->where('phone', 'like', "%{$this->searchQuery}%")
-                        ->orWhere('national_identity_number', 'like', "%{$this->searchQuery}%");
-                  });
+                    ->orWhereHas('borrower.user', function ($q) {
+                        $q->where('name', 'like', "%{$this->searchQuery}%")
+                            ->orWhere('email', 'like', "%{$this->searchQuery}%");
+                    })
+                    ->orWhereHas('borrower', function ($q) {
+                        $q->where('phone', 'like', "%{$this->searchQuery}%")
+                            ->orWhere('national_identity_number', 'like', "%{$this->searchQuery}%");
+                    });
             })
             ->take(5)
             ->get();
@@ -73,7 +87,7 @@ class CollateralForm extends Component
             ->with('borrower.user', 'collateral')
             ->find($id);
         $this->isBranchAsset = false;
-        
+
         if ($this->selectedLoan && $this->selectedLoan->collateral) {
             $this->collateral_id = $this->selectedLoan->collateral->id;
             $this->fillCollateralData($this->selectedLoan->collateral);
@@ -137,7 +151,7 @@ class CollateralForm extends Component
 
         if ($this->image) {
             $path = $this->image->store('collaterals', 'public');
-            $data['image_path'] = 'storage/' . $path; // Adjust depending on storage link
+            $data['image_path'] = 'storage/'.$path; // Adjust depending on storage link
         }
 
         if ($this->collateral_id) {
@@ -150,16 +164,16 @@ class CollateralForm extends Component
         }
 
         $this->dispatch('custom-alert', ['type' => 'success', 'message' => $message]);
-        
+
         if ($this->loan_id) {
             return redirect()->route('loan.show', $this->loan_id);
         }
-        
+
         return redirect()->route('vault');
     }
 
     public function render()
     {
-        return view('livewire.collateral-form')->layout('layouts.app');
+        return view('livewire.collateral-form')->layout('layouts.app', ['title' => 'Add Collateral']);
     }
 }

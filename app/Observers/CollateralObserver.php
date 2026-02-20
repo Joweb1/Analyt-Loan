@@ -2,8 +2,8 @@
 
 namespace App\Observers;
 
-use App\Models\Collateral;
 use App\Helpers\SystemLogger;
+use App\Models\Collateral;
 
 class CollateralObserver
 {
@@ -12,13 +12,13 @@ class CollateralObserver
      */
     public function created(Collateral $collateral): void
     {
-        $context = $collateral->loan 
-            ? "to Loan #{$collateral->loan->loan_number}" 
-            : "as Company Asset";
+        $context = $collateral->loan
+            ? "to Loan #{$collateral->loan->loan_number}"
+            : 'as Company Asset';
 
         SystemLogger::success(
             'New Collateral Added',
-            "Collateral '{$collateral->name}' (₦" . number_format($collateral->value) . ") has been added {$context}.",
+            "Collateral '{$collateral->name}' (₦".number_format($collateral->value).") has been added {$context}.",
             'collateral',
             $collateral
         );
@@ -30,9 +30,9 @@ class CollateralObserver
     public function updated(Collateral $collateral): void
     {
         if ($collateral->isDirty(['name', 'value', 'status', 'condition'])) {
-            $context = $collateral->loan 
-                ? "on Loan #{$collateral->loan->loan_number}" 
-                : "Company Asset";
+            $context = $collateral->loan
+                ? "on Loan #{$collateral->loan->loan_number}"
+                : 'Company Asset';
 
             SystemLogger::log(
                 'Collateral Updated',
@@ -49,9 +49,9 @@ class CollateralObserver
      */
     public function deleted(Collateral $collateral): void
     {
-        $context = $collateral->loan 
-            ? "from Loan #{$collateral->loan->loan_number}" 
-            : "";
+        $context = $collateral->loan
+            ? "from Loan #{$collateral->loan->loan_number}"
+            : '';
 
         SystemLogger::warning(
             'Collateral Removed',

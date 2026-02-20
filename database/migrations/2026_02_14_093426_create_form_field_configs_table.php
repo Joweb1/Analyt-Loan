@@ -24,7 +24,7 @@ return new class extends Migration
             $table->boolean('is_system')->default(false); // If true, cannot be deleted (but maybe disabled if optional)
             $table->integer('sort_order')->default(0);
             $table->timestamps();
-            
+
             $table->unique(['organization_id', 'section', 'name']);
         });
     }

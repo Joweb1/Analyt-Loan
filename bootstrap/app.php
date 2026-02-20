@@ -16,9 +16,19 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
+            'update_last_seen' => \App\Http\Middleware\UpdateUserLastSeen::class,
         ]);
         $middleware->append(\App\Http\Middleware\CheckOrganizationStatus::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (\Spatie\Permission\Exceptions\UnauthorizedException|\Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException|\Illuminate\Auth\Access\AuthorizationException $e, \Illuminate\Http\Request $request) {
+            if ($request->expectsJson()) {
+                return response()->json(['message' => 'Unauthorized.'], 403);
+            }
+
+            return redirect()->back()->with('custom-alert', [
+                'type' => 'error',
+                'message' => 'ACCESS DENIED: You do not have the required permissions to access this page or perform this action.',
+            ]);
+        });
     })->create();

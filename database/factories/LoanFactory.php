@@ -18,8 +18,13 @@ class LoanFactory extends Factory
     public function definition(): array
     {
         return [
-            'borrower_id' => Borrower::factory(),
-            'loan_number' => 'LN-' . $this->faker->unique()->numerify('#####'),
+            'organization_id' => \App\Models\Organization::factory(),
+            'borrower_id' => function (array $attributes) {
+                return Borrower::factory()->create([
+                    'organization_id' => $attributes['organization_id'] ?? null,
+                ])->id;
+            },
+            'loan_number' => 'LN-'.$this->faker->unique()->numerify('#####'),
             'amount' => $this->faker->randomFloat(2, 50000, 5000000),
             'loan_product' => $this->faker->randomElement(['Personal Loan', 'Business Loan', 'Mortgage']),
             'interest_rate' => $this->faker->randomFloat(2, 5, 20),

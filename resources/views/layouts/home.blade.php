@@ -2,8 +2,13 @@
 
 <html class="light" lang="en"><head>
 <meta charset="utf-8"/>
+<meta name="csrf-token" content="{{ csrf_token() }}">
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Analyt Loan | The Self-Driving Bank for Modern Lending</title>
+@auth
+    <meta name="vapid-public-key" content="{{ config('webpush.vapid.public_key') }}">
+@endauth
+<x-page-title :title="$title ?? null" />
+<x-favicon />
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 <style>
         .hero-gradient {

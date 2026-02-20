@@ -53,17 +53,6 @@
     animation: custom-spin 1s linear infinite;
 }
 
-/* Sidebar animation classes */
-.sidebar-hidden {
-    width: 0 !important; /* Force width to 0 */
-    transform: translateX(-100%) !important; /* Slide out completely */
-    overflow: hidden; /* Hide content during transition */
-}
-/* Ensure the sidebar transitions width and transform */
-#sidebar {
-    transition: all 0.3s ease-in-out; /* Match JS duration */
-}
-
 /* FAB animation classes */
 .fab-visible {
     opacity: 1 !important;

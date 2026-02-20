@@ -44,10 +44,12 @@
             <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Loan Management</h2>
         </div>
         <div class="flex gap-3">
-             <a href="{{ route('loan.print', $loan->id) }}" target="_blank" class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-white rounded-xl text-sm font-bold shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
-                <span class="material-symbols-outlined text-lg">print</span>
-                Print
-            </a>
+            @can('export_and_print')
+                <a href="{{ route('loan.print', $loan->id) }}" target="_blank" class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-white rounded-xl text-sm font-bold shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
+                    <span class="material-symbols-outlined text-lg">print</span>
+                    Print
+                </a>
+            @endcan
             <a href="{{ route('loan.edit', $loan->id) }}" class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl text-sm font-bold shadow-lg shadow-primary/30 hover:bg-blue-700 transition-all">
                 <span class="material-symbols-outlined text-lg">edit</span>
                 Edit Loan
@@ -113,15 +115,22 @@
                     </div>
                     
                     <div class="mt-8 grid grid-cols-2 gap-2">
-                        <button class="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors text-xs font-bold">
-                            <span class="material-symbols-outlined text-sm">call</span> Call
-                        </button>
-                        <button class="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-green-50 text-green-600 hover:bg-green-100 transition-colors text-xs font-bold">
-                            <span class="material-symbols-outlined text-sm">sms</span> SMS
-                        </button>
-                        <button class="col-span-2 flex items-center justify-center gap-2 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors text-xs font-bold">
+                        @can('communicate_with_customers')
+                            <a href="tel:{{ $loan->borrower->phone }}" class="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors text-xs font-bold">
+                                <span class="material-symbols-outlined text-sm">call</span> Call
+                            </a>
+                            <a href="sms:{{ $loan->borrower->phone }}" class="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-green-50 text-green-600 hover:bg-green-100 transition-colors text-xs font-bold">
+                                <span class="material-symbols-outlined text-sm">sms</span> SMS
+                            </a>
+                        @endcan
+                        @can('send_customer_messages')
+                            <button wire:click="$dispatchTo('borrower.message-modal', 'openMessageModal', { borrowerId: '{{ $loan->borrower->id }}' })" class="col-span-2 flex items-center justify-center gap-2 py-2.5 rounded-xl border border-primary/20 text-primary hover:bg-primary/5 transition-colors text-xs font-bold">
+                                <span class="material-symbols-outlined text-sm">chat_bubble</span> Send Message
+                            </button>
+                        @endcan
+                        <a href="{{ route('borrower.loans', $loan->borrower->id) }}" class="col-span-2 flex items-center justify-center gap-2 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors text-xs font-bold">
                             <span class="material-symbols-outlined text-sm">visibility</span> View All Loans
-                        </button>
+                        </a>
                     </div>
                 </div>
                 <div class="bg-slate-50 dark:bg-slate-800/50 p-4 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center">
@@ -257,6 +266,52 @@
                     </table>
                 </div>
             </div>
+
+            <!-- Pending Payment Verifications -->
+            @if($pendingProofs && $pendingProofs->isNotEmpty())
+                <div class="bg-amber-50 border border-amber-200 rounded-2xl overflow-hidden shadow-sm animate-in fade-in slide-in-from-top-4 duration-500">
+                    <div class="px-6 py-4 border-b border-amber-200 flex items-center justify-between bg-amber-100/50">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-amber-600">payments</span>
+                            <h3 class="text-sm font-black text-amber-900 uppercase tracking-wider">Pending Payment Verifications</h3>
+                        </div>
+                        <span class="px-2 py-0.5 rounded-full bg-amber-200 text-amber-800 text-[10px] font-black uppercase">{{ $pendingProofs->count() }} Pending</span>
+                    </div>
+                    <div class="divide-y divide-amber-100">
+                        @foreach($pendingProofs as $proof)
+                            <div class="p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                                <div class="flex items-start gap-4">
+                                    <div class="size-10 rounded-xl bg-white flex items-center justify-center shadow-sm text-amber-600">
+                                        <span class="material-symbols-outlined">receipt_long</span>
+                                    </div>
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <p class="text-lg font-black text-slate-900">₦{{ number_format($proof->amount, 2) }}</p>
+                                            <span class="text-[10px] font-bold text-amber-700 bg-amber-200/50 px-2 py-0.5 rounded uppercase font-mono tracking-tighter">{{ $proof->reference_code }}</span>
+                                        </div>
+                                        <div class="flex items-center gap-3 mt-1">
+                                            <p class="text-xs text-slate-500 font-medium">Submitted {{ $proof->created_at->diffForHumans() }}</p>
+                                            @if($proof->receipt_path)
+                                                <a href="{{ Storage::url($proof->receipt_path) }}" target="_blank" class="flex items-center gap-1 text-[10px] font-black text-blue-600 uppercase hover:underline">
+                                                    <span class="material-symbols-outlined text-sm">attachment</span> View Receipt
+                                                </a>
+                                            @endif
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-2 w-full sm:w-auto">
+                                    <button wire:click="declineProof('{{ $proof->id }}')" wire:confirm="Are you sure you want to decline this payment proof?" class="flex-1 sm:flex-none px-4 py-2 bg-white text-red-600 border border-red-100 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-50 transition-all">
+                                        Decline
+                                    </button>
+                                    <button wire:click="approveProof('{{ $proof->id }}')" wire:confirm="Confirm and record this ₦{{ number_format($proof->amount) }} payment?" class="flex-1 sm:flex-none px-6 py-2 bg-green-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-green-600/20 hover:bg-green-700 transition-all">
+                                        Approve & Record
+                                    </button>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            @endif
 
             <!-- Action Card -->
             @if(!in_array($loan->status, ['applied', 'verification_pending', 'declined']))
@@ -976,6 +1031,6 @@
             </div>
         </div>
     </div>
-        </div>
-    </div>
+
+    <livewire:borrower.message-modal :borrower="$loan->borrower" />
 </div>

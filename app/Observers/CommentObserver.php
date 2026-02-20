@@ -2,8 +2,8 @@
 
 namespace App\Observers;
 
-use App\Models\Comment;
 use App\Helpers\SystemLogger;
+use App\Models\Comment;
 use App\Models\Loan;
 
 class CommentObserver
@@ -13,9 +13,8 @@ class CommentObserver
      */
     public function created(Comment $comment): void
     {
-        // Check if the comment is on a Loan
-        if ($comment->commentable_type === Loan::class) {
-            $loan = $comment->commentable;
+        $loan = $comment->commentable;
+        if ($loan instanceof Loan) {
             $user = $comment->user;
 
             SystemLogger::log(

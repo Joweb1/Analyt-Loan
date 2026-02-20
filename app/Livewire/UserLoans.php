@@ -20,8 +20,13 @@ class UserLoans extends Component
 
     public function getRiskLevel($score)
     {
-        if ($score >= 750) return ['label' => 'Low Risk', 'color' => 'green'];
-        if ($score >= 600) return ['label' => 'Medium Risk', 'color' => 'yellow'];
+        if ($score >= 750) {
+            return ['label' => 'Low Risk', 'color' => 'green'];
+        }
+        if ($score >= 600) {
+            return ['label' => 'Medium Risk', 'color' => 'yellow'];
+        }
+
         return ['label' => 'High Risk', 'color' => 'red'];
     }
 
@@ -33,7 +38,7 @@ class UserLoans extends Component
             ->paginate(12);
 
         return view('livewire.user-loans', [
-            'loans' => $loans
-        ])->layout('layouts.app');
+            'loans' => $loans,
+        ])->layout('layouts.app', ['title' => 'Borrower Loans']);
     }
 }

@@ -6,16 +6,16 @@ use App\Models\Borrower;
 use App\Models\Loan;
 use App\Models\Organization;
 use App\Models\Repayment;
-use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Carbon;
 
 class ReportDataSeeder extends Seeder
 {
     public function run(): void
     {
         $org = Organization::first();
-        if (!$org) return;
+        if (! $org) {
+            return;
+        }
 
         $borrowers = Borrower::where('organization_id', $org->id)->get();
         if ($borrowers->isEmpty()) {
@@ -25,7 +25,7 @@ class ReportDataSeeder extends Seeder
         // Generate data for the last 12 months
         for ($i = 0; $i < 365; $i++) {
             $date = now()->subDays($i);
-            
+
             // Randomly create loans on some days
             if (rand(1, 10) > 6) {
                 $count = rand(1, 3);

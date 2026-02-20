@@ -20,6 +20,7 @@ class StatusBoardSeeder extends Seeder
         $createBorrower = function ($name, $creditScore) use ($borrowerRole) {
             $user = User::factory()->create(['name' => $name]);
             $user->assignRole($borrowerRole);
+
             return Borrower::factory()->create([
                 'user_id' => $user->id,
                 'credit_score' => $creditScore,
@@ -50,7 +51,7 @@ class StatusBoardSeeder extends Seeder
         // 2. Pending Verification (Status: verification_pending)
         $b3 = $createBorrower('Chinedu Okafor', 400); // High Risk
         // Simulate missing BVN by setting it to null if the factory doesn't
-        $b3->update(['bvn' => null]); 
+        $b3->update(['bvn' => null]);
         $l3 = Loan::factory()->create([
             'borrower_id' => $b3->id,
             'amount' => 8500000,
@@ -66,8 +67,7 @@ class StatusBoardSeeder extends Seeder
             'status' => 'approved',
             'updated_at' => now(), // Today
         ]);
-         Collateral::factory()->create(['loan_id' => $l4->id, 'name' => 'Gold Chain', 'value' => 600000]);
-
+        Collateral::factory()->create(['loan_id' => $l4->id, 'name' => 'Gold Chain', 'value' => 600000]);
 
         // 4. Active (Status: active)
         $b5 = $createBorrower('Tunde Folayan', 700);

@@ -101,9 +101,9 @@
                 </div>
                 <!-- NIN -->
                 <div class="flex flex-col gap-2">
-                    <label class="text-xs font-bold text-zinc-500 uppercase tracking-widest">NIN</label>
-                    <input wire:model="nin" class="w-full px-5 py-4 bg-zinc-50 dark:bg-zinc-800/50 border-2 border-zinc-100 dark:border-zinc-800 rounded-2xl focus:border-primary focus:ring-0 transition-all font-medium" placeholder="12345678901" type="text"/>
-                    <p class="text-[10px] text-zinc-400 font-bold uppercase px-1">Required</p>
+                    <label class="text-xs font-bold text-zinc-500 uppercase tracking-widest">NIN (11 Digits)</label>
+                    <input wire:model="nin" class="w-full px-5 py-4 bg-zinc-50 dark:bg-zinc-800/50 border-2 border-zinc-100 dark:border-zinc-800 rounded-2xl focus:border-primary focus:ring-0 transition-all font-medium tracking-[0.2em]" maxlength="11" placeholder="12345678901" type="text"/>
+                    <p class="text-[10px] text-zinc-400 font-bold uppercase px-1">Required, Exactly 11 digits</p>
                     @error('nin') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                 </div>
                 <!-- Passport Photograph -->
@@ -181,7 +181,7 @@
                         <span class="text-sm font-medium" :class="!is_employed ? 'text-primary' : 'text-zinc-400'">Self-Employed</span>
                         <label class="relative inline-flex items-center cursor-pointer">
                             <input type="checkbox" wire:model.live="is_employed" class="sr-only peer">
-                            <div class="w-14 h-8 bg-zinc-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all dark:border-zinc-600 peer-checked:bg-blue-600"></div>
+                            <div class="w-14 h-8 bg-zinc-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary/20 dark:peer-focus:ring-primary/10 rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[4px] after:left-[4px] after:bg-white after:border-zinc-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all dark:border-zinc-600 peer-checked:bg-primary"></div>
                         </label>
                         <span class="text-sm font-medium" :class="is_employed ? 'text-primary' : 'text-zinc-400'">Employed</span>
                     </div>
@@ -361,7 +361,8 @@
                                 
                                 <p class="text-[10px] text-zinc-400 font-bold uppercase px-1">
                                     {{ $field['is_required'] ? 'Required' : 'Optional' }} 
-                                    @if($type === 'number') | Numeric @endif
+                                    @if(in_array($field['name'], ['bvn', 'nin'])) | Exactly 11 digits @endif
+                                    @if($type === 'number' && !in_array($field['name'], ['bvn', 'nin'])) | Numeric @endif
                                     @if($type === 'email') | Valid email @endif
                                 </p>
                                 @error($modelName) <span class="text-red-500 text-xs">{{ $message }}</span> @enderror

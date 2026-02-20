@@ -1,4 +1,5 @@
 import './bootstrap';
+import './webpush';
 
 window.togglePasswordVisibility = function(inputId, iconId) {
     const passwordInput = document.getElementById(inputId);
@@ -19,96 +20,60 @@ function setupSidebarToggle() {
     const sidebar = document.getElementById('sidebar');
     const mainContent = document.getElementById('main-content');
 
-    // Only run the sidebar script if both the sidebar and main content elements exist
-    if (!sidebar || !mainContent) {
-        return;
-    }
+    if (!sidebar || !mainContent) return;
 
     const hideSidebarBtn = document.getElementById('hideSidebarBtn');
     const showSidebarFab = document.getElementById('showSidebarFab');
-    const hideSidebarBtnIcon = hideSidebarBtn ? hideSidebarBtn.querySelector('.material-symbols-outlined') : null;
-    const hideSidebarBtnText = hideSidebarBtn ? hideSidebarBtn.querySelector('.sidebar-nav-text') : null;
-    const sidebarNavTexts = document.querySelectorAll('.sidebar-nav-text');
-    const sidebarLogoText = document.getElementById('sidebar-logo-text');
-    const sidebarUserProfileText = document.getElementById('sidebar-user-profile-text');
-    const showSidebarFabIcon = showSidebarFab ? showSidebarFab.querySelector('.material-symbols-outlined') : null; // New reference
+    const showSidebarFabIcon = showSidebarFab ? showSidebarFab.querySelector('.material-symbols-outlined') : null;
 
-    const transitionDuration = 300; // ms, matches CSS transition-duration
+    const setSidebarState = (expanded, save = true) => {
+        // Remove the transition-blocking attribute if it exists
+        document.documentElement.removeAttribute('data-sidebar-pinned');
 
-    // Function to set sidebar state
-    const setSidebarState = (isExpanded) => {
-        if (isExpanded) {
-            sidebar.style.display = 'flex'; // Make it display before animating
-            // Use setTimeout to ensure display:flex is applied before transition
-            setTimeout(() => {
-                sidebar.classList.remove('sidebar-collapsed');
-                sidebar.classList.add('sidebar-expanded');
-                mainContent.classList.remove('lg:ml-0');
-                mainContent.classList.add('lg:ml-64');
-                if (hideSidebarBtnIcon) hideSidebarBtnIcon.classList.remove('rotate-180');
-                if (hideSidebarBtnText) hideSidebarBtnText.textContent = 'Collapse';
-                if (showSidebarFabIcon) showSidebarFabIcon.textContent = 'arrow_back_ios'; // Change FAB icon
+        sidebar.setAttribute('data-expanded', expanded);
+        
+        if (showSidebarFabIcon) {
+            showSidebarFabIcon.textContent = expanded ? 'arrow_back_ios' : 'menu';
+        }
 
-                // Show text elements
-                if (sidebarLogoText) sidebarLogoText.classList.remove('hidden');
-                if (sidebarUserProfileText) sidebarUserProfileText.classList.remove('hidden');
-                sidebarNavTexts.forEach(el => el.classList.remove('hidden'));
-                // sidebar.classList.remove('overflow-hidden'); // Removed as overflow-hidden is now permanent on aside
-
-                // FAB always visible, so no class manipulation here
-            }, 10); // Small delay to allow display change to render
-        } else {
-            sidebar.classList.remove('sidebar-expanded');
-            sidebar.classList.add('sidebar-collapsed');
-            mainContent.classList.remove('lg:ml-64');
-            mainContent.classList.add('lg:ml-0');
-            if (hideSidebarBtnIcon) hideSidebarBtnIcon.classList.add('rotate-180');
-            if (hideSidebarBtnText) hideSidebarBtnText.textContent = 'Expand';
-            if (showSidebarFabIcon) showSidebarFabIcon.textContent = 'menu'; // Change FAB icon
-
-            // Hide text elements
-            if (sidebarLogoText) sidebarLogoText.classList.add('hidden');
-            if (sidebarUserProfileText) sidebarUserProfileText.classList.add('hidden');
-            sidebarNavTexts.forEach(el => el.classList.add('hidden'));
-            // sidebar.classList.add('overflow-hidden'); // Removed as overflow-hidden is now permanent on aside
-
-            // FAB always visible, so no class manipulation here
-
-            // Hide sidebar completely after transition
-            setTimeout(() => {
-                sidebar.style.display = 'none';
-            }, transitionDuration);
+        if (save && window.innerWidth >= 700) {
+            localStorage.setItem('sidebarPinned', expanded ? 'true' : 'false');
         }
     };
 
-    // Toggle function
     const toggleSidebar = () => {
-        setSidebarState(sidebar.classList.contains('sidebar-collapsed'));
+        const isExpanded = sidebar.getAttribute('data-expanded') === 'true';
+        setSidebarState(!isExpanded);
     };
 
-    // Event listeners - Prevent duplicates using data attribute
     if (hideSidebarBtn && !hideSidebarBtn.dataset.hasSidebarListener) {
-        hideSidebarBtn.addEventListener('click', toggleSidebar);
+        hideSidebarBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            setSidebarState(false);
+        });
         hideSidebarBtn.dataset.hasSidebarListener = 'true';
     }
 
     if (showSidebarFab && !showSidebarFab.dataset.hasSidebarListener) {
-        showSidebarFab.addEventListener('click', toggleSidebar);
+        showSidebarFab.addEventListener('click', (e) => {
+            e.preventDefault();
+            toggleSidebar();
+        });
         showSidebarFab.dataset.hasSidebarListener = 'true';
     }
 
-    // Initial setup on DOMContentLoaded
     const initializeSidebar = () => {
-        // Only force collapse on initial load if needed, but user interaction should persist.
-        // For now, defaulting to collapsed is fine on page load.
-        if (!sidebar.classList.contains('sidebar-expanded')) {
-             setSidebarState(false);
-        } else {
-             // If somehow already expanded (e.g. preserved state in future), sync UI
-             setSidebarState(true);
-        }
+        const isPinned = localStorage.getItem('sidebarPinned') === 'true';
+        const isWideScreen = window.innerWidth >= 700;
         
-        if (showSidebarFabIcon) showSidebarFabIcon.textContent = 'menu';
+        // Use attribute from inline script if it already set it to true
+        const alreadyExpanded = sidebar.getAttribute('data-expanded') === 'true';
+
+        if ((isWideScreen && isPinned) || alreadyExpanded) {
+            setSidebarState(true, false);
+        } else {
+            setSidebarState(false, false);
+        }
     };
 
     initializeSidebar();

@@ -1,6 +1,6 @@
-<div class="relative min-h-[1000px] flex flex-col">
+<div class="relative min-h-[1000px] flex flex-col pt-8">
     <!-- Action Button (Floating/Fixed) -->
-    <div class="no-print absolute -top-12 right-0 flex gap-3">
+    <div class="no-print absolute top-0 right-0 flex gap-3">
         <button onclick="window.print()" class="flex items-center gap-2 px-6 py-2 bg-primary text-white rounded-xl font-bold shadow-lg hover:bg-blue-700 transition-all">
             <span class="material-symbols-outlined">print</span>
             Print Document

@@ -3,8 +3,8 @@
 namespace App\Livewire\Settings;
 
 use App\Models\FormFieldConfig;
-use Livewire\Component;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Component;
 
 class FormBuilder extends Component
 {
@@ -28,8 +28,11 @@ class FormBuilder extends Component
 
     // New Field State
     public $newFieldSection = 'identity';
+
     public $newFieldLabel;
+
     public $newFieldType = 'text';
+
     public $newFieldOptions = ''; // Comma separated for simplicity in UI
 
     public function mount()
@@ -40,8 +43,10 @@ class FormBuilder extends Component
     public function ensureDefaultConfig()
     {
         $orgId = Auth::user()->organization_id;
-        
-        if (!$orgId) return; // Should handle this case (e.g. Super Admin or error)
+
+        if (! $orgId) {
+            return;
+        } // Should handle this case (e.g. Super Admin or error)
 
         if (FormFieldConfig::where('organization_id', $orgId)->exists()) {
             return;
@@ -82,7 +87,7 @@ class FormBuilder extends Component
             ],
             'guarantor' => [
                 ['name' => 'guarantor_id', 'label' => 'Select Guarantor', 'type' => 'select', 'required' => false], // complex type
-            ]
+            ],
         ];
 
         $order = 0;
@@ -107,22 +112,26 @@ class FormBuilder extends Component
     public function toggleRequired($id)
     {
         $field = FormFieldConfig::find($id);
-        if ($field->organization_id !== Auth::user()->organization_id) return;
-        
-        $field->is_required = !$field->is_required;
+        if ($field->organization_id !== Auth::user()->organization_id) {
+            return;
+        }
+
+        $field->is_required = ! $field->is_required;
         $field->save();
     }
 
     public function toggleActive($id)
     {
         $field = FormFieldConfig::find($id);
-        if ($field->organization_id !== Auth::user()->organization_id) return;
-        
+        if ($field->organization_id !== Auth::user()->organization_id) {
+            return;
+        }
+
         // Ensure system fields that are critical cannot be disabled if logic prevents it
         // For now allow toggling, but in render we might hide core logic if disabled which is tricky.
         // Better to allow toggling only optional system fields or custom fields.
-        
-        $field->is_active = !$field->is_active;
+
+        $field->is_active = ! $field->is_active;
         $field->save();
     }
 
@@ -134,8 +143,8 @@ class FormBuilder extends Component
 
         $this->validate([
             'newFieldLabel' => 'required|string|max:255',
-            'newFieldType' => 'required|in:' . implode(',', array_keys($this->fieldTypes)),
-            'newFieldSection' => 'required|in:' . implode(',', array_keys($this->sections)),
+            'newFieldType' => 'required|in:'.implode(',', array_keys($this->fieldTypes)),
+            'newFieldSection' => 'required|in:'.implode(',', array_keys($this->sections)),
         ]);
 
         $name = \Illuminate\Support\Str::slug($this->newFieldLabel, '_');
@@ -144,6 +153,7 @@ class FormBuilder extends Component
         // Check unique name in section
         if (FormFieldConfig::where('organization_id', $orgId)->where('name', $name)->exists()) {
             $this->addError('newFieldLabel', 'A field with this name already exists.');
+
             return;
         }
 
@@ -172,9 +182,12 @@ class FormBuilder extends Component
     public function deleteField($id)
     {
         $field = FormFieldConfig::find($id);
-        if ($field->organization_id !== Auth::user()->organization_id) return;
+        if ($field->organization_id !== Auth::user()->organization_id) {
+            return;
+        }
         if ($field->is_system) {
             $this->dispatch('custom-alert', ['type' => 'error', 'message' => 'System fields cannot be deleted.']);
+
             return;
         }
 
@@ -190,7 +203,7 @@ class FormBuilder extends Component
             ->groupBy('section');
 
         return view('livewire.settings.form-builder', [
-            'configs' => $configs
-        ])->layout('layouts.app');
+            'configs' => $configs,
+        ])->layout('layouts.app', ['title' => 'Form Builder']);
     }
 }

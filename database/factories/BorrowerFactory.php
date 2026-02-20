@@ -18,7 +18,12 @@ class BorrowerFactory extends Factory
     public function definition(): array
     {
         return [
-            'user_id' => User::factory(),
+            'organization_id' => \App\Models\Organization::factory(),
+            'user_id' => function (array $attributes) {
+                return User::factory()->create([
+                    'organization_id' => $attributes['organization_id'] ?? null,
+                ])->id;
+            },
             'phone' => $this->faker->phoneNumber,
             'bvn' => $this->faker->numerify('###########'),
             'trust_score' => $this->faker->numberBetween(0, 100),

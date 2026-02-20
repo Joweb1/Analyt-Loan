@@ -118,6 +118,8 @@ return [
     |
     */
 
+    'owner' => env('APP_OWNER', 'nahjonah00@gmail.com'),
+
     'maintenance' => [
         'driver' => env('APP_MAINTENANCE_DRIVER', 'file'),
         'store' => env('APP_MAINTENANCE_STORE', 'database'),

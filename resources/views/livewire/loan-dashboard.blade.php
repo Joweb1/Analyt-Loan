@@ -1,4 +1,10 @@
-<div class="p-2 max-w-7xl mx-auto w-full space-y-8" x-data="{ showTerminal: false }">
+<div class="p-2 max-w-7xl mx-auto w-full space-y-8" 
+    x-data="{ showTerminal: false }"
+    x-init="
+        showTerminal = localStorage.getItem('terminal_visible') === 'true';
+        $watch('showTerminal', value => localStorage.setItem('terminal_visible', value))
+    "
+>
     <!-- Section Title -->
     <div class="flex justify-between items-center">
         <div>
@@ -153,47 +159,137 @@
             </div>
         </div>
 
-        <!-- Collection Pulse Chart -->
-        <div class="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm">
-            <h3 class="font-bold text-base dark:text-white mb-4">Collection Pulse</h3>
-            <div class="space-y-4">
-                @php
-                    $total = array_sum($collectionPulse['series']);
-                    $active = $collectionPulse['series'][0] ?? 0;
-                    $repaid = $collectionPulse['series'][1] ?? 0;
-                    $overdue = $collectionPulse['series'][2] ?? 0;
-                    
-                    $activePct = $total > 0 ? ($active / $total) * 100 : 33;
-                    $repaidPct = $total > 0 ? ($repaid / $total) * 100 : 33;
-                    $overduePct = $total > 0 ? ($overdue / $total) * 100 : 33;
-
-                    $y1 = 150 - ($repaidPct * 1.2);
-                    $y2 = 150 - ($activePct * 1.2);
-                    $y3 = 150 - ($overduePct * 1.2);
-                @endphp
-                
-                <div class="relative h-32 w-full">
-                    <svg class="w-full h-full" preserveAspectRatio="none" viewBox="0 0 400 150">
-                        <path d="M0 150 C 50 150, 100 {{ $y1 }}, 200 {{ $y2 }} S 350 {{ $y3 }}, 400 150" fill="none" stroke="#0f1729" stroke-width="3" stroke-linecap="round"></path>
-                        <circle cx="100" cy="{{ $y1 }}" r="4" fill="#10b981"></circle>
-                        <circle cx="200" cy="{{ $y2 }}" r="4" fill="#3b82f6"></circle>
-                        <circle cx="300" cy="{{ $y3 }}" r="4" fill="#ef4444"></circle>
-                    </svg>
+        <!-- Collections Pulse Chart -->
+        <div class="bg-white dark:bg-[#1a1f2b] rounded-2xl p-6 shadow-soft flex flex-col min-h-[420px]" x-data="{ activePoint: null }">
+            <div class="flex items-center justify-between mb-8">
+                <div>
+                    <h3 class="text-primary dark:text-white text-lg font-black tracking-tight flex items-center gap-2">
+                        <span class="relative flex h-3 w-3">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-blue opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-3 w-3 bg-brand-blue"></span>
+                        </span>
+                        Collections Pulse
+                    </h3>
+                    <p class="text-slate-500 text-xs font-medium uppercase tracking-wider">7-Day Recovery Trend</p>
                 </div>
+                <div class="flex flex-col text-right">
+                    <span class="text-2xl font-black text-primary dark:text-white leading-none">₦ {{ number_format(collect($pulseData)->sum('amount')) }}</span>
+                    <span class="text-[10px] font-bold text-slate-400 uppercase">Total This Week</span>
+                </div>
+            </div>
+            
+            @php
+                $maxVal = collect($pulseData)->max('amount') ?: 1000;
+                $height = 200;
+                $width = 800;
+                $padding = 40;
+                $chartHeight = $height - ($padding * 2);
                 
-                <div class="flex justify-between text-[10px] font-bold uppercase text-gray-500">
-                    <div class="flex items-center gap-1.5">
-                        <span class="w-2 h-2 rounded-full bg-blue-500"></span>
-                        <span>Active: {{ round($activePct) }}%</span>
+                $points = [];
+                foreach($pulseData as $index => $data) {
+                    $x = ($width / 6) * $index;
+                    $y = $height - $padding - (($data['amount'] / $maxVal) * $chartHeight);
+                    $points[] = "$x,$y";
+                }
+                $pathData = "M " . implode(" L ", $points);
+                
+                // For the area fill
+                $fillPoints = $points;
+                $fillPoints[] = ($width) . "," . $height;
+                $fillPoints[] = "0," . $height;
+                $fillPath = "M " . implode(" L ", $fillPoints) . " Z";
+            @endphp
+
+            <div class="relative flex-1 w-full mt-4 group">
+                <!-- Tooltip -->
+                <div 
+                    x-show="activePoint !== null" 
+                    x-cloak
+                    class="absolute z-30 bg-primary text-white p-3 rounded-xl shadow-2xl pointer-events-none transition-all duration-200 -translate-x-1/2 -translate-y-full mb-4 border border-white/10"
+                    :style="`left: ${activePoint?.x}px; top: ${activePoint?.y}px`"
+                >
+                    <div class="flex flex-col gap-0.5">
+                        <span class="text-[10px] font-black uppercase text-slate-400" x-text="activePoint?.day"></span>
+                        <span class="text-sm font-black" x-text="'₦ ' + activePoint?.formatted"></span>
                     </div>
+                    <div class="absolute bottom-[-6px] left-1/2 -translate-x-1/2 w-3 h-3 bg-primary rotate-45 border-r border-b border-white/10"></div>
+                </div>
+
+                <!-- SVG Chart -->
+                <svg class="w-full h-full overflow-visible" viewBox="0 0 800 200" preserveAspectRatio="none">
+                    <defs>
+                        <linearGradient id="pulse-area-gradient" x1="0" x2="0" y1="0" y2="1">
+                            <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.2"></stop>
+                            <stop offset="100%" stop-color="#3b82f6" stop-opacity="0"></stop>
+                        </linearGradient>
+                        <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                            <feGaussianBlur stdDeviation="4" result="blur"></feGaussianBlur>
+                            <feComposite in="SourceGraphic" in2="blur" operator="over"></feComposite>
+                        </filter>
+                    </defs>
+
+                    <!-- Horizontal Grid Lines -->
+                    @foreach(range(0, 4) as $i)
+                        @php $gridY = $padding + ($i * ($chartHeight / 4)); @endphp
+                        <line x1="0" y1="{{ $gridY }}" x2="800" y2="{{ $gridY }}" stroke="currentColor" class="text-slate-100 dark:text-slate-800/50" stroke-width="1" stroke-dasharray="4 4"></line>
+                    @endforeach
+
+                    <!-- Area Fill -->
+                    <path d="{{ $fillPath }}" fill="url(#pulse-area-gradient)" class="transition-all duration-700"></path>
+
+                    <!-- Main Line -->
+                    <path d="{{ $pathData }}" fill="none" stroke="#3b82f6" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" class="transition-all duration-700" filter="url(#glow)"></path>
+
+                    <!-- Interactive Markers -->
+                    @foreach($pulseData as $index => $data)
+                        @php
+                            $x = ($width / 6) * $index;
+                            $y = $height - $padding - (($data['amount'] / $maxVal) * $chartHeight);
+                        @endphp
+                        <circle 
+                            cx="{{ $x }}" 
+                            cy="{{ $y }}" 
+                            r="6" 
+                            fill="#3b82f6" 
+                            stroke="white" 
+                            stroke-width="3"
+                            class="cursor-pointer transition-all duration-300 hover:r-8 hover:fill-primary dark:hover:fill-white"
+                            @mouseenter="activePoint = { x: ({{ $index }} * (100/6)) * ($el.closest('div').clientWidth/100), y: ({{ $y }}/200) * $el.closest('div').clientHeight, day: '{{ $data['day'] }}', formatted: '{{ $data['formatted'] }}' }"
+                            @mouseleave="activePoint = null"
+                        ></circle>
+                    @endforeach
+                </svg>
+
+                <!-- X-Axis Labels -->
+                <div class="flex justify-between mt-6 px-1">
+                    @foreach($pulseData as $data)
+                        <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">{{ $data['day'] }}</span>
+                    @endforeach
+                </div>
+            </div>
+
+            <!-- Portfolio Composition Cards -->
+            <div class="grid grid-cols-3 gap-4 mt-10 pt-6 border-t border-slate-100 dark:border-slate-800">
+                <div class="flex flex-col gap-1">
                     <div class="flex items-center gap-1.5">
-                        <span class="w-2 h-2 rounded-full bg-green-500"></span>
-                        <span>Repaid: {{ round($repaidPct) }}%</span>
+                        <span class="w-2 h-2 rounded-full bg-brand-green"></span>
+                        <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider">Repaid</span>
                     </div>
+                    <span class="text-sm font-black text-primary dark:text-white">₦ {{ number_format($repaidAmount) }}</span>
+                </div>
+                <div class="flex flex-col gap-1 border-x border-slate-100 dark:border-slate-800 px-4">
                     <div class="flex items-center gap-1.5">
-                        <span class="w-2 h-2 rounded-full bg-red-500"></span>
-                        <span>Overdue: {{ round($overduePct) }}%</span>
+                        <span class="w-2 h-2 rounded-full bg-brand-blue"></span>
+                        <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider">Active</span>
                     </div>
+                    <span class="text-sm font-black text-primary dark:text-white">₦ {{ number_format($activeAmount) }}</span>
+                </div>
+                <div class="flex flex-col gap-1 pl-4">
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-brand-red"></span>
+                        <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider">Overdue</span>
+                    </div>
+                    <span class="text-sm font-black text-primary dark:text-white">₦ {{ number_format($overdueAmountTotal) }}</span>
                 </div>
             </div>
         </div>
@@ -232,35 +328,8 @@
         </div>
 
         <!-- System Health Terminal -->
-        <div x-show="showTerminal" x-transition class="bg-primary rounded-xl border border-white/10 shadow-xl flex flex-col overflow-hidden">
-            <div class="bg-primary px-4 py-3 border-b border-white/5 flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <div class="flex gap-1.5">
-                        <div class="size-2.5 rounded-full bg-red-500"></div>
-                        <div class="size-2.5 rounded-full bg-yellow-500"></div>
-                        <div class="size-2.5 rounded-full bg-green-500"></div>
-                    </div>
-                    <span class="text-[10px] text-gray-400 font-bold uppercase tracking-widest ml-4">System Health Terminal</span>
-                </div>
-                <div class="flex items-center gap-2">
-                    <div class="size-2 rounded-full bg-green-500 animate-pulse"></div>
-                    <span class="text-[10px] text-green-500 font-bold uppercase tracking-widest">Active</span>
-                </div>
-            </div>
-            <div class="p-4 flex-1 font-mono text-xs overflow-y-auto terminal-scroll space-y-2 h-64">
-                <p class="text-gray-400">[14:32:01] <span class="text-green-400">SUCCESS</span> Auto-check complete for #AL-8821</p>
-                <p class="text-gray-400">[14:32:05] <span class="text-blue-400">INFO</span> Triggered 42 WhatsApp payment reminders</p>
-                <p class="text-gray-400">[14:32:15] <span class="text-yellow-400">WARN</span> Credit score below threshold for User #4410</p>
-                <p class="text-gray-400">[14:33:42] <span class="text-green-400">SUCCESS</span> Repayment of ₦45,000 reconciled for AL-302</p>
-                <p class="text-gray-400">[14:35:00] <span class="text-blue-400">INFO</span> Identity verification verified: Adeola John</p>
-                <p class="text-gray-400">[14:35:05] <span class="text-green-400">SUCCESS</span> Disbursed ₦250,000 to AL-9011</p>
-                <p class="text-gray-400">[14:35:20] <span class="text-blue-400">INFO</span> Batch update: Loan status moved to 'Closed' (12)</p>
-                <p class="text-gray-400">[14:36:10] <span class="text-green-400">SUCCESS</span> BVN Match confirmed for new application</p>
-            </div>
-            <div class="p-3 bg-white/5 border-t border-white/5 flex items-center gap-2">
-                <span class="text-primary-foreground/50 material-symbols-outlined text-sm">chevron_right</span>
-                <input class="bg-transparent border-none p-0 text-xs font-mono text-white focus:ring-0 w-full" placeholder="Type a command..." type="text"/>
-            </div>
+        <div x-show="showTerminal" x-cloak x-transition>
+            <livewire:components.system-terminal />
         </div>
     </div>
 </div>

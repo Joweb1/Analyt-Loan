@@ -46,6 +46,14 @@
                 @php
                     $totalDebt = $borrower->loans->sum('amount');
                     $initials = collect(explode(' ', $borrower->user->name))->map(fn($n) => substr($n, 0, 1))->take(2)->join('');
+                    
+                    $kycColor = match($borrower->kyc_status) {
+                        'approved' => 'green',
+                        'pending' => 'amber',
+                        'rejected' => 'red',
+                        default => 'gray'
+                    };
+
                     $riskColor = match(true) {
                         $borrower->credit_score >= 750 => 'green',
                         $borrower->credit_score >= 600 => 'amber',
@@ -65,13 +73,17 @@
                 <div class="group relative bg-white dark:bg-[#1a1f2e] p-5 rounded-xl border border-[#e5e7eb] dark:border-[#2d3344] shadow-sm hover:shadow-xl transition-all duration-300 custom-card-hover overflow-hidden">
                     <div class="flex justify-between items-start mb-6">
                         <div class="flex items-center gap-3">
-                            @if($borrower->photo_url)
-                                <div class="size-14 rounded-full bg-cover bg-center border-2 border-white dark:border-[#2d3344] shadow-sm ring-1 ring-gray-100 dark:ring-white/5" style="background-image: url('{{ $borrower->photo_url }}')"></div>
-                            @else
-                                <div class="size-14 rounded-full {{ $colorClass }} flex items-center justify-center border-2 border-white dark:border-[#2d3344] shadow-sm ring-1 ring-gray-100 dark:ring-white/5">
-                                    <span class="font-black text-lg tracking-tighter">{{ $initials }}</span>
-                                </div>
-                            @endif
+                            <div class="relative">
+                                @if($borrower->photo_url)
+                                    <div class="size-14 rounded-full bg-cover bg-center border-2 border-white dark:border-[#2d3344] shadow-sm ring-1 ring-gray-100 dark:ring-white/5" style="background-image: url('{{ $borrower->photo_url }}')"></div>
+                                @else
+                                    <div class="size-14 rounded-full {{ $colorClass }} flex items-center justify-center border-2 border-white dark:border-[#2d3344] shadow-sm ring-1 ring-gray-100 dark:ring-white/5">
+                                        <span class="font-black text-lg tracking-tighter">{{ $initials }}</span>
+                                    </div>
+                                @endif
+                                <!-- KYC Status Indicator -->
+                                <div class="absolute -bottom-0.5 -right-0.5 size-4 rounded-full border-2 border-white dark:border-[#1a1f2e] bg-{{ $kycColor }}-500 shadow-sm" title="KYC {{ ucfirst($borrower->kyc_status) }}"></div>
+                            </div>
                             <div>
                                 <h3 class="text-[#111318] dark:text-white font-bold text-base leading-tight truncate max-w-[100px]">{{ $borrower->user->name }}</h3>
                                 <p class="text-[#606b8a] text-xs truncate max-w-[100px]">{{ $borrower->phone ?? 'N/A' }}</p>
@@ -108,15 +120,21 @@
                         <div class="flex items-center justify-between pt-2">
                             <div>
                                 <p class="text-[#606b8a] text-[11px] uppercase tracking-wider font-semibold mb-1">Repayment Score</p>
-                                <span class="px-2 py-0.5 rounded-full bg-{{ $riskColor }}-100 dark:bg-{{ $riskColor }}-900/30 text-{{ $riskColor }}-700 dark:text-{{ $riskColor }}-400 text-[10px] font-bold uppercase">{{ $riskLabel }}</span>
+                                @if($borrower->trust_score > 0)
+                                    <span class="px-2 py-0.5 rounded-full bg-{{ $riskColor }}-100 dark:bg-{{ $riskColor }}-900/30 text-{{ $riskColor }}-700 dark:text-{{ $riskColor }}-400 text-[10px] font-bold uppercase">{{ $riskLabel }}</span>
+                                @else
+                                    <span class="px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 text-[10px] font-bold uppercase">Unscored</span>
+                                @endif
                             </div>
                             <div class="relative size-12">
                                 <svg class="size-full -rotate-90" viewbox="0 0 36 36">
                                     <circle class="stroke-[#f0f1f5] dark:stroke-[#2d3344]" cx="18" cy="18" fill="none" r="16" stroke-width="3"></circle>
-                                    <circle class="stroke-{{ $riskColor }}-500" cx="18" cy="18" fill="none" r="16" stroke-dasharray="100" stroke-dashoffset="{{ 100 - $scorePercent }}" stroke-linecap="round" stroke-width="3"></circle>
+                                    @if($borrower->trust_score > 0)
+                                        <circle class="stroke-{{ $riskColor }}-500" cx="18" cy="18" fill="none" r="16" stroke-dasharray="100" stroke-dashoffset="{{ 100 - $scorePercent }}" stroke-linecap="round" stroke-width="3"></circle>
+                                    @endif
                                 </svg>
                                 <div class="absolute inset-0 flex items-center justify-center">
-                                    <span class="text-[#111318] dark:text-white text-[10px] font-bold">{{ round($scorePercent) }}%</span>
+                                    <span class="text-[#111318] dark:text-white text-[10px] font-bold">{{ $borrower->trust_score > 0 ? round($scorePercent) . '%' : '—' }}</span>
                                 </div>
                             </div>
                         </div>
@@ -153,7 +171,8 @@
                             <th scope="col" class="px-6 py-3">Borrower</th>
                             <th scope="col" class="px-6 py-3">Total Debt</th>
                             <th scope="col" class="px-6 py-3">Savings</th>
-                            <th scope="col" class="px-6 py-3">Risk Level</th>
+                            <th scope="col" class="px-6 py-3">KYC Status</th>
+                            <th scope="col" class="px-6 py-3">Repayment Score</th>
                             <th scope="col" class="px-6 py-3 text-right">Actions</th>
                         </tr>
                     </thead>
@@ -163,16 +182,25 @@
                                 $totalDebt = $borrower->loans->sum('amount');
                                 $savingsBalance = $borrower->savingsAccount->balance ?? 0;
                                 $initials = collect(explode(' ', $borrower->user->name))->map(fn($n) => substr($n, 0, 1))->take(2)->join('');
+                                
+                                $kycColor = match($borrower->kyc_status) {
+                                    'approved' => 'green',
+                                    'pending' => 'amber',
+                                    'rejected' => 'red',
+                                    default => 'gray'
+                                };
+
                                 $riskColor = match(true) {
-                                    $borrower->credit_score >= 750 => 'green',
-                                    $borrower->credit_score >= 600 => 'amber',
+                                    $borrower->trust_score >= 75 => 'green',
+                                    $borrower->trust_score >= 41 => 'amber',
                                     default => 'red'
                                 };
                                 $riskLabel = match(true) {
-                                    $borrower->credit_score >= 750 => 'Low Risk',
-                                    $borrower->credit_score >= 600 => 'Medium Risk',
+                                    $borrower->trust_score >= 75 => 'Low Risk',
+                                    $borrower->trust_score >= 41 => 'Medium Risk',
                                     default => 'High Risk'
                                 };
+
                                 $colors = ['bg-blue-50 text-blue-600', 'bg-purple-50 text-purple-600', 'bg-emerald-50 text-emerald-600', 'bg-rose-50 text-rose-600', 'bg-amber-50 text-amber-600'];
                                 $colorClass = $colors[ord(substr($borrower->user->name, 0, 1)) % count($colors)];
                             @endphp
@@ -197,7 +225,14 @@
                                     ₦{{ number_format($savingsBalance, 2) }}
                                 </td>
                                 <td class="px-6 py-4">
-                                     <span class="px-2 py-0.5 rounded-full bg-{{ $riskColor }}-100 dark:bg-{{ $riskColor }}-900/30 text-{{ $riskColor }}-700 dark:text-{{ $riskColor }}-400 text-[10px] font-bold uppercase">{{ $riskLabel }}</span>
+                                     <span class="px-2 py-0.5 rounded-full bg-{{ $kycColor }}-100 dark:bg-{{ $kycColor }}-900/30 text-{{ $kycColor }}-700 dark:text-{{ $kycColor }}-400 text-[10px] font-bold uppercase">KYC {{ ucfirst($borrower->kyc_status) }}</span>
+                                </td>
+                                <td class="px-6 py-4">
+                                     @if($borrower->trust_score > 0)
+                                        <span class="px-2 py-0.5 rounded-full bg-{{ $riskColor }}-100 dark:bg-{{ $riskColor }}-900/30 text-{{ $riskColor }}-700 dark:text-{{ $riskColor }}-400 text-[10px] font-bold uppercase">{{ $riskLabel }} ({{ $borrower->trust_score }}%)</span>
+                                     @else
+                                        <span class="px-2 py-0.5 rounded-full bg-gray-100 dark:bg-gray-800 text-gray-500 text-[10px] font-bold uppercase">Unscored</span>
+                                     @endif
                                 </td>
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex gap-2 justify-end">

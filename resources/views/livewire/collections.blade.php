@@ -8,26 +8,28 @@
         
         <div class="flex items-center gap-4">
             <!-- Repayments Records Button -->
-            <a href="{{ route('repayments.records') }}" class="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 py-2 px-4 rounded-xl text-xs font-bold shadow-sm hover:bg-slate-200 transition-colors">
+            <a href="{{ route('repayments.records') }}" class="flex items-center gap-2 bg-primary text-white py-2 px-4 rounded-xl text-xs font-extrabold shadow-md hover:bg-slate-800 transition-all">
                 <span class="material-symbols-outlined text-sm">history</span>
                 Repayments
             </a>
 
             <!-- Focus Mode Toggle -->
-            <div x-data="{ active: @entangle('showSummary') }" class="flex items-center gap-2 cursor-pointer" @click="active = !active">
-                <span class="text-xs font-bold text-slate-500 uppercase">Summary</span>
-                <button type="button" 
-                    class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-                    :class="{ 'bg-primary': active, 'bg-slate-200 dark:bg-slate-700': !active }"
-                    role="switch" 
-                    :aria-checked="active">
-                    <span class="sr-only">Use setting</span>
-                    <span aria-hidden="true" 
-                        class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
-                        :class="{ 'translate-x-5': active, 'translate-x-0': !active }">
-                    </span>
-                </button>
-            </div>
+            @unless(Auth::user()->hasRole('Collection Officer'))
+                <div x-data="{ active: @entangle('showSummary') }" class="flex items-center gap-2 cursor-pointer" @click="active = !active">
+                    <span class="text-xs font-bold text-slate-500 uppercase">Summary</span>
+                    <button type="button" 
+                        class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                        :class="{ 'bg-primary': active, 'bg-slate-200 dark:bg-slate-700': !active }"
+                        role="switch" 
+                        :aria-checked="active">
+                        <span class="sr-only">Use setting</span>
+                        <span aria-hidden="true" 
+                            class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                            :class="{ 'translate-x-5': active, 'translate-x-0': !active }">
+                        </span>
+                    </button>
+                </div>
+            @endunless
 
             <!-- Custom Date Filter Dropdown -->
             <div x-data="{ open: false, selected: @entangle('filter') }" class="relative">

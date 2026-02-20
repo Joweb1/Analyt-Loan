@@ -10,10 +10,12 @@
             <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Repayment History</h2>
         </div>
         <div class="flex gap-3">
-             <button wire:click="export" class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-white rounded-xl text-sm font-bold shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
-                <span class="material-symbols-outlined text-lg">download</span>
-                Export CSV
-            </button>
+            @can('export_and_print')
+                <button wire:click="export" class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-white rounded-xl text-sm font-bold shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
+                    <span class="material-symbols-outlined text-lg">download</span>
+                    Export CSV
+                </button>
+            @endcan
         </div>
     </div>
 

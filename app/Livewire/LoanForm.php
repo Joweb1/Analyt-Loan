@@ -6,56 +6,83 @@ use App\Models\Borrower;
 use App\Models\Collateral;
 use App\Models\Loan;
 use App\Rules\FiftyPercentRule;
+use App\Services\LoanService;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Livewire\Component;
 use Livewire\WithFileUploads;
-use Illuminate\Support\Str;
 
 class LoanForm extends Component
 {
     use WithFileUploads;
 
+    // ... (rest of properties)
+
     // Borrower Selection
     public $borrowerId;
+
     public $selectedBorrower;
+
     public $search = '';
+
     public $searchResults = [];
+
     public $showBorrowerModal = false;
 
     // Loan Details
     public $loan_number;
+
     public $loan_product;
+
     public $release_date;
+
     public $amount;
+
     public $interest_rate;
+
     public $interest_type = 'year';
+
     public $duration = 1;
+
     public $duration_unit = 'month';
+
     public $repayment_cycle = 'monthly';
+
     public $num_repayments = 1;
 
     // Fees & extras
     public $processing_fee;
+
     public $processing_fee_type = 'fixed';
+
     public $insurance_fee;
+
     public $description;
+
     public $attachments; // File upload
+
     public $loan_officer_id;
 
     // Collateral
     public $collateralId;
+
     public $collaterals;
+
     public $staffMembers;
+
+    public $loanProducts = [];
 
     // Edit Mode State
     public $loanId;
+
     public $isEditMode = false;
 
-    protected function rules() 
+    protected function rules()
     {
         return [
             'borrowerId' => 'required|exists:borrowers,id',
             'loan_officer_id' => 'nullable|exists:users,id',
-            'loan_number' => 'required|unique:loans,loan_number' . ($this->isEditMode ? ',' . $this->loanId : ''),
+            'loan_number' => 'required|unique:loans,loan_number'.($this->isEditMode ? ','.$this->loanId : ''),
             'loan_product' => 'required|string',
             'release_date' => 'required|date',
             'amount' => 'required|numeric|min:1',
@@ -74,8 +101,11 @@ class LoanForm extends Component
         ];
     }
 
-    public function mount(Loan $loan = null)
+    public function mount(?Loan $loan = null)
     {
+        $orgId = Auth::user()->organization_id;
+        $this->loanProducts = \App\Models\LoanProduct::orderBy('name')->get();
+
         if ($loan && $loan->exists) {
             $this->isEditMode = true;
             $this->loanId = $loan->id;
@@ -99,7 +129,7 @@ class LoanForm extends Component
             $this->loan_officer_id = $loan->loan_officer_id;
         } else {
             $this->release_date = now()->format('Y-m-d');
-            
+
             // Check for borrower_id in query string
             if ($borrowerId = request()->query('borrower_id')) {
                 $this->selectBorrower($borrowerId);
@@ -107,13 +137,16 @@ class LoanForm extends Component
         }
 
         $this->collaterals = Collateral::whereNull('loan_id')
-            ->when($this->loanId, function($query) {
+            ->when($this->loanId, function ($query) {
                 return $query->orWhere('loan_id', $this->loanId);
             })
             ->get();
 
-        $this->staffMembers = \App\Models\User::where('organization_id', \Illuminate\Support\Facades\Auth::user()->organization_id)
-            ->whereHas('roles', function($q) { $q->whereNotIn('name', ['Borrower']); })
+        $orgId = Auth::user()->organization_id;
+        $this->staffMembers = \App\Models\User::where('organization_id', $orgId)
+            ->whereHas('roles', function ($q) {
+                $q->whereNotIn('name', ['Borrower']);
+            })
             ->get();
     }
 
@@ -122,18 +155,19 @@ class LoanForm extends Component
     {
         if (strlen($this->search) < 2) {
             $this->searchResults = [];
+
             return;
         }
 
         $this->searchResults = Borrower::with('user')
             ->where(function ($query) {
-                $query->where('phone', 'like', '%' . $this->search . '%')
-                      ->orWhere('bvn', 'like', '%' . $this->search . '%')
-                      ->orWhere('national_identity_number', 'like', '%' . $this->search . '%');
+                $query->where('phone', 'like', '%'.$this->search.'%')
+                    ->orWhere('bvn', 'like', '%'.$this->search.'%')
+                    ->orWhere('national_identity_number', 'like', '%'.$this->search.'%');
             })
             ->orWhereHas('user', function ($query) {
-                $query->where('name', 'like', '%' . $this->search . '%')
-                      ->orWhere('email', 'like', '%' . $this->search . '%');
+                $query->where('name', 'like', '%'.$this->search.'%')
+                    ->orWhere('email', 'like', '%'.$this->search.'%');
             })
             ->take(10)
             ->get();
@@ -143,7 +177,7 @@ class LoanForm extends Component
     {
         $this->borrowerId = $id;
         $this->selectedBorrower = Borrower::with('user')->find($id);
-        if (!$this->isEditMode) {
+        if (! $this->isEditMode) {
             $this->generateLoanNumber();
         }
         $this->showBorrowerModal = false;
@@ -157,15 +191,26 @@ class LoanForm extends Component
         $this->selectedBorrower = null;
         $this->search = '';
         $this->searchResults = [];
-        if (!$this->isEditMode) {
-            $this->loan_number = null; 
+        if (! $this->isEditMode) {
+            $this->loan_number = null;
         }
     }
 
     public function generateLoanNumber()
     {
         // Example: LN-2026-X8Y9Z
-        $this->loan_number = 'LN-' . date('Y') . '-' . strtoupper(Str::random(5));
+        $this->loan_number = 'LN-'.date('Y').'-'.strtoupper(Str::random(5));
+    }
+
+    public function updatedLoanProduct($value)
+    {
+        $product = \App\Models\LoanProduct::where('name', $value)->first();
+        if ($product) {
+            $this->interest_rate = $product->default_interest_rate;
+            $this->duration = $product->default_duration;
+            $this->duration_unit = $product->duration_unit;
+            $this->repayment_cycle = $product->repayment_cycle;
+        }
     }
 
     public function updated($propertyName)
@@ -177,7 +222,7 @@ class LoanForm extends Component
             ];
 
             if ($this->collateralId) {
-                $rules['collateralId'][] = new FiftyPercentRule((float)($this->amount ?? 0));
+                $rules['collateralId'][] = new FiftyPercentRule((float) ($this->amount ?? 0));
             }
 
             $this->validateOnly($propertyName, $rules);
@@ -186,12 +231,12 @@ class LoanForm extends Component
         }
     }
 
-    public function saveLoan()
+    public function saveLoan(LoanService $loanService)
     {
         $rules = $this->rules();
 
         if ($this->collateralId) {
-            $rules['collateralId'][] = new FiftyPercentRule((float)($this->amount ?? 0));
+            $rules['collateralId'][] = new FiftyPercentRule((float) ($this->amount ?? 0));
         }
 
         try {
@@ -218,45 +263,24 @@ class LoanForm extends Component
             'insurance_fee' => $this->insurance_fee,
             'description' => $this->description,
             'loan_officer_id' => $this->loan_officer_id,
-            'organization_id' => \Illuminate\Support\Facades\Auth::user()->organization_id,
         ];
-
-        if ($this->attachments) {
-            $attachmentPath = $this->attachments->store('loan-attachments', 'public');
-            $data['attachments'] = [$attachmentPath];
-        }
 
         if ($this->isEditMode) {
             $loan = Loan::find($this->loanId);
-            $loan->update($data);
+            $loanService->updateLoan($loan, $data, $this->attachments, $this->collateralId);
             $message = 'Loan details updated successfully.';
         } else {
-            $loan = Loan::create($data);
-            $message = 'Loan created successfully with Number: ' . $this->loan_number;
-        }
-
-        // Link Collateral
-        // First, detach any previous collateral if changed
-        if ($this->isEditMode && $loan->collateral && $loan->collateral->id != $this->collateralId) {
-            $oldCollateral = $loan->collateral;
-            $oldCollateral->loan_id = null;
-            $oldCollateral->save();
-        }
-
-        $collateral = Collateral::find($this->collateralId);
-        if ($collateral) {
-            $collateral->loan_id = $loan->id;
-            $collateral->status = 'in_vault';
-            $collateral->save();
+            $loan = $loanService->createLoan($data, $this->attachments, $this->collateralId);
+            $message = 'Loan created successfully with Number: '.$this->loan_number;
         }
 
         $this->dispatch('custom-alert', ['message' => $message, 'type' => 'success']);
 
-        if (!$this->isEditMode) {
+        if (! $this->isEditMode) {
             $this->reset([
-                'borrowerId', 'selectedBorrower', 'loan_number', 'loan_product', 'amount', 
-                'interest_rate', 'processing_fee', 'insurance_fee', 'description', 
-                'attachments', 'collateralId'
+                'borrowerId', 'selectedBorrower', 'loan_number', 'loan_product', 'amount',
+                'interest_rate', 'processing_fee', 'insurance_fee', 'description',
+                'attachments', 'collateralId',
             ]);
             $this->mount();
         } else {

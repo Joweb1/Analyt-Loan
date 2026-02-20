@@ -7,6 +7,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "laravel-notification-channels/webpush": "^10.4",
         "laravel/framework": "^12.0",
         "laravel/pennant": "^1.18",
         "laravel/tinker": "^2.10.1",
@@ -16,7 +17,9 @@
         "spatie/laravel-permission": "^6.24"
     },
     "require-dev": {
+        "barryvdh/laravel-ide-helper": "^3.5",
         "fakerphp/faker": "^1.23",
+        "larastan/larastan": "^3.1",
         "laravel/breeze": "^2.3",
         "laravel/pail": "^1.2.2",
         "laravel/pint": "^1.24",

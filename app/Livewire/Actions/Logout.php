@@ -2,7 +2,6 @@
 
 namespace App\Livewire\Actions;
 
-use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 

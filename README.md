@@ -11,6 +11,11 @@ Analyt Loan is a specialized SaaS platform designed to replace manual processes 
 
 ---
 
+## 📖 Navigation
+[🏠 Home (README)](README.md) | [⚙️ Technical Docs](TECHNICAL_DOCUMENTATION.md) | [🤝 Contributing](CONTRIBUTING.md)
+
+---
+
 ## 📖 Table of Contents
 - [Core Philosophy](#-core-philosophy)
 - [Key Features](#-key-features)

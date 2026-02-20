@@ -4,6 +4,11 @@ This document provides an in-depth technical overview of the Analyt Loan platfor
 
 ---
 
+## 📖 Navigation
+[🏠 Home (README)](README.md) | [⚙️ Technical Docs](TECHNICAL_DOCUMENTATION.md) | [🤝 Contributing](CONTRIBUTING.md)
+
+---
+
 ## 1. System Architecture
 
 ### 1.1 Technology Stack

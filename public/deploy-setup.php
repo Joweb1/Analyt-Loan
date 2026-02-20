@@ -2,48 +2,48 @@
 
 /**
  * Laravel Deployment Setup Utility for Shared Hosting (cPanel)
- * 
+ *
  * Since SSH access is not available, this script allows you to run
  * necessary artisan commands via the web browser.
- * 
+ *
  * SECURITY: Delete this file immediately after use.
  */
 
 // Define a simple security token. Change this or pass it as ?token=...
 $secretToken = 'setup_'.substr(md5(date('Y-m-d')), 0, 8);
 
-if (!isset($_GET['token']) || $_GET['token'] !== $secretToken) {
+if (! isset($_GET['token']) || $_GET['token'] !== $secretToken) {
     header('HTTP/1.1 403 Forbidden');
-    die("Access Denied. Provide the correct token. (Hint: The current daily token is: $secretToken)");
+    exit("Access Denied. Provide the correct token. (Hint: The current daily token is: $secretToken)");
 }
 
-require __DIR__ . '/../vendor/autoload.php';
-$app = require_once __DIR__ . '/../bootstrap/app.php';
+require __DIR__.'/../vendor/autoload.php';
+$app = require_once __DIR__.'/../bootstrap/app.php';
 
 use Illuminate\Support\Facades\Artisan;
-use Illuminate\Support\Facades\Schema;
 
 // Create a kernel to handle the request
 $kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
 
-echo "<h1>Laravel Deployment Setup</h1>";
-echo "<pre>";
+echo '<h1>Laravel Deployment Setup</h1>';
+echo '<pre>';
 
-function runCommand($command, $params = []) {
-    echo "Executing: php artisan $command " . json_encode($params) . "
-";
+function runCommand($command, $params = [])
+{
+    echo "Executing: php artisan $command ".json_encode($params).'
+';
     try {
         Artisan::call($command, $params);
-        echo Artisan::output() . "
-";
-        echo "SUCCESS
-";
+        echo Artisan::output().'
+';
+        echo 'SUCCESS
+';
     } catch (\Exception $e) {
-        echo "ERROR: " . $e->getMessage() . "
-";
+        echo 'ERROR: '.$e->getMessage().'
+';
     }
-    echo str_repeat('-', 40) . "
-";
+    echo str_repeat('-', 40).'
+';
 }
 
 // 1. Run Migrations
@@ -68,6 +68,6 @@ if (!file_exists($publicStorage)) {
 }
 */
 
-echo "</pre>";
-echo "<h2>Setup Finished.</h2>";
+echo '</pre>';
+echo '<h2>Setup Finished.</h2>';
 echo "<p style='color:red;'><strong>IMPORTANT: Delete this file (public/deploy-setup.php) immediately!</strong></p>";

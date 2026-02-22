@@ -25,9 +25,8 @@ if (is_dir(__DIR__.'/..')) {
 
 // Try to find the 'analyt' folder
 $possible_analyt_paths = [
-    __DIR__.'/../analyt',
     __DIR__.'/analyt',
-    dirname(__DIR__).'/analyt',
+    __DIR__.'/../analyt',
 ];
 
 $analyt_path = null;

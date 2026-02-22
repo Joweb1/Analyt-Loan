@@ -13,7 +13,8 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         if (config('app.is_production')) {
-            $this->app->usePublicPath(base_path('../htdocs'));
+            // If analyt is inside htdocs, the public path is the parent directory
+            $this->app->usePublicPath(base_path('../'));
         }
     }
 

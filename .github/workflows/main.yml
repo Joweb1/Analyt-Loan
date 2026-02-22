@@ -98,27 +98,29 @@ jobs:
 
     - name: Prepare Deployment Package
       run: |
-        # Update index.php for cPanel structure
-        sed -i "s|__DIR__.'/../|__DIR__.'/../analyt/|g" public/index.php
+        # Update index.php to look for analyt inside the same folder
+        sed -i "s|__DIR__.'/../|__DIR__.'/analyt/|g" public/index.php
         
         # Inject deployment token
         sed -i "s|DEPLOY_TOKEN_PLACEHOLDER|${{ secrets.DEPLOY_TOKEN }}|g" public/deploy-setup.php
 
-        # Zip ONLY the vendor folder to speed up FTP
+        # Zip ONLY the vendor folder
         zip -r vendor.zip vendor/
 
         # Organize for upload
         mkdir -p dist/analyt
-        mkdir -p dist/htdocs
-
-        # 1. Copy app files to analyt (excluding public, vendor, git, etc.)
+        
+        # 1. Copy app files to analyt
         rsync -av . dist/analyt/ --exclude public --exclude vendor --exclude .git --exclude .github --exclude node_modules --exclude tests --exclude "*.zip" --exclude dist
         
         # 2. Add vendor.zip to analyt
         mv vendor.zip dist/analyt/
 
-        # 3. Copy public files to htdocs
-        cp -r public/. dist/htdocs/
+        # 3. Copy public files to dist (these go directly into htdocs)
+        cp -r public/. dist/
+        
+        # 4. Add security to prevent browser access to the core analyt folder
+        echo "Deny from all" > dist/analyt/.htaccess
         
         # Verify
         ls -R dist/
@@ -129,10 +131,9 @@ jobs:
         server: ${{ secrets.FTP_SERVER }}
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
-        # Upload to root (parent of htdocs)
-        server-dir: /
+        # Upload directly into htdocs
+        server-dir: htdocs/
         local-dir: dist/
-        # Include all files in dist (including those not in git)
         git-server: false
 
     - name: Cleanup

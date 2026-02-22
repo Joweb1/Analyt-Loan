@@ -99,20 +99,21 @@ jobs:
     - name: Prepare Deployment Package
       run: |
         # Update index.php for cPanel structure
-        # When moved to 'htdocs', it needs to point back to the 'analyt' folder
         sed -i "s|__DIR__.'/../|__DIR__.'/../analyt/|g" public/index.php
         
-        # Inject the deployment token into the setup script
+        # Inject deployment token
         sed -i "s|DEPLOY_TOKEN_PLACEHOLDER|${{ secrets.DEPLOY_TOKEN }}|g" public/deploy-setup.php
 
-        # Create the zip file of the entire project
+        # Create zip
         zip -r deploy.zip . -x ".git/*" ".github/*" "node_modules/*" "tests/*" "storage/*.key"
 
-        # Organize files for FTP upload
-        # Put everything inside htdocs to be safe
-        mkdir -p ftp_upload/htdocs
-        mv deploy.zip ftp_upload/htdocs/
-        cp public/deploy-setup.php ftp_upload/htdocs/
+        # Organize for upload
+        mkdir -p dist
+        mv deploy.zip dist/
+        cp public/deploy-setup.php dist/
+        
+        # Verify
+        ls -lh dist/
 
     - name: FTP Upload
       uses: SamKirkland/FTP-Deploy-Action@v4.3.5
@@ -120,8 +121,12 @@ jobs:
         server: ${{ secrets.FTP_SERVER }}
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
-        server-dir: ./
-        local-dir: ftp_upload/htdocs/
+        # Upload to htdocs folder specifically
+        server-dir: htdocs/
+        local-dir: dist/
+
+    - name: Cleanup
+      run: rm -rf dist ftp_upload
 
     - name: Trigger Setup Script
       run: |

@@ -6,12 +6,6 @@
  * This script handles unzipping the deployment package and setting up the environment.
  * SECURITY: Delete this file immediately after use.
  */
-
-// Use the database password or a custom deployment token as the security token
-// For safety, let's look for a DEPLOY_TOKEN in the environment or use a hardcoded fallback if needed.
-// However, since we might not have the .env yet (it's in the zip), let's use a query parameter 'token'
-// and compare it against a secret defined in the GitHub Action.
-
 $possible_paths = [
     __DIR__.'/deploy.zip',
     __DIR__.'/../deploy.zip',
@@ -44,11 +38,35 @@ echo '<pre>';
 
 // 1. Unzip the application
 if ($config['zip_file'] && file_exists($config['zip_file'])) {
-    echo "Extracting {$config['zip_file']} to {$config['extract_to']}...\n";
-    // ...
+    echo "Zip found at: {$config['zip_file']}\n";
+    echo "Extracting to: {$config['extract_to']}\n";
+
+    if (! is_dir($config['extract_to'])) {
+        if (! mkdir($config['extract_to'], 0755, true)) {
+            echo "ERROR: Could not create extraction directory {$config['extract_to']}.\n";
+            echo 'Parent directory is: '.dirname($config['extract_to'])."\n";
+            echo 'Is parent writable? '.(is_writable(dirname($config['extract_to'])) ? 'YES' : 'NO')."\n";
+            exit;
+        }
+    }
+
+    if (! is_writable($config['extract_to'])) {
+        echo "ERROR: Extraction directory {$config['extract_to']} is not writable.\n";
+        exit;
+    }
+
+    $zip = new ZipArchive;
+    if ($zip->open($config['zip_file']) === true) {
+        $zip->extractTo($config['extract_to']);
+        $zip->close();
+        echo "SUCCESS: Extraction complete.\n";
+    } else {
+        echo "ERROR: Could not open zip file.\n";
+        exit;
+    }
 } else {
     echo "ERROR: Zip file not found.\n";
-    echo "Current Directory: ".__DIR__."\n";
+    echo 'Current Directory: '.__DIR__."\n";
     echo "Searched paths:\n";
     print_r($possible_paths);
     echo "\nDirectory listing of ".__DIR__.":\n";
@@ -57,7 +75,7 @@ if ($config['zip_file'] && file_exists($config['zip_file'])) {
 }
 
 // 2. Sync Public Folder
-echo "Syncing public assets from analyt/public to htdocs...\n";
+echo "\nSyncing public assets from analyt/public to htdocs...\n";
 function syncDir($src, $dst)
 {
     $dir = opendir($src);
@@ -80,7 +98,7 @@ if (is_dir($config['extract_to'].'/public')) {
 }
 
 // 3. Setup Laravel
-echo "Bootstrapping Laravel for final setup...\n";
+echo "\nBootstrapping Laravel for final setup...\n";
 $autoload = $config['extract_to'].'/vendor/autoload.php';
 $bootstrap = $config['extract_to'].'/bootstrap/app.php';
 
@@ -91,28 +109,33 @@ if (file_exists($autoload) && file_exists($bootstrap)) {
     $kernel = $app->make(Illuminate\Contracts\Console\Kernel::class);
 
     echo "Running Migrations...\n";
-    \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
-    echo \Illuminate\Support\Facades\Artisan::output();
+    try {
+        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+        echo \Illuminate\Support\Facades\Artisan::output();
+    } catch (\Exception $e) {
+        echo 'Migration failed: '.$e->getMessage()."\n";
+    }
 
     echo "Creating Storage Symlink...\n";
-    // Manual symlink since htdocs is outside analyt
     $target = $config['extract_to'].'/storage/app/public';
     $link = $config['public_dir'].'/storage';
     if (! file_exists($link)) {
         if (symlink($target, $link)) {
             echo "SUCCESS: Storage symlink created.\n";
         } else {
-            echo "WARNING: Could not create symlink. You may need to copy storage contents manually.\n";
+            echo "WARNING: Could not create symlink. Using absolute paths might help.\n";
         }
     }
 
     echo "Clearing Caches...\n";
     \Illuminate\Support\Facades\Artisan::call('optimize:clear');
     echo \Illuminate\Support\Facades\Artisan::output();
+} else {
+    echo "ERROR: Laravel files not found in extraction directory. Check extraction logs above.\n";
 }
 
 echo "\nCleanup: Removing zip file...\n";
-unlink($config['zip_file']);
+@unlink($config['zip_file']);
 
 echo '</pre>';
 echo '<h2>Deployment Complete!</h2>';

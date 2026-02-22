@@ -25,17 +25,16 @@ if (is_dir(__DIR__.'/..')) {
 
 // Try to find the 'analyt' folder
 $possible_analyt_paths = [
-    __DIR__.'/analyt',
-    __DIR__.'/../analyt',
+    __DIR__.'/analyt',      // Parallel to analyt folder (htdocs root)
+    __DIR__.'/../analyt',   // One level up from analyt folder (if in a subfolder)
+    realpath(__DIR__.'/..'), // Parent directory (if we are inside analyt/public)
 ];
 
 $analyt_path = null;
 foreach ($possible_analyt_paths as $path) {
-    if (is_dir($path)) {
+    if (is_dir($path) && file_exists($path.'/bootstrap/app.php')) {
         $analyt_path = realpath($path);
-        echo "\nFOUND 'analyt' folder at: $analyt_path\n";
-        echo "Listing contents of 'analyt':\n";
-        print_r(scandir($analyt_path));
+        echo "\nFOUND project core at: $analyt_path\n";
         break;
     }
 }
@@ -48,9 +47,8 @@ if (! $analyt_path) {
 }
 
 $config = [
-    'vendor_zip' => $analyt_path.'/vendor.zip',
     'analyt_dir' => $analyt_path,
-    'public_dir' => __DIR__, // This is htdocs
+    'public_dir' => __DIR__, // This is where the script is located
     'token' => $_GET['token'] ?? null,
     'expected_token' => 'DEPLOY_TOKEN_PLACEHOLDER',
 ];
@@ -62,32 +60,7 @@ if (! $config['token'] || $config['token'] !== $config['expected_token']) {
     exit;
 }
 
-// 1. Unzip the vendor folder
-if (file_exists($config['vendor_zip'])) {
-    echo "\nUnzipping vendor.zip into {$config['analyt_dir']}...\n";
-
-    if (! is_writable($config['analyt_dir'])) {
-        echo "ERROR: App directory {$config['analyt_dir']} is not writable.\n";
-        exit;
-    }
-
-    $zip = new ZipArchive;
-    if ($zip->open($config['vendor_zip']) === true) {
-        $zip->extractTo($config['analyt_dir']);
-        $zip->close();
-        echo "SUCCESS: Vendor extraction complete.\n";
-
-        echo "\nCleanup: Removing vendor.zip...\n";
-        @unlink($config['vendor_zip']);
-    } else {
-        echo "ERROR: Could not open vendor.zip.\n";
-        exit;
-    }
-} else {
-    echo "\nNOTE: vendor.zip not found (it may have been extracted already).\n";
-}
-
-// 2. Setup Laravel
+// 1. Setup Laravel
 echo "\nBootstrapping Laravel for final setup...\n";
 $autoload = $config['analyt_dir'].'/vendor/autoload.php';
 $bootstrap = $config['analyt_dir'].'/bootstrap/app.php';
@@ -108,6 +81,8 @@ if (file_exists($autoload) && file_exists($bootstrap)) {
 
     echo "Creating Storage Symlink...\n";
     $target = $config['analyt_dir'].'/storage/app/public';
+    // If we are in public subfolder, the link should be in current dir
+    // If we are in htdocs, the link should be in current dir
     $link = $config['public_dir'].'/storage';
     if (! file_exists($link)) {
         if (symlink($target, $link)) {

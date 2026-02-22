@@ -98,28 +98,39 @@ jobs:
 
     - name: Prepare Deployment Package
       run: |
-        # Update index.php to look for analyt inside the same folder
-        sed -i "s|__DIR__.'/../|__DIR__.'/analyt/|g" public/index.php
-        
         # Inject deployment token
         sed -i "s|DEPLOY_TOKEN_PLACEHOLDER|${{ secrets.DEPLOY_TOKEN }}|g" public/deploy-setup.php
 
         # Organize for upload
         mkdir -p dist/analyt
         
-        # 1. Zip ONLY the vendor folder
-        zip -r vendor.zip vendor/
-        mv vendor.zip dist/analyt/
-
-        # 2. Copy app files to analyt (excluding public, vendor, git, etc.)
-        # Using find to get a list of files to copy instead of rsync for better control
-        find . -maxdepth 1 ! -name "." ! -name "dist" ! -name "public" ! -name "vendor" ! -name ".git" ! -name ".github" ! -name "node_modules" ! -name "tests" ! -name "*.zip" -exec cp -r {} dist/analyt/ \;
+        # 1. Copy ALL relevant files to dist/analyt
+        find . -maxdepth 1 ! -name "." ! -name "dist" ! -name ".git" ! -name ".github" ! -name "node_modules" ! -name "tests" -exec cp -r {} dist/analyt/ \;
         
-        # 3. Copy public files to dist (these go directly into htdocs)
-        cp -r public/. dist/
+        # 2. Extract deploy-setup.php to htdocs root for easy execution
+        cp public/deploy-setup.php dist/
         
-        # 4. Add security to prevent browser access to the core analyt folder
-        echo "Deny from all" > dist/analyt/.htaccess
+        # 3. Create the root .htaccess to point everything to analyt/public
+        cat <<EOT > dist/.htaccess
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    # Allow accessing the deployment script directly from htdocs
+    RewriteCond %{REQUEST_URI} !^/deploy-setup.php
+    # Don't rewrite if already pointing to analyt/public
+    RewriteCond %{REQUEST_URI} !^/analyt/public/
+    # Rewrite everything else to analyt/public
+    RewriteRule ^(.*)$ analyt/public/\$1 [L]
+</IfModule>
+EOT
+        
+        # 4. Add security to prevent direct browser access to core folders except public
+        cat <<EOT > dist/analyt/.htaccess
+# Prevent direct access to core files but allow the public directory
+RewriteEngine On
+RewriteCond %{REQUEST_URI} ^/analyt/
+RewriteCond %{REQUEST_URI} !^/analyt/public/
+RewriteRule ^.*$ - [F,L]
+EOT
         
         # Verify package structure
         echo "Package root (dist/):"

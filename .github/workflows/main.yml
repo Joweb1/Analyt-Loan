@@ -111,30 +111,30 @@ jobs:
         cp public/deploy-setup.php dist/
         
         # 3. Create the root .htaccess to point everything to analyt/public
-        cat <<EOT > dist/.htaccess
-<IfModule mod_rewrite.c>
-    RewriteEngine On
-    RewriteBase /
-    
-    # Allow accessing the deployment script directly from htdocs
-    RewriteCond %{REQUEST_URI} !^/deploy-setup.php
-    # Don't rewrite if already pointing to analyt/public
-    RewriteCond %{REQUEST_URI} !^/analyt/public/
-    # Rewrite everything else to analyt/public
-    RewriteRule ^(.*)$ analyt/public/\$1 [L,QSA]
-</IfModule>
-EOT
+        sed 's/^        //' <<EOT > dist/.htaccess
+        <IfModule mod_rewrite.c>
+            RewriteEngine On
+            RewriteBase /
+            
+            # Allow accessing the deployment script directly from htdocs
+            RewriteCond %{REQUEST_URI} !^/deploy-setup.php
+            # Don't rewrite if already pointing to analyt/public
+            RewriteCond %{REQUEST_URI} !^/analyt/public/
+            # Rewrite everything else to analyt/public
+            RewriteRule ^(.*)$ analyt/public/\$1 [L,QSA]
+        </IfModule>
+        EOT
         
         # 4. Add security to prevent direct browser access to core folders except public
-        cat <<EOT > dist/analyt/.htaccess
-<IfModule mod_rewrite.c>
-    # Prevent direct access to core files but allow the public directory
-    RewriteEngine On
-    RewriteCond %{REQUEST_URI} ^/analyt/
-    RewriteCond %{REQUEST_URI} !^/analyt/public/
-    RewriteRule ^.*$ - [F,L]
-</IfModule>
-EOT
+        sed 's/^        //' <<EOT > dist/analyt/.htaccess
+        <IfModule mod_rewrite.c>
+            # Prevent direct access to core files but allow the public directory
+            RewriteEngine On
+            RewriteCond %{REQUEST_URI} ^/analyt/
+            RewriteCond %{REQUEST_URI} !^/analyt/public/
+            RewriteRule ^.*$ - [F,L]
+        </IfModule>
+        EOT
         
         # Verify package structure
         echo "Package root (dist/):"

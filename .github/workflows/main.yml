@@ -104,16 +104,24 @@ jobs:
         # Inject deployment token
         sed -i "s|DEPLOY_TOKEN_PLACEHOLDER|${{ secrets.DEPLOY_TOKEN }}|g" public/deploy-setup.php
 
-        # Create zip
-        zip -r deploy.zip . -x ".git/*" ".github/*" "node_modules/*" "tests/*" "storage/*.key"
+        # Zip ONLY the vendor folder to speed up FTP
+        zip -r vendor.zip vendor/
 
         # Organize for upload
-        mkdir -p dist
-        mv deploy.zip dist/
-        cp public/deploy-setup.php dist/
+        mkdir -p dist/analyt
+        mkdir -p dist/htdocs
+
+        # 1. Copy app files to analyt (excluding public, vendor, git, etc.)
+        rsync -av . dist/analyt/ --exclude public --exclude vendor --exclude .git --exclude .github --exclude node_modules --exclude tests --exclude "*.zip" --exclude dist
+        
+        # 2. Add vendor.zip to analyt
+        mv vendor.zip dist/analyt/
+
+        # 3. Copy public files to htdocs
+        cp -r public/. dist/htdocs/
         
         # Verify
-        ls -lh dist/
+        ls -R dist/
 
     - name: FTP Upload
       uses: SamKirkland/FTP-Deploy-Action@v4.3.5
@@ -121,9 +129,14 @@ jobs:
         server: ${{ secrets.FTP_SERVER }}
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
-        # Upload to htdocs folder specifically
-        server-dir: htdocs/
+        # Upload to root (parent of htdocs)
+        server-dir: /
         local-dir: dist/
+        # Include all files in dist (including those not in git)
+        git-server: false
+
+    - name: Cleanup
+      run: rm -rf dist
 
     - name: Cleanup
       run: rm -rf dist ftp_upload

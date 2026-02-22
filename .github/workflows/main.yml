@@ -114,22 +114,26 @@ jobs:
         cat <<EOT > dist/.htaccess
 <IfModule mod_rewrite.c>
     RewriteEngine On
+    RewriteBase /
+    
     # Allow accessing the deployment script directly from htdocs
     RewriteCond %{REQUEST_URI} !^/deploy-setup.php
     # Don't rewrite if already pointing to analyt/public
     RewriteCond %{REQUEST_URI} !^/analyt/public/
     # Rewrite everything else to analyt/public
-    RewriteRule ^(.*)$ analyt/public/\$1 [L]
+    RewriteRule ^(.*)$ analyt/public/\$1 [L,QSA]
 </IfModule>
 EOT
         
         # 4. Add security to prevent direct browser access to core folders except public
         cat <<EOT > dist/analyt/.htaccess
-# Prevent direct access to core files but allow the public directory
-RewriteEngine On
-RewriteCond %{REQUEST_URI} ^/analyt/
-RewriteCond %{REQUEST_URI} !^/analyt/public/
-RewriteRule ^.*$ - [F,L]
+<IfModule mod_rewrite.c>
+    # Prevent direct access to core files but allow the public directory
+    RewriteEngine On
+    RewriteCond %{REQUEST_URI} ^/analyt/
+    RewriteCond %{REQUEST_URI} !^/analyt/public/
+    RewriteRule ^.*$ - [F,L]
+</IfModule>
 EOT
         
         # Verify package structure
@@ -150,13 +154,11 @@ EOT
         git-server: false
 
     - name: Cleanup
-      run: rm -rf dist
-
-    - name: Cleanup
       run: rm -rf dist ftp_upload
 
     - name: Trigger Setup Script
       run: |
-        # Call the setup script on the server to unzip and finalize
+        # Call the setup script on the server to finalize
         # Ensure your APP_URL and DEPLOY_TOKEN secrets are set in GitHub Actions
-        curl -X GET "${{ secrets.APP_URL }}/deploy-setup.php?token=${{ secrets.DEPLOY_TOKEN }}"
+        # We use -L to follow redirects if any, and -i to see headers
+        curl -i -L -X GET "${{ secrets.APP_URL }}/deploy-setup.php?token=${{ secrets.DEPLOY_TOKEN }}"

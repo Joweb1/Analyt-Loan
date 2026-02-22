@@ -40,8 +40,10 @@ foreach ($possible_analyt_paths as $path) {
 }
 
 if (! $analyt_path) {
-    echo "\nERROR: 'analyt' folder not found in any of the searched paths.\n";
+    echo "\nERROR: 'analyt' folder (project core) not found in any of the searched paths.\n";
     print_r($possible_analyt_paths);
+    echo "Current contents of current dir (__DIR__):\n";
+    print_r(scandir(__DIR__));
     echo '</pre>';
     exit;
 }
@@ -56,8 +58,24 @@ $config = [
 if (! $config['token'] || $config['token'] !== $config['expected_token']) {
     header('HTTP/1.1 403 Forbidden');
     echo "\nAccess Denied. Invalid deployment token.";
+    // More detailed debug info for token mismatch
+    $placeholder_replaced = (strpos($config['expected_token'], 'PLACEHOLDER') === false);
+    echo "\nReceived token: ".($config['token'] ? 'PROVIDED (Length: '.strlen($config['token']).')' : 'EMPTY');
+    echo "\nExpected token state: ".($placeholder_replaced ? 'REPLACED WITH SECRET' : 'STILL PLACEHOLDER (GITHUB SECRET NOT PASSED)');
     echo '</pre>';
     exit;
+}
+
+// 0. Environment Check
+echo "\nChecking for .env file...\n";
+if (! file_exists($config['analyt_dir'].'/.env')) {
+    echo "WARNING: .env file NOT FOUND in project core ({$config['analyt_dir']}).\n";
+    if (file_exists($config['analyt_dir'].'/.env.example')) {
+        echo "Found .env.example, using it as fallback (WARNING: DB config may be incorrect).\n";
+        copy($config['analyt_dir'].'/.env.example', $config['analyt_dir'].'/.env');
+    }
+} else {
+    echo "SUCCESS: .env file located.\n";
 }
 
 // 1. Setup Laravel

@@ -102,45 +102,43 @@ jobs:
         sed -i "s|DEPLOY_TOKEN_PLACEHOLDER|${{ secrets.DEPLOY_TOKEN }}|g" public/deploy-setup.php
 
         # Organize for upload
-        mkdir -p dist/analyt
+        mkdir -p dist
         
-        # 1. Copy ALL relevant files to dist/analyt
-        find . -maxdepth 1 ! -name "." ! -name "dist" ! -name ".git" ! -name ".github" ! -name "node_modules" ! -name "tests" -exec cp -r {} dist/analyt/ \;
+        # 1. Copy ALL relevant files to dist/
+        find . -maxdepth 1 ! -name "." ! -name "dist" ! -name ".git" ! -name ".github" ! -name "node_modules" ! -name "tests" -exec cp -r {} dist/ \;
         
-        # 2. Extract deploy-setup.php to htdocs root for easy execution
-        cp public/deploy-setup.php dist/
-        
-        # 3. Create the root .htaccess to point everything to analyt/public
+        # 2. Create the .htaccess inside the automation folder (dist root) to direct to the public folder
         sed 's/^        //' <<EOT > dist/.htaccess
         <IfModule mod_rewrite.c>
             RewriteEngine On
             RewriteBase /
             
-            # Allow accessing the deployment script directly from htdocs
-            RewriteCond %{REQUEST_URI} !^/deploy-setup.php
-            # Don't rewrite if already pointing to analyt/public
-            RewriteCond %{REQUEST_URI} !^/analyt/public/
-            # Rewrite everything else to analyt/public
-            RewriteRule ^(.*)$ analyt/public/\$1 [L,QSA]
+            # Allow accessing the deployment script directly if it's in the root
+            # (Though it's likely in public/ now)
+            RewriteCond %{REQUEST_URI} !^/?deploy-setup.php
+            
+            # Don't rewrite if already pointing to public/
+            RewriteCond %{REQUEST_URI} !^/?public/
+            
+            # Rewrite everything else to public/
+            RewriteRule ^(.*)$ public/\$1 [L,QSA]
         </IfModule>
         EOT
         
-        # 4. Add security to prevent direct browser access to core folders except public
-        sed 's/^        //' <<EOT > dist/analyt/.htaccess
-        <IfModule mod_rewrite.c>
-            # Prevent direct access to core files but allow the public directory
-            RewriteEngine On
-            RewriteCond %{REQUEST_URI} ^/analyt/
-            RewriteCond %{REQUEST_URI} !^/analyt/public/
-            RewriteRule ^.*$ - [F,L]
-        </IfModule>
+        # 3. Add security to prevent direct access to core folders except public
+        sed 's/^        //' <<EOT >> dist/.htaccess
+        
+        # Prevent direct access to core files but allow the public directory
+        RewriteCond %{REQUEST_URI} !^/?public/
+        RewriteCond %{REQUEST_URI} ^/?(app|bootstrap|config|database|resources|routes|storage|vendor)
+        RewriteRule ^.*$ - [F,L]
         EOT
         
         # Verify package structure
         echo "Package root (dist/):"
         ls -F dist/
-        echo "\nApp core (dist/analyt/):"
-        ls -F dist/analyt/
+        echo "\nPublic core (dist/public/):"
+        ls -F dist/public/
 
     - name: FTP Upload
       uses: SamKirkland/FTP-Deploy-Action@v4.3.5
@@ -148,8 +146,8 @@ jobs:
         server: ${{ secrets.FTP_SERVER }}
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
-        # Upload directly into htdocs
-        server-dir: htdocs/
+        # Upload directly into automation folder
+        server-dir: automation/
         local-dir: dist/
         git-server: false
 

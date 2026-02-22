@@ -149,7 +149,6 @@ jobs:
         # Upload directly into automation folder
         server-dir: automation/
         local-dir: dist/
-        git-server: false
 
     - name: Cleanup
       run: rm -rf dist ftp_upload

@@ -6,9 +6,49 @@
  * This script handles unzipping the vendor folder and setting up the environment.
  * SECURITY: Delete this file immediately after use.
  */
+
+// Debugging: Let's see where we are and what's around us
+echo '<h1>Analyt Loan Deployment Debugger</h1>';
+echo '<pre>';
+echo "Current Directory: ".__DIR__."\n";
+echo "Parent Directory: ".realpath(__DIR__.'/..')."\n\n";
+
+echo "Listing Current Directory (__DIR__):\n";
+print_r(scandir(__DIR__));
+
+echo "\nListing Parent Directory (__DIR__/..):\n";
+if (is_dir(__DIR__.'/..')) {
+    print_r(scandir(__DIR__.'/..'));
+} else {
+    echo "Parent directory not readable.\n";
+}
+
+// Try to find the 'analyt' folder
+$possible_analyt_paths = [
+    __DIR__.'/../analyt',
+    __DIR__.'/analyt',
+    dirname(__DIR__).'/analyt',
+];
+
+$analyt_path = null;
+foreach ($possible_analyt_paths as $path) {
+    if (is_dir($path)) {
+        $analyt_path = realpath($path);
+        echo "\nFOUND 'analyt' folder at: $analyt_path\n";
+        break;
+    }
+}
+
+if (! $analyt_path) {
+    echo "\nERROR: 'analyt' folder not found in any of the searched paths.\n";
+    print_r($possible_analyt_paths);
+    echo '</pre>';
+    exit;
+}
+
 $config = [
-    'vendor_zip' => __DIR__.'/../analyt/vendor.zip',
-    'analyt_dir' => __DIR__.'/../analyt',
+    'vendor_zip' => $analyt_path.'/vendor.zip',
+    'analyt_dir' => $analyt_path,
     'public_dir' => __DIR__, // This is htdocs
     'token' => $_GET['token'] ?? null,
     'expected_token' => 'DEPLOY_TOKEN_PLACEHOLDER',
@@ -16,15 +56,14 @@ $config = [
 
 if (! $config['token'] || $config['token'] !== $config['expected_token']) {
     header('HTTP/1.1 403 Forbidden');
-    exit('Access Denied. Invalid deployment token.');
+    echo "\nAccess Denied. Invalid deployment token.";
+    echo '</pre>';
+    exit;
 }
-
-echo '<h1>Analyt Loan Deployment Utility</h1>';
-echo '<pre>';
 
 // 1. Unzip the vendor folder
 if (file_exists($config['vendor_zip'])) {
-    echo "Unzipping vendor.zip into {$config['analyt_dir']}...\n";
+    echo "\nUnzipping vendor.zip into {$config['analyt_dir']}...\n";
 
     if (! is_writable($config['analyt_dir'])) {
         echo "ERROR: App directory {$config['analyt_dir']} is not writable.\n";
@@ -33,11 +72,10 @@ if (file_exists($config['vendor_zip'])) {
 
     $zip = new ZipArchive;
     if ($zip->open($config['vendor_zip']) === true) {
-        // Extract to analyt folder
         $zip->extractTo($config['analyt_dir']);
         $zip->close();
         echo "SUCCESS: Vendor extraction complete.\n";
-
+        
         echo "\nCleanup: Removing vendor.zip...\n";
         @unlink($config['vendor_zip']);
     } else {
@@ -45,7 +83,7 @@ if (file_exists($config['vendor_zip'])) {
         exit;
     }
 } else {
-    echo "NOTE: vendor.zip not found (it may have been extracted already).\n";
+    echo "\nNOTE: vendor.zip not found (it may have been extracted already).\n";
 }
 
 // 2. Setup Laravel
@@ -64,7 +102,7 @@ if (file_exists($autoload) && file_exists($bootstrap)) {
         \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
         echo \Illuminate\Support\Facades\Artisan::output();
     } catch (\Exception $e) {
-        echo 'Migration failed: '.$e->getMessage()."\n";
+        echo "Migration failed: ".$e->getMessage()."\n";
     }
 
     echo "Creating Storage Symlink...\n";
@@ -74,7 +112,7 @@ if (file_exists($autoload) && file_exists($bootstrap)) {
         if (symlink($target, $link)) {
             echo "SUCCESS: Storage symlink created.\n";
         } else {
-            echo "WARNING: Could not create symlink. Using absolute paths might help.\n";
+            echo "WARNING: Could not create symlink.\n";
         }
     }
 
@@ -82,7 +120,7 @@ if (file_exists($autoload) && file_exists($bootstrap)) {
     \Illuminate\Support\Facades\Artisan::call('optimize:clear');
     echo \Illuminate\Support\Facades\Artisan::output();
 } else {
-    echo "ERROR: Laravel bootstrap files not found. Check if files were uploaded correctly to: {$config['analyt_dir']}\n";
+    echo "ERROR: Laravel bootstrap files not found in {$config['analyt_dir']}.\n";
 }
 
 echo '</pre>';

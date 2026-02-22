@@ -102,6 +102,9 @@ jobs:
         # When moved to 'htdocs', it needs to point back to the 'analyt' folder
         sed -i "s|__DIR__.'/../|__DIR__.'/../analyt/|g" public/index.php
         
+        # Inject the deployment token into the setup script
+        sed -i "s|DEPLOY_TOKEN_PLACEHOLDER|${{ secrets.DEPLOY_TOKEN }}|g" public/deploy-setup.php
+
         # Create the zip file of the entire project
         zip -r deploy.zip . -x ".git/*" ".github/*" "node_modules/*" "tests/*" "storage/*.key"
 
@@ -122,6 +125,5 @@ jobs:
     - name: Trigger Setup Script
       run: |
         # Call the setup script on the server to unzip and finalize
-        # Ensure your APP_URL secret is set in GitHub Actions
-        # Using a fixed token for simplicity, but you can use a secret if preferred.
-        curl -X GET "${{ secrets.APP_URL }}/deploy-setup.php?token=analyt_deploy_secret_2026"
+        # Ensure your APP_URL and DEPLOY_TOKEN secrets are set in GitHub Actions
+        curl -X GET "${{ secrets.APP_URL }}/deploy-setup.php?token=${{ secrets.DEPLOY_TOKEN }}"

@@ -17,12 +17,10 @@ $config = [
     'extract_to' => __DIR__.'/../analyt',
     'public_dir' => __DIR__, // This is htdocs
     'token' => $_GET['token'] ?? null,
-    'expected_token' => 'YOUR_DEPLOYMENT_TOKEN_HERE', // This should be replaced or checked against a secret
+    'expected_token' => 'DEPLOY_TOKEN_PLACEHOLDER',
 ];
 
-// If you want to use a secret from GitHub, you can replace the token line above during the CI/CD build.
-
-if (! $config['token'] || $config['token'] !== 'analyt_deploy_secret_2026') {
+if (! $config['token'] || $config['token'] !== $config['expected_token']) {
     header('HTTP/1.1 403 Forbidden');
     exit('Access Denied. Invalid deployment token.');
 }

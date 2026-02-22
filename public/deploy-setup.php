@@ -10,8 +10,8 @@
 // Debugging: Let's see where we are and what's around us
 echo '<h1>Analyt Loan Deployment Debugger</h1>';
 echo '<pre>';
-echo "Current Directory: ".__DIR__."\n";
-echo "Parent Directory: ".realpath(__DIR__.'/..')."\n\n";
+echo 'Current Directory: '.__DIR__."\n";
+echo 'Parent Directory: '.realpath(__DIR__.'/..')."\n\n";
 
 echo "Listing Current Directory (__DIR__):\n";
 print_r(scandir(__DIR__));
@@ -75,7 +75,7 @@ if (file_exists($config['vendor_zip'])) {
         $zip->extractTo($config['analyt_dir']);
         $zip->close();
         echo "SUCCESS: Vendor extraction complete.\n";
-        
+
         echo "\nCleanup: Removing vendor.zip...\n";
         @unlink($config['vendor_zip']);
     } else {
@@ -102,7 +102,7 @@ if (file_exists($autoload) && file_exists($bootstrap)) {
         \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
         echo \Illuminate\Support\Facades\Artisan::output();
     } catch (\Exception $e) {
-        echo "Migration failed: ".$e->getMessage()."\n";
+        echo 'Migration failed: '.$e->getMessage()."\n";
     }
 
     echo "Creating Storage Symlink...\n";

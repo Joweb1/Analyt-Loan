@@ -34,6 +34,8 @@ foreach ($possible_analyt_paths as $path) {
     if (is_dir($path)) {
         $analyt_path = realpath($path);
         echo "\nFOUND 'analyt' folder at: $analyt_path\n";
+        echo "Listing contents of 'analyt':\n";
+        print_r(scandir($analyt_path));
         break;
     }
 }

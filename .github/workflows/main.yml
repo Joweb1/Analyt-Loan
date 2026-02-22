@@ -104,26 +104,28 @@ jobs:
         # Inject deployment token
         sed -i "s|DEPLOY_TOKEN_PLACEHOLDER|${{ secrets.DEPLOY_TOKEN }}|g" public/deploy-setup.php
 
-        # Zip ONLY the vendor folder
-        zip -r vendor.zip vendor/
-
         # Organize for upload
         mkdir -p dist/analyt
         
-        # 1. Copy app files to analyt
-        rsync -av . dist/analyt/ --exclude public --exclude vendor --exclude .git --exclude .github --exclude node_modules --exclude tests --exclude "*.zip" --exclude dist
-        
-        # 2. Add vendor.zip to analyt
+        # 1. Zip ONLY the vendor folder
+        zip -r vendor.zip vendor/
         mv vendor.zip dist/analyt/
 
+        # 2. Copy app files to analyt (excluding public, vendor, git, etc.)
+        # Using find to get a list of files to copy instead of rsync for better control
+        find . -maxdepth 1 ! -name "." ! -name "dist" ! -name "public" ! -name "vendor" ! -name ".git" ! -name ".github" ! -name "node_modules" ! -name "tests" ! -name "*.zip" -exec cp -r {} dist/analyt/ \;
+        
         # 3. Copy public files to dist (these go directly into htdocs)
         cp -r public/. dist/
         
         # 4. Add security to prevent browser access to the core analyt folder
         echo "Deny from all" > dist/analyt/.htaccess
         
-        # Verify
-        ls -R dist/
+        # Verify package structure
+        echo "Package root (dist/):"
+        ls -F dist/
+        echo "\nApp core (dist/analyt/):"
+        ls -F dist/analyt/
 
     - name: FTP Upload
       uses: SamKirkland/FTP-Deploy-Action@v4.3.5

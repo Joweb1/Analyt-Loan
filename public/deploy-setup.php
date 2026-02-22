@@ -12,8 +12,22 @@
 // However, since we might not have the .env yet (it's in the zip), let's use a query parameter 'token'
 // and compare it against a secret defined in the GitHub Action.
 
+$possible_paths = [
+    __DIR__.'/deploy.zip',
+    __DIR__.'/../deploy.zip',
+    dirname(__DIR__).'/deploy.zip',
+];
+
+$zip_path = null;
+foreach ($possible_paths as $path) {
+    if (file_exists($path)) {
+        $zip_path = $path;
+        break;
+    }
+}
+
 $config = [
-    'zip_file' => file_exists(__DIR__.'/../deploy.zip') ? __DIR__.'/../deploy.zip' : __DIR__.'/deploy.zip',
+    'zip_file' => $zip_path,
     'extract_to' => __DIR__.'/../analyt',
     'public_dir' => __DIR__, // This is htdocs
     'token' => $_GET['token'] ?? null,
@@ -29,23 +43,16 @@ echo '<h1>Analyt Loan Deployment Utility</h1>';
 echo '<pre>';
 
 // 1. Unzip the application
-if (file_exists($config['zip_file'])) {
+if ($config['zip_file'] && file_exists($config['zip_file'])) {
     echo "Extracting {$config['zip_file']} to {$config['extract_to']}...\n";
-
-    $zip = new ZipArchive;
-    if ($zip->open($config['zip_file']) === true) {
-        if (! is_dir($config['extract_to'])) {
-            mkdir($config['extract_to'], 0755, true);
-        }
-        $zip->extractTo($config['extract_to']);
-        $zip->close();
-        echo "SUCCESS: Extraction complete.\n";
-    } else {
-        echo "ERROR: Could not open zip file.\n";
-        exit;
-    }
+    // ...
 } else {
-    echo "ERROR: Zip file not found at {$config['zip_file']}.\n";
+    echo "ERROR: Zip file not found.\n";
+    echo "Current Directory: ".__DIR__."\n";
+    echo "Searched paths:\n";
+    print_r($possible_paths);
+    echo "\nDirectory listing of ".__DIR__.":\n";
+    print_r(scandir(__DIR__));
     exit;
 }
 

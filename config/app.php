@@ -41,6 +41,10 @@ return [
 
     'debug' => (bool) env('APP_DEBUG', false),
 
+    'is_production' => (bool) env('APP_IS_PRODUCTION', false),
+
+    'is_development' => (bool) env('APP_IS_DEVELOPMENT', true),
+
     /*
     |--------------------------------------------------------------------------
     | Application URL

@@ -12,7 +12,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        if (config('app.is_production')) {
+            $this->app->usePublicPath(base_path('../htdocs'));
+        }
     }
 
     /**

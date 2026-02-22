@@ -109,8 +109,9 @@ jobs:
         zip -r deploy.zip . -x ".git/*" ".github/*" "node_modules/*" "tests/*" "storage/*.key"
 
         # Organize files for FTP upload
+        # Put everything inside htdocs to be safe
         mkdir -p ftp_upload/htdocs
-        mv deploy.zip ftp_upload/
+        mv deploy.zip ftp_upload/htdocs/
         cp public/deploy-setup.php ftp_upload/htdocs/
 
     - name: FTP Upload
@@ -119,8 +120,8 @@ jobs:
         server: ${{ secrets.FTP_SERVER }}
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
-        server-dir: /
-        local-dir: ftp_upload/
+        server-dir: ./
+        local-dir: ftp_upload/htdocs/
 
     - name: Trigger Setup Script
       run: |

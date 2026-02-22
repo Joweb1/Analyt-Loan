@@ -13,7 +13,7 @@
 // and compare it against a secret defined in the GitHub Action.
 
 $config = [
-    'zip_file' => __DIR__.'/../deploy.zip',
+    'zip_file' => file_exists(__DIR__.'/../deploy.zip') ? __DIR__.'/../deploy.zip' : __DIR__.'/deploy.zip',
     'extract_to' => __DIR__.'/../analyt',
     'public_dir' => __DIR__, // This is htdocs
     'token' => $_GET['token'] ?? null,

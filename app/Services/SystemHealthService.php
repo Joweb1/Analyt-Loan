@@ -36,7 +36,7 @@ class SystemHealthService
 
         // 3. Storage Check
         try {
-            if (Storage::disk('public')->exists('.')) {
+            if (Storage::disk()->exists('.')) {
                 $status['storage'] = ['level' => 'success', 'message' => 'Storage permissions verified (RW).'];
             }
         } catch (\Exception $e) {

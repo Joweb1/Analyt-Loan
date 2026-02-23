@@ -114,15 +114,36 @@ class GeneralSettings extends Component
         ];
 
         if ($this->logo) {
-            $data['logo_path'] = $this->logo->store('logos', 'public');
+            $filename = \Illuminate\Support\Str::random(40).'.'.$this->logo->getClientOriginalExtension();
+            $path = 'logos/'.$filename;
+            $stream = fopen($this->logo->getRealPath(), 'r');
+            \Illuminate\Support\Facades\Storage::disk('supabase')->put($path, $stream);
+            if (is_resource($stream)) {
+                fclose($stream);
+            }
+            $data['logo_path'] = $path;
         }
 
         if ($this->signature) {
-            $data['signature_path'] = $this->signature->store('signatures', 'public');
+            $filename = \Illuminate\Support\Str::random(40).'.'.$this->signature->getClientOriginalExtension();
+            $path = 'signatures/'.$filename;
+            $stream = fopen($this->signature->getRealPath(), 'r');
+            \Illuminate\Support\Facades\Storage::disk('supabase')->put($path, $stream);
+            if (is_resource($stream)) {
+                fclose($stream);
+            }
+            $data['signature_path'] = $path;
         }
 
         if ($this->kyc_document) {
-            $data['kyc_document_path'] = $this->kyc_document->store('kyc-docs', 'public');
+            $filename = \Illuminate\Support\Str::random(40).'.'.$this->kyc_document->getClientOriginalExtension();
+            $path = 'kyc-docs/'.$filename;
+            $stream = fopen($this->kyc_document->getRealPath(), 'r');
+            \Illuminate\Support\Facades\Storage::disk('supabase')->put($path, $stream);
+            if (is_resource($stream)) {
+                fclose($stream);
+            }
+            $data['kyc_document_path'] = $path;
         }
 
         $this->organization->update($data);

@@ -6,7 +6,7 @@
             <h1 class="text-2xl font-bold text-slate-900">{{ Auth::user()->first_name }}</h1>
         </div>
         @if($organization->logo_path)
-            <img src="{{ Storage::url($organization->logo_path) }}" class="h-10 w-10 object-contain rounded-full border border-slate-200 bg-white" alt="Logo">
+            <img src="{{ $organization->logo_url }}" class="h-10 w-10 object-contain rounded-full border border-slate-200 bg-white" alt="Logo">
         @else
              <div class="h-10 w-10 rounded-full bg-brand flex items-center justify-center text-white font-bold">
                 {{ substr($organization->name, 0, 1) }}

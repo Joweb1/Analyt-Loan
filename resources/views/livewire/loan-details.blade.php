@@ -901,8 +901,8 @@
                         <!-- Image Section -->
                         <div>
                             <div class="aspect-video rounded-2xl bg-slate-100 dark:bg-slate-800 overflow-hidden border border-slate-200 dark:border-slate-700 relative">
-                                @if($loan->collateral->image_path)
-                                    <img src="{{ asset($loan->collateral->image_path) }}" alt="{{ $loan->collateral->name }}" class="w-full h-full object-cover">
+                                @if($loan->collateral->image_url)
+                                    <img src="{{ $loan->collateral->image_url }}" alt="{{ $loan->collateral->name }}" class="w-full h-full object-cover">
                                 @else
                                     <div class="w-full h-full flex flex-col items-center justify-center text-slate-400">
                                         <span class="material-symbols-outlined text-6xl opacity-50">image</span>

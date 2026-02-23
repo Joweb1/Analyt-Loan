@@ -66,6 +66,10 @@ class Collateral extends Model
         'status',
     ];
 
+    protected $appends = [
+        'image_url',
+    ];
+
     protected $casts = [
         'documents' => 'array',
         'registered_date' => 'date',
@@ -75,5 +79,18 @@ class Collateral extends Model
     public function loan(): BelongsTo
     {
         return $this->belongsTo(Loan::class);
+    }
+
+    public function getImageUrlAttribute(): ?string
+    {
+        if (! $this->image_path) {
+            return null;
+        }
+
+        if (filter_var($this->image_path, FILTER_VALIDATE_URL)) {
+            return $this->image_path;
+        }
+
+        return \Illuminate\Support\Facades\Storage::url($this->image_path);
     }
 }

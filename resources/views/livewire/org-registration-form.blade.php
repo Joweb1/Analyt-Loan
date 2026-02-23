@@ -2,6 +2,16 @@
     <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white dark:bg-gray-800 shadow-md overflow-hidden sm:rounded-lg">
         <h2 class="text-2xl font-bold text-center mb-6 dark:text-white">Register Organization</h2>
         
+        @if ($errors->any())
+            <div class="mb-4 p-2 bg-red-100 text-red-700 text-xs rounded">
+                <ul>
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+        
         <form wire:submit.prevent="save" class="space-y-4">
             <!-- Org Details -->
             <div>

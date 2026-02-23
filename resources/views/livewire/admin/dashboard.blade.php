@@ -111,7 +111,7 @@
                     <div class="flex items-center gap-4">
                         <div class="w-10 h-10 bg-slate-50 dark:bg-slate-800 rounded-lg flex items-center justify-center shrink-0">
                             @if($org->logo_path)
-                                <img src="{{ Storage::url($org->logo_path) }}" class="w-full h-full object-contain rounded-lg">
+                                <img src="{{ $org->logo_url }}" class="w-full h-full object-contain rounded-lg">
                             @else
                                 <span class="material-symbols-outlined text-slate-400">business</span>
                             @endif

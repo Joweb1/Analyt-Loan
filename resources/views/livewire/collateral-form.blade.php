@@ -191,7 +191,7 @@
                                         <span class="text-white font-bold text-sm">Change Image</span>
                                     </div>
                                 @elseif ($current_image)
-                                    <img src="{{ asset($current_image) }}" class="absolute inset-0 w-full h-full object-cover">
+                                    <img src="{{ \Illuminate\Support\Facades\Storage::url($current_image) }}" class="absolute inset-0 w-full h-full object-cover">
                                     <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                                         <span class="text-white font-bold text-sm">Change Image</span>
                                     </div>

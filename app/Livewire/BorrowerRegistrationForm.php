@@ -323,26 +323,67 @@ class BorrowerRegistrationForm extends Component
 
             // File Uploads
             if ($this->passport_photo) {
-                $borrower->passport_photograph = $this->passport_photo->store('passport-photos', 'public');
+                $filename = \Illuminate\Support\Str::random(40).'.'.$this->passport_photo->getClientOriginalExtension();
+                $path = 'passport-photos/'.$filename;
+                $stream = fopen($this->passport_photo->getRealPath(), 'r');
+                \Illuminate\Support\Facades\Storage::disk('supabase')->put($path, $stream);
+                if (is_resource($stream)) {
+                    fclose($stream);
+                }
+                $borrower->passport_photograph = $path;
             }
             if ($this->biometric_data) {
-                $borrower->biometric_data = $this->biometric_data->store('biometrics', 'public');
+                $filename = \Illuminate\Support\Str::random(40).'.'.$this->biometric_data->getClientOriginalExtension();
+                $path = 'biometrics/'.$filename;
+                $stream = fopen($this->biometric_data->getRealPath(), 'r');
+                \Illuminate\Support\Facades\Storage::disk('supabase')->put($path, $stream);
+                if (is_resource($stream)) {
+                    fclose($stream);
+                }
+                $borrower->biometric_data = $path;
             }
             if ($this->bank_statement) {
-                $borrower->bank_statement = $this->bank_statement->store('bank-statements', 'public');
+                $filename = \Illuminate\Support\Str::random(40).'.'.$this->bank_statement->getClientOriginalExtension();
+                $path = 'bank-statements/'.$filename;
+                $stream = fopen($this->bank_statement->getRealPath(), 'r');
+                \Illuminate\Support\Facades\Storage::disk('supabase')->put($path, $stream);
+                if (is_resource($stream)) {
+                    fclose($stream);
+                }
+                $borrower->bank_statement = $path;
             }
             if ($this->identity_document) {
-                $borrower->identity_document = $this->identity_document->store('identity-documents', 'public');
+                $filename = \Illuminate\Support\Str::random(40).'.'.$this->identity_document->getClientOriginalExtension();
+                $path = 'identity-documents/'.$filename;
+                $stream = fopen($this->identity_document->getRealPath(), 'r');
+                \Illuminate\Support\Facades\Storage::disk('supabase')->put($path, $stream);
+                if (is_resource($stream)) {
+                    fclose($stream);
+                }
+                $borrower->identity_document = $path;
             }
             if ($this->income_proof) {
-                $borrower->income_proof = $this->income_proof->store('income-proofs', 'public');
+                $filename = \Illuminate\Support\Str::random(40).'.'.$this->income_proof->getClientOriginalExtension();
+                $path = 'income-proofs/'.$filename;
+                $stream = fopen($this->income_proof->getRealPath(), 'r');
+                \Illuminate\Support\Facades\Storage::disk('supabase')->put($path, $stream);
+                if (is_resource($stream)) {
+                    fclose($stream);
+                }
+                $borrower->income_proof = $path;
             }
 
             // Save Custom Data
             // Handle file uploads in custom data
             foreach ($this->customData as $key => $value) {
                 if ($value instanceof \Illuminate\Http\UploadedFile) {
-                    $path = $value->store('custom-files', 'public');
+                    $filename = \Illuminate\Support\Str::random(40).'.'.$value->getClientOriginalExtension();
+                    $path = 'custom-files/'.$filename;
+                    $stream = fopen($value->getRealPath(), 'r');
+                    \Illuminate\Support\Facades\Storage::disk('supabase')->put($path, $stream);
+                    if (is_resource($stream)) {
+                        fclose($stream);
+                    }
                     $this->customData[$key] = $path;
                 }
             }

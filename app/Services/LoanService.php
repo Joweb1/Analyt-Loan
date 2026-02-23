@@ -19,7 +19,13 @@ class LoanService
             $data['organization_id'] ??= Auth::user()->organization_id;
 
             if ($attachment) {
-                $attachmentPath = $attachment->store('loan-attachments', 'public');
+                $filename = \Illuminate\Support\Str::random(40).'.'.$attachment->getClientOriginalExtension();
+                $attachmentPath = 'loan-attachments/'.$filename;
+                $stream = fopen($attachment->getRealPath(), 'r');
+                \Illuminate\Support\Facades\Storage::disk('supabase')->put($attachmentPath, $stream);
+                if (is_resource($stream)) {
+                    fclose($stream);
+                }
                 $data['attachments'] = [$attachmentPath];
             }
 
@@ -40,7 +46,13 @@ class LoanService
     {
         return DB::transaction(function () use ($loan, $data, $attachment, $collateralId) {
             if ($attachment) {
-                $attachmentPath = $attachment->store('loan-attachments', 'public');
+                $filename = \Illuminate\Support\Str::random(40).'.'.$attachment->getClientOriginalExtension();
+                $attachmentPath = 'loan-attachments/'.$filename;
+                $stream = fopen($attachment->getRealPath(), 'r');
+                \Illuminate\Support\Facades\Storage::disk('supabase')->put($attachmentPath, $stream);
+                if (is_resource($stream)) {
+                    fclose($stream);
+                }
                 $data['attachments'] = array_merge($loan->attachments ?? [], [$attachmentPath]);
             }
 

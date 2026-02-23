@@ -150,8 +150,14 @@ class CollateralForm extends Component
         ];
 
         if ($this->image) {
-            $path = $this->image->store('collaterals', 'public');
-            $data['image_path'] = 'storage/'.$path; // Adjust depending on storage link
+            $filename = \Illuminate\Support\Str::random(40).'.'.$this->image->getClientOriginalExtension();
+            $path = 'collaterals/'.$filename;
+            $stream = fopen($this->image->getRealPath(), 'r');
+            \Illuminate\Support\Facades\Storage::disk('supabase')->put($path, $stream);
+            if (is_resource($stream)) {
+                fclose($stream);
+            }
+            $data['image_path'] = $path;
         }
 
         if ($this->collateral_id) {

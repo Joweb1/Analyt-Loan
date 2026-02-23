@@ -38,38 +38,70 @@ class AdminDashboard extends Component
     public function mount()
     {
         $orgId = Auth::user()->organization_id;
+        $cacheKey = "admin_dashboard_stats_{$orgId}";
 
-        $this->totalLoaned = Loan::where('organization_id', $orgId)->sum('amount');
+        $stats = \Illuminate\Support\Facades\Cache::remember($cacheKey, now()->addMinutes(15), function () use ($orgId) {
+            $totalLoaned = Loan::where('organization_id', $orgId)->sum('amount');
+            $totalCollected = Repayment::whereHas('loan', function ($query) use ($orgId) {
+                $query->where('organization_id', $orgId);
+            })->sum('amount');
+            $totalCustomers = Borrower::where('organization_id', $orgId)->count();
 
-        $this->totalCollected = Repayment::whereHas('loan', function ($query) use ($orgId) {
-            $query->where('organization_id', $orgId);
-        })->sum('amount');
+            $activeLoansCount = Loan::where('organization_id', $orgId)->where('status', 'active')->count();
+            $paidLoansCount = Loan::where('organization_id', $orgId)->where('status', 'repaid')->count();
+            $defaultedLoansCount = Loan::where('organization_id', $orgId)->where('status', 'overdue')->count();
 
-        $this->totalCustomers = Borrower::where('organization_id', $orgId)->count();
+            $activeAmount = Loan::where('organization_id', $orgId)->where('status', 'active')->sum('amount');
+            $repaidAmount = Loan::where('organization_id', $orgId)->where('status', 'repaid')->sum('amount');
+            $overdueAmount = Loan::where('organization_id', $orgId)->where('status', 'overdue')->sum('amount');
 
-        $this->activeLoansCount = Loan::where('organization_id', $orgId)->where('status', 'active')->count();
-        $this->paidLoansCount = Loan::where('organization_id', $orgId)->where('status', 'repaid')->count();
-        $this->defaultedLoansCount = Loan::where('organization_id', $orgId)->where('status', 'overdue')->count();
-
-        $this->activeAmount = Loan::where('organization_id', $orgId)->where('status', 'active')->sum('amount');
-        $this->repaidAmount = Loan::where('organization_id', $orgId)->where('status', 'repaid')->sum('amount');
-        $this->overdueAmount = Loan::where('organization_id', $orgId)->where('status', 'overdue')->sum('amount');
-
-        // Fetch Last 7 Days Pulse (Repayments Trend)
-        $this->pulseData = collect(range(6, 0))->map(function ($daysAgo) use ($orgId) {
-            $date = now()->subDays($daysAgo)->startOfDay();
-            $amount = Repayment::whereHas('loan', function ($q) use ($orgId) {
+            // Fetch Last 7 Days Pulse in ONE query
+            $startDate = now()->subDays(6)->startOfDay();
+            $repayments = Repayment::whereHas('loan', function ($q) use ($orgId) {
                 $q->where('organization_id', $orgId);
-            })->whereDate('paid_at', $date)->sum('amount');
+            })
+                ->where('paid_at', '>=', $startDate)
+                ->selectRaw('DATE(paid_at) as paid_date, SUM(amount) as total')
+                ->groupBy('paid_date')
+                ->get()
+                ->pluck('total', 'paid_date');
 
-            return [
-                'day' => $date->format('D'),
-                'amount' => (float) $amount,
-                'formatted' => number_format($amount, 0),
-            ];
-        })->toArray();
+            $pulseData = collect(range(6, 0))->map(function ($daysAgo) use ($repayments) {
+                $date = now()->subDays($daysAgo);
+                $dateKey = $date->format('Y-m-d');
+                $amount = $repayments->get($dateKey, 0);
 
-        \App\Services\ActionTaskService::generateDailyTasks($orgId);
+                return [
+                    'day' => $date->format('D'),
+                    'amount' => (float) $amount,
+                    'formatted' => number_format($amount, 0),
+                ];
+            })->toArray();
+
+            return compact(
+                'totalLoaned',
+                'totalCollected',
+                'totalCustomers',
+                'activeLoansCount',
+                'paidLoansCount',
+                'defaultedLoansCount',
+                'activeAmount',
+                'repaidAmount',
+                'overdueAmount',
+                'pulseData'
+            );
+        });
+
+        foreach ($stats as $key => $value) {
+            $this->{$key} = $value;
+        }
+
+        // Cache task generation to run only once every hour per organization
+        \Illuminate\Support\Facades\Cache::remember("daily_tasks_run_{$orgId}", now()->addHour(), function () use ($orgId) {
+            \App\Services\ActionTaskService::generateDailyTasks($orgId);
+
+            return true;
+        });
 
         $this->loadActionItems($orgId);
     }

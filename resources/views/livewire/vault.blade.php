@@ -85,7 +85,7 @@
                                     <div class="flex items-center gap-4">
                                         <div class="size-10 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-primary group-hover:scale-105 transition-transform overflow-hidden">
                                             @if($asset->image_path)
-                                                <img src="{{ asset($asset->image_path) }}" class="w-full h-full object-cover">
+                                                <img src="{{ $asset->image_url }}" class="w-full h-full object-cover">
                                             @else
                                                 <span class="material-symbols-outlined text-xl">inventory_2</span>
                                             @endif
@@ -206,7 +206,7 @@
                         <div>
                             <div class="aspect-video rounded-2xl bg-slate-100 dark:bg-slate-800 overflow-hidden border border-slate-200 dark:border-slate-700 relative">
                                 @if($viewingAsset->image_path)
-                                    <img src="{{ asset($viewingAsset->image_path) }}" class="w-full h-full object-cover">
+                                    <img src="{{ $viewingAsset->image_url }}" class="w-full h-full object-cover">
                                 @else
                                     <div class="w-full h-full flex flex-col items-center justify-center text-slate-400">
                                         <span class="material-symbols-outlined text-6xl opacity-50">image</span>

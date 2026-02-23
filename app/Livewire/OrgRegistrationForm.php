@@ -33,57 +33,78 @@ class OrgRegistrationForm extends Component
 
     public function save()
     {
-        $this->phone = $this->sterilize($this->phone);
+        try {
+            \Illuminate\Support\Facades\Log::info('OrgRegistrationForm::save started');
+            $this->phone = $this->sterilize($this->phone);
 
-        $this->validate([
-            'orgName' => 'required|string|max:255',
-            'orgEmail' => 'required|email|max:255',
-            'orgLogo' => 'nullable|image|max:2048',
-            'adminName' => 'required|string|max:255',
-            'phone' => 'required|string|size:13|unique:users,phone',
-            'email' => 'nullable|email|unique:users,email',
-            'password' => 'required|string|confirmed|min:8',
-        ]);
+            $this->validate([
+                'orgName' => 'required|string|max:255',
+                'orgEmail' => 'required|email|max:255',
+                'orgLogo' => 'nullable|image|max:2048',
+                'adminName' => 'required|string|max:255',
+                'phone' => 'required|string|size:13|unique:users,phone',
+                'email' => 'nullable|email|unique:users,email',
+                'password' => 'required|string|confirmed|min:8',
+            ]);
+            \Illuminate\Support\Facades\Log::info('OrgRegistrationForm validation passed');
 
-        $logoPath = null;
-        if ($this->orgLogo) {
-            $logoPath = $this->orgLogo->store('logos', 'public');
+            $logoPath = null;
+            if ($this->orgLogo) {
+                \Illuminate\Support\Facades\Log::info('OrgRegistrationForm storing logo on supabase disk manually');
+                $filename = \Illuminate\Support\Str::random(40).'.'.$this->orgLogo->getClientOriginalExtension();
+                $logoPath = 'logos/'.$filename;
+
+                // Read from temporary local storage and put to Supabase
+                $stream = fopen($this->orgLogo->getRealPath(), 'r');
+                \Illuminate\Support\Facades\Storage::disk('supabase')->put($logoPath, $stream);
+                if (is_resource($stream)) {
+                    fclose($stream);
+                }
+
+                \Illuminate\Support\Facades\Log::info('OrgRegistrationForm logo stored at: '.$logoPath);
+            }
+
+            // Create Org
+            \Illuminate\Support\Facades\Log::info('OrgRegistrationForm creating organization');
+            $org = Organization::create([
+                'name' => $this->orgName,
+                'email' => $this->orgEmail,
+                'slug' => \Illuminate\Support\Str::slug($this->orgName),
+                'logo_path' => $logoPath,
+                'status' => 'active', // Allow login
+                'kyc_status' => 'pending', // Needs approval
+            ]);
+            \Illuminate\Support\Facades\Log::info('OrgRegistrationForm organization created with ID: '.$org->id);
+
+            // Create Admin User
+            $user = User::create([
+                'organization_id' => $org->id,
+                'name' => $this->adminName,
+                'phone' => $this->phone,
+                'email' => $this->email,
+                'password' => Hash::make($this->password),
+            ]);
+
+            // Link owner
+            $org->owner_id = $user->id;
+            $org->save();
+
+            // Assign Role
+            /** @var \Spatie\Permission\Models\Role|null $adminRole */
+            $adminRole = Role::where('name', 'Admin')->first();
+            if ($adminRole) {
+                $user->assignRole($adminRole);
+            }
+
+            // Login
+            Auth::login($user);
+
+            return redirect()->route('dashboard');
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('OrgRegistrationForm::save failed: '.$e->getMessage());
+            \Illuminate\Support\Facades\Log::error($e->getTraceAsString());
+            throw $e;
         }
-
-        // Create Org
-        $org = Organization::create([
-            'name' => $this->orgName,
-            'email' => $this->orgEmail,
-            'slug' => \Illuminate\Support\Str::slug($this->orgName),
-            'logo_path' => $logoPath,
-            'status' => 'active', // Allow login
-            'kyc_status' => 'pending', // Needs approval
-        ]);
-
-        // Create Admin User
-        $user = User::create([
-            'organization_id' => $org->id,
-            'name' => $this->adminName,
-            'phone' => $this->phone,
-            'email' => $this->email,
-            'password' => Hash::make($this->password),
-        ]);
-
-        // Link owner
-        $org->owner_id = $user->id;
-        $org->save();
-
-        // Assign Role
-        /** @var \Spatie\Permission\Models\Role|null $adminRole */
-        $adminRole = Role::where('name', 'Admin')->first();
-        if ($adminRole) {
-            $user->assignRole($adminRole);
-        }
-
-        // Login
-        Auth::login($user);
-
-        return redirect()->route('dashboard');
     }
 
     public function render()

@@ -111,6 +111,10 @@ class Loan extends Model
         'status',
     ];
 
+    protected $appends = [
+        'attachment_urls',
+    ];
+
     protected $casts = [
         'release_date' => 'date',
         'amount' => 'decimal:2',
@@ -147,6 +151,17 @@ class Loan extends Model
     public function loanOfficer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'loan_officer_id');
+    }
+
+    public function getAttachmentUrlsAttribute(): array
+    {
+        if (! $this->attachments) {
+            return [];
+        }
+
+        return collect($this->attachments)->map(function ($path) {
+            return \Illuminate\Support\Facades\Storage::url($path);
+        })->toArray();
     }
 
     /**

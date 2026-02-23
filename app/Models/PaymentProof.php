@@ -61,6 +61,10 @@ class PaymentProof extends Model
         'paid_at',
     ];
 
+    protected $appends = [
+        'receipt_url',
+    ];
+
     protected $casts = [
         'paid_at' => 'datetime',
         'amount' => 'decimal:2',
@@ -79,5 +83,10 @@ class PaymentProof extends Model
     public function borrower(): BelongsTo
     {
         return $this->belongsTo(Borrower::class);
+    }
+
+    public function getReceiptUrlAttribute(): ?string
+    {
+        return $this->receipt_path ? \Illuminate\Support\Facades\Storage::url($this->receipt_path) : null;
     }
 }

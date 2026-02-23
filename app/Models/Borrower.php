@@ -118,6 +118,14 @@ class Borrower extends Model
         'onboarding_step',
     ];
 
+    protected $appends = [
+        'photo_url',
+        'passport_photograph_url',
+        'identity_document_url',
+        'bank_statement_url',
+        'income_proof_url',
+    ];
+
     protected $attributes = [
         'kyc_status' => 'pending',
     ];
@@ -153,5 +161,40 @@ class Borrower extends Model
     {
         $this->trust_score = \App\Services\TrustScoringService::calculate($this);
         $this->save();
+    }
+
+    /**
+     * URL Accessors
+     */
+    public function getPhotoUrlAttribute($value): ?string
+    {
+        if (! $value) {
+            return null;
+        }
+        if (filter_var($value, FILTER_VALIDATE_URL)) {
+            return $value;
+        }
+
+        return \Illuminate\Support\Facades\Storage::url($value);
+    }
+
+    public function getPassportPhotographUrlAttribute(): ?string
+    {
+        return $this->passport_photograph ? \Illuminate\Support\Facades\Storage::url($this->passport_photograph) : null;
+    }
+
+    public function getIdentityDocumentUrlAttribute(): ?string
+    {
+        return $this->identity_document ? \Illuminate\Support\Facades\Storage::url($this->identity_document) : null;
+    }
+
+    public function getBankStatementUrlAttribute(): ?string
+    {
+        return $this->bank_statement ? \Illuminate\Support\Facades\Storage::url($this->bank_statement) : null;
+    }
+
+    public function getIncomeProofUrlAttribute(): ?string
+    {
+        return $this->income_proof ? \Illuminate\Support\Facades\Storage::url($this->income_proof) : null;
     }
 }

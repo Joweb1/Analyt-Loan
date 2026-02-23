@@ -4,7 +4,6 @@ namespace App\Livewire;
 
 use App\Models\Borrower;
 use App\Models\User;
-use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -181,9 +180,9 @@ class BorrowerProfile extends Component
         ];
 
         if ($this->new_photo) {
-            $path = $this->new_photo->store('borrower-photos', 'public');
-            $borrowerData['photo_url'] = Storage::url($path);
-            $this->photo_url = $borrowerData['photo_url'];
+            $path = $this->new_photo->store('borrower-photos', 'supabase');
+            $borrowerData['photo_url'] = $path;
+            $this->photo_url = \Illuminate\Support\Facades\Storage::url($path);
         }
 
         $this->borrower->update($borrowerData);

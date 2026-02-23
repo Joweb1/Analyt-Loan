@@ -7,7 +7,7 @@
     }
 
     if ($logoPath) {
-        $faviconUrl = asset('storage/' . $logoPath);
+        $faviconUrl = \Illuminate\Support\Facades\Storage::url($logoPath);
     } else {
         // SVG data URI for the 'A' fallback
         // Background: #0f172a (Deep dark blue/Slate-900)

@@ -39,13 +39,17 @@ class PlatformSetting extends Model
 
     public static function get($key, $default = null)
     {
-        $setting = static::where('key', $key)->first();
+        return \Illuminate\Support\Facades\Cache::remember("platform_setting_{$key}", now()->addDay(), function () use ($key, $default) {
+            $setting = static::where('key', $key)->first();
 
-        return $setting ? $setting->value : $default;
+            return $setting ? $setting->value : $default;
+        });
     }
 
     public static function set($key, $value, $type = 'string', $description = null)
     {
+        \Illuminate\Support\Facades\Cache::forget("platform_setting_{$key}");
+
         return static::updateOrCreate(
             ['key' => $key],
             [

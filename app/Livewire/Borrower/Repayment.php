@@ -63,7 +63,7 @@ class Repayment extends Component
 
         $path = null;
         if ($this->receipt) {
-            $path = $this->receipt->store('payment-proofs', 'public');
+            $path = $this->receipt->store('payment-proofs', 'supabase');
         }
 
         PaymentProof::create([

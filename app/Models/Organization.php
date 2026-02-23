@@ -133,6 +133,12 @@ class Organization extends Model
         'repayment_account_name',
     ];
 
+    protected $appends = [
+        'logo_url',
+        'signature_url',
+        'kyc_document_url',
+    ];
+
     /**
      * Get the attributes that should be cast.
      *
@@ -188,5 +194,20 @@ class Organization extends Model
     public function collaterals(): HasMany
     {
         return $this->hasMany(Collateral::class);
+    }
+
+    public function getLogoUrlAttribute(): ?string
+    {
+        return $this->logo_path ? \Illuminate\Support\Facades\Storage::url($this->logo_path) : null;
+    }
+
+    public function getSignatureUrlAttribute(): ?string
+    {
+        return $this->signature_path ? \Illuminate\Support\Facades\Storage::url($this->signature_path) : null;
+    }
+
+    public function getKycDocumentUrlAttribute(): ?string
+    {
+        return $this->kyc_document_path ? \Illuminate\Support\Facades\Storage::url($this->kyc_document_path) : null;
     }
 }

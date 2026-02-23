@@ -13,7 +13,7 @@
                                 <div class="flex items-center space-x-3">
                                     <div class="h-12 w-12 rounded-full bg-gray-200 dark:bg-zinc-700 flex items-center justify-center overflow-hidden">
                                         @if($org->logo_path)
-                                            <img src="{{ Storage::url($org->logo_path) }}" alt="{{ $org->name }}" class="h-full w-full object-cover">
+                                            <img src="{{ $org->logo_url }}" alt="{{ $org->name }}" class="h-full w-full object-cover">
                                         @else
                                             <span class="text-lg font-bold text-gray-500">{{ substr($org->name, 0, 1) }}</span>
                                         @endif
@@ -94,10 +94,10 @@
             <div class="p-8 border-b border-slate-50 dark:border-slate-800 flex items-center justify-between">
                 <div class="flex items-center gap-4">
                     <div class="w-14 h-14 bg-slate-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center">
-                        <template x-if="selectedOrg.logo_path">
-                            <img :src="'/storage/' + selectedOrg.logo_path" class="w-full h-full object-contain rounded-2xl">
+                        <template x-if="selectedOrg.logo_url">
+                            <img :src="selectedOrg.logo_url" class="w-full h-full object-contain rounded-2xl">
                         </template>
-                        <template x-if="!selectedOrg.logo_path">
+                        <template x-if="!selectedOrg.logo_url">
                             <span class="material-symbols-outlined text-2xl text-slate-400">business</span>
                         </template>
                     </div>

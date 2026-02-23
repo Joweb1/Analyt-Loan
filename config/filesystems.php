@@ -60,6 +60,17 @@ return [
             'report' => false,
         ],
 
+        'supabase' => [
+            'driver' => 'supabase',
+            'key' => env('SUPABASE_SECRET_KEY'),
+            'endpoint' => env('SUPABASE_URL'),
+            'bucket' => env('SUPABASE_BUCKET'),
+            'public' => true, // Set to false for private buckets
+            'visibility' => 'public',
+            'throw' => true,
+            'report' => true,
+        ],
+
     ],
 
     /*

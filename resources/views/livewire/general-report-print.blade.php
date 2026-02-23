@@ -15,7 +15,7 @@
     <header class="flex justify-between items-start border-b-4 border-slate-900 pb-8 mb-10">
         <div class="flex items-center gap-6">
             @if($organization->logo_path)
-                <img src="{{ asset('storage/' . $organization->logo_path) }}" class="h-20 w-auto object-contain">
+                <img src="{{ \Illuminate\Support\Facades\Storage::url($organization->logo_path) }}" class="h-20 w-auto object-contain">
             @else
                 <div class="size-20 bg-primary rounded-2xl flex items-center justify-center text-white">
                     <span class="material-symbols-outlined text-5xl">account_balance</span>
@@ -174,7 +174,7 @@
             <p class="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-8">Organization Signature/Stamp</p>
             <div class="flex justify-end items-end h-16">
                 @if($organization->signature_path)
-                    <img src="{{ asset('storage/' . $organization->signature_path) }}" class="h-16 w-auto object-contain">
+                    <img src="{{ \Illuminate\Support\Facades\Storage::url($organization->signature_path) }}" class="h-16 w-auto object-contain">
                 @else
                     <div class="h-12 border-b border-dotted border-slate-400 w-2/3 ml-auto"></div>
                 @endif

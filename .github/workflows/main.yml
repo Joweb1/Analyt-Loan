@@ -76,7 +76,7 @@ jobs:
         DB_DATABASE: database/database.sqlite
       run: php artisan test
 
-  deploy:
+  prepare-artifact-and-push:
     needs: testing
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
@@ -88,74 +88,29 @@ jobs:
       with:
         php-version: '8.4'
 
-    - name: Install Dependencies
+    - name: Install Production Dependencies
       run: composer install --no-dev --optimize-autoloader --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
-    - name: Install NPM Dependencies & Build
+    - name: Install NPM Dependencies & Build Assets
       run: |
         npm install
         npm run build
 
-    - name: Prepare Deployment Package
+    - name: Create Release Zip
       run: |
-        # Inject deployment token
-        sed -i "s|DEPLOY_TOKEN_PLACEHOLDER|${{ secrets.DEPLOY_TOKEN }}|g" public/deploy-setup.php
+        zip -r release.zip . -x ".git/*" ".github/*" "node_modules/*" "tests/*" "phpstan.neon" "phpunit.xml" ".dockerignore" "docker-compose.yml" "Dockerfile"
 
-        # Organize for upload
-        mkdir -p dist
-        
-        # 1. Copy ALL relevant files to dist/
-        find . -maxdepth 1 ! -name "." ! -name "dist" ! -name ".git" ! -name ".github" ! -name "node_modules" ! -name "tests" -exec cp -r {} dist/ \;
-        
-        # 2. Create the .htaccess inside the automation folder (dist root) to direct to the public folder
-        sed 's/^        //' <<EOT > dist/.htaccess
-        <IfModule mod_rewrite.c>
-            RewriteEngine On
-            RewriteBase /
-            
-            # Allow accessing the deployment script directly if it's in the root
-            # (Though it's likely in public/ now)
-            RewriteCond %{REQUEST_URI} !^/?deploy-setup.php
-            
-            # Don't rewrite if already pointing to public/
-            RewriteCond %{REQUEST_URI} !^/?public/
-            
-            # Rewrite everything else to public/
-            RewriteRule ^(.*)$ public/\$1 [L,QSA]
-        </IfModule>
-        EOT
-        
-        # 3. Add security to prevent direct access to core folders except public
-        sed 's/^        //' <<EOT >> dist/.htaccess
-        
-        # Prevent direct access to core files but allow the public directory
-        RewriteCond %{REQUEST_URI} !^/?public/
-        RewriteCond %{REQUEST_URI} ^/?(app|bootstrap|config|database|resources|routes|storage|vendor)
-        RewriteRule ^.*$ - [F,L]
-        EOT
-        
-        # Verify package structure
-        echo "Package root (dist/):"
-        ls -F dist/
-        echo "\nPublic core (dist/public/):"
-        ls -F dist/public/
-
-    - name: FTP Upload
-      uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-      with:
-        server: ${{ secrets.FTP_SERVER }}
-        username: ${{ secrets.FTP_USERNAME }}
-        password: ${{ secrets.FTP_PASSWORD }}
-        # Upload directly into automation folder
-        server-dir: automation/
-        local-dir: dist/
-
-    - name: Cleanup
-      run: rm -rf dist ftp_upload
-
-    - name: Trigger Setup Script
+    - name: Push to deploy branch
       run: |
-        # Call the setup script on the server to finalize
-        # Ensure your APP_URL and DEPLOY_TOKEN secrets are set in GitHub Actions
-        # We use -L to follow redirects if any, and -i to see headers
-        curl -i -L -X GET "${{ secrets.APP_URL }}/deploy-setup.php?token=${{ secrets.DEPLOY_TOKEN }}"
+        mkdir deploy-dir
+        cp release.zip deploy-dir/
+        cp Dockerfile deploy-dir/
+        cd deploy-dir
+        git init
+        git config --global user.name "GitHub Actions"
+        git config --global user.email "actions@github.com"
+        git checkout -b deploy
+        git add .
+        git commit -m "Build artifact for deployment"
+        git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+        git push origin deploy --force

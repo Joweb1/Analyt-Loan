@@ -13,8 +13,9 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         if (config('app.is_production')) {
-            // If analyt is inside htdocs, the public path is the parent directory
-            $this->app->usePublicPath(base_path('../'));
+            // In the Docker structure, the code is in /var/www/laravel-app 
+            // and the public files are in /var/www/html
+            $this->app->usePublicPath(realpath(base_path('../html')));
         }
     }
 

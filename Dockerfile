@@ -41,17 +41,18 @@ RUN rm -rf html/*
 RUN cp -r laravel-app/public/* html/
 RUN cp laravel-app/public/.htaccess html/
 
-# 8. Modify index.php to point to the new paths
+# 10. Modify index.php to point to the new paths
 WORKDIR /var/www/html
 RUN sed -i "s|require __DIR__.'/../vendor/autoload.php';|require __DIR__.'/../laravel-app/vendor/autoload.php';|g" index.php && \
     sed -i "s|\$app = require_once __DIR__.'/../bootstrap/app.php';|\$app = require_once __DIR__.'/../laravel-app/bootstrap/app.php';|g" index.php
 
-# 9. Create Production .env Base
+# 11. Create Production .env Base
 RUN echo "APP_ENV=production" > ../laravel-app/.env && \
     echo "APP_DEBUG=false" >> ../laravel-app/.env && \
+    echo "APP_IS_PRODUCTION=true" >> ../laravel-app/.env && \
     echo "LOG_CHANNEL=stderr" >> ../laravel-app/.env
 
-# 10. Permissions and Storage Linking
+# 12. Permissions and Storage Linking
 RUN chown -R www-data:www-data /var/www/laravel-app \
     && chown -R www-data:www-data /var/www/html
 
@@ -61,12 +62,12 @@ RUN find /var/www/laravel-app -type d -exec chmod 755 {} + \
 RUN rm -rf /var/www/html/storage && \
     ln -s /var/www/laravel-app/storage/app/public /var/www/html/storage
 
-# 11. Final Apache Permissions
+# 13. Final Apache Permissions
 RUN chown -h www-data:www-data /var/www/html/storage
 RUN chown -R www-data:www-data /var/www/laravel-app/storage /var/www/laravel-app/bootstrap/cache \
     && chmod -R 777 /var/www/laravel-app/storage /var/www/laravel-app/bootstrap/cache
 
-# 12. Setup Startup Script
+# 14. Setup Startup Script
 COPY start.sh /usr/local/bin/start.sh
 RUN chmod +x /usr/local/bin/start.sh
 

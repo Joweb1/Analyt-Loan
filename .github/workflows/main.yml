@@ -103,3 +103,33 @@ jobs:
         git commit -m "Build artifact for deployment"
         git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
         git push origin deploy --force
+
+  create-release:
+    needs: prepare-artifact-and-push
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Download Artifacts
+      run: |
+        # We need to recreate the zip for the release asset or use upload/download actions.
+        # For simplicity in this workflow, we recreate it.
+        composer install --no-dev --optimize-autoloader
+        npm install && npm run build
+        zip -r release.zip . -x ".git/*" ".github/*" "node_modules/*" "vendor/*" "tests/*" "phpstan.neon" "phpunit.xml" ".dockerignore" "docker-compose.yml" "Dockerfile" "*.zip" "*.rdb" "enhuljaq_analytloan" "icei_41195783_analytloan"
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: v${{ github.run_number }}
+        name: Release v${{ github.run_number }}
+        draft: false
+        prerelease: false
+        files: |
+          release.zip
+          Dockerfile
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

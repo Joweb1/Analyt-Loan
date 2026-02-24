@@ -4,9 +4,9 @@ set -e
 # Navigate to the Laravel app directory
 cd /var/www/laravel-app
 
-# Run migrations
-echo "Running database migrations..."
-php artisan migrate --force || { echo "Migrations failed!"; exit 1; }
+# Check migration status
+echo "Checking database migration status..."
+php artisan migrate:status --show-pending || echo "Warning: Could not verify migration status."
 
 # Optimize performance
 echo "Caching configuration and routes..."

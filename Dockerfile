@@ -66,6 +66,10 @@ RUN chown -h www-data:www-data /var/www/html/storage
 RUN chown -R www-data:www-data /var/www/laravel-app/storage /var/www/laravel-app/bootstrap/cache \
     && chmod -R 777 /var/www/laravel-app/storage /var/www/laravel-app/bootstrap/cache
 
+# 12. Setup Startup Script
+COPY start.sh /usr/local/bin/start.sh
+RUN chmod +x /usr/local/bin/start.sh
+
 EXPOSE 80
 
-CMD ["apache2-foreground"]
+CMD ["/usr/local/bin/start.sh"]

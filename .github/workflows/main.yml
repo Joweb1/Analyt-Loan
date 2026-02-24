@@ -94,6 +94,7 @@ jobs:
         mkdir deploy-dir
         cp release.zip deploy-dir/
         cp Dockerfile deploy-dir/
+        cp deployment/start.sh deploy-dir/start.sh
         cd deploy-dir
         git init
         git config user.name "github-actions[bot]"
@@ -131,5 +132,6 @@ jobs:
         files: |
           release.zip
           Dockerfile
+          deployment/start.sh
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

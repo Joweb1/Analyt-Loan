@@ -87,7 +87,7 @@ jobs:
 
     - name: Create Release Zip
       run: |
-        zip -r release.zip . -x ".git/*" ".github/*" "node_modules/*" "tests/*" "phpstan.neon" "phpunit.xml" ".dockerignore" "docker-compose.yml" "Dockerfile"
+        zip -r release.zip . -x ".git/*" ".github/*" "node_modules/*" "vendor/*" "tests/*" "phpstan.neon" "phpunit.xml" ".dockerignore" "docker-compose.yml" "Dockerfile" "*.zip" "*.rdb" "enhuljaq_analytloan" "icei_41195783_analytloan"
 
     - name: Push to deploy branch
       run: |

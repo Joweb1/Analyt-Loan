@@ -14,21 +14,29 @@ ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/do
 RUN chmod +x /usr/local/bin/install-php-extensions
 RUN install-php-extensions gd mbstring xml zip pdo_mysql pdo_pgsql opcache intl redis bcmath
 
-# 3. Configure Apache to allow .htaccess rewrites
+# 3. Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# 4. Configure Apache to allow .htaccess rewrites
 RUN a2enmod rewrite
 
-# 4. Setup Working Directory
+# 5. Setup Working Directory
 WORKDIR /var/www
 
-# 5. Copy the Zipped Project from the build context
+# 6. Copy the Zipped Project from the build context
 # The CI/CD pipeline will place 'release.zip' here
 COPY release.zip .
 
-# 6. Unzip and Setup "Shared Hosting" Structure
+# 7. Unzip and Setup "Shared Hosting" Structure
 RUN unzip release.zip -d laravel-app && \
     rm release.zip
 
-# 7. Move Public files to Main Directory (Apache Root)
+# 8. Install PHP Dependencies
+WORKDIR /var/www/laravel-app
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progress
+
+# 9. Move Public files to Main Directory (Apache Root)
+WORKDIR /var/www
 RUN rm -rf html/*
 RUN cp -r laravel-app/public/* html/
 RUN cp laravel-app/public/.htaccess html/

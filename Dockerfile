@@ -59,6 +59,9 @@ RUN chown -R www-data:www-data /var/www/laravel-app \
 RUN find /var/www/laravel-app -type d -exec chmod 755 {} + \
     && find /var/www/laravel-app -type f -exec chmod 644 {} +
 
+RUN find /var/www/html -type d -exec chmod 755 {} + \
+    && find /var/www/html -type f -exec chmod 644 {} +
+
 RUN rm -rf /var/www/html/storage && \
     ln -s /var/www/laravel-app/storage/app/public /var/www/html/storage
 

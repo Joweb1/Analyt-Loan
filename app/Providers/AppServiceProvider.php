@@ -24,6 +24,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        if (config('app.is_production')) {
+            \Illuminate\Support\Facades\URL::forceScheme('https');
+        }
+
         // Implicitly grant "Admin" role all permissions
         Gate::before(function ($user, $ability) {
             return $user->hasRole('Admin') || $user->email === config('app.owner') ? true : null;

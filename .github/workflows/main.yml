@@ -96,10 +96,10 @@ jobs:
         cp Dockerfile deploy-dir/
         cd deploy-dir
         git init
-        git config --global user.name "GitHub Actions"
-        git config --global user.email "actions@github.com"
+        git config user.name "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
         git checkout -b deploy
         git add .
         git commit -m "Build artifact for deployment"
-        git remote add origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+        git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
         git push origin deploy --force

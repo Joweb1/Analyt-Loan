@@ -326,7 +326,7 @@ class BorrowerRegistrationForm extends Component
                 $filename = \Illuminate\Support\Str::random(40).'.'.$this->passport_photo->getClientOriginalExtension();
                 $path = 'passport-photos/'.$filename;
                 $stream = fopen($this->passport_photo->getRealPath(), 'r');
-                \Illuminate\Support\Facades\Storage::disk('supabase')->put($path, $stream);
+                \Illuminate\Support\Facades\Storage::put($path, $stream);
                 if (is_resource($stream)) {
                     fclose($stream);
                 }
@@ -336,7 +336,7 @@ class BorrowerRegistrationForm extends Component
                 $filename = \Illuminate\Support\Str::random(40).'.'.$this->biometric_data->getClientOriginalExtension();
                 $path = 'biometrics/'.$filename;
                 $stream = fopen($this->biometric_data->getRealPath(), 'r');
-                \Illuminate\Support\Facades\Storage::disk('supabase')->put($path, $stream);
+                \Illuminate\Support\Facades\Storage::put($path, $stream);
                 if (is_resource($stream)) {
                     fclose($stream);
                 }
@@ -346,7 +346,7 @@ class BorrowerRegistrationForm extends Component
                 $filename = \Illuminate\Support\Str::random(40).'.'.$this->bank_statement->getClientOriginalExtension();
                 $path = 'bank-statements/'.$filename;
                 $stream = fopen($this->bank_statement->getRealPath(), 'r');
-                \Illuminate\Support\Facades\Storage::disk('supabase')->put($path, $stream);
+                \Illuminate\Support\Facades\Storage::put($path, $stream);
                 if (is_resource($stream)) {
                     fclose($stream);
                 }
@@ -356,7 +356,7 @@ class BorrowerRegistrationForm extends Component
                 $filename = \Illuminate\Support\Str::random(40).'.'.$this->identity_document->getClientOriginalExtension();
                 $path = 'identity-documents/'.$filename;
                 $stream = fopen($this->identity_document->getRealPath(), 'r');
-                \Illuminate\Support\Facades\Storage::disk('supabase')->put($path, $stream);
+                \Illuminate\Support\Facades\Storage::put($path, $stream);
                 if (is_resource($stream)) {
                     fclose($stream);
                 }
@@ -366,7 +366,7 @@ class BorrowerRegistrationForm extends Component
                 $filename = \Illuminate\Support\Str::random(40).'.'.$this->income_proof->getClientOriginalExtension();
                 $path = 'income-proofs/'.$filename;
                 $stream = fopen($this->income_proof->getRealPath(), 'r');
-                \Illuminate\Support\Facades\Storage::disk('supabase')->put($path, $stream);
+                \Illuminate\Support\Facades\Storage::put($path, $stream);
                 if (is_resource($stream)) {
                     fclose($stream);
                 }
@@ -380,7 +380,7 @@ class BorrowerRegistrationForm extends Component
                     $filename = \Illuminate\Support\Str::random(40).'.'.$value->getClientOriginalExtension();
                     $path = 'custom-files/'.$filename;
                     $stream = fopen($value->getRealPath(), 'r');
-                    \Illuminate\Support\Facades\Storage::disk('supabase')->put($path, $stream);
+                    \Illuminate\Support\Facades\Storage::put($path, $stream);
                     if (is_resource($stream)) {
                         fclose($stream);
                     }

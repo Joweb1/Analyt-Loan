@@ -153,7 +153,7 @@ class CollateralForm extends Component
             $filename = \Illuminate\Support\Str::random(40).'.'.$this->image->getClientOriginalExtension();
             $path = 'collaterals/'.$filename;
             $stream = fopen($this->image->getRealPath(), 'r');
-            \Illuminate\Support\Facades\Storage::disk('supabase')->put($path, $stream);
+            \Illuminate\Support\Facades\Storage::put($path, $stream);
             if (is_resource($stream)) {
                 fclose($stream);
             }

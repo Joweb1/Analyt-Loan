@@ -180,7 +180,7 @@ class BorrowerProfile extends Component
         ];
 
         if ($this->new_photo) {
-            $path = $this->new_photo->store('borrower-photos', 'supabase');
+            $path = $this->new_photo->store('borrower-photos');
             $borrowerData['photo_url'] = $path;
             $this->photo_url = \Illuminate\Support\Facades\Storage::url($path);
         }

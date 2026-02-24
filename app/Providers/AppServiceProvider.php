@@ -13,7 +13,7 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         if (config('app.is_production')) {
-            // In the Docker structure, the code is in /var/www/laravel-app 
+            // In the Docker structure, the code is in /var/www/laravel-app
             // and the public files are in /var/www/html
             $this->app->usePublicPath(realpath(base_path('../html')));
         }

@@ -58,7 +58,7 @@ class Repayment extends Component
     {
         $this->validate([
             'amount' => 'required|numeric|min:100',
-            'receipt' => 'nullable|image|max:5120', // 5MB
+            'receipt' => ['nullable', 'image', 'max:5120'], // 5MB
         ]);
 
         $path = null;

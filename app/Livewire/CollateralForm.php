@@ -134,7 +134,7 @@ class CollateralForm extends Component
             'value' => 'required|numeric|min:0',
             'condition' => 'required|string',
             'status' => 'required|in:in_vault,returned',
-            'image' => 'nullable|image|max:2048', // 2MB Max
+            'image' => ['nullable', 'image', 'max:2048'], // 2MB Max
         ]);
 
         $data = [

@@ -159,7 +159,7 @@ class BorrowerProfile extends Component
             // phone removed as it's read-only
             'bvn' => 'nullable|string|max:11',
             'national_identity_number' => 'nullable|string|max:11',
-            'new_photo' => 'nullable|image|max:2048',
+            'new_photo' => ['nullable', 'image', 'max:2048'],
         ]);
 
         $user = $this->borrower->user;

@@ -40,7 +40,7 @@ class OrgRegistrationForm extends Component
             $this->validate([
                 'orgName' => 'required|string|max:255',
                 'orgEmail' => 'required|email|max:255',
-                'orgLogo' => 'nullable|image|max:2048',
+                'orgLogo' => ['nullable', 'image', 'max:2048'],
                 'adminName' => 'required|string|max:255',
                 'phone' => 'required|string|size:13|unique:users,phone',
                 'email' => 'nullable|email|unique:users,email',

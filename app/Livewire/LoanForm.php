@@ -97,7 +97,7 @@ class LoanForm extends Component
             'insurance_fee' => 'nullable|numeric|min:0',
             'description' => 'nullable|string',
             'collateralId' => ['nullable', 'exists:collaterals,id'],
-            'attachments' => 'nullable|file|max:10240', // 10MB max
+            'attachments' => ['nullable', 'file', 'max:10240'], // 10MB max
         ];
     }
 

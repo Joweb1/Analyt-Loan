@@ -1,11 +1,12 @@
 #!/bin/sh
+set -e
 
 # Navigate to the Laravel app directory
 cd /var/www/laravel-app
 
 # Run migrations
 echo "Running database migrations..."
-php artisan migrate --force
+php artisan migrate --force || { echo "Migrations failed!"; exit 1; }
 
 # Optimize performance
 echo "Caching configuration and routes..."

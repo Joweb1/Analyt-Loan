@@ -204,7 +204,8 @@ class BorrowerRegistrationForm extends Component
                     $rule[] = 'date';
                 }
                 if ($type === 'file') {
-                    $rule[] = 'file|max:10240';
+                    $rule[] = 'file';
+                    $rule[] = 'max:10240';
                 } // Generic max
 
                 // Specific rules for identification

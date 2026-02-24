@@ -77,13 +77,27 @@ jobs:
       with:
         php-version: '8.4'
 
-    - name: Install Production Dependencies
+    - name: Install Dependencies
+      run: composer install --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
+
+    - name: Run Pint (Linting)
+      run: ./vendor/bin/pint --test
+
+    - name: Prune Dev Dependencies
       run: composer install --no-dev --optimize-autoloader --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
 
     - name: Install NPM Dependencies & Build Assets
       run: |
         npm install
         npm run build
+
+    - name: Verify Build Assets
+      run: |
+        if [ ! -d "public/build" ]; then
+          echo "ERROR: public/build directory not found! Vite build failed."
+          exit 1
+        fi
+        echo "Vite build assets verified successfully."
 
     - name: Create Release Zip
       run: |

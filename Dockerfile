@@ -41,7 +41,12 @@ RUN rm -rf html/*
 RUN cp -r laravel-app/public/* html/
 RUN cp laravel-app/public/.htaccess html/
 
-# 10. Modify index.php to point to the new paths
+# 10. Verify Assets
+RUN if [ ! -d "/var/www/html/build" ]; then \
+    echo "ERROR: Vite build assets missing in /var/www/html/build. Build will fail." && exit 1; \
+    fi
+
+# 11. Modify index.php to point to the new paths
 WORKDIR /var/www/html
 RUN sed -i "s|require __DIR__.'/../vendor/autoload.php';|require __DIR__.'/../laravel-app/vendor/autoload.php';|g" index.php && \
     sed -i "s|\$app = require_once __DIR__.'/../bootstrap/app.php';|\$app = require_once __DIR__.'/../laravel-app/bootstrap/app.php';|g" index.php

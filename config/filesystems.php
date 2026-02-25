@@ -65,7 +65,6 @@ return [
             'key' => env('SUPABASE_SECRET_KEY', env('SUPABASE_KEY')),
             'endpoint' => env('SUPABASE_URL'),
             'bucket' => env('SUPABASE_BUCKET'),
-            'url' => env('SUPABASE_URL') ? rtrim(env('SUPABASE_URL'), '/').'/storage/v1/object/public/'.env('SUPABASE_BUCKET') : null,
             'is_configured' => ! empty(env('SUPABASE_URL')) && env('APP_ENV') !== 'testing',
             'public' => true, // Set to false for private buckets
             'visibility' => 'public',

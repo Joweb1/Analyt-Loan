@@ -157,11 +157,11 @@ class BorrowerRegistrationForm extends Component
                 'address' => 'required|string',
                 'bvn' => 'required|string|size:11',
                 'nin' => 'required|string|size:11',
-                'passport_photo' => ['required', 'image', 'max:5120'],
-                'biometric_data' => ['nullable', 'file', 'max:10240'],
-                'identity_document' => ['required', 'file', 'max:10240'],
-                'bank_statement' => ['nullable', 'file', 'max:10240'],
-                'income_proof' => ['nullable', 'file', 'max:10240'],
+                'passport_photo' => ($this->passport_photo instanceof \Illuminate\Http\UploadedFile) ? ['required', 'image', 'max:5120'] : ['nullable'],
+                'biometric_data' => ($this->biometric_data instanceof \Illuminate\Http\UploadedFile) ? ['nullable', 'file', 'max:10240'] : ['nullable'],
+                'identity_document' => ($this->identity_document instanceof \Illuminate\Http\UploadedFile) ? ['required', 'file', 'max:10240'] : ['nullable'],
+                'bank_statement' => ($this->bank_statement instanceof \Illuminate\Http\UploadedFile) ? ['nullable', 'file', 'max:10240'] : ['nullable'],
+                'income_proof' => ($this->income_proof instanceof \Illuminate\Http\UploadedFile) ? ['nullable', 'file', 'max:10240'] : ['nullable'],
                 'credit_score' => 'nullable|string',
                 'marital_status' => 'required|string',
                 'dependents' => 'required|integer',
@@ -204,9 +204,27 @@ class BorrowerRegistrationForm extends Component
                     $rule[] = 'date';
                 }
                 if ($type === 'file') {
-                    $rule[] = 'file';
-                    $rule[] = 'max:10240';
-                } // Generic max
+                    // If we already have a path (string) and it's required, we don't need 'required' rule again
+                    // because the file has been uploaded to the temp storage or final storage.
+                    // However, Livewire properties for files usually hold the UploadedFile object until saved.
+                    // The issue is likely that when the form re-validates, it doesn't see the file object anymore or it's not a 'file' type.
+                    $currentValue = $isSystem ? $this->{$fieldName} : ($this->customData[$fieldName] ?? null);
+
+                    if ($isRequired && ! $currentValue) {
+                        $rule[] = 'required';
+                    } else {
+                        $rule[] = 'nullable';
+                    }
+
+                    if ($currentValue instanceof \Illuminate\Http\UploadedFile) {
+                        $rule[] = 'file';
+                        if ($fieldName === 'passport_photo') {
+                            $rule[] = 'image';
+                        }
+                        $rule[] = 'max:10240';
+                    }
+                }
+                // Generic max
 
                 // Specific rules for identification
                 if (in_array($fieldName, ['bvn', 'nin'])) {

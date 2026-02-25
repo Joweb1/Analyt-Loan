@@ -22,7 +22,8 @@ class LoanService
                 $filename = \Illuminate\Support\Str::random(40).'.'.$attachment->getClientOriginalExtension();
                 $attachmentPath = 'loan-attachments/'.$filename;
                 $stream = fopen($attachment->getRealPath(), 'r');
-                \Illuminate\Support\Facades\Storage::put($attachmentPath, $stream);
+                $disk = env('SUPABASE_URL') ? 'supabase' : config('filesystems.default');
+                \Illuminate\Support\Facades\Storage::disk($disk)->put($attachmentPath, $stream);
                 if (is_resource($stream)) {
                     fclose($stream);
                 }
@@ -49,7 +50,8 @@ class LoanService
                 $filename = \Illuminate\Support\Str::random(40).'.'.$attachment->getClientOriginalExtension();
                 $attachmentPath = 'loan-attachments/'.$filename;
                 $stream = fopen($attachment->getRealPath(), 'r');
-                \Illuminate\Support\Facades\Storage::put($attachmentPath, $stream);
+                $disk = env('SUPABASE_URL') ? 'supabase' : config('filesystems.default');
+                \Illuminate\Support\Facades\Storage::disk($disk)->put($attachmentPath, $stream);
                 if (is_resource($stream)) {
                     fclose($stream);
                 }

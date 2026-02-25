@@ -175,26 +175,48 @@ class Borrower extends Model
             return $value;
         }
 
-        return \Illuminate\Support\Facades\Storage::url($value);
+        $disk = env('SUPABASE_URL') ? 'supabase' : config('filesystems.default');
+
+        return \Illuminate\Support\Facades\Storage::disk($disk)->url($value);
     }
 
     public function getPassportPhotographUrlAttribute(): ?string
     {
-        return $this->passport_photograph ? \Illuminate\Support\Facades\Storage::url($this->passport_photograph) : null;
+        if (! $this->passport_photograph) {
+            return null;
+        }
+        $disk = env('SUPABASE_URL') ? 'supabase' : config('filesystems.default');
+
+        return \Illuminate\Support\Facades\Storage::disk($disk)->url($this->passport_photograph);
     }
 
     public function getIdentityDocumentUrlAttribute(): ?string
     {
-        return $this->identity_document ? \Illuminate\Support\Facades\Storage::url($this->identity_document) : null;
+        if (! $this->identity_document) {
+            return null;
+        }
+        $disk = env('SUPABASE_URL') ? 'supabase' : config('filesystems.default');
+
+        return \Illuminate\Support\Facades\Storage::disk($disk)->url($this->identity_document);
     }
 
     public function getBankStatementUrlAttribute(): ?string
     {
-        return $this->bank_statement ? \Illuminate\Support\Facades\Storage::url($this->bank_statement) : null;
+        if (! $this->bank_statement) {
+            return null;
+        }
+        $disk = env('SUPABASE_URL') ? 'supabase' : config('filesystems.default');
+
+        return \Illuminate\Support\Facades\Storage::disk($disk)->url($this->bank_statement);
     }
 
     public function getIncomeProofUrlAttribute(): ?string
     {
-        return $this->income_proof ? \Illuminate\Support\Facades\Storage::url($this->income_proof) : null;
+        if (! $this->income_proof) {
+            return null;
+        }
+        $disk = env('SUPABASE_URL') ? 'supabase' : config('filesystems.default');
+
+        return \Illuminate\Support\Facades\Storage::disk($disk)->url($this->income_proof);
     }
 }

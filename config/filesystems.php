@@ -62,9 +62,10 @@ return [
 
         'supabase' => [
             'driver' => 'supabase',
-            'key' => env('SUPABASE_SECRET_KEY'),
+            'key' => env('SUPABASE_SECRET_KEY', env('SUPABASE_KEY')),
             'endpoint' => env('SUPABASE_URL'),
             'bucket' => env('SUPABASE_BUCKET'),
+            'url' => env('SUPABASE_URL') ? rtrim(env('SUPABASE_URL'), '/').'/storage/v1/object/public/'.env('SUPABASE_BUCKET') : null,
             'public' => true, // Set to false for private buckets
             'visibility' => 'public',
             'throw' => true,

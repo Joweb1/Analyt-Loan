@@ -198,16 +198,31 @@ class Organization extends Model
 
     public function getLogoUrlAttribute(): ?string
     {
-        return $this->logo_path ? \Illuminate\Support\Facades\Storage::url($this->logo_path) : null;
+        if (! $this->logo_path) {
+            return null;
+        }
+        $disk = env('SUPABASE_URL') ? 'supabase' : config('filesystems.default');
+
+        return \Illuminate\Support\Facades\Storage::disk($disk)->url($this->logo_path);
     }
 
     public function getSignatureUrlAttribute(): ?string
     {
-        return $this->signature_path ? \Illuminate\Support\Facades\Storage::url($this->signature_path) : null;
+        if (! $this->signature_path) {
+            return null;
+        }
+        $disk = env('SUPABASE_URL') ? 'supabase' : config('filesystems.default');
+
+        return \Illuminate\Support\Facades\Storage::disk($disk)->url($this->signature_path);
     }
 
     public function getKycDocumentUrlAttribute(): ?string
     {
-        return $this->kyc_document_path ? \Illuminate\Support\Facades\Storage::url($this->kyc_document_path) : null;
+        if (! $this->kyc_document_path) {
+            return null;
+        }
+        $disk = env('SUPABASE_URL') ? 'supabase' : config('filesystems.default');
+
+        return \Illuminate\Support\Facades\Storage::disk($disk)->url($this->kyc_document_path);
     }
 }

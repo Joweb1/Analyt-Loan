@@ -159,8 +159,10 @@ class Loan extends Model
             return [];
         }
 
-        return collect($this->attachments)->map(function ($path) {
-            return \Illuminate\Support\Facades\Storage::url($path);
+        $disk = env('SUPABASE_URL') ? 'supabase' : config('filesystems.default');
+
+        return collect($this->attachments)->map(function ($path) use ($disk) {
+            return \Illuminate\Support\Facades\Storage::disk($disk)->url($path);
         })->toArray();
     }
 

@@ -27,7 +27,7 @@
                                     @if($logo)
                                         <img src="{{ $logo->temporaryUrl() }}" class="w-full h-full object-cover">
                                     @elseif($currentLogo)
-                                        <img src="{{ \Illuminate\Support\Facades\Storage::url($currentLogo) }}" class="w-full h-full object-cover">
+                                        <img src="{{ $organization->logo_url }}" class="w-full h-full object-cover">
                                     @else
                                         <span class="material-symbols-outlined text-gray-400 text-3xl">add_a_photo</span>
                                     @endif
@@ -47,7 +47,7 @@
                                     @if($signature)
                                         <img src="{{ $signature->temporaryUrl() }}" class="w-full h-full object-cover">
                                     @elseif($currentSignature)
-                                        <img src="{{ \Illuminate\Support\Facades\Storage::url($currentSignature) }}" class="w-full h-full object-cover">
+                                        <img src="{{ $organization->signature_url }}" class="w-full h-full object-cover">
                                     @else
                                         <span class="material-symbols-outlined text-gray-400 text-3xl">draw</span>
                                     @endif

@@ -102,7 +102,7 @@
     <div class="h-20 flex items-center justify-start px-8 border-b border-transparent shrink-0">
         <div class="flex items-center gap-3">
             @if($org && $org->logo_path)
-                <img src="{{ Storage::url($org->logo_path) }}" class="size-9 object-contain rounded-lg" alt="{{ $org->name }}">
+                <img src="{{ $org->logo_url }}" class="size-9 object-contain rounded-lg" alt="{{ $org->name }}">
             @else
                 <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white">
                     <span class="material-symbols-outlined text-[20px]">account_balance</span>

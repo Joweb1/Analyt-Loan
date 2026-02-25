@@ -89,7 +89,7 @@
             <!-- Center Logo/Icon -->
             <div class="relative size-20 bg-white rounded-3xl flex items-center justify-center shadow-xl shadow-brand/20 animate-bounce overflow-hidden border-2 border-brand/10">
                 @if($org && $org->logo_path)
-                    <img src="{{ Storage::url($org->logo_path) }}" class="size-14 object-contain" alt="Logo">
+                    <img src="{{ $org->logo_url }}" class="size-14 object-contain" alt="Logo">
                 @else
                     <div class="size-full bg-brand flex items-center justify-center">
                         <span class="material-symbols-outlined text-white text-4xl">account_balance</span>

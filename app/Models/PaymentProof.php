@@ -87,6 +87,12 @@ class PaymentProof extends Model
 
     public function getReceiptUrlAttribute(): ?string
     {
-        return $this->receipt_path ? \Illuminate\Support\Facades\Storage::url($this->receipt_path) : null;
+        if (! $this->receipt_path) {
+            return null;
+        }
+
+        $disk = env('SUPABASE_URL') ? 'supabase' : config('filesystems.default');
+
+        return \Illuminate\Support\Facades\Storage::disk($disk)->url($this->receipt_path);
     }
 }

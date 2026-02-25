@@ -117,7 +117,8 @@ class GeneralSettings extends Component
             $filename = \Illuminate\Support\Str::random(40).'.'.$this->logo->getClientOriginalExtension();
             $path = 'logos/'.$filename;
             $stream = fopen($this->logo->getRealPath(), 'r');
-            \Illuminate\Support\Facades\Storage::put($path, $stream);
+            $disk = env('SUPABASE_URL') ? 'supabase' : config('filesystems.default');
+            \Illuminate\Support\Facades\Storage::disk($disk)->put($path, $stream);
             if (is_resource($stream)) {
                 fclose($stream);
             }
@@ -128,7 +129,8 @@ class GeneralSettings extends Component
             $filename = \Illuminate\Support\Str::random(40).'.'.$this->signature->getClientOriginalExtension();
             $path = 'signatures/'.$filename;
             $stream = fopen($this->signature->getRealPath(), 'r');
-            \Illuminate\Support\Facades\Storage::put($path, $stream);
+            $disk = env('SUPABASE_URL') ? 'supabase' : config('filesystems.default');
+            \Illuminate\Support\Facades\Storage::disk($disk)->put($path, $stream);
             if (is_resource($stream)) {
                 fclose($stream);
             }
@@ -139,7 +141,8 @@ class GeneralSettings extends Component
             $filename = \Illuminate\Support\Str::random(40).'.'.$this->kyc_document->getClientOriginalExtension();
             $path = 'kyc-docs/'.$filename;
             $stream = fopen($this->kyc_document->getRealPath(), 'r');
-            \Illuminate\Support\Facades\Storage::put($path, $stream);
+            $disk = env('SUPABASE_URL') ? 'supabase' : config('filesystems.default');
+            \Illuminate\Support\Facades\Storage::disk($disk)->put($path, $stream);
             if (is_resource($stream)) {
                 fclose($stream);
             }

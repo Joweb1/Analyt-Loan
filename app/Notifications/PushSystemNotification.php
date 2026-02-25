@@ -6,7 +6,6 @@ use App\Models\SystemNotification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
-use Illuminate\Support\Facades\Storage;
 use NotificationChannels\WebPush\WebPushChannel;
 use NotificationChannels\WebPush\WebPushMessage;
 
@@ -40,7 +39,7 @@ class PushSystemNotification extends Notification implements ShouldQueue
     public function toWebPush($notifiable, $notification)
     {
         $org = $this->systemNotification->organization;
-        $logo = $org && $org->logo_path ? Storage::url($org->logo_path) : 'https://ui-avatars.com/api/?name=A&background=0f1729&color=fff';
+        $logo = $org && $org->logo_path ? $org->logo_url : 'https://ui-avatars.com/api/?name=A&background=0f1729&color=fff';
 
         $actorName = $this->systemNotification->user->name ?? 'System';
         $message = $this->systemNotification->message;

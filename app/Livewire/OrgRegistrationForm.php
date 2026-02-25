@@ -54,9 +54,10 @@ class OrgRegistrationForm extends Component
                 $filename = \Illuminate\Support\Str::random(40).'.'.$this->orgLogo->getClientOriginalExtension();
                 $logoPath = 'logos/'.$filename;
 
-                // Read from temporary local storage and put to default disk
+                // Read from temporary local storage and put to supabase disk if configured, else default
                 $stream = fopen($this->orgLogo->getRealPath(), 'r');
-                \Illuminate\Support\Facades\Storage::put($logoPath, $stream);
+                $disk = env('SUPABASE_URL') ? 'supabase' : config('filesystems.default');
+                \Illuminate\Support\Facades\Storage::disk($disk)->put($logoPath, $stream);
                 if (is_resource($stream)) {
                     fclose($stream);
                 }

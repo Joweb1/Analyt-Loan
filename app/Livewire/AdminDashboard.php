@@ -41,7 +41,9 @@ class AdminDashboard extends Component
         $cacheKey = "admin_dashboard_stats_{$orgId}";
 
         $stats = \Illuminate\Support\Facades\Cache::remember($cacheKey, now()->addMinutes(15), function () use ($orgId) {
-            $totalLoaned = Loan::where('organization_id', $orgId)->sum('amount');
+            $totalLoaned = Loan::where('organization_id', $orgId)
+                ->whereIn('status', ['active', 'repaid', 'overdue'])
+                ->sum('amount');
             $totalCollected = Repayment::whereHas('loan', function ($query) use ($orgId) {
                 $query->where('organization_id', $orgId);
             })->sum('amount');

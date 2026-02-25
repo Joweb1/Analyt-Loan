@@ -59,6 +59,7 @@ class ReportsTest extends TestCase
             'organization_id' => $this->organization->id,
             'amount' => 50000,
             'release_date' => now(),
+            'status' => 'active',
         ]);
 
         // Create repayment today

@@ -91,7 +91,7 @@ class Collateral extends Model
             return $this->image_path;
         }
 
-        $disk = env('SUPABASE_URL') ? 'supabase' : config('filesystems.default');
+        $disk = config('filesystems.disks.supabase.is_configured') ? 'supabase' : config('filesystems.default');
 
         return \Illuminate\Support\Facades\Storage::disk($disk)->url($this->image_path);
     }

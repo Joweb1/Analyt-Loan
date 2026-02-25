@@ -341,7 +341,7 @@ class BorrowerRegistrationForm extends Component
             ];
 
             // File Uploads
-            $disk = env('SUPABASE_URL') ? 'supabase' : config('filesystems.default');
+            $disk = config('filesystems.disks.supabase.is_configured') ? 'supabase' : config('filesystems.default');
             if ($this->passport_photo) {
                 $filename = \Illuminate\Support\Str::random(40).'.'.$this->passport_photo->getClientOriginalExtension();
                 $path = 'passport-photos/'.$filename;

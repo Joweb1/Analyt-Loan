@@ -91,7 +91,7 @@ class PaymentProof extends Model
             return null;
         }
 
-        $disk = env('SUPABASE_URL') ? 'supabase' : config('filesystems.default');
+        $disk = config('filesystems.disks.supabase.is_configured') ? 'supabase' : config('filesystems.default');
 
         return \Illuminate\Support\Facades\Storage::disk($disk)->url($this->receipt_path);
     }

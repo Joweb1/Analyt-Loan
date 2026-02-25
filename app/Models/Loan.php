@@ -159,7 +159,7 @@ class Loan extends Model
             return [];
         }
 
-        $disk = env('SUPABASE_URL') ? 'supabase' : config('filesystems.default');
+        $disk = config('filesystems.disks.supabase.is_configured') ? 'supabase' : config('filesystems.default');
 
         return collect($this->attachments)->map(function ($path) use ($disk) {
             return \Illuminate\Support\Facades\Storage::disk($disk)->url($path);

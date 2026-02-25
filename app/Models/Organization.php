@@ -201,7 +201,7 @@ class Organization extends Model
         if (! $this->logo_path) {
             return null;
         }
-        $disk = env('SUPABASE_URL') ? 'supabase' : config('filesystems.default');
+        $disk = config('filesystems.disks.supabase.is_configured') ? 'supabase' : config('filesystems.default');
 
         return \Illuminate\Support\Facades\Storage::disk($disk)->url($this->logo_path);
     }
@@ -211,7 +211,7 @@ class Organization extends Model
         if (! $this->signature_path) {
             return null;
         }
-        $disk = env('SUPABASE_URL') ? 'supabase' : config('filesystems.default');
+        $disk = config('filesystems.disks.supabase.is_configured') ? 'supabase' : config('filesystems.default');
 
         return \Illuminate\Support\Facades\Storage::disk($disk)->url($this->signature_path);
     }
@@ -221,7 +221,7 @@ class Organization extends Model
         if (! $this->kyc_document_path) {
             return null;
         }
-        $disk = env('SUPABASE_URL') ? 'supabase' : config('filesystems.default');
+        $disk = config('filesystems.disks.supabase.is_configured') ? 'supabase' : config('filesystems.default');
 
         return \Illuminate\Support\Facades\Storage::disk($disk)->url($this->kyc_document_path);
     }

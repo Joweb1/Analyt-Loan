@@ -175,7 +175,7 @@ class Borrower extends Model
             return $value;
         }
 
-        $disk = env('SUPABASE_URL') ? 'supabase' : config('filesystems.default');
+        $disk = config('filesystems.disks.supabase.is_configured') ? 'supabase' : config('filesystems.default');
 
         return \Illuminate\Support\Facades\Storage::disk($disk)->url($value);
     }
@@ -185,7 +185,7 @@ class Borrower extends Model
         if (! $this->passport_photograph) {
             return null;
         }
-        $disk = env('SUPABASE_URL') ? 'supabase' : config('filesystems.default');
+        $disk = config('filesystems.disks.supabase.is_configured') ? 'supabase' : config('filesystems.default');
 
         return \Illuminate\Support\Facades\Storage::disk($disk)->url($this->passport_photograph);
     }
@@ -195,7 +195,7 @@ class Borrower extends Model
         if (! $this->identity_document) {
             return null;
         }
-        $disk = env('SUPABASE_URL') ? 'supabase' : config('filesystems.default');
+        $disk = config('filesystems.disks.supabase.is_configured') ? 'supabase' : config('filesystems.default');
 
         return \Illuminate\Support\Facades\Storage::disk($disk)->url($this->identity_document);
     }
@@ -205,7 +205,7 @@ class Borrower extends Model
         if (! $this->bank_statement) {
             return null;
         }
-        $disk = env('SUPABASE_URL') ? 'supabase' : config('filesystems.default');
+        $disk = config('filesystems.disks.supabase.is_configured') ? 'supabase' : config('filesystems.default');
 
         return \Illuminate\Support\Facades\Storage::disk($disk)->url($this->bank_statement);
     }
@@ -215,7 +215,7 @@ class Borrower extends Model
         if (! $this->income_proof) {
             return null;
         }
-        $disk = env('SUPABASE_URL') ? 'supabase' : config('filesystems.default');
+        $disk = config('filesystems.disks.supabase.is_configured') ? 'supabase' : config('filesystems.default');
 
         return \Illuminate\Support\Facades\Storage::disk($disk)->url($this->income_proof);
     }

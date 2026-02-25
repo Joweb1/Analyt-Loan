@@ -39,7 +39,9 @@ class DistributionPanel extends Component
                     $roleQuery->where('name', '!=', 'Borrower');
                 });
             }])
-            ->withSum('loans as total_lent', 'amount')
+            ->withSum(['loans as total_lent' => function ($q) {
+                $q->whereIn('status', ['active', 'repaid', 'overdue']);
+            }], 'amount')
             ->get();
 
         // Calculate total collected manually or via a complex query.
@@ -50,12 +52,15 @@ class DistributionPanel extends Component
             $org->total_collected = $org->loans->flatMap->repayments->sum('amount');
 
             // Monthly Activity
-            $org->monthly_lent = $org->loans()->whereMonth('created_at', now()->month)->sum('amount');
+            $org->monthly_lent = $org->loans()
+                ->whereIn('status', ['active', 'repaid', 'overdue'])
+                ->whereMonth('created_at', now()->month)
+                ->sum('amount');
             $org->monthly_collected = \App\Models\Repayment::whereHas('loan', function ($q) use ($org) {
                 $q->where('organization_id', $org->id);
             })->whereMonth('paid_at', now()->month)->sum('amount');
 
-            $org->active_loans_count = $org->loans->where('status', 'active')->count();
+            $org->active_loans_count = $org->loans->whereIn('status', ['active', 'overdue'])->count();
         }
 
         return view('livewire.admin.distribution-panel', [

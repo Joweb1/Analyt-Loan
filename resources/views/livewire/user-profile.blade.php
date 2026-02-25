@@ -113,7 +113,7 @@
                                 <span class="material-symbols-outlined text-[100px] text-primary">payments</span>
                             </div>
                             <p class="text-sm font-bold text-gray-500 uppercase tracking-wide">Active Loans</p>
-                            <h3 class="text-3xl font-black text-primary dark:text-white mt-1">{{ auth()->user()->borrower?->loans()->where('status', 'active')->count() ?? 0 }}</h3>
+                            <h3 class="text-3xl font-black text-primary dark:text-white mt-1">{{ auth()->user()->borrower?->active_loans_count ?? 0 }}</h3>
                             <p class="text-xs text-blue-600 mt-2 font-medium flex items-center gap-1">
                                 Current Liabilities
                             </p>

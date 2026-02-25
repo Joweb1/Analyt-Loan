@@ -27,7 +27,9 @@ class Reports extends Component
     public function render()
     {
         $orgStats = Organization::withCount(['loans', 'borrowers', 'staff'])
-            ->withSum('loans as total_lent', 'amount')
+            ->withSum(['loans as total_lent' => function ($query) {
+                $query->whereIn('status', ['active', 'repaid', 'overdue']);
+            }], 'amount')
             ->get()
             ->map(function ($org) {
                 $org->total_collected = Repayment::withoutGlobalScopes()
@@ -40,7 +42,9 @@ class Reports extends Component
 
         // Platform Totals
         $totals = [
-            'lent' => Loan::withoutGlobalScopes()->sum('amount'),
+            'lent' => Loan::withoutGlobalScopes()
+                ->whereIn('status', ['active', 'repaid', 'overdue'])
+                ->sum('amount'),
             'collected' => Repayment::withoutGlobalScopes()->sum('amount'),
             'organizations' => Organization::count(),
             'borrowers' => Organization::sum('id'), // Just a placeholder, actually need to sum borrower counts

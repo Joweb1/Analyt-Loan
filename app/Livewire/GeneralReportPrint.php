@@ -94,10 +94,12 @@ class GeneralReportPrint extends Component
 
         // 1. Disbursement Metrics
         $this->metrics['total_disbursed'] = Loan::where('organization_id', $orgId)
+            ->whereIn('status', ['active', 'repaid', 'overdue'])
             ->whereBetween('release_date', [$this->startDate, $this->endDate])
             ->sum('amount');
 
         $this->metrics['disbursement_count'] = Loan::where('organization_id', $orgId)
+            ->whereIn('status', ['active', 'repaid', 'overdue'])
             ->whereBetween('release_date', [$this->startDate, $this->endDate])
             ->count();
 

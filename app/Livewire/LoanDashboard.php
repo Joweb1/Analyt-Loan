@@ -56,7 +56,7 @@ class LoanDashboard extends Component
                 ->sum('amount');
 
             $totalLent = Loan::where('organization_id', $orgId)
-                ->whereIn('status', ['active', 'repaid'])
+                ->whereIn('status', ['active', 'repaid', 'overdue'])
                 ->whereMonth('created_at', now()->month)
                 ->sum('amount');
 

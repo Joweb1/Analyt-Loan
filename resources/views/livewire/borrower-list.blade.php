@@ -44,7 +44,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             @foreach($borrowers as $borrower)
                 @php
-                    $totalDebt = $borrower->loans->sum('amount');
+                    $totalDebt = $borrower->total_debt;
                     $initials = collect(explode(' ', $borrower->user->name))->map(fn($n) => substr($n, 0, 1))->take(2)->join('');
                     
                     $kycColor = match($borrower->kyc_status) {
@@ -179,7 +179,7 @@
                     <tbody>
                         @foreach($borrowers as $borrower)
                             @php
-                                $totalDebt = $borrower->loans->sum('amount');
+                                $totalDebt = $borrower->total_debt;
                                 $savingsBalance = $borrower->savingsAccount->balance ?? 0;
                                 $initials = collect(explode(' ', $borrower->user->name))->map(fn($n) => substr($n, 0, 1))->take(2)->join('');
                                 

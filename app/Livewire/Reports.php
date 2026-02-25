@@ -152,6 +152,7 @@ class Reports extends Component
         }
 
         $disbursed = Loan::where('organization_id', $orgId)
+            ->whereIn('status', ['active', 'repaid', 'overdue'])
             ->whereBetween('release_date', [$startDate, $endDate])
             ->sum('amount');
 
@@ -189,6 +190,7 @@ class Reports extends Component
                 $labels[] = $date->format('D, d M');
 
                 $disbursedData[] = Loan::where('organization_id', $orgId)
+                    ->whereIn('status', ['active', 'repaid', 'overdue'])
                     ->whereDate('release_date', $date->toDateString())
                     ->sum('amount');
 
@@ -206,6 +208,7 @@ class Reports extends Component
                 $labels[] = 'Week '.$start->format('W');
 
                 $disbursedData[] = Loan::where('organization_id', $orgId)
+                    ->whereIn('status', ['active', 'repaid', 'overdue'])
                     ->whereBetween('release_date', [$start, $end])
                     ->sum('amount');
 
@@ -222,6 +225,7 @@ class Reports extends Component
                 $labels[] = $month->format('M Y');
 
                 $disbursedData[] = Loan::where('organization_id', $orgId)
+                    ->whereIn('status', ['active', 'repaid', 'overdue'])
                     ->whereMonth('release_date', $month->month)
                     ->whereYear('release_date', $month->year)
                     ->sum('amount');

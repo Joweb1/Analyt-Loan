@@ -124,6 +124,8 @@ class Borrower extends Model
         'identity_document_url',
         'bank_statement_url',
         'income_proof_url',
+        'total_debt',
+        'active_loans_count',
     ];
 
     protected $attributes = [
@@ -150,6 +152,16 @@ class Borrower extends Model
     public function loans(): HasMany
     {
         return $this->hasMany(Loan::class);
+    }
+
+    public function getTotalDebtAttribute(): float
+    {
+        return (float) $this->loans()->whereIn('status', ['active', 'overdue'])->sum('amount');
+    }
+
+    public function getActiveLoansCountAttribute(): int
+    {
+        return $this->loans()->whereIn('status', ['active', 'overdue'])->count();
     }
 
     public function savingsAccount(): \Illuminate\Database\Eloquent\Relations\HasOne

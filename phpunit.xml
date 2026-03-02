@@ -30,7 +30,7 @@
         <env name="QUEUE_CONNECTION" value="sync"/>
         <env name="SESSION_DRIVER" value="array" force="true"/>
         <env name="FILESYSTEM_DISK" value="public" force="true"/>
-        <env name="SUPABASE_URL" value="http://localhost"/>
+        <env name="SUPABASE_URL" value=""/>
         <env name="SUPABASE_SECRET_KEY" value="mock-key"/>
         <env name="SUPABASE_BUCKET" value="mock-bucket"/>
         <env name="PULSE_ENABLED" value="false"/>

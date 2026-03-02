@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Loan;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -109,7 +110,18 @@ class StatusBoard extends Component
 
     public function fetchBoardData()
     {
+        $user = Auth::user();
+        $isOwner = $user->isAppOwner();
+        $orgId = $user->organization_id;
+
         $baseQuery = Loan::with(['borrower.user', 'collateral', 'repayments']);
+
+        if ($isOwner) {
+            $baseQuery->withoutGlobalScopes();
+        } else {
+            $baseQuery->where('organization_id', $orgId);
+        }
+
         $this->applyFilters($baseQuery);
 
         $this->pending = (clone $baseQuery)->whereIn('status', ['applied', 'verification_pending'])->latest()->get();
@@ -161,8 +173,18 @@ class StatusBoard extends Component
         // Fetch Board Data (Card View) with filters
         $this->fetchBoardData();
 
-        // Fetch List Data with filters
+        $user = Auth::user();
+        $isOwner = $user->isAppOwner();
+        $orgId = $user->organization_id;
+
         $query = Loan::with(['borrower.user', 'collateral', 'repayments']);
+
+        if ($isOwner) {
+            $query->withoutGlobalScopes();
+        } else {
+            $query->where('organization_id', $orgId);
+        }
+
         $this->applyFilters($query);
 
         return view('livewire.status-board', [

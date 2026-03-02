@@ -119,7 +119,7 @@ class OmnibarSearch extends Component
         }
 
         // 3. Search Loans (including prefix statuses)
-        $statusPrefixes = ['active', 'pending', 'repaid', 'overdue', 'repayment'];
+        $statusPrefixes = ['active', 'applied', 'repaid', 'overdue', 'repayment'];
         if (! $prefix || in_array($prefix, array_merge(['loan', 'staff'], $statusPrefixes))) {
             $loans = Loan::where('organization_id', $orgId)
                 ->where(function ($q) use ($search, $prefix) {
@@ -135,7 +135,7 @@ class OmnibarSearch extends Component
                             });
                     }
                 })
-                ->when($prefix && in_array($prefix, ['active', 'pending', 'repaid', 'overdue']), function ($q) use ($prefix) {
+                ->when($prefix && in_array($prefix, ['active', 'applied', 'repaid', 'overdue']), function ($q) use ($prefix) {
                     return $q->where('status', $prefix);
                 })
                 ->when($prefix === 'repayment', function ($q) {

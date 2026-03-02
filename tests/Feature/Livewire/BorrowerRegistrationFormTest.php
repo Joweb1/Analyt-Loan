@@ -132,7 +132,7 @@ class BorrowerRegistrationFormTest extends TestCase
             'kyc_status' => 'approved',
             'status' => 'active',
         ]);
-        
+
         User::factory()->create([
             'email' => 'duplicate@example.com',
             'organization_id' => $otherOrg->id,

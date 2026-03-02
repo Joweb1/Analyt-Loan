@@ -203,7 +203,7 @@ class Loan extends Model
                 $remaining = 0;
             } else {
                 $s->paid_amount = 0;
-                $s->status = $s->due_date->isPast() ? 'overdue' : 'pending';
+                $s->status = $s->due_date->isPast() ? 'overdue' : 'applied';
             }
             $s->save();
         }

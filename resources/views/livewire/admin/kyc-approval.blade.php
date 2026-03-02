@@ -1,7 +1,12 @@
 <div>
-    <div class="flex items-center justify-between mb-6">
-        <h1 class="text-2xl font-bold text-slate-900 dark:text-white">KYC Approval</h1>
-        <p class="text-sm text-slate-500">Review and approve pending KYC applications.</p>
+    <div class="flex items-center gap-4 mb-6">
+        <a href="{{ route('dashboard') }}" class="size-10 flex items-center justify-center bg-white dark:bg-[#1a1f2b] rounded-xl border border-slate-100 dark:border-slate-800 text-slate-500 hover:text-primary transition-colors">
+            <span class="material-symbols-outlined">arrow_back</span>
+        </a>
+        <div>
+            <h1 class="text-2xl font-bold text-slate-900 dark:text-white">KYC Approval</h1>
+            <p class="text-sm text-slate-500">Review and approve pending KYC applications.</p>
+        </div>
     </div>
 
     <div class="bg-white dark:bg-[#1a1f2b] rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 p-6">

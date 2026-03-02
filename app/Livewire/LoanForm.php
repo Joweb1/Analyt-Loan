@@ -5,7 +5,6 @@ namespace App\Livewire;
 use App\Models\Borrower;
 use App\Models\Collateral;
 use App\Models\Loan;
-use App\Rules\FiftyPercentRule;
 use App\Services\LoanService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
@@ -250,29 +249,12 @@ class LoanForm extends Component
 
     public function updated($propertyName)
     {
-        if ($propertyName === 'amount' || $propertyName === 'collateralId') {
-            $rules = [
-                'amount' => 'required|numeric|min:1',
-                'collateralId' => ['nullable', 'exists:collaterals,id'],
-            ];
-
-            if ($this->collateralId) {
-                $rules['collateralId'][] = new FiftyPercentRule((float) ($this->amount ?? 0));
-            }
-
-            $this->validateOnly($propertyName, $rules);
-        } else {
-            $this->validateOnly($propertyName, $this->rules());
-        }
+        $this->validateOnly($propertyName, $this->rules());
     }
 
     public function saveLoan(LoanService $loanService)
     {
         $rules = $this->rules();
-
-        if ($this->collateralId) {
-            $rules['collateralId'][] = new FiftyPercentRule((float) ($this->amount ?? 0));
-        }
 
         try {
             $this->validate($rules);

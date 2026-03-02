@@ -10,8 +10,6 @@ use App\Livewire\Settings\TeamManagement;
 use App\Livewire\UserProfile;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/borrowers', BorrowerList::class)->name('borrowers.index');
-
 // Secure Cron & Queue Triggers (for Shared Hosting)
 Route::get('/cron/schedule', [\App\Http\Controllers\CronController::class, 'runSchedule']);
 Route::get('/cron/queue', [\App\Http\Controllers\CronController::class, 'runQueue']);
@@ -21,6 +19,7 @@ Route::view('/', 'pages.welcome');
 Route::get('/register-org', OrgRegistrationForm::class)->name('register.org');
 
 Route::middleware(['auth', 'update_last_seen'])->group(function () {
+    Route::get('/borrowers', BorrowerList::class)->name('borrowers.index');
     Route::get('profile', UserProfile::class)->name('profile');
 
     Route::get('dashboard', function () {

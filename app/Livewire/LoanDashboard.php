@@ -43,81 +43,70 @@ class LoanDashboard extends Component
 
     public function mount()
     {
-        $orgId = Auth::user()->organization_id;
-        $cacheKey = "loan_dashboard_stats_{$orgId}";
+        $user = Auth::user();
+        $orgId = $user->organization_id;
+        $isOwner = $user->isAppOwner();
 
-        $stats = \Illuminate\Support\Facades\Cache::remember($cacheKey, now()->addMinutes(15), function () use ($orgId) {
-            $repaidToday = Repayment::whereHas('loan', function ($query) use ($orgId) {
-                $query->where('organization_id', $orgId);
-            })->whereDate('paid_at', today())->sum('amount');
+        // Base queries
+        $loanQuery = Loan::query();
+        $repaymentQuery = Repayment::query();
+        $borrowerQuery = Borrower::query();
 
-            $overdueAmount = Loan::where('organization_id', $orgId)
-                ->where('status', 'overdue')
-                ->sum('amount');
-
-            $totalLent = Loan::where('organization_id', $orgId)
-                ->whereIn('status', ['active', 'repaid', 'overdue'])
-                ->whereMonth('created_at', now()->month)
-                ->sum('amount');
-
-            $activeCustomers = Borrower::where('organization_id', $orgId)->count();
-
-            // Fetch Last 7 Days Pulse in ONE query
-            $startDate = now()->subDays(6)->startOfDay();
-            $repayments = Repayment::whereHas('loan', function ($q) use ($orgId) {
-                $q->where('organization_id', $orgId);
-            })
-                ->where('paid_at', '>=', $startDate)
-                ->selectRaw('DATE(paid_at) as paid_date, SUM(amount) as total')
-                ->groupBy('paid_date')
-                ->get()
-                ->pluck('total', 'paid_date');
-
-            $pulseData = collect(range(6, 0))->map(function ($daysAgo) use ($repayments) {
-                $date = now()->subDays($daysAgo);
-                $dateKey = $date->format('Y-m-d');
-                $amount = $repayments->get($dateKey, 0);
-
-                return [
-                    'day' => $date->format('D'),
-                    'amount' => (float) $amount,
-                    'formatted' => number_format($amount, 0),
-                ];
-            })->toArray();
-
-            $activeAmount = Loan::where('organization_id', $orgId)->where('status', 'active')->sum('amount');
-            $repaidAmount = Loan::where('organization_id', $orgId)->where('status', 'repaid')->sum('amount');
-            $overdueAmountTotal = Loan::where('organization_id', $orgId)->where('status', 'overdue')->sum('amount');
-
-            return compact(
-                'repaidToday',
-                'overdueAmount',
-                'totalLent',
-                'activeCustomers',
-                'pulseData',
-                'activeAmount',
-                'repaidAmount',
-                'overdueAmountTotal'
-            );
-        });
-
-        foreach ($stats as $key => $value) {
-            $this->{$key} = $value;
+        if ($isOwner) {
+            $loanQuery->withoutGlobalScopes();
+            $repaymentQuery->withoutGlobalScopes();
+            $borrowerQuery->withoutGlobalScopes();
+        } else {
+            $loanQuery->where('organization_id', $orgId);
+            $repaymentQuery->whereHas('loan', fn ($q) => $q->where('organization_id', $orgId));
+            $borrowerQuery->where('organization_id', $orgId);
         }
+
+        $this->repaidToday = (clone $repaymentQuery)->whereDate('paid_at', today())->sum('amount');
+        $this->overdueAmount = (clone $loanQuery)->where('status', 'overdue')->sum('amount');
+        $this->totalLent = (clone $loanQuery)->whereIn('status', ['approved', 'active', 'repaid', 'overdue'])->whereMonth('created_at', now()->month)->sum('amount');
+        $this->activeCustomers = (clone $borrowerQuery)->count();
+
+        // Fetch Last 7 Days Pulse
+        $startDate = now()->subDays(6)->startOfDay();
+        $pulseRepayments = (clone $repaymentQuery)
+            ->where('paid_at', '>=', $startDate)
+            ->selectRaw('DATE(paid_at) as paid_date, SUM(amount) as total')
+            ->groupBy('paid_date')
+            ->get()
+            ->pluck('total', 'paid_date');
+
+        $this->pulseData = collect(range(6, 0))->map(function ($daysAgo) use ($pulseRepayments) {
+            $date = now()->subDays($daysAgo);
+            $dateKey = $date->format('Y-m-d');
+            $amount = $pulseRepayments->get($dateKey, 0);
+
+            return [
+                'day' => $date->format('D'),
+                'amount' => (float) $amount,
+                'formatted' => number_format($amount, 0),
+            ];
+        })->toArray();
+
+        $this->activeAmount = (clone $loanQuery)->whereIn('status', ['approved', 'active'])->sum('amount');
+        $this->repaidAmount = (clone $loanQuery)->where('status', 'repaid')->sum('amount');
+        $this->overdueAmountTotal = (clone $loanQuery)->where('status', 'overdue')->sum('amount');
 
         // Initial Pipeline Calc
         $this->calculatePipeline();
 
         // Action Box Items
-        \Illuminate\Support\Facades\Cache::remember("daily_tasks_run_{$orgId}", now()->addHour(), function () use ($orgId) {
-            \App\Services\ActionTaskService::generateDailyTasks($orgId);
+        if (! $isOwner) {
+            \Illuminate\Support\Facades\Cache::remember("daily_tasks_run_{$orgId}", now()->addHour(), function () use ($orgId) {
+                \App\Services\ActionTaskService::generateDailyTasks($orgId);
 
-            return true;
-        });
-        $this->loadActionItems($orgId);
+                return true;
+            });
+        }
+        $this->loadActionItems($isOwner ? null : $orgId);
 
         // Chart Data
-        $this->loadChartData($orgId);
+        $this->loadChartData($isOwner ? null : $orgId);
     }
 
     public function updatedFilter()
@@ -127,7 +116,10 @@ class LoanDashboard extends Component
 
     public function calculatePipeline()
     {
-        $orgId = Auth::user()->organization_id;
+        $user = Auth::user();
+        $orgId = $user->organization_id;
+        $isOwner = $user->isAppOwner();
+
         $startDate = today();
         $endDate = today()->endOfDay();
 
@@ -151,18 +143,22 @@ class LoanDashboard extends Component
                 break;
         }
 
-        $this->pipelineApplied = Loan::where('organization_id', $orgId)
-            ->where('status', 'applied')
+        $query = Loan::query();
+        if ($isOwner) {
+            $query->withoutGlobalScopes();
+        } else {
+            $query->where('organization_id', $orgId);
+        }
+
+        $this->pipelineApplied = (clone $query)
             ->whereBetween('created_at', [$startDate, $endDate])
             ->count();
 
-        $this->pipelineApproved = Loan::where('organization_id', $orgId)
-            ->where('status', 'approved')
+        $this->pipelineApproved = (clone $query)->whereIn('status', ['approved', 'active', 'repaid', 'overdue'])
             ->whereBetween('updated_at', [$startDate, $endDate])
             ->count();
 
-        $this->pipelineDeclined = Loan::where('organization_id', $orgId)
-            ->where('status', 'declined')
+        $this->pipelineDeclined = (clone $query)->where('status', 'declined')
             ->whereBetween('updated_at', [$startDate, $endDate])
             ->count();
     }
@@ -171,14 +167,18 @@ class LoanDashboard extends Component
     {
         $user = Auth::user();
         // Query real "Actions" from system_notifications table
-        $this->actionItems = SystemNotification::where('organization_id', $orgId)
-            ->where('is_actionable', true)
-            ->whereNull('read_at')
-            ->where(function ($q) use ($user) {
-                $q->whereNull('recipient_id')
-                    ->orWhere('recipient_id', $user->id);
-            })
-            ->latest()
+        $query = SystemNotification::where('is_actionable', true)
+            ->whereNull('read_at');
+
+        if ($orgId) {
+            $query->where('organization_id', $orgId)
+                ->where(function ($q) use ($user) {
+                    $q->whereNull('recipient_id')
+                        ->orWhere('recipient_id', $user->id);
+                });
+        }
+
+        $this->actionItems = $query->latest()
             ->take(5)
             ->get()
             ->map(function ($notif) {
@@ -192,12 +192,19 @@ class LoanDashboard extends Component
             })->toArray();
     }
 
-    public function loadChartData($orgId)
+    public function loadChartData($orgId = null)
     {
+        $query = Loan::query();
+        if (! $orgId) {
+            $query->withoutGlobalScopes();
+        } else {
+            $query->where('organization_id', $orgId);
+        }
+
         // Collection Pulse: Defaulted vs Active vs Refunded (Repaid)
-        $active = Loan::where('organization_id', $orgId)->where('status', 'active')->sum('amount');
-        $repaid = Loan::where('organization_id', $orgId)->where('status', 'repaid')->sum('amount');
-        $overdue = Loan::where('organization_id', $orgId)->where('status', 'overdue')->sum('amount');
+        $active = (clone $query)->where('status', 'active')->sum('amount');
+        $repaid = (clone $query)->where('status', 'repaid')->sum('amount');
+        $overdue = (clone $query)->where('status', 'overdue')->sum('amount');
 
         $this->collectionPulse = [
             'series' => [$active, $repaid, $overdue],

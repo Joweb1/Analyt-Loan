@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\Services;
 
-use App\Exceptions\CollateralInsufficientException;
 use App\Models\Borrower;
 use App\Models\Collateral;
 use App\Models\Loan;
@@ -58,10 +57,13 @@ class LoanServiceTest extends TestCase
         $loan = $this->loanService->createLoan($data);
 
         $this->assertInstanceOf(Loan::class, $loan);
+        $loan->refresh();
+        $this->assertEquals('applied', $loan->status);
         $this->assertDatabaseHas('loans', [
             'id' => $loan->id,
             'loan_number' => 'LN-TEST-001',
             'organization_id' => $this->organization->id,
+            'status' => 'applied',
         ]);
     }
 
@@ -87,8 +89,6 @@ class LoanServiceTest extends TestCase
         $loan = $this->loanService->createLoan($data, $file);
 
         $this->assertNotEmpty($loan->attachments);
-        // LoanService currently uses default or supabase disk, in testing it might be using local/public depending on config
-        // But the service logic put it in 'loan-attachments/'
         $this->assertNotNull($loan->attachments[0]);
     }
 
@@ -137,7 +137,7 @@ class LoanServiceTest extends TestCase
         ]);
     }
 
-    public function test_it_activates_loan_with_sufficient_collateral()
+    public function test_it_activates_loan_without_collateral()
     {
         $borrower = Borrower::factory()->create(['organization_id' => $this->organization->id]);
         $loan = Loan::factory()->create([
@@ -147,37 +147,10 @@ class LoanServiceTest extends TestCase
             'status' => 'approved',
         ]);
 
-        Collateral::factory()->create([
-            'organization_id' => $this->organization->id,
-            'loan_id' => $loan->id,
-            'value' => 60000, // 60% of 100,000
-            'status' => 'in_vault',
-        ]);
+        // No collateral added
 
         $activatedLoan = $this->loanService->activateLoan($loan);
 
         $this->assertEquals('active', $activatedLoan->status);
-    }
-
-    public function test_it_throws_exception_on_insufficient_collateral()
-    {
-        $borrower = Borrower::factory()->create(['organization_id' => $this->organization->id]);
-        $loan = Loan::factory()->create([
-            'organization_id' => $this->organization->id,
-            'borrower_id' => $borrower->id,
-            'amount' => 100000,
-            'status' => 'approved',
-        ]);
-
-        Collateral::factory()->create([
-            'organization_id' => $this->organization->id,
-            'loan_id' => $loan->id,
-            'value' => 40000, // 40% of 100,000
-            'status' => 'in_vault',
-        ]);
-
-        $this->expectException(CollateralInsufficientException::class);
-
-        $this->loanService->activateLoan($loan);
     }
 }

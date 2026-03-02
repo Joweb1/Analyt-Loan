@@ -1,6 +1,23 @@
 <div>
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex items-center gap-4 mb-6">
+        <a href="{{ route('collections') }}" class="size-10 flex items-center justify-center bg-white dark:bg-[#1a1f2b] rounded-xl border border-slate-100 dark:border-slate-800 text-slate-500 hover:text-primary transition-colors">
+            <span class="material-symbols-outlined">arrow_back</span>
+        </a>
         <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Collection Entry</h1>
+        
+        <div class="ml-auto flex items-center gap-3">
+            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Show All Active</span>
+            <button wire:click="toggleFilter" type="button" 
+                class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                :class="{ 'bg-primary': @json($showAllActive), 'bg-slate-200 dark:bg-slate-700': !@json($showAllActive) }"
+                role="switch">
+                <span class="sr-only">Toggle Filter</span>
+                <span aria-hidden="true" 
+                    class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                    :class="{ 'translate-x-5': @json($showAllActive), 'translate-x-0': !@json($showAllActive) }">
+                </span>
+            </button>
+        </div>
     </div>
 
     <div class="bg-white dark:bg-[#1a1f2b] rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 p-6 mb-6">

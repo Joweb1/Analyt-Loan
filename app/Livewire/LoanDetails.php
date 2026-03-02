@@ -100,7 +100,7 @@ class LoanDetails extends Component
     public function loadPendingProofs()
     {
         $this->pendingProofs = \App\Models\PaymentProof::where('loan_id', $this->loan->id)
-            ->where('status', 'pending')
+            ->where('status', 'applied')
             ->latest()
             ->get();
     }
@@ -109,14 +109,14 @@ class LoanDetails extends Component
     {
         $proof = \App\Models\PaymentProof::findOrFail($id);
 
-        if ($proof->status !== 'pending') {
+        if ($proof->status !== 'applied') {
             return;
         }
 
         // Distribution Logic (Match with PaymentVerifications logic)
         $amount = $proof->amount;
         $nextSchedule = $this->loan->scheduledRepayments()
-            ->whereIn('status', ['pending', 'overdue', 'partial'])
+            ->whereIn('status', ['applied', 'overdue', 'partial'])
             ->orderBy('due_date')
             ->first();
 
@@ -174,7 +174,7 @@ class LoanDetails extends Component
     {
         // Find the earliest schedule that isn't fully paid
         $nextSchedule = $this->loan->scheduledRepayments->sortBy('due_date')->first(function ($schedule) {
-            return in_array($schedule->status, ['pending', 'overdue', 'partial']);
+            return in_array($schedule->status, ['applied', 'overdue', 'partial']);
         });
 
         if ($nextSchedule) {
@@ -239,7 +239,7 @@ class LoanDetails extends Component
                 'interest_amount' => $interestShare,
                 'penalty_amount' => 0,
                 'installment_number' => $i,
-                'status' => 'pending',
+                'status' => 'applied',
             ]);
         }
 
@@ -519,6 +519,19 @@ class LoanDetails extends Component
     {
         $this->loan->update(['status' => 'approved']);
         $this->dispatch('custom-alert', ['type' => 'success', 'message' => 'Loan approved successfully.']);
+    }
+
+    public function activateLoan()
+    {
+        try {
+            $loanService = app(\App\Services\LoanService::class);
+            $loanService->activateLoan($this->loan);
+            $this->dispatch('custom-alert', ['type' => 'success', 'message' => 'Loan activated and funds disbursed.']);
+        } catch (\App\Exceptions\CollateralInsufficientException $e) {
+            $this->dispatch('custom-alert', ['type' => 'error', 'message' => $e->getMessage()]);
+        } catch (\Exception $e) {
+            $this->dispatch('custom-alert', ['type' => 'error', 'message' => 'Failed to activate loan.']);
+        }
     }
 
     public function declineLoan()

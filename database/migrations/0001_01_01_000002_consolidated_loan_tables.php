@@ -45,7 +45,7 @@ return new class extends Migration
             $table->boolean('override_system_penalty')->default(false);
             $table->text('description')->nullable();
             $table->json('attachments')->nullable();
-            $table->string('status')->default('active');
+            $table->string('status')->default('applied');
             $table->date('release_date')->nullable();
             $table->timestamps();
         });
@@ -71,7 +71,7 @@ return new class extends Migration
             $table->decimal('interest_amount', 15, 2);
             $table->decimal('penalty_amount', 15, 2)->default(0);
             $table->decimal('paid_amount', 15, 2)->default(0);
-            $table->string('status')->default('pending');
+            $table->string('status')->default('applied');
             $table->integer('installment_number');
             $table->timestamps();
         });
@@ -101,7 +101,7 @@ return new class extends Migration
             $table->string('payment_method');
             $table->string('reference_code')->unique();
             $table->string('receipt_path')->nullable();
-            $table->string('status')->default('pending');
+            $table->string('status')->default('applied');
             $table->text('admin_notes')->nullable();
             $table->timestamp('paid_at');
             $table->timestamps();

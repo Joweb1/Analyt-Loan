@@ -55,7 +55,7 @@ class LoanFormTest extends TestCase
             ->set('borrowerId', $borrower->id)
             ->set('loan_number', 'LN-TEST-001')
             ->set('amount', 100000)
-            ->set('loan_product', 'Personal Loan') // Assuming field exists
+            ->set('loan_product', 'Personal Loan')
             ->set('interest_rate', 10)
             ->set('duration', 6)
             ->set('duration_unit', 'month')
@@ -67,9 +67,10 @@ class LoanFormTest extends TestCase
             'borrower_id' => $borrower->id,
             'amount' => 100000,
             'organization_id' => $this->organization->id,
+            'status' => 'applied',
         ]);
 
-        // Check if collateral is linked (LoanService handles this)
+        // Check if collateral is linked
         $loan = Loan::latest()->first();
         $this->assertDatabaseHas('collaterals', [
             'id' => $collateral->id,
@@ -88,12 +89,12 @@ class LoanFormTest extends TestCase
             ->assertSet('borrowerUserId', $borrower->user_id);
     }
 
-    public function test_cannot_create_loan_with_insufficient_collateral(): void
+    public function test_loan_creation_with_insufficient_collateral_is_allowed(): void
     {
         $borrower = Borrower::factory()->create(['organization_id' => $this->organization->id]);
         $collateral = Collateral::factory()->create([
             'organization_id' => $this->organization->id,
-            'value' => 40000, // 40%
+            'value' => 40000, // 40% (below the old 50% limit)
             'status' => 'deposited',
             'loan_id' => null,
         ]);
@@ -113,10 +114,11 @@ class LoanFormTest extends TestCase
             ->set('interest_type', 'year')
             ->set('release_date', now()->format('Y-m-d'))
             ->call('saveLoan')
-            ->assertHasErrors(); // Validation or Exception?
+            ->assertHasNoErrors();
 
-        // Assuming LoanForm catches the exception and adds an error, or the validation rule handles it.
-        // If LoanService throws exception, Livewire might not catch it unless try-catch is in component.
-        // Let's assume standard behavior for now.
+        $this->assertDatabaseHas('loans', [
+            'loan_number' => 'LN-TEST-002',
+            'status' => 'applied',
+        ]);
     }
 }

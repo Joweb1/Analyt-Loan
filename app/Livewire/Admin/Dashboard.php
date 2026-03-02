@@ -71,7 +71,7 @@ class Dashboard extends Component
         })->count();
 
         // Summing across all organizations
-        $this->totalLent = Loan::withoutGlobalScopes()->sum('amount');
+        $this->totalLent = Loan::withoutGlobalScopes()->whereIn('status', ['active', 'repaid', 'overdue'])->sum('amount');
         $this->totalCollected = Repayment::withoutGlobalScopes()->sum('amount');
     }
 

@@ -118,7 +118,7 @@ class GeneralReportPrint extends Component
 
         // 3. Portfolio Health (Snapshot as of End Date)
         $this->metrics['active_loans'] = Loan::where('organization_id', $orgId)
-            ->whereIn('status', ['active', 'approved', 'overdue'])
+            ->whereIn('status', ['active', 'repaid', 'overdue'])
             ->count();
 
         $this->metrics['overdue_amount'] = Loan::where('organization_id', $orgId)

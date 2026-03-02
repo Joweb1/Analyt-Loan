@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Exceptions\CollateralInsufficientException;
 use App\Models\Collateral;
 use App\Models\Loan;
 use Illuminate\Support\Facades\Auth;
@@ -16,7 +15,15 @@ class LoanService
     public function createLoan(array $data, $attachment = null, $collateralId = null): Loan
     {
         return DB::transaction(function () use ($data, $attachment, $collateralId) {
-            $data['organization_id'] ??= Auth::user()->organization_id;
+            $user = Auth::user();
+            $data['organization_id'] ??= $user->organization_id;
+
+            // If an Admin creates a loan, approve it immediately
+            if ($user->hasRole('Admin')) {
+                $data['status'] = 'approved';
+            } else {
+                $data['status'] ??= 'applied';
+            }
 
             if ($attachment) {
                 $filename = \Illuminate\Support\Str::random(40).'.'.$attachment->getClientOriginalExtension();
@@ -73,14 +80,7 @@ class LoanService
      */
     public function activateLoan(Loan $loan): Loan
     {
-        $totalCollateralValue = Collateral::where('loan_id', $loan->id)
-            ->where('status', 'in_vault')
-            ->sum('value');
-
-        if ($loan->amount > 0 && ($totalCollateralValue / $loan->amount) < 0.5) {
-            throw new CollateralInsufficientException('Insufficient collateral to activate the loan.');
-        }
-
+        // Collateral check is no longer mandatory
         $loan->status = 'active';
         $loan->save();
 

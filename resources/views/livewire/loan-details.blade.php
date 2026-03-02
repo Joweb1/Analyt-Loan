@@ -167,6 +167,13 @@
                                     Decline
                                 </button>
                             </div>
+                        @elseif($loan->status === 'approved')
+                            <div class="flex items-center gap-2">
+                                <button wire:click="activateLoan" wire:confirm="Are you sure you want to activate and disburse this loan? This checks collateral requirements." class="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-[10px] font-black uppercase tracking-wider hover:bg-blue-700 transition-all shadow-sm">
+                                    <span class="material-symbols-outlined text-sm">payments</span>
+                                    Activate & Disburse
+                                </button>
+                            </div>
                         @endif
                     </div>
                     <div class="flex bg-slate-100 dark:bg-slate-800 rounded-lg p-1">

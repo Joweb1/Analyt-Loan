@@ -29,14 +29,33 @@ class LoanApproval extends Component
         $this->dispatch('custom-alert', ['type' => 'success', 'message' => 'Loan #'.$loan->loan_number.' Approved']);
     }
 
+    public function activateLoan($id)
+    {
+        $loan = Loan::findOrFail($id);
+        $loanService = app(\App\Services\LoanService::class);
+
+        try {
+            $loanService->activateLoan($loan);
+
+            \App\Helpers\SystemLogger::success(
+                'Loan Activated',
+                'Loan #'.$loan->loan_number.' was activated.',
+                'loan',
+                $loan
+            );
+
+            $this->dispatch('custom-alert', ['type' => 'success', 'message' => 'Loan #'.$loan->loan_number.' Activated']);
+        } catch (\Exception $e) {
+            $this->dispatch('custom-alert', ['type' => 'error', 'message' => 'Failed to activate loan.']);
+        }
+    }
+
     public function render()
     {
         $orgId = Auth::user()->organization_id;
-        // Looking for 'applied' or 'pending' depending on system flow.
-        // Assuming 'applied' is the initial state before approval based on PendingLoans.php.
         $loans = Loan::with('borrower.user')
             ->where('organization_id', $orgId)
-            ->whereIn('status', ['applied', 'pending'])
+            ->whereIn('status', ['applied', 'approved'])
             ->latest()
             ->paginate(15);
 

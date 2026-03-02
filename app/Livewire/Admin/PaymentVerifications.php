@@ -15,7 +15,7 @@ class PaymentVerifications extends Component
     {
         $proof = PaymentProof::findOrFail($id);
 
-        if ($proof->status !== 'pending') {
+        if ($proof->status !== 'applied') {
             return;
         }
 
@@ -25,7 +25,7 @@ class PaymentVerifications extends Component
         // Distribution Logic (Simplified)
         // 1. Calculate what is due on the next pending schedule
         $nextSchedule = $loan->scheduledRepayments()
-            ->whereIn('status', ['pending', 'overdue', 'partial'])
+            ->whereIn('status', ['applied', 'overdue', 'partial'])
             ->orderBy('due_date')
             ->first();
 
@@ -85,7 +85,7 @@ class PaymentVerifications extends Component
     public function render()
     {
         $proofs = PaymentProof::where('organization_id', Auth::user()->organization_id)
-            ->where('status', 'pending')
+            ->where('status', 'applied')
             ->with(['borrower.user', 'loan'])
             ->latest()
             ->paginate(10);

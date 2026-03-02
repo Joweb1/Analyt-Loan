@@ -1,5 +1,8 @@
 <div>
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex items-center gap-4 mb-6">
+        <a href="{{ route('collections') }}" class="size-10 flex items-center justify-center bg-white dark:bg-[#1a1f2b] rounded-xl border border-slate-100 dark:border-slate-800 text-slate-500 hover:text-primary transition-colors">
+            <span class="material-symbols-outlined">arrow_back</span>
+        </a>
         <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Savings Entry</h1>
     </div>
 

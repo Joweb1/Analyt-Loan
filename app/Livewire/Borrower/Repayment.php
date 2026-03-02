@@ -44,7 +44,7 @@ class Repayment extends Component
             $this->referenceCode = $this->activeLoan->loan_number.'-'.strtoupper(substr(uniqid(), -4));
         } else {
             $this->hasPendingApplication = $user->borrower->loans()
-                ->whereIn('status', ['applied', 'pending', 'verification_pending'])
+                ->whereIn('status', ['applied', 'verification_pending'])
                 ->exists();
         }
     }
@@ -74,7 +74,7 @@ class Repayment extends Component
             'payment_method' => 'Bank Transfer',
             'reference_code' => $this->referenceCode,
             'receipt_path' => $path,
-            'status' => 'pending',
+            'status' => 'applied',
             'paid_at' => now(),
         ]);
 
@@ -86,7 +86,7 @@ class Repayment extends Component
     public function render()
     {
         $pendingProofs = PaymentProof::where('borrower_id', Auth::user()->borrower->id)
-            ->where('status', 'pending')
+            ->where('status', 'applied')
             ->latest()
             ->get();
 

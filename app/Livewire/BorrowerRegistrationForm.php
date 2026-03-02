@@ -297,15 +297,15 @@ class BorrowerRegistrationForm extends Component
 
             if ($user) {
                 if ($user->organization_id !== $this->organization_id) {
-                    $errorMessage = $user->phone === $this->phone 
-                        ? 'User with this phone exists in another organization.' 
+                    $errorMessage = $user->phone === $this->phone
+                        ? 'User with this phone exists in another organization.'
                         : 'User with this email exists in another organization.';
-                    
+
                     $this->addError($user->phone === $this->phone ? 'phone' : 'email', $errorMessage);
 
                     return;
                 }
-                
+
                 // If user exists with same phone/email, we update them
                 $user->update([
                     'name' => $this->name,

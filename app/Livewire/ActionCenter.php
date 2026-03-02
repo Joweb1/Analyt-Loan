@@ -18,17 +18,22 @@ class ActionCenter extends Component
     public function loadTasks()
     {
         $user = Auth::user();
+        $isOwner = $user->isAppOwner();
         $orgId = $user->organization_id;
 
         // Query real "Actions" from system_notifications table
-        $this->tasks = SystemNotification::where('organization_id', $orgId)
-            ->where('is_actionable', true)
-            ->whereNull('read_at')
-            ->where(function ($q) use ($user) {
-                $q->whereNull('recipient_id')
-                    ->orWhere('recipient_id', $user->id);
-            })
-            ->latest()
+        $query = SystemNotification::where('is_actionable', true)
+            ->whereNull('read_at');
+
+        if (! $isOwner) {
+            $query->where('organization_id', $orgId)
+                ->where(function ($q) use ($user) {
+                    $q->whereNull('recipient_id')
+                        ->orWhere('recipient_id', $user->id);
+                });
+        }
+
+        $this->tasks = $query->latest()
             ->get()
             ->map(function ($notif) {
                 return [
@@ -46,12 +51,18 @@ class ActionCenter extends Component
     public function markAsResolved($id)
     {
         $user = Auth::user();
-        $notif = SystemNotification::where('organization_id', $user->organization_id)
-            ->where(function ($q) use ($user) {
-                $q->whereNull('recipient_id')
-                    ->orWhere('recipient_id', $user->id);
-            })
-            ->find($id);
+        $isOwner = $user->isAppOwner();
+
+        $query = SystemNotification::query();
+        if (! $isOwner) {
+            $query->where('organization_id', $user->organization_id)
+                ->where(function ($q) use ($user) {
+                    $q->whereNull('recipient_id')
+                        ->orWhere('recipient_id', $user->id);
+                });
+        }
+
+        $notif = $query->find($id);
 
         if ($notif) {
             $notif->read_at = now();

@@ -41,22 +41,30 @@
             </div>
         </a>
         <!-- Total Collected Card -->
-        <a href="{{ route('collections') }}" class="md:col-span-1 bg-white dark:bg-[#1a1f2b] rounded-2xl p-6 shadow-soft hover:shadow-lg transition-all duration-300 border border-transparent hover:border-brand-green/10 relative overflow-hidden group block">
+        <div class="md:col-span-1 bg-white dark:bg-[#1a1f2b] rounded-2xl p-6 shadow-soft transition-all duration-300 border border-transparent relative overflow-hidden group">
             <div class="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
                 <span class="material-symbols-outlined text-[80px] text-brand-green">savings</span>
             </div>
             <div class="flex flex-col gap-4 relative z-10">
-                <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 rounded-full bg-brand-green/10 flex items-center justify-center text-brand-green">
-                        <span class="material-symbols-outlined text-sm font-bold">trending_up</span>
-                    </div>
-                    <p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Total Collected</p>
+                <div class="flex items-center justify-between">
+                    <a href="{{ route('collections') }}" class="flex items-center gap-2 hover:opacity-80 transition-opacity">
+                        <div class="w-8 h-8 rounded-full bg-brand-green/10 flex items-center justify-center text-brand-green">
+                            <span class="material-symbols-outlined text-sm font-bold">trending_up</span>
+                        </div>
+                        <p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Total Collected</p>
+                    </a>
+                    
+                    <!-- Integrated Pending Apps Badge -->
+                    <a href="{{ route('loans.pending') }}" class="flex items-center gap-1.5 px-2.5 py-1 bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-full hover:bg-blue-100 transition-colors">
+                        <span class="material-symbols-outlined text-[14px] font-bold">pending_actions</span>
+                        <span class="text-[10px] font-black uppercase tracking-tight">{{ number_format($pendingApplicationsCount) }} Pending Apps</span>
+                    </a>
                 </div>
                 <div>
                     <h3 class="text-primary dark:text-white text-3xl font-extrabold tracking-tight">₦ {{ number_format($totalCollected, 2) }}</h3>
                 </div>
             </div>
-        </a>
+        </div>
         <!-- Stats Grid -->
         <div class="md:col-span-2 grid grid-cols-2 lg:grid-cols-4 gap-4">
             <!-- Total Customers -->

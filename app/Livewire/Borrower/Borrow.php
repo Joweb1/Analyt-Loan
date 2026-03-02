@@ -49,9 +49,9 @@ class Borrow extends Component
 
         // Check for active loan
         $hasActiveLoan = Loan::where('borrower_id', $user->borrower->id)
-            ->whereIn('status', ['active', 'overdue', 'pending', 'approved', 'applied', 'declined']) // Adding declined to block if needed? No, user can re-apply if declined.
+            ->whereIn('status', ['active', 'overdue', 'applied', 'approved', 'applied', 'declined']) // Adding declined to block if needed? No, user can re-apply if declined.
             ->where('created_at', '>', now()->subHours(24)) // Block for 24h if declined? Or just check active.
-            ->whereIn('status', ['active', 'overdue', 'pending', 'approved', 'applied'])
+            ->whereIn('status', ['active', 'overdue', 'applied', 'approved', 'applied'])
             ->exists();
 
         if ($hasActiveLoan) {

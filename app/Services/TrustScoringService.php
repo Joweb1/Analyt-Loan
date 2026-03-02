@@ -60,7 +60,7 @@ class TrustScoringService
     private static function getTimelinessMultiplier(ScheduledRepayment $schedule): float
     {
         // If unpaid and overdue, it's 0
-        if ($schedule->status === 'overdue' || ($schedule->status === 'pending' && $schedule->due_date->isPast())) {
+        if ($schedule->status === 'overdue' || ($schedule->status === 'applied' && $schedule->due_date->isPast())) {
             return 0.0;
         }
 

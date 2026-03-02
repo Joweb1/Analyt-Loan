@@ -50,7 +50,7 @@ class MidnightSync extends Command
                 /** @var \App\Models\Loan $loan */
                 $overdueSchedules = $loan->scheduledRepayments()
                     ->where('due_date', '<', now()->startOfDay())
-                    ->whereIn('status', ['pending', 'partial', 'overdue'])
+                    ->whereIn('status', ['applied', 'partial', 'overdue'])
                     ->get();
 
                 if ($overdueSchedules->isNotEmpty()) {

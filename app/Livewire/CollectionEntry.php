@@ -39,6 +39,8 @@ class CollectionEntry extends Component
 
     public $staffs;
 
+    public $showAllActive = false;
+
     public function mount()
     {
         $orgId = Auth::user()->organization_id;
@@ -47,6 +49,12 @@ class CollectionEntry extends Component
             ->get();
         $this->paid_at = now()->format('Y-m-d');
         $this->collected_by = Auth::id();
+    }
+
+    public function toggleFilter()
+    {
+        $this->showAllActive = ! $this->showAllActive;
+        $this->resetPage();
     }
 
     public function updatingSearch()
@@ -61,7 +69,7 @@ class CollectionEntry extends Component
 
         $this->calculateSuggestions($loan);
 
-        $this->amount = $this->suggestedPrincipal + $this->suggestedInterest;
+        $this->amount = null; // Should be empty initially
         $this->payment_method = 'Cash';
         $this->collected_by = Auth::id();
         $this->paid_at = now()->format('Y-m-d');
@@ -72,7 +80,7 @@ class CollectionEntry extends Component
     private function calculateSuggestions(Loan $loan)
     {
         $nextSchedule = $loan->scheduledRepayments->sortBy('due_date')->first(function ($schedule) {
-            return in_array($schedule->status, ['pending', 'overdue', 'partial']);
+            return in_array($schedule->status, ['applied', 'overdue', 'partial']);
         });
 
         if ($nextSchedule) {
@@ -149,6 +157,8 @@ class CollectionEntry extends Component
 
         $this->showRepaymentModal = false;
         $this->dispatch('custom-alert', ['type' => 'success', 'message' => 'Repayment added successfully.']);
+
+        return redirect()->route('repayments.records');
     }
 
     public function render()
@@ -186,10 +196,14 @@ class CollectionEntry extends Component
                         });
                 }
             });
-            $query->whereIn('status', ['active', 'overdue']);
+            $query->whereIn('status', ['approved', 'active', 'overdue']);
         } else {
-            // Default view: Overdue loans
-            $query->where('status', 'overdue');
+            if ($this->showAllActive) {
+                $query->whereIn('status', ['approved', 'active', 'overdue']);
+            } else {
+                // Default view: Overdue loans
+                $query->where('status', 'overdue');
+            }
         }
 
         $loans = $query->latest()->paginate(15);

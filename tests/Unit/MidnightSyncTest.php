@@ -22,7 +22,7 @@ class MidnightSyncTest extends TestCase
             'principal_amount' => 1000,
             'interest_amount' => 0,
             'installment_number' => 1,
-            'status' => 'pending',
+            'status' => 'applied',
         ]);
 
         Artisan::call('app:midnight-sync');
@@ -47,7 +47,7 @@ class MidnightSyncTest extends TestCase
             'interest_amount' => 0,
             'penalty_amount' => 0,
             'installment_number' => 1,
-            'status' => 'pending',
+            'status' => 'applied',
         ]);
 
         Artisan::call('app:midnight-sync');

@@ -125,4 +125,31 @@ class BorrowerRegistrationFormTest extends TestCase
 
         $this->assertDatabaseMissing('users', ['email' => 'john@example.com']);
     }
+
+    public function test_it_fails_validation_if_email_exists_in_another_organization()
+    {
+        $otherOrg = Organization::factory()->create([
+            'kyc_status' => 'approved',
+            'status' => 'active',
+        ]);
+        
+        User::factory()->create([
+            'email' => 'duplicate@example.com',
+            'organization_id' => $otherOrg->id,
+        ]);
+
+        Livewire::actingAs($this->admin)
+            ->test(BorrowerRegistrationForm::class)
+            ->set('organization_id', $this->organization->id)
+            ->set('name', 'John Doe')
+            ->set('email', 'duplicate@example.com')
+            ->set('phone', '08011112222')
+            ->set('dob', '1990-01-01')
+            ->set('bvn', '12345678901')
+            ->set('nin', '12345678901')
+            ->set('password', 'password123')
+            ->set('password_confirmation', 'password123')
+            ->call('save')
+            ->assertHasErrors(['email']);
+    }
 }

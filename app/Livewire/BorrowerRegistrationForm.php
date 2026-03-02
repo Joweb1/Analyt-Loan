@@ -208,6 +208,12 @@ class BorrowerRegistrationForm extends Component
 
                 if ($type === 'email') {
                     $rule[] = 'email';
+                    if ($fieldName === 'email' && $isSystem) {
+                        $rule[] = 'unique:users,email';
+                    }
+                }
+                if ($fieldName === 'phone' && $isSystem) {
+                    $rule[] = 'unique:users,phone';
                 }
                 if ($type === 'number') {
                     $rule[] = 'numeric';
@@ -275,24 +281,36 @@ class BorrowerRegistrationForm extends Component
             if (isset($rules['phone'])) {
                 $rules['phone'] = 'required|string|size:13|unique:users,phone';
             }
+            if (isset($rules['email'])) {
+                $rules['email'] = 'nullable|string|email|max:255|unique:users,email';
+            }
             if (isset($rules['next_of_kin_phone'])) {
                 $rules['next_of_kin_phone'] = 'required|string|size:13';
             }
 
             $validatedData = $this->validate($rules);
 
-            // User Creation/Update
-            $user = User::where('phone', $this->phone)->first();
+            // User Creation/Update - Check by both phone and email
+            $user = User::where('phone', $this->phone)
+                ->orWhere('email', $this->email)
+                ->first();
+
             if ($user) {
                 if ($user->organization_id !== $this->organization_id) {
-                    $this->addError('phone', 'User exists in another organization.');
+                    $errorMessage = $user->phone === $this->phone 
+                        ? 'User with this phone exists in another organization.' 
+                        : 'User with this email exists in another organization.';
+                    
+                    $this->addError($user->phone === $this->phone ? 'phone' : 'email', $errorMessage);
 
                     return;
                 }
-                // Update basic user info
+                
+                // If user exists with same phone/email, we update them
                 $user->update([
                     'name' => $this->name,
                     'email' => $this->email,
+                    'phone' => $this->phone,
                 ]);
             } else {
                 $user = User::create([
@@ -316,7 +334,7 @@ class BorrowerRegistrationForm extends Component
 
             $borrower->phone = $this->phone;
             $borrower->date_of_birth = $this->dob;
-            $borrower->gender = $this->gender;
+            $borrower->gender = strtolower((string) $this->gender);
             $borrower->address = $this->address;
             $borrower->bvn = $this->bvn;
             $borrower->national_identity_number = $this->nin;

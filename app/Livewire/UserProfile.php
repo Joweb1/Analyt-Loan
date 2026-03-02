@@ -26,6 +26,8 @@ class UserProfile extends Component
 
     public $last_seen_at;
 
+    public $custom_id;
+
     // Password Update
     public $current_password;
 
@@ -97,6 +99,7 @@ class UserProfile extends Component
                 $this->dependents = $this->borrower->dependents;
                 $this->employment_information = $this->borrower->employment_information;
                 $this->bank_account_details = $this->borrower->bank_account_details;
+                $this->custom_id = $this->borrower->custom_id;
             }
         }
 

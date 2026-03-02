@@ -24,7 +24,11 @@
         </a>
         <a href="{{ route('settings.form-builder') }}" 
            class="px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all {{ $active === 'form' ? 'bg-white dark:bg-slate-800 text-primary shadow-sm' : 'text-slate-500 hover:text-primary' }}">
-            Forms
+            Borrower Form
+        </a>
+        <a href="{{ route('settings.guarantor-form') }}" 
+           class="px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all {{ $active === 'guarantor-form' ? 'bg-white dark:bg-slate-800 text-primary shadow-sm' : 'text-slate-500 hover:text-primary' }}">
+            Guarantor Form
         </a>
         <a href="{{ route('settings.notifications') }}" 
            class="px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all {{ $active === 'notifications' ? 'bg-white dark:bg-slate-800 text-primary shadow-sm' : 'text-slate-500 hover:text-primary' }}">

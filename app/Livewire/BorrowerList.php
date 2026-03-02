@@ -37,6 +37,7 @@ class BorrowerList extends Component
                         ->orWhere('email', 'like', '%'.$this->search.'%');
                 })
                     ->orWhere('phone', 'like', '%'.$this->search.'%')
+                    ->orWhere('custom_id', 'like', '%'.$this->search.'%')
                     ->orWhere('bvn', 'like', '%'.$this->search.'%')
                     ->orWhere('national_identity_number', 'like', '%'.$this->search.'%');
             });

@@ -88,10 +88,21 @@ class Borrower extends Model
 {
     use BelongsToOrganization, HasFactory, HasUuids;
 
+    protected static function booted()
+    {
+        static::creating(function ($borrower) {
+            if (empty($borrower->custom_id)) {
+                $borrower->custom_id = 'CUS-'.strtoupper(\Illuminate\Support\Str::random(6));
+            }
+        });
+    }
+
     protected $fillable = [
         'organization_id',
         'user_id',
+        'custom_id',
         'guarantor_id',
+        'external_guarantor_id',
         'phone',
         'bvn',
         'trust_score',
@@ -147,6 +158,11 @@ class Borrower extends Model
     public function guarantor(): BelongsTo
     {
         return $this->belongsTo(User::class, 'guarantor_id');
+    }
+
+    public function externalGuarantor(): BelongsTo
+    {
+        return $this->belongsTo(Guarantor::class, 'external_guarantor_id');
     }
 
     public function loans(): HasMany

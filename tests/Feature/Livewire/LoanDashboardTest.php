@@ -35,6 +35,9 @@ class LoanDashboardTest extends TestCase
 
     public function test_it_calculates_pipeline_stats_based_on_filter()
     {
+        // Set fixed time to a Wednesday to ensure 'yesterday' is in the same week (Carbon week starts Monday)
+        $this->travelTo(now()->next('Wednesday'));
+
         // Created today
         Loan::factory()->create([
             'organization_id' => $this->organization->id,

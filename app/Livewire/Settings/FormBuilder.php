@@ -43,12 +43,16 @@ class FormBuilder extends Component
     public function ensureDefaultConfig()
     {
         $orgId = Auth::user()->organization_id;
+        self::seedDefaults($orgId);
+    }
 
+    public static function seedDefaults($orgId)
+    {
         if (! $orgId) {
             return;
-        } // Should handle this case (e.g. Super Admin or error)
+        }
 
-        if (FormFieldConfig::where('organization_id', $orgId)->exists()) {
+        if (FormFieldConfig::where('organization_id', $orgId)->where('form_type', 'borrower')->exists()) {
             return;
         }
 
@@ -59,34 +63,37 @@ class FormBuilder extends Component
                 ['name' => 'phone', 'label' => 'Phone Number', 'type' => 'text', 'required' => true],
                 ['name' => 'email', 'label' => 'Email Address', 'type' => 'email', 'required' => false],
                 ['name' => 'dob', 'label' => 'Date of Birth', 'type' => 'date', 'required' => true],
-                ['name' => 'gender', 'label' => 'Gender', 'type' => 'select', 'options' => ['Male', 'Female'], 'required' => true],
+                ['name' => 'gender', 'label' => 'Gender', 'type' => 'select', 'options' => ['Male', 'Female', 'Other'], 'required' => true],
+                ['name' => 'marital_status', 'label' => 'Marital Status', 'type' => 'select', 'options' => ['Single', 'Married', 'Divorced', 'Widowed'], 'required' => true],
+                ['name' => 'dependents', 'label' => 'Number of Dependents', 'type' => 'number', 'required' => true],
                 ['name' => 'address', 'label' => 'Residential Address', 'type' => 'textarea', 'required' => true],
             ],
             'documents' => [
                 ['name' => 'bvn', 'label' => 'BVN', 'type' => 'text', 'required' => true],
                 ['name' => 'nin', 'label' => 'NIN', 'type' => 'text', 'required' => true],
                 ['name' => 'passport_photo', 'label' => 'Passport Photograph', 'type' => 'file', 'required' => true],
-                ['name' => 'identity_document', 'label' => 'ID Document', 'type' => 'file', 'required' => true],
-                ['name' => 'biometric_data', 'label' => 'Biometric Data', 'type' => 'file', 'required' => false],
+                ['name' => 'identity_document', 'label' => 'Identity Document (ID Card)', 'type' => 'file', 'required' => true],
+                ['name' => 'biometric_data', 'label' => 'Biometric Data (Optional)', 'type' => 'file', 'required' => false],
             ],
             'financial' => [
                 ['name' => 'bank_name', 'label' => 'Bank Name', 'type' => 'text', 'required' => true],
                 ['name' => 'account_number', 'label' => 'Account Number', 'type' => 'text', 'required' => true],
                 ['name' => 'bank_account_name', 'label' => 'Account Name', 'type' => 'text', 'required' => true],
-                ['name' => 'bank_statement', 'label' => 'Bank Statement', 'type' => 'file', 'required' => false],
-                ['name' => 'is_employed', 'label' => 'Employment Status', 'type' => 'checkbox', 'required' => true], // checkbox handled as boolean logic usually
+                ['name' => 'bank_statement', 'label' => 'Bank Statement (Last 3 Months)', 'type' => 'file', 'required' => false],
+                ['name' => 'is_employed', 'label' => 'Currently Employed?', 'type' => 'select', 'options' => ['Yes', 'No'], 'required' => true],
                 ['name' => 'employer_name', 'label' => 'Employer Name', 'type' => 'text', 'required' => false],
-                ['name' => 'salary', 'label' => 'Salary', 'type' => 'number', 'required' => false],
-                ['name' => 'income_proof', 'label' => 'Income Proof', 'type' => 'file', 'required' => false],
+                ['name' => 'job_title', 'label' => 'Job Title', 'type' => 'text', 'required' => false],
+                ['name' => 'salary', 'label' => 'Monthly Income (₦)', 'type' => 'number', 'required' => false],
+                ['name' => 'employer_address', 'label' => 'Employer Address', 'type' => 'textarea', 'required' => false],
+                ['name' => 'income_proof', 'label' => 'Income Proof (Payslip)', 'type' => 'file', 'required' => false],
             ],
             'family' => [
-                ['name' => 'marital_status', 'label' => 'Marital Status', 'type' => 'select', 'options' => ['Single', 'Married', 'Divorced', 'Widowed'], 'required' => true],
-                ['name' => 'dependents', 'label' => 'Dependents', 'type' => 'number', 'required' => true],
-                ['name' => 'next_of_kin_name', 'label' => 'Next of Kin Name', 'type' => 'text', 'required' => true],
+                ['name' => 'next_of_kin_name', 'label' => 'Next of Kin Full Name', 'type' => 'text', 'required' => true],
+                ['name' => 'next_of_kin_relationship', 'label' => 'Relationship', 'type' => 'text', 'required' => true],
                 ['name' => 'next_of_kin_phone', 'label' => 'Next of Kin Phone', 'type' => 'text', 'required' => true],
             ],
             'guarantor' => [
-                ['name' => 'guarantor_id', 'label' => 'Select Guarantor', 'type' => 'select', 'required' => false], // complex type
+                ['name' => 'guarantor_id', 'label' => 'Select Guarantor', 'type' => 'select', 'required' => false],
             ],
         ];
 
@@ -95,6 +102,7 @@ class FormBuilder extends Component
             foreach ($fields as $field) {
                 FormFieldConfig::create([
                     'organization_id' => $orgId,
+                    'form_type' => 'borrower',
                     'section' => $section,
                     'name' => $field['name'],
                     'label' => $field['label'],
@@ -164,6 +172,7 @@ class FormBuilder extends Component
 
         FormFieldConfig::create([
             'organization_id' => $orgId,
+            'form_type' => 'borrower',
             'section' => $this->newFieldSection,
             'name' => $name,
             'label' => $this->newFieldLabel,
@@ -198,6 +207,7 @@ class FormBuilder extends Component
     public function render()
     {
         $configs = FormFieldConfig::where('organization_id', Auth::user()->organization_id)
+            ->where('form_type', 'borrower')
             ->orderBy('sort_order')
             ->get()
             ->groupBy('section');

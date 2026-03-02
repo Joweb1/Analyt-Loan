@@ -25,6 +25,7 @@ class BorrowerFactory extends Factory
                 ])->id;
             },
             'phone' => $this->faker->phoneNumber,
+            'custom_id' => 'CUS-'.strtoupper($this->faker->bothify('??####')),
             'bvn' => $this->faker->numerify('###########'),
             'trust_score' => $this->faker->numberBetween(0, 100),
             'portal_access' => $this->faker->boolean,

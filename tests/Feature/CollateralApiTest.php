@@ -15,7 +15,9 @@ class CollateralApiTest extends TestCase
     {
         $loan = Loan::factory()->create();
         $collateralData = [
+            'organization_id' => $loan->organization_id,
             'name' => 'Test Collateral',
+            'type' => 'Vehicle',
             'description' => 'Test Description',
             'value' => 1000,
             'loan_id' => $loan->id,

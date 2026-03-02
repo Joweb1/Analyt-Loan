@@ -22,7 +22,9 @@ class CollateralController extends Controller
     public function store(Request $request)
     {
         $validatedData = $request->validate([
+            'organization_id' => 'required|exists:organizations,id',
             'name' => 'required|string|max:255',
+            'type' => 'required|string|max:255',
             'description' => 'nullable|string',
             'value' => 'required|numeric',
             'loan_id' => 'required|exists:loans,id',

@@ -121,7 +121,7 @@ class CollateralForm extends Component
         $this->description = $collateral->description;
         $this->registered_date = $collateral->registered_date ? $collateral->registered_date->format('Y-m-d') : null;
         $this->status = $collateral->status;
-        $this->current_image = $collateral->image_path;
+        $this->current_image = $collateral->image_url;
         // Documents handling would be complex with livewire file uploads, keeping simple for now
     }
 

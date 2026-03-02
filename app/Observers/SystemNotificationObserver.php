@@ -51,9 +51,13 @@ class SystemNotificationObserver
                 ->get();
         }
 
-        $permissionStaff = \App\Models\User::where('organization_id', $orgId)
-            ->permission('access_org_notifications')
-            ->get();
+        $permissionStaff = collect();
+        // Only attempt permission-based lookup if the permission exists to avoid Spatie exceptions during tests/seeds
+        if (\Spatie\Permission\Models\Permission::where('name', 'access_org_notifications')->exists()) {
+            $permissionStaff = \App\Models\User::where('organization_id', $orgId)
+                ->permission('access_org_notifications')
+                ->get();
+        }
 
         $authorizedStaff = $roleStaff->merge($permissionStaff)->unique('id');
 

@@ -28,8 +28,11 @@ class LoanFactory extends Factory
             'amount' => $this->faker->randomFloat(2, 50000, 5000000),
             'loan_product' => $this->faker->randomElement(['Personal Loan', 'Business Loan', 'Mortgage']),
             'interest_rate' => $this->faker->randomFloat(2, 5, 20),
+            'interest_type' => 'year',
             'duration' => $this->faker->numberBetween(1, 12),
             'duration_unit' => 'month',
+            'repayment_cycle' => 'monthly',
+            'num_repayments' => $this->faker->numberBetween(1, 12),
             'status' => 'applied',
         ];
     }

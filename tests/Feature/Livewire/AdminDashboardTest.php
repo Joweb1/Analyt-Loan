@@ -7,6 +7,7 @@ use App\Models\Borrower;
 use App\Models\Loan;
 use App\Models\Organization;
 use App\Models\Repayment;
+use App\Models\SystemNotification;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -72,10 +73,11 @@ class AdminDashboardTest extends TestCase
 
     public function test_it_loads_action_items()
     {
-        \App\Models\SystemNotification::create([
+        SystemNotification::create([
             'organization_id' => $this->organization->id,
             'title' => 'Urgent Action',
             'message' => 'Action required',
+            'type' => 'info',
             'is_actionable' => true,
             'priority' => 'high',
         ]);

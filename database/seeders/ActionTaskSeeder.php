@@ -15,7 +15,7 @@ class ActionTaskSeeder extends Seeder
      */
     public function run(): void
     {
-        $org = Organization::where('slug', 'analyt-demo')->first();
+        $org = Organization::where('slug', 'analyt-org-demo')->first();
         if (! $org) {
             return;
         }

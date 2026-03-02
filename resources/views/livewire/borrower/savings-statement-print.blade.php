@@ -3,7 +3,7 @@
     <div class="flex justify-between items-start border-b-2 border-slate-900 pb-8">
         <div class="flex items-center gap-4">
             @if($borrower->organization->logo_path)
-                <img src="{{ Storage::url($borrower->organization->logo_path) }}" class="h-16 w-auto" alt="Logo">
+                <img src="{{ $borrower->organization->logo_url }}" class="h-16 w-auto" alt="Logo">
             @else
                 <div class="size-16 bg-slate-950 rounded flex items-center justify-center text-white font-black text-3xl">A</div>
             @endif

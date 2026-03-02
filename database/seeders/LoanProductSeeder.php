@@ -11,7 +11,7 @@ class LoanProductSeeder extends Seeder
      */
     public function run(): void
     {
-        $demoOrg = \App\Models\Organization::where('slug', 'analyt-demo')->first();
+        $demoOrg = \App\Models\Organization::where('slug', 'analyt-org-demo')->first();
         if (! $demoOrg) {
             return;
         }

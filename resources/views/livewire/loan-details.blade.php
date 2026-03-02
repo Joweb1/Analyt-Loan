@@ -292,7 +292,7 @@
                                         <div class="flex items-center gap-3 mt-1">
                                             <p class="text-xs text-slate-500 font-medium">Submitted {{ $proof->created_at->diffForHumans() }}</p>
                                             @if($proof->receipt_path)
-                                                <a href="{{ Storage::url($proof->receipt_path) }}" target="_blank" class="flex items-center gap-1 text-[10px] font-black text-blue-600 uppercase hover:underline">
+                                                <a href="{{ $proof->receipt_url }}" target="_blank" class="flex items-center gap-1 text-[10px] font-black text-blue-600 uppercase hover:underline">
                                                     <span class="material-symbols-outlined text-sm">attachment</span> View Receipt
                                                 </a>
                                             @endif

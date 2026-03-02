@@ -22,8 +22,9 @@ class NotificationsTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        Role::create(['name' => 'Admin']);
-        Role::create(['name' => 'Borrower']);
+        \Spatie\Permission\Models\Permission::firstOrCreate(['name' => 'access_org_notifications', 'guard_name' => 'web']);
+        Role::firstOrCreate(['name' => 'Admin', 'guard_name' => 'web']);
+        Role::firstOrCreate(['name' => 'Borrower', 'guard_name' => 'web']);
 
         $this->organization = Organization::factory()->create();
         $this->admin = User::factory()->create(['organization_id' => $this->organization->id]);
@@ -43,6 +44,7 @@ class NotificationsTest extends TestCase
             'organization_id' => $this->organization->id,
             'title' => 'Loan Notif',
             'message' => 'Loan message',
+            'type' => 'info',
             'category' => 'loan',
         ]);
 
@@ -50,6 +52,7 @@ class NotificationsTest extends TestCase
             'organization_id' => $this->organization->id,
             'title' => 'KYC Notif',
             'message' => 'KYC message',
+            'type' => 'info',
             'category' => 'kyc',
         ]);
 
@@ -71,6 +74,7 @@ class NotificationsTest extends TestCase
             'organization_id' => $this->organization->id,
             'title' => 'Global News',
             'message' => 'Global message',
+            'type' => 'info',
             'recipient_id' => null,
         ]);
 
@@ -79,6 +83,7 @@ class NotificationsTest extends TestCase
             'organization_id' => $this->organization->id,
             'title' => 'Your Loan Approved',
             'message' => 'Your loan message',
+            'type' => 'info',
             'recipient_id' => $borrowerUser->id,
         ]);
 
@@ -95,6 +100,7 @@ class NotificationsTest extends TestCase
             'organization_id' => $this->organization->id,
             'title' => 'Unread 1',
             'message' => 'Unread message',
+            'type' => 'info',
             'read_at' => null,
         ]);
 

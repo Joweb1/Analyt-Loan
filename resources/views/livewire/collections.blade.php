@@ -6,34 +6,48 @@
             <p class="text-xs text-slate-500 mt-1">Track payments and recovery performance</p>
         </div>
         
-        <div class="flex items-center gap-4">
+        <div class="flex flex-wrap items-center gap-3 sm:gap-4">
+            <!-- New Entry Buttons -->
+            @can('enter_collections')
+                <a href="{{ route('collection.entry') }}" class="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-blue-600 text-white py-2 px-4 rounded-xl text-xs font-extrabold shadow-md hover:bg-blue-700 transition-all whitespace-nowrap">
+                    <span class="material-symbols-outlined text-sm">payments</span>
+                    Collection Entry
+                </a>
+            @endcan
+            @can('enter_savings')
+                <a href="{{ route('savings.entry') }}" class="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-green-600 text-white py-2 px-4 rounded-xl text-xs font-extrabold shadow-md hover:bg-green-700 transition-all whitespace-nowrap">
+                    <span class="material-symbols-outlined text-sm">account_balance_wallet</span>
+                    Savings Entry
+                </a>
+            @endcan
+
             <!-- Repayments Records Button -->
-            <a href="{{ route('repayments.records') }}" class="flex items-center gap-2 bg-primary text-white py-2 px-4 rounded-xl text-xs font-extrabold shadow-md hover:bg-slate-800 transition-all">
+            <a href="{{ route('repayments.records') }}" class="flex-1 sm:flex-none flex items-center justify-center gap-2 bg-primary text-white py-2 px-4 rounded-xl text-xs font-extrabold shadow-md hover:bg-slate-800 transition-all whitespace-nowrap">
                 <span class="material-symbols-outlined text-sm">history</span>
                 Repayments
             </a>
 
             <!-- Focus Mode Toggle -->
             @unless(Auth::user()->hasRole('Collection Officer'))
-                <div x-data="{ active: @entangle('showSummary') }" class="flex items-center gap-2 cursor-pointer" @click="active = !active">
-                    <span class="text-xs font-bold text-slate-500 uppercase">Summary</span>
+                <div x-data="{ active: @entangle('showSummary') }" class="flex items-center gap-2 cursor-pointer bg-slate-50 dark:bg-slate-800/50 px-3 py-2 rounded-xl border border-slate-100 dark:border-slate-700 sm:bg-transparent sm:border-0 sm:px-0 sm:py-0" @click="active = !active">
+                    <span class="text-[10px] sm:text-xs font-bold text-slate-500 uppercase">Summary</span>
                     <button type="button" 
-                        class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                        class="relative inline-flex h-5 w-9 sm:h-6 sm:w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                         :class="{ 'bg-primary': active, 'bg-slate-200 dark:bg-slate-700': !active }"
                         role="switch" 
                         :aria-checked="active">
                         <span class="sr-only">Use setting</span>
                         <span aria-hidden="true" 
-                            class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
-                            :class="{ 'translate-x-5': active, 'translate-x-0': !active }">
+                            class="pointer-events-none inline-block h-4 w-4 sm:h-5 sm:w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                            :class="{ 'translate-x-4 sm:translate-x-5': active, 'translate-x-0': !active }">
                         </span>
                     </button>
                 </div>
             @endunless
 
             <!-- Custom Date Filter Dropdown -->
-            <div x-data="{ open: false, selected: @entangle('filter') }" class="relative">
-                <button @click="open = !open" @click.outside="open = false" type="button" class="flex items-center justify-between gap-2 w-40 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 py-2 pl-4 pr-3 rounded-xl text-xs font-bold shadow-sm hover:border-primary/50 transition-colors">
+            <div x-data="{ open: false, selected: @entangle('filter') }" class="relative flex-1 sm:flex-none">
+                <button @click="open = !open" @click.outside="open = false" type="button" class="flex items-center justify-between gap-2 w-full sm:w-40 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 py-2 pl-4 pr-3 rounded-xl text-xs font-bold shadow-sm hover:border-primary/50 transition-colors">
                     <span x-text="selected.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())"></span>
                     <span class="material-symbols-outlined text-sm text-slate-400" :class="{ 'rotate-180': open }">expand_more</span>
                 </button>

@@ -84,6 +84,10 @@ Route::middleware(['auth', 'update_last_seen'])->group(function () {
         Route::get('reports', \App\Livewire\Reports::class)->middleware('permission:view_reports')->name('reports');
         Route::get('reports/print/{type}', \App\Livewire\GeneralReportPrint::class)->middleware('permission:export_and_print')->name('report.print');
         Route::get('collections', \App\Livewire\Collections::class)->middleware('permission:manage_collections')->name('collections');
+        Route::get('collection-entry', \App\Livewire\CollectionEntry::class)->middleware('permission:enter_collections')->name('collection.entry');
+        Route::get('savings-entry', \App\Livewire\SavingsEntry::class)->middleware('permission:enter_savings')->name('savings.entry');
+        Route::get('kyc-approval', \App\Livewire\Admin\KycApproval::class)->middleware('permission:approve_kyc')->name('kyc.approval');
+        Route::get('loan-approval', \App\Livewire\Admin\LoanApproval::class)->middleware('permission:approve_loans')->name('loan.approval');
         Route::get('repayments', \App\Livewire\RepaymentRecords::class)->middleware('permission:manage_collections')->name('repayments.records');
         Route::get('verifications', \App\Livewire\Admin\PaymentVerifications::class)->middleware('permission:manage_collections')->name('admin.verifications');
         Route::get('notifications', \App\Livewire\Notifications::class)->name('notifications');
@@ -91,11 +95,13 @@ Route::middleware(['auth', 'update_last_seen'])->group(function () {
         Route::get('settings/security', \App\Livewire\Settings\SecuritySettings::class)->name('settings.security');
         Route::get('settings/notifications', \App\Livewire\Settings\NotificationSettings::class)->middleware('permission:manage_settings')->name('settings.notifications');
         Route::get('settings/form-builder', FormBuilder::class)->middleware('permission:manage_settings')->name('settings.form-builder');
+        Route::get('settings/guarantor-form', \App\Livewire\Settings\GuarantorFormBuilder::class)->middleware('permission:manage_settings')->name('settings.guarantor-form');
         Route::get('settings/roles', RolesManagement::class)->middleware('permission:manage_settings')->name('settings.roles');
         Route::get('settings/team-members', TeamManagement::class)->middleware('permission:manage_settings')->name('settings.team-members');
         Route::get('settings/loan-products', \App\Livewire\Settings\LoanProducts::class)->middleware('permission:manage_settings')->name('settings.loan-products');
         Route::view('customer', 'pages.customer')->middleware('permission:manage_borrowers')->name('customer');
         Route::view('customer/create', 'pages.customer-registration')->middleware('permission:manage_borrowers')->name('customer.create');
+        Route::get('customer/guarantor/create', \App\Livewire\Borrower\GuarantorRegistration::class)->middleware('permission:manage_guarantors')->name('guarantor.create');
         Route::get('vault', \App\Livewire\Vault::class)->middleware('permission:manage_vault')->name('vault');
         Route::view('collateral/create', 'pages.add-collateral')->middleware('permission:manage_vault')->name('collateral.create');
     });

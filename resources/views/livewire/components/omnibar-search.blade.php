@@ -10,16 +10,17 @@
         type="text"
     />
     
-    @if(!empty($results))
+    @if(strlen($query) >= 2)
         <div class="absolute mt-3 w-full bg-white dark:bg-[#1a1f2b] rounded-3xl shadow-2xl border border-slate-100 dark:border-slate-800 z-[100] overflow-hidden animate-in fade-in slide-in-from-top-4 duration-200">
             <div class="p-3">
                 <div class="flex items-center justify-between px-3 py-2 border-b border-slate-50 dark:border-slate-800/50 mb-2">
                     <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Search Results</span>
                     <span class="text-[10px] font-bold text-primary bg-primary/10 px-2 py-0.5 rounded-full">{{ count($results) }} Found</span>
                 </div>
+                
                 <div class="max-h-[400px] overflow-y-auto custom-scrollbar">
-                    @foreach($results as $res)
-                        <a href="{{ $res['link'] }}" class="flex items-center gap-4 p-3 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all group">
+                    @forelse($results as $res)
+                        <a href="#" wire:click.prevent="navigateTo('{{ $res['link'] }}', '{{ $res['permission'] ?? '' }}')" class="flex items-center gap-4 p-3 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-all group">
                             <div class="size-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 group-hover:bg-primary group-hover:text-white transition-colors">
                                 <span class="material-symbols-outlined text-xl">{{ $res['icon'] }}</span>
                             </div>
@@ -29,8 +30,17 @@
                             </div>
                             <span class="material-symbols-outlined text-slate-300 group-hover:text-primary group-hover:translate-x-1 transition-all">chevron_right</span>
                         </a>
-                    @endforeach
+                    @empty
+                        <div class="flex flex-col items-center justify-center py-8 px-4 text-center">
+                            <div class="size-16 bg-slate-50 dark:bg-slate-800/50 rounded-full flex items-center justify-center mb-4">
+                                <span class="material-symbols-outlined text-slate-300 text-3xl">search_off</span>
+                            </div>
+                            <p class="text-sm font-bold text-slate-900 dark:text-white mb-1">No results found</p>
+                            <p class="text-[10px] text-slate-400 font-medium uppercase tracking-wider">Try searching for something else or use prefixes like <span class="text-primary">loan:</span> or <span class="text-primary">customer:</span></p>
+                        </div>
+                    @endforelse
                 </div>
+
                 <div @click="open = false; $wire.set('query', '')" class="p-3 bg-slate-50 dark:bg-slate-800/50 mt-2 rounded-2xl flex items-center justify-center cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
                     <p class="text-[10px] font-bold text-slate-400">Press <kbd class="px-1.5 py-0.5 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded text-slate-500 font-mono">ESC</kbd> or click here to close</p>
                 </div>

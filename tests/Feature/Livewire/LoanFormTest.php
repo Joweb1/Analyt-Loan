@@ -78,6 +78,16 @@ class LoanFormTest extends TestCase
         ]);
     }
 
+    public function test_selecting_borrower_sets_borrower_user_id(): void
+    {
+        $borrower = Borrower::factory()->create(['organization_id' => $this->organization->id]);
+
+        Livewire::actingAs($this->user)
+            ->test(LoanForm::class)
+            ->call('selectBorrower', $borrower->id)
+            ->assertSet('borrowerUserId', $borrower->user_id);
+    }
+
     public function test_cannot_create_loan_with_insufficient_collateral(): void
     {
         $borrower = Borrower::factory()->create(['organization_id' => $this->organization->id]);

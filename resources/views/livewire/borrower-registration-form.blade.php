@@ -295,13 +295,8 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div class="flex flex-col gap-2 md:col-span-2">
                     <label class="text-xs font-bold text-zinc-500 uppercase tracking-widest px-1">Select Guarantor</label>
-                    <select wire:model="guarantor_id" class="w-full px-5 py-4 bg-zinc-50 dark:bg-zinc-800/50 border-2 border-zinc-100 dark:border-zinc-800 rounded-2xl focus:border-primary focus:ring-0 transition-all font-medium">
-                        <option value="">Select a guarantor</option>
-                        @foreach($users as $user)
-                            <option value="{{ $user->id }}">{{ $user->name }}</option>
-                        @endforeach
-                    </select>
-                    <p class="text-[10px] text-zinc-400 font-bold uppercase px-1">Optional, Select from registered users</p>
+                    <livewire:components.guarantor-select />
+                    <p class="text-[10px] text-zinc-400 font-bold uppercase px-1">Optional, Select from registered users or guarantors</p>
                     @error('guarantor_id') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                 </div>
             </div>
@@ -332,19 +327,18 @@
                                 @if($type === 'textarea')
                                     <textarea wire:model="{{ $modelName }}" class="w-full px-5 py-4 bg-zinc-50 dark:bg-zinc-800/50 border-2 border-zinc-100 dark:border-zinc-800 rounded-2xl focus:border-primary focus:ring-0 transition-all font-medium resize-none" rows="3"></textarea>
                                 @elseif($type === 'select')
-                                    <select wire:model="{{ $modelName }}" class="w-full px-5 py-4 bg-zinc-50 dark:bg-zinc-800/50 border-2 border-zinc-100 dark:border-zinc-800 rounded-2xl focus:border-primary focus:ring-0 transition-all font-medium">
-                                        <option value="">Select {{ $label }}</option>
-                                        @if(isset($field['options']) && is_array($field['options']))
-                                            @foreach($field['options'] as $opt)
-                                                <option value="{{ $opt }}">{{ $opt }}</option>
-                                            @endforeach
-                                        @elseif($field['name'] === 'guarantor_id')
-                                             {{-- Special case for guarantor --}}
-                                            @foreach($users as $user)
-                                                <option value="{{ $user->id }}">{{ $user->name }}</option>
-                                            @endforeach
-                                        @endif
-                                    </select>
+                                    @if($field['name'] === 'guarantor_id')
+                                        <livewire:components.guarantor-select />
+                                    @else
+                                        <select wire:model="{{ $modelName }}" class="w-full px-5 py-4 bg-zinc-50 dark:bg-zinc-800/50 border-2 border-zinc-100 dark:border-zinc-800 rounded-2xl focus:border-primary focus:ring-0 transition-all font-medium">
+                                            <option value="">Select {{ $label }}</option>
+                                            @if(isset($field['options']) && is_array($field['options']))
+                                                @foreach($field['options'] as $opt)
+                                                    <option value="{{ $opt }}">{{ $opt }}</option>
+                                                @endforeach
+                                            @endif
+                                        </select>
+                                    @endif
                                 @elseif($type === 'file')
                                     <div class="relative">
                                         <input wire:key="{{ $modelName }}_input" wire:model="{{ $modelName }}" type="file" class="w-full text-sm text-zinc-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary/10 file:text-primary dark:file:bg-primary/80 dark:file:text-white hover:file:bg-primary/20"/>

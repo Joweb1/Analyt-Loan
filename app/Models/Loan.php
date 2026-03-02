@@ -89,6 +89,8 @@ class Loan extends Model
         'organization_id',
         'borrower_id',
         'loan_officer_id',
+        'guarantor_id',
+        'external_guarantor_id',
         'amount',
         'loan_number',
         'loan_product',
@@ -151,6 +153,16 @@ class Loan extends Model
     public function loanOfficer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'loan_officer_id');
+    }
+
+    public function guarantor(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'guarantor_id');
+    }
+
+    public function externalGuarantor(): BelongsTo
+    {
+        return $this->belongsTo(Guarantor::class, 'external_guarantor_id');
     }
 
     public function getAttachmentUrlsAttribute(): array

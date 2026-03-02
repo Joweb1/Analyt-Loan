@@ -39,6 +39,7 @@ class ActionCenterTest extends TestCase
             'organization_id' => $this->organization->id,
             'title' => 'Pending Loan Approval',
             'message' => 'Please approve this loan',
+            'type' => 'info',
             'is_actionable' => true,
             'category' => 'loan',
             'priority' => 'high',
@@ -49,6 +50,7 @@ class ActionCenterTest extends TestCase
             'organization_id' => $this->organization->id,
             'title' => 'General Info',
             'message' => 'System update',
+            'type' => 'info',
             'is_actionable' => false,
         ]);
 
@@ -58,6 +60,7 @@ class ActionCenterTest extends TestCase
             'organization_id' => $otherOrg->id,
             'title' => 'Another Pending Action',
             'message' => 'Other org task',
+            'type' => 'info',
             'is_actionable' => true,
         ]);
 
@@ -74,6 +77,7 @@ class ActionCenterTest extends TestCase
             'organization_id' => $this->organization->id,
             'title' => 'Overdue Task',
             'message' => 'Your task is overdue',
+            'type' => 'info',
             'is_actionable' => true,
         ]);
 
@@ -94,6 +98,7 @@ class ActionCenterTest extends TestCase
             'recipient_id' => $this->admin->id,
             'title' => 'Admin Only Task',
             'message' => 'Task for admin',
+            'type' => 'info',
             'is_actionable' => true,
         ]);
 
@@ -104,6 +109,7 @@ class ActionCenterTest extends TestCase
             'recipient_id' => $otherUser->id,
             'title' => 'Other User Task',
             'message' => 'Task for other user',
+            'type' => 'info',
             'is_actionable' => true,
         ]);
 

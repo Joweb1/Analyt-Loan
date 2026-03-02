@@ -2,12 +2,9 @@
     $faviconUrl = asset('favicon.ico'); // Default fallback if anything fails
     $logoPath = null;
 
-    if (Auth::check() && Auth::user()->organization) {
+    if (Auth::check() && Auth::user()->organization && Auth::user()->organization->logo_url) {
+        $faviconUrl = Auth::user()->organization->logo_url;
         $logoPath = Auth::user()->organization->logo_path;
-    }
-
-    if ($logoPath) {
-        $faviconUrl = \Illuminate\Support\Facades\Storage::url($logoPath);
     } else {
         // SVG data URI for the 'A' fallback
         // Background: #0f172a (Deep dark blue/Slate-900)

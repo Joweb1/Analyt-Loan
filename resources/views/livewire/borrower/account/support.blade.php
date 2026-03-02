@@ -9,7 +9,7 @@
     <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 mb-6">
         <div class="flex items-center gap-4 mb-6">
              @if($organization->logo_path)
-                <img src="{{ Storage::url($organization->logo_path) }}" class="h-14 w-14 object-contain rounded-2xl bg-slate-50 p-2" alt="Logo">
+                <img src="{{ $organization->logo_url }}" class="h-14 w-14 object-contain rounded-2xl bg-slate-50 p-2" alt="Logo">
             @else
                 <div class="h-14 w-14 rounded-2xl bg-brand flex items-center justify-center text-white font-bold text-xl">
                     {{ substr($organization->name, 0, 1) }}

@@ -10,6 +10,7 @@ use App\Traits\SterilizesPhone;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Spatie\Permission\Models\Role;
@@ -83,6 +84,20 @@ class BorrowerRegistrationForm extends Component
 
     public $guarantor_id;
 
+    public $guarantor_type; // 'internal' or 'external'
+
+    #[On('guarantorSelected')]
+    public function updateGuarantor($guarantor)
+    {
+        if ($guarantor) {
+            $this->guarantor_id = $guarantor['id'];
+            $this->guarantor_type = $guarantor['type'];
+        } else {
+            $this->guarantor_id = null;
+            $this->guarantor_type = null;
+        }
+    }
+
     // Custom Fields Data
     public $customData = [];
 
@@ -95,6 +110,7 @@ class BorrowerRegistrationForm extends Component
             $this->organization_id = Auth::user()->organization_id;
         }
 
+        $this->is_employed = 'Yes';
         $this->loadConfigs();
     }
 
@@ -116,27 +132,22 @@ class BorrowerRegistrationForm extends Component
         // Ideally, we should seed on org creation or first access)
 
         $rawConfigs = FormFieldConfig::where('organization_id', $this->organization_id)
+            ->where('form_type', 'borrower')
             ->where('is_active', true)
             ->orderBy('sort_order')
             ->get();
 
         // If no configs found, rely on default behavior (hardcoded fields) OR seed defaults on the fly?
-        // Let's seed defaults on the fly to ensure consistency
         if ($rawConfigs->isEmpty()) {
-            // Instantiate FormBuilder just to trigger default seeding?
-            // Or just duplicate the logic. Duplicating logic is cleaner than instantiating a Livewire component.
-            // For now, let's assume if empty, we fall back to standard hardcoded view logic?
-            // Actually, the view needs to know if it should render dynamically or not.
-            // Let's try to seed defaults if missing.
-            $builder = new \App\Livewire\Settings\FormBuilder;
-            // Mock auth for builder? No, builder relies on Auth::user()->organization_id.
-            // Let's just create a static helper or service for seeding.
-            // For now, I'll just check if rawConfigs is empty and if so, return empty configs
-            // and the view will handle "if configs empty, show default form".
-            $this->configs = [];
-        } else {
-            $this->configs = $rawConfigs->groupBy('section')->toArray();
+            \App\Livewire\Settings\FormBuilder::seedDefaults($this->organization_id);
+            $rawConfigs = FormFieldConfig::where('organization_id', $this->organization_id)
+                ->where('form_type', 'borrower')
+                ->where('is_active', true)
+                ->orderBy('sort_order')
+                ->get();
         }
+
+        $this->configs = $rawConfigs->groupBy('section')->toArray();
     }
 
     protected function getDynamicRules()
@@ -175,7 +186,8 @@ class BorrowerRegistrationForm extends Component
                 'next_of_kin_name' => 'required|string',
                 'next_of_kin_relationship' => 'required|string',
                 'next_of_kin_phone' => 'required|string',
-                'guarantor_id' => 'nullable|exists:users,id',
+                'guarantor_id' => 'nullable|string',
+                'guarantor_type' => 'nullable|in:internal,external',
             ]);
         }
 
@@ -311,7 +323,14 @@ class BorrowerRegistrationForm extends Component
             $borrower->credit_score = $this->credit_score;
             $borrower->marital_status = $this->marital_status;
             $borrower->dependents = $this->dependents;
-            $borrower->guarantor_id = $this->guarantor_id;
+
+            if ($this->guarantor_type === 'external') {
+                $borrower->external_guarantor_id = $this->guarantor_id;
+                $borrower->guarantor_id = null;
+            } else {
+                $borrower->guarantor_id = $this->guarantor_id;
+                $borrower->external_guarantor_id = null;
+            }
 
             // Computed Fields
             $borrower->bank_account_details = [
@@ -320,7 +339,7 @@ class BorrowerRegistrationForm extends Component
                 'account_name' => $this->bank_account_name,
             ];
 
-            if ($this->is_employed) {
+            if ($this->is_employed === 'Yes' || $this->is_employed === true || $this->is_employed === 1 || $this->is_employed === '1') {
                 $borrower->employment_information = [
                     'employer_name' => $this->employer_name,
                     'job_title' => $this->job_title,

@@ -42,6 +42,12 @@
                             <span class="material-symbols-outlined text-primary text-[20px]">business</span>
                             {{ $organization }}
                         </span>
+                        @if($custom_id)
+                            <span class="flex items-center gap-2 px-3 py-1 bg-white/5 rounded-lg border border-white/10">
+                                <span class="material-symbols-outlined text-blue-400 text-[18px]">fingerprint</span>
+                                <span class="text-white font-mono text-xs">{{ $custom_id }}</span>
+                            </span>
+                        @endif
                         <span class="flex items-center gap-2">
                             <span class="material-symbols-outlined text-primary text-[20px]">mail</span>
                             {{ $email }}

@@ -1,9 +1,24 @@
 <div class="max-w-6xl mx-auto px-2 py-2 w-full">
+    @php
+        $isKycApproved = Auth::user()->organization && Auth::user()->organization->kyc_status === 'approved';
+    @endphp
     <!-- Section Header & Filters -->
     <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
-        <div>
-            <h2 class="text-[#111318] dark:text-white text-[28px] font-bold tracking-tight">Manage Customers</h2>
-            <p class="text-[#606b8a] text-sm mt-1">Manage {{ $borrowers->total() }} active borrowers</p>
+        <div class="flex flex-col md:flex-row md:items-center gap-4">
+            <div>
+                <h2 class="text-[#111318] dark:text-white text-[28px] font-bold tracking-tight">Manage Customers</h2>
+                <p class="text-[#606b8a] text-sm mt-1">Manage {{ $borrowers->total() }} active borrowers</p>
+            </div>
+            @if($isKycApproved)
+                <div class="hidden md:flex gap-2">
+                    <a href="{{ route('customer.create') }}" class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl text-xs font-bold hover:bg-primary/90 transition-all shadow-md">
+                        <span class="material-symbols-outlined text-sm">person_add</span> Add Customer
+                    </a>
+                    <a href="{{ route('guarantor.create') }}" class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-[#1a1f2e] border border-[#020617] text-[#020617] dark:text-white rounded-xl text-xs font-bold hover:bg-slate-50 transition-all shadow-sm">
+                        <span class="material-symbols-outlined text-sm">shield_person</span> Register Guarantor
+                    </a>
+                </div>
+            @endif
         </div>
         <div class="flex gap-3 items-center flex-1 max-w-md">
             <div class="relative w-full">
@@ -24,13 +39,13 @@
         </div>
     </div>
     
-    @php
-        $isKycApproved = Auth::user()->organization && Auth::user()->organization->kyc_status === 'approved';
-    @endphp
-    <div class="w-full max-w-[600px] mx-auto my-8 md:hidden">
+    <div class="w-full max-w-[600px] mx-auto my-8 md:hidden space-y-3">
         @if($isKycApproved)
             <a href="{{ route('customer.create') }}" class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20">
                 <span class="material-symbols-outlined text-base">person_add</span> Add New Customer/Borrower
+            </a>
+            <a href="{{ route('guarantor.create') }}" class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white dark:bg-[#1a1f2e] border border-[#020617] text-[#020617] dark:text-white rounded-lg text-sm font-medium hover:bg-slate-50 transition-all shadow-sm">
+                <span class="material-symbols-outlined text-base">shield_person</span> Register Guarantor
             </a>
         @else
             <div class="w-full px-4 py-3 bg-yellow-50 text-yellow-700 text-center text-xs font-bold rounded-lg border border-yellow-100">
@@ -66,11 +81,17 @@
                     };
                     $scorePercent = min(100, ($borrower->credit_score / 850) * 100);
                     
-                    // Generate a consistent soft background color based on name
                     $colors = ['bg-blue-50 text-blue-600', 'bg-purple-50 text-purple-600', 'bg-emerald-50 text-emerald-600', 'bg-rose-50 text-rose-600', 'bg-amber-50 text-amber-600'];
                     $colorClass = $colors[ord(substr($borrower->user->name, 0, 1)) % count($colors)];
                 @endphp
-                <div class="group relative bg-white dark:bg-[#1a1f2e] p-5 rounded-xl border border-[#e5e7eb] dark:border-[#2d3344] shadow-sm hover:shadow-xl transition-all duration-300 custom-card-hover overflow-hidden">
+                <div class="group relative bg-white dark:bg-[#1a1f2e] p-5 rounded-xl border border-[#e5e7eb] dark:border-[#2d3344] shadow-sm hover:shadow-xl transition-all duration-300 custom-card-hover">
+                    @if($borrower->custom_id)
+                        <a href="{{ route('borrower.profile', $borrower->id) }}" class="absolute -top-4 -left-3 z-30 bg-[#020617] text-white text-[9px] font-black px-3.5 py-2 shadow-md border border-white/80 dark:border-[#1a1f2e] flex items-center gap-2 uppercase tracking-widest ring-1 ring-blue-500/20 hover:scale-105 transition-transform" style="border-radius: 12px 40px 0px 12px;">
+                            <div class="size-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]"></div>
+                            {{ $borrower->custom_id }}
+                        </a>
+                    @endif
+                    
                     <div class="flex justify-between items-start mb-6">
                         <div class="flex items-center gap-3">
                             <div class="relative">
@@ -214,7 +235,12 @@
                                         </div>
                                     @endif
                                     <div>
-                                        <div class="text-sm font-semibold">{{ $borrower->user->name }}</div>
+                                        <div class="text-sm font-semibold flex items-center gap-2">
+                                            {{ $borrower->user->name }}
+                                            @if($borrower->custom_id)
+                                                <a href="{{ route('borrower.profile', $borrower->id) }}" class="text-[9px] bg-slate-100 dark:bg-slate-700 text-slate-500 px-1.5 py-0.5 rounded font-mono hover:bg-primary hover:text-white transition-colors">{{ $borrower->custom_id }}</a>
+                                            @endif
+                                        </div>
                                         <div class="text-xs text-gray-500">{{ $borrower->phone ?? 'N/A' }}</div>
                                     </div>
                                 </th>

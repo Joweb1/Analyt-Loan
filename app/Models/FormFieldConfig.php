@@ -48,6 +48,7 @@ class FormFieldConfig extends Model
 
     protected $fillable = [
         'organization_id',
+        'form_type',
         'section',
         'name',
         'label',

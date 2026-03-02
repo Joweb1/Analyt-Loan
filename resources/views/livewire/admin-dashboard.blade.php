@@ -1,12 +1,22 @@
 <div class="flex flex-col gap-4">
     <!-- Welcome/Context -->
-    <div class="flex justify-between items-end">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
         <div>
             <h2 class="text-2xl font-bold text-primary dark:text-white tracking-tight">Financial Pulse</h2>
             <p class="text-slate-500 text-sm mt-1">System Lending Overview</p>
         </div>
-        <div class="flex gap-2">
-            <a href="{{ route('loan.create') }}" class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20">
+        <div class="flex flex-wrap gap-2">
+            @can('approve_kyc')
+                <a href="{{ route('kyc.approval') }}" class="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-white dark:bg-[#1a1f2e] border border-[#020617] text-[#020617] dark:text-white rounded-lg text-sm font-medium hover:bg-slate-50 transition-all whitespace-nowrap shadow-sm">
+                    <span class="material-symbols-outlined text-base">verified_user</span> KYC Approval
+                </a>
+            @endcan
+            @can('approve_loans')
+                <a href="{{ route('loan.approval') }}" class="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-white dark:bg-[#1a1f2e] border border-[#020617] text-[#020617] dark:text-white rounded-lg text-sm font-medium hover:bg-slate-50 transition-all whitespace-nowrap shadow-sm">
+                    <span class="material-symbols-outlined text-base">fact_check</span> Loan Approval
+                </a>
+            @endcan
+            <a href="{{ route('loan.create') }}" class="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20 whitespace-nowrap">
                 <span class="material-symbols-outlined text-base">add</span> New Loan
             </a>
         </div>

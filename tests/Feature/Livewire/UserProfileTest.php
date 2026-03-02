@@ -76,7 +76,7 @@ class UserProfileTest extends TestCase
         Livewire::actingAs($borrowerUser)
             ->test(UserProfile::class)
             ->set('dob', '1990-01-01')
-            ->set('gender', 'Male')
+            ->set('gender', 'male')
             ->set('address', '123 Test St')
             ->set('bvn', '12345678901')
             ->set('nin', '10987654321')

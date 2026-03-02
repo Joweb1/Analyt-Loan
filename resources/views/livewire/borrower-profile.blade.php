@@ -7,7 +7,12 @@
                 <span>/</span>
                 <span class="text-slate-800 dark:text-white">Borrower Profile</span>
             </div>
-            <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Customer Information</h2>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                Customer Information
+                @if($borrower->custom_id)
+                    <span class="ml-2 text-sm text-slate-500 font-mono bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md">{{ $borrower->custom_id }}</span>
+                @endif
+            </h2>
         </div>
         <div class="flex gap-3">
              <button wire:click="toggleEdit" class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-white rounded-xl text-sm font-bold shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">

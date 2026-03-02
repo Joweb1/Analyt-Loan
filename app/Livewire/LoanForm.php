@@ -9,6 +9,7 @@ use App\Rules\FiftyPercentRule;
 use App\Services\LoanService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -16,12 +17,13 @@ class LoanForm extends Component
 {
     use WithFileUploads;
 
-    // ... (rest of properties)
+    /** @var \App\Models\Borrower|null */
+    public $selectedBorrower;
 
     // Borrower Selection
     public $borrowerId;
 
-    public $selectedBorrower;
+    public $borrowerUserId;
 
     public $search = '';
 
@@ -63,6 +65,22 @@ class LoanForm extends Component
 
     public $loan_officer_id;
 
+    public $guarantor_id;
+
+    public $guarantor_type;
+
+    #[On('guarantorSelected')]
+    public function updateGuarantor($guarantor)
+    {
+        if ($guarantor) {
+            $this->guarantor_id = $guarantor['id'];
+            $this->guarantor_type = $guarantor['type'];
+        } else {
+            $this->guarantor_id = null;
+            $this->guarantor_type = null;
+        }
+    }
+
     // Collateral
     public $collateralId;
 
@@ -98,6 +116,8 @@ class LoanForm extends Component
             'description' => 'nullable|string',
             'collateralId' => ['nullable', 'exists:collaterals,id'],
             'attachments' => ['nullable', 'file', 'max:10240'], // 10MB max
+            'guarantor_id' => 'nullable|string',
+            'guarantor_type' => 'nullable|in:internal,external',
         ];
     }
 
@@ -110,7 +130,10 @@ class LoanForm extends Component
             $this->isEditMode = true;
             $this->loanId = $loan->id;
             $this->borrowerId = $loan->borrower_id;
-            $this->selectedBorrower = $loan->borrower()->with('user')->first();
+            /** @var \App\Models\Borrower|null $borrower */
+            $borrower = $loan->borrower()->with('user')->first();
+            $this->selectedBorrower = $borrower;
+            $this->borrowerUserId = $borrower?->user_id;
             $this->loan_number = $loan->loan_number;
             $this->loan_product = $loan->loan_product;
             $this->release_date = $loan->release_date ? $loan->release_date->format('Y-m-d') : now()->format('Y-m-d');
@@ -127,6 +150,14 @@ class LoanForm extends Component
             $this->description = $loan->description;
             $this->collateralId = $loan->collateral?->id;
             $this->loan_officer_id = $loan->loan_officer_id;
+
+            if ($loan->external_guarantor_id) {
+                $this->guarantor_id = $loan->external_guarantor_id;
+                $this->guarantor_type = 'external';
+            } elseif ($loan->guarantor_id) {
+                $this->guarantor_id = $loan->guarantor_id;
+                $this->guarantor_type = 'internal';
+            }
         } else {
             $this->release_date = now()->format('Y-m-d');
 
@@ -176,7 +207,10 @@ class LoanForm extends Component
     public function selectBorrower($id)
     {
         $this->borrowerId = $id;
-        $this->selectedBorrower = Borrower::with('user')->find($id);
+        /** @var \App\Models\Borrower|null $borrower */
+        $borrower = Borrower::with('user')->find($id);
+        $this->selectedBorrower = $borrower;
+        $this->borrowerUserId = $borrower?->user_id;
         if (! $this->isEditMode) {
             $this->generateLoanNumber();
         }
@@ -188,6 +222,7 @@ class LoanForm extends Component
     public function resetBorrower()
     {
         $this->borrowerId = null;
+        $this->borrowerUserId = null;
         $this->selectedBorrower = null;
         $this->search = '';
         $this->searchResults = [];
@@ -263,6 +298,8 @@ class LoanForm extends Component
             'insurance_fee' => $this->insurance_fee,
             'description' => $this->description,
             'loan_officer_id' => $this->loan_officer_id,
+            'guarantor_id' => $this->guarantor_type === 'internal' ? $this->guarantor_id : null,
+            'external_guarantor_id' => $this->guarantor_type === 'external' ? $this->guarantor_id : null,
         ];
 
         if ($this->isEditMode) {

@@ -99,6 +99,13 @@ class BorrowTest extends TestCase
             'organization_id' => $this->org->id,
             'amount' => 1000,
             'loan_number' => 'EXISTING',
+            'loan_product' => 'Test Product',
+            'interest_rate' => 5,
+            'interest_type' => 'month',
+            'duration' => 1,
+            'duration_unit' => 'month',
+            'repayment_cycle' => 'monthly',
+            'num_repayments' => 1,
             'status' => 'active',
         ]);
 

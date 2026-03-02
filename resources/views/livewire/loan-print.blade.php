@@ -15,7 +15,7 @@
     <header class="flex justify-between items-start border-b-2 border-slate-900 pb-6 mb-8">
         <div class="flex items-center gap-4">
             @if($loan->organization->logo_path)
-                <img src="{{ \Illuminate\Support\Facades\Storage::url($loan->organization->logo_path) }}" class="h-16 w-auto object-contain">
+                <img src="{{ $loan->organization->logo_url }}" class="h-16 w-auto object-contain">
             @else
                 <div class="size-16 bg-primary rounded-xl flex items-center justify-center text-white">
                     <span class="material-symbols-outlined text-4xl">account_balance</span>
@@ -175,7 +175,7 @@
             <p class="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-4">Authorized Organization Signature</p>
             <div class="flex justify-end items-end h-16">
                 @if($loan->organization->signature_path)
-                    <img src="{{ \Illuminate\Support\Facades\Storage::url($loan->organization->signature_path) }}" class="h-16 w-auto object-contain">
+                    <img src="{{ $loan->organization->signature_url }}" class="h-16 w-auto object-contain">
                 @else
                     <div class="h-12 border-b border-dotted border-slate-400 w-2/3 ml-auto"></div>
                 @endif

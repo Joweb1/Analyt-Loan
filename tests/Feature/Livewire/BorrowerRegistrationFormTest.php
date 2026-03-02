@@ -67,7 +67,7 @@ class BorrowerRegistrationFormTest extends TestCase
             ->set('email', 'john@example.com')
             ->set('phone', '08012345678')
             ->set('dob', '1990-01-01')
-            ->set('gender', 'Male')
+            ->set('gender', 'male')
             ->set('address', '123 Main St')
             ->set('bvn', '12345678901')
             ->set('nin', '12345678901')
@@ -88,9 +88,10 @@ class BorrowerRegistrationFormTest extends TestCase
             ->set('identity_document', $doc)
             ->call('save')
             ->assertHasNoErrors()
-            ->assertDispatched('custom-alert', function ($event, $params) {
-                return $params[0]['type'] === 'success';
-            }); // Assuming success alerts are dispatched
+            ->assertDispatched('custom-alert', [
+                'type' => 'success',
+                'message' => 'Borrower registered successfully.',
+            ]);
 
         $this->assertDatabaseHas('users', [
             'email' => 'john@example.com',
@@ -117,9 +118,10 @@ class BorrowerRegistrationFormTest extends TestCase
             ->set('name', 'John Doe')
             ->set('phone', '08012345678')
             ->call('save')
-            ->assertDispatched('custom-alert', function ($event, $params) {
-                return $params[0]['type'] === 'error' && str_contains($params[0]['message'], 'KYC');
-            });
+            ->assertDispatched('custom-alert', [
+                'type' => 'error',
+                'message' => 'Registration is currently disabled for this organization (KYC Pending/Rejected).',
+            ]);
 
         $this->assertDatabaseMissing('users', ['email' => 'john@example.com']);
     }

@@ -49,7 +49,7 @@ class MasterSeeder extends Seeder
             LoanProductSeeder::class,
         ]);
 
-        $demoOrg = Organization::where('slug', 'analyt-demo')->first();
+        $demoOrg = Organization::where('slug', 'analyt-org-demo')->first();
 
         // 2. Add some Demo Loans/Data linked to Demo Org
         // We ensure the observers catch these and create actionable tasks

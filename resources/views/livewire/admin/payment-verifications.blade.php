@@ -48,7 +48,7 @@
                                 </td>
                                 <td class="px-6 py-4">
                                     @if($proof->receipt_path)
-                                        <a href="{{ Storage::url($proof->receipt_path) }}" target="_blank" class="flex items-center gap-2 text-blue-600 hover:underline text-sm font-medium">
+                                        <a href="{{ $proof->receipt_url }}" target="_blank" class="flex items-center gap-2 text-blue-600 hover:underline text-sm font-medium">
                                             <span class="material-symbols-outlined text-lg">attachment</span>
                                             View Receipt
                                         </a>

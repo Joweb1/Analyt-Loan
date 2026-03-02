@@ -30,6 +30,7 @@ class UserObserver
                 'recipient_id' => $appOwner->id,
                 'title' => $title,
                 'message' => $message,
+                'type' => 'info',
                 'category' => $category,
                 'priority' => 'normal',
                 'is_actionable' => true,

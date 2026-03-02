@@ -390,6 +390,28 @@
             </div>
         </div>
 
+        <!-- Guarantor Section -->
+        <div class="mb-8 relative" x-data>
+            <div class="absolute inset-0 bg-gradient-to-r from-teal-500/10 to-emerald-500/10 rounded-3xl transform -skew-y-1"></div>
+            <div class="relative bg-white dark:bg-[#1a1f2b] rounded-2xl shadow-xl border border-teal-100 dark:border-teal-900/50 p-6 md:p-10">
+                <div class="flex items-start justify-between mb-8 relative z-10">
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                            <span class="material-symbols-outlined text-teal-500">shield_person</span>
+                            Guarantor Information
+                        </h3>
+                        <p class="text-sm text-gray-500 mt-1">Change or assign a guarantor specifically for this loan application.</p>
+                    </div>
+                </div>
+                
+                <div class="relative z-10 w-full">
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Select Guarantor</label>
+                    <livewire:components.guarantor-select :excludeId="$borrowerUserId" :key="'guarantor-select-'.$borrowerUserId" />
+                    @error('guarantor_id') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
+                </div>
+            </div>
+        </div>
+
         <!-- Floating Fixed Footer -->
         <div class="fixed bottom-6 left-4 right-4 md:left-8 md:right-8 lg:left-auto lg:right-12 lg:w-[calc(100%-320px)] xl:w-[calc(100%-400px)] z-50">
             <div class="bg-white/90 backdrop-blur-md border border-gray-200 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.15)] p-4 md:px-8 flex flex-col md:flex-row items-center justify-between gap-4">

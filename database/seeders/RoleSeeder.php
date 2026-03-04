@@ -25,6 +25,7 @@ class RoleSeeder extends Seeder
             'manage_collections',
             'enter_collections',
             'enter_savings',
+            'delete_savings',
             'approve_kyc',
             'manage_guarantors',
             'view_reports',

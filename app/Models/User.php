@@ -71,9 +71,19 @@ class User extends Authenticatable
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, HasPushSubscriptions, HasRoles, HasUuids, Notifiable;
 
+    protected static function booted()
+    {
+        static::creating(function ($user) {
+            if (empty($user->email)) {
+                $phone = $user->phone ? preg_replace('/[^0-9]/', '', $user->phone) : \Illuminate\Support\Str::random(10);
+                $user->email = $phone.'@analyt-loan.com';
+            }
+        });
+    }
+
     /**
      * The attributes that are mass assignable.
-     *
+...
      * @var list<string>
      */
     protected $fillable = [

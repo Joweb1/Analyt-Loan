@@ -2,131 +2,110 @@
 
 namespace App\Livewire\Settings;
 
-use App\Models\Borrower;
 use App\Models\User;
-use App\Traits\SterilizesPhone;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Livewire\Component;
 use Livewire\WithPagination;
 use Spatie\Permission\Models\Role;
 
 class TeamManagement extends Component
 {
-    use SterilizesPhone, WithPagination;
+    use WithPagination;
 
     public $showInviteModal = false;
 
-    // Invite/Edit Form State
-    public $memberId;
+    // Staff creation state
+    public $selectedUserId;
 
-    public $name;
-
-    public $email;
-
-    public $phone;
+    public $selectedUserName;
 
     public $role;
 
-    // Search for existing borrowers to promote
-    public $searchBorrower = '';
+    // Search for existing users in organization
+    public $searchUser = '';
 
-    public $borrowerResults = [];
+    public $userResults = [];
 
     protected $rules = [
-        'name' => 'required|string|max:255',
-        'phone' => 'required|string|size:13',
-        'email' => 'nullable|email',
+        'selectedUserId' => 'required|exists:users,id',
         'role' => 'required|exists:roles,name',
     ];
 
-    public function updatedSearchBorrower()
+    public function updatedSearchUser()
     {
-        if (strlen($this->searchBorrower) < 3) {
-            $this->borrowerResults = [];
+        if (strlen($this->searchUser) < 2) {
+            $this->userResults = [];
 
             return;
         }
 
         $orgId = Auth::user()->organization_id;
-        $this->borrowerResults = User::role('Borrower')
-            ->where('organization_id', $orgId)
+
+        // Find users in the same organization who are currently just borrowers or have no administrative role
+        // The user specifically asked for "users/borrowers in the current organization"
+        $this->userResults = User::where('organization_id', $orgId)
             ->where(function ($q) {
-                $q->where('name', 'like', '%'.$this->searchBorrower.'%')
-                    ->orWhere('phone', 'like', '%'.$this->searchBorrower.'%');
+                $q->where('name', 'like', '%'.$this->searchUser.'%')
+                    ->orWhere('phone', 'like', '%'.$this->searchUser.'%')
+                    ->orWhere('email', 'like', '%'.$this->searchUser.'%');
             })
-            ->take(5)
+            ->take(10)
             ->get();
     }
 
-    public function selectBorrower($id)
+    public function selectUser($id, $name)
     {
-        $user = User::find($id);
-        $this->name = $user->name;
-        $this->phone = $user->phone;
-        $this->email = $user->email;
-        $this->searchBorrower = '';
-        $this->borrowerResults = [];
+        $this->selectedUserId = $id;
+        $this->selectedUserName = $name;
+        $this->searchUser = $name;
+        $this->userResults = [];
     }
 
-    public function inviteMember()
+    public function addMember()
     {
-        $this->phone = $this->sterilize($this->phone);
+        $this->validate();
 
-        $this->validate([
-            'name' => 'required|string|max:255',
-            'phone' => 'required|string|size:13',
-            'email' => 'nullable|email',
-            'role' => 'required|exists:roles,name',
-        ]);
+        $user = User::findOrFail($this->selectedUserId);
 
-        $orgId = Auth::user()->organization_id;
-
-        // Check if user exists by phone
-        $user = User::where('phone', $this->phone)->first();
-
-        if ($user) {
-            if ($user->organization_id !== $orgId) {
-                $this->addError('phone', 'This user belongs to another organization.');
-
-                return;
-            }
-            // Update role if exists
-            $user->syncRoles([$this->role]);
-            $user->name = $this->name;
-            $user->email = $this->email;
-            $user->save();
-            $message = 'User role updated successfully.';
-        } else {
-            // Create new staff
-            $user = User::create([
-                'organization_id' => $orgId,
-                'name' => $this->name,
-                'phone' => $this->phone,
-                'email' => $this->email,
-                'password' => Hash::make('password'), // Default password, they should reset it
-            ]);
-            $user->assignRole($this->role);
-            $message = 'Team member invited successfully.';
-        }
-
-        $this->dispatch('custom-alert', ['type' => 'success', 'message' => $message]);
-        $this->reset(['showInviteModal', 'name', 'email', 'phone', 'role', 'memberId']);
-    }
-
-    public function deleteMember($id)
-    {
-        $user = User::find($id);
-        if ($user->id === Auth::id()) {
-            $this->dispatch('custom-alert', ['type' => 'error', 'message' => 'You cannot delete yourself.']);
+        // Ensure user belongs to the same organization (security check)
+        if ($user->organization_id !== Auth::user()->organization_id) {
+            $this->dispatch('custom-alert', ['type' => 'error', 'message' => 'Unauthorized operation.']);
 
             return;
         }
 
-        // Don't actually delete, just strip roles or move to borrower?
-        // For simplicity in this prompt, we'll strip administrative roles
+        // Sync roles - this promotes them to the selected staff role
+        $user->syncRoles([$this->role]);
+
+        $this->dispatch('custom-alert', ['type' => 'success', 'message' => "{$user->name} has been added to the team as {$this->role}."]);
+
+        $this->reset(['showInviteModal', 'selectedUserId', 'selectedUserName', 'role', 'searchUser', 'userResults']);
+    }
+
+    public function changeRole($userId, $newRole)
+    {
+        $user = User::findOrFail($userId);
+
+        if ($user->organization_id !== Auth::user()->organization_id) {
+            return;
+        }
+
+        $user->syncRoles([$newRole]);
+        $this->dispatch('custom-alert', ['type' => 'success', 'message' => "Role for {$user->name} updated to {$newRole}."]);
+    }
+
+    public function removeStaffAccess($id)
+    {
+        $user = User::find($id);
+        if ($user->id === Auth::id()) {
+            $this->dispatch('custom-alert', ['type' => 'error', 'message' => 'You cannot revoke your own access.']);
+
+            return;
+        }
+
+        // Strip administrative roles and revert to Borrower
         $user->syncRoles(['Borrower']);
-        $this->dispatch('custom-alert', ['type' => 'warning', 'message' => 'Member administrative access revoked.']);
+        $this->dispatch('custom-alert', ['type' => 'warning', 'message' => "Administrative access revoked for {$user->name}."]);
     }
 
     public function togglePush($userId)
@@ -148,6 +127,8 @@ class TeamManagement extends Component
     public function render()
     {
         $orgId = Auth::user()->organization_id;
+
+        // Members are those with roles other than 'Borrower'
         $members = User::where('organization_id', $orgId)
             ->whereHas('roles', function ($q) {
                 $q->whereNotIn('name', ['Borrower']);

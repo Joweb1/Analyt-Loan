@@ -66,6 +66,21 @@ class RepaymentObserver
     }
 
     /**
+     * Handle the Repayment "deleting" event.
+     */
+    public function deleting(Repayment $repayment): void
+    {
+        // When a repayment is deleted, we must also remove the savings transaction
+        // that was created from its extra_amount.
+        foreach ($repayment->savingsTransactions as $transaction) {
+            /** @var \App\Models\SavingsTransaction $transaction */
+            $account = $transaction->savingsAccount;
+            $account->decrement('balance', $transaction->amount);
+            $transaction->delete();
+        }
+    }
+
+    /**
      * Handle the Repayment "restored" event.
      */
     public function restored(Repayment $repayment): void

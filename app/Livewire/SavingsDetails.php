@@ -131,9 +131,48 @@ class SavingsDetails extends Component
             ]);
         });
 
-        $this->showTransactionModal = false;
         $this->savingsAccount->refresh();
         $this->dispatch('custom-alert', ['type' => 'success', 'message' => ucfirst($this->transactionType).' recorded successfully.']);
+    }
+
+    public function deleteTransaction($transactionId)
+    {
+        if (! Auth::user()->can('delete_savings')) {
+            $this->dispatch('custom-alert', ['type' => 'error', 'message' => 'You do not have permission to delete savings records.']);
+
+            return;
+        }
+
+        $transaction = SavingsTransaction::findOrFail($transactionId);
+
+        // Check if it belongs to this account
+        if ($transaction->savings_account_id !== $this->savingsAccount->id) {
+            return;
+        }
+
+        // IMPORTANT: Prevent deletion if linked to a loan repayment
+        if ($transaction->repayment_id) {
+            $this->dispatch('custom-alert', [
+                'type' => 'error',
+                'message' => 'This record is linked to a loan repayment and cannot be deleted from here.',
+            ]);
+
+            return;
+        }
+
+        DB::transaction(function () use ($transaction) {
+            // Revert balance
+            if ($transaction->type === 'deposit') {
+                $this->savingsAccount->decrement('balance', $transaction->amount);
+            } else {
+                $this->savingsAccount->increment('balance', $transaction->amount);
+            }
+
+            $transaction->delete();
+        });
+
+        $this->savingsAccount->refresh();
+        $this->dispatch('custom-alert', ['type' => 'warning', 'message' => 'Transaction deleted and balance adjusted.']);
     }
 
     public function render()

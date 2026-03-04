@@ -7,7 +7,7 @@
         </div>
         <button wire:click="$set('showInviteModal', true)" class="flex items-center gap-2 bg-primary dark:bg-zinc-100 dark:text-primary text-white px-6 py-3 rounded-xl font-bold text-sm shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform active:scale-95">
             <span class="material-symbols-outlined text-[20px]">person_add</span>
-            <span>Invite/Add Member</span>
+            <span>Add Team Member</span>
         </button>
     </div>
 
@@ -42,9 +42,16 @@
                             </div>
                         </td>
                         <td class="px-6 py-5">
-                            <span class="px-3 py-1 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 rounded-full text-xs font-bold">
-                                {{ $member->getRoleNames()->first() }}
-                            </span>
+                            <select 
+                                wire:change="changeRole('{{ $member->id }}', $event.target.value)"
+                                class="bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border-none rounded-full text-xs font-bold py-1 px-3 focus:ring-1 focus:ring-blue-500 cursor-pointer"
+                            >
+                                @foreach($roles as $r)
+                                    <option value="{{ $r->name }}" {{ $member->hasRole($r->name) ? 'selected' : '' }}>
+                                        {{ $r->name }}
+                                    </option>
+                                @endforeach
+                            </select>
                         </td>
                         <td class="px-6 py-5 text-center">
                             @php $isPushEnabled = $member->pushEnabled(); @endphp
@@ -57,8 +64,13 @@
                         </td>
                         <td class="px-6 py-5 text-right">
                             <div class="flex items-center justify-end gap-2">
-                                <button wire:click="deleteMember('{{ $member->id }}')" class="p-2 text-[#716b80] hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
-                                    <span class="material-symbols-outlined text-[20px]">delete</span>
+                                <button 
+                                    wire:click="removeStaffAccess('{{ $member->id }}')" 
+                                    wire:confirm="Are you sure you want to revoke administrative access for {{ $member->name }}?"
+                                    class="p-2 text-[#716b80] hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                                    title="Revoke Admin Access"
+                                >
+                                    <span class="material-symbols-outlined text-[20px]">person_remove</span>
                                 </button>
                             </div>
                         </td>
@@ -73,69 +85,92 @@
         </div>
     </div>
 
-    <!-- Invite Modal -->
+    <!-- Add Member Modal -->
     @if($showInviteModal)
         <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
             <div class="bg-white dark:bg-zinc-900 w-full max-w-[520px] rounded-2xl shadow-2xl overflow-hidden flex flex-col">
                 <div class="px-8 pt-8 pb-4 flex justify-between items-start">
                     <div>
-                        <h2 class="text-primary dark:text-white text-2xl font-black">Add Team Member</h2>
-                        <p class="text-gray-500 text-sm">Add a new staff or promote a borrower.</p>
+                        <h2 class="text-primary dark:text-white text-2xl font-black">Promote to Team</h2>
+                        <p class="text-gray-500 text-sm">Select an existing user to grant team access.</p>
                     </div>
                     <button wire:click="$set('showInviteModal', false)" class="text-gray-400 hover:text-primary">
                         <span class="material-symbols-outlined">close</span>
                     </button>
                 </div>
 
-                <div class="px-8 py-4 space-y-4">
-                    <!-- Borrower Search -->
-                    <div class="bg-blue-50 dark:bg-blue-900/10 p-4 rounded-xl mb-4">
-                        <label class="block text-xs font-bold text-blue-600 uppercase mb-2">Find existing borrower to promote</label>
-                        <input wire:model.live="searchBorrower" type="text" class="w-full rounded-lg border-blue-100 dark:border-blue-800 dark:bg-zinc-800 text-sm" placeholder="Search by name or phone...">
-                        @if(!empty($borrowerResults))
-                            <div class="mt-2 bg-white dark:bg-zinc-800 border rounded-lg shadow-lg overflow-hidden">
-                                @foreach($borrowerResults as $res)
-                                    <button wire:click="selectBorrower('{{ $res->id }}')" class="w-full px-4 py-2 text-left text-sm hover:bg-gray-50 dark:hover:bg-zinc-700 flex justify-between items-center">
-                                        <span>{{ $res->name }}</span>
-                                        <span class="text-xs text-gray-400">{{ $res->phone }}</span>
+                <div class="px-8 py-4 space-y-6">
+                    <!-- User Search -->
+                    <div class="relative">
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Search User/Borrower</label>
+                        <div class="relative">
+                            <input 
+                                wire:model.live.debounce.300ms="searchUser" 
+                                type="text" 
+                                class="w-full rounded-xl border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white h-14 pl-12 pr-4 focus:ring-primary focus:border-primary" 
+                                placeholder="Search by name, phone or email..."
+                                autocomplete="off"
+                            >
+                            <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">search</span>
+                        </div>
+
+                        @if(!empty($userResults))
+                            <div class="absolute z-10 w-full mt-2 bg-white dark:bg-zinc-800 border dark:border-zinc-700 rounded-xl shadow-xl overflow-hidden max-h-60 overflow-y-auto">
+                                @foreach($userResults as $res)
+                                    <button 
+                                        wire:click="selectUser('{{ $res->id }}', '{{ $res->name }}')" 
+                                        class="w-full px-5 py-3 text-left hover:bg-primary/5 dark:hover:bg-zinc-700 border-b dark:border-zinc-700 last:border-0 transition-colors group"
+                                    >
+                                        <div class="flex justify-between items-center">
+                                            <div>
+                                                <p class="text-sm font-bold dark:text-white group-hover:text-primary">{{ $res->name }}</p>
+                                                <p class="text-xs text-gray-500">{{ $res->phone }} | {{ $res->email ?? 'No Email' }}</p>
+                                            </div>
+                                            <span class="material-symbols-outlined text-gray-300 text-[20px]">add_circle</span>
+                                        </div>
                                     </button>
                                 @endforeach
                             </div>
+                        @elseif($searchUser && strlen($searchUser) >= 2 && empty($userResults) && !$selectedUserId)
+                             <div class="absolute z-10 w-full mt-2 bg-white dark:bg-zinc-800 border dark:border-zinc-700 rounded-xl p-4 text-center text-sm text-gray-500 shadow-xl">
+                                No users found in your organization.
+                             </div>
                         @endif
+                        @error('selectedUserId') <span class="text-red-500 text-xs mt-1 block">Please select a user from the results.</span> @enderror
                     </div>
 
-                    <div class="grid grid-cols-1 gap-4">
-                        <div>
-                            <label class="block text-xs font-bold text-gray-500 uppercase">Full Name</label>
-                            <input wire:model="name" type="text" class="w-full rounded-lg border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white">
-                            @error('name') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                    @if($selectedUserId)
+                        <div class="bg-primary/5 dark:bg-zinc-800 p-4 rounded-xl border border-primary/10 flex items-center gap-3">
+                            <div class="size-10 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold">
+                                {{ substr($selectedUserName, 0, 1) }}
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-500 font-bold uppercase tracking-wider">Selected User</p>
+                                <p class="text-sm font-black text-primary dark:text-white">{{ $selectedUserName }}</p>
+                            </div>
                         </div>
-                        <div>
-                            <label class="block text-xs font-bold text-gray-500 uppercase">Phone Number</label>
-                            <input wire:model="phone" type="text" class="w-full rounded-lg border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white">
-                            @error('phone') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-gray-500 uppercase">Email (Optional)</label>
-                            <input wire:model="email" type="email" class="w-full rounded-lg border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white">
-                            @error('email') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-gray-500 uppercase">Assign Role</label>
-                            <select wire:model="role" class="w-full rounded-lg border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white">
-                                <option value="">Select a role</option>
-                                @foreach($roles as $r)
-                                    <option value="{{ $r->name }}">{{ $r->name }}</option>
-                                @endforeach
-                            </select>
-                            @error('role') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
-                        </div>
+                    @endif
+
+                    <!-- Role Selection -->
+                    <div>
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Assign Access Level</label>
+                        <select wire:model="role" class="w-full rounded-xl border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white h-14 px-4 focus:ring-primary focus:border-primary">
+                            <option value="">Select a role</option>
+                            @foreach($roles as $r)
+                                <option value="{{ $r->name }}">{{ $r->name }}</option>
+                            @endforeach
+                        </select>
+                        @error('role') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
                     </div>
                 </div>
 
                 <div class="px-8 pb-8 pt-4">
-                    <button wire:click="inviteMember" class="w-full bg-primary text-white font-bold py-4 rounded-xl shadow-lg hover:scale-[1.02] transition-transform">
-                        Save Member Access
+                    <button 
+                        wire:click="addMember" 
+                        class="w-full bg-primary text-white font-bold py-4 rounded-xl shadow-lg hover:bg-primary/90 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+                        @if(!$selectedUserId) disabled @endif
+                    >
+                        Save Team Member
                     </button>
                 </div>
             </div>

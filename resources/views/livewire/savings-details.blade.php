@@ -157,6 +157,7 @@
                                 <th class="px-6 py-4 font-black">Description</th>
                                 <th class="px-6 py-4 font-black text-right">Amount</th>
                                 <th class="px-6 py-4 font-black text-center">Status</th>
+                                <th class="px-6 py-4 font-black text-right">Actions</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
@@ -179,6 +180,22 @@
                                     </td>
                                     <td class="px-6 py-4 text-center">
                                         <span class="px-2 py-0.5 rounded bg-green-100 text-green-600 text-[9px] font-black uppercase tracking-wider">Completed</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-right">
+                                        @can('delete_savings')
+                                            @if(!$transaction->repayment_id)
+                                                <button 
+                                                    wire:click="deleteTransaction('{{ $transaction->id }}')" 
+                                                    wire:confirm="Are you sure you want to delete this transaction? This will also revert the account balance."
+                                                    class="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-colors"
+                                                    title="Delete Transaction"
+                                                >
+                                                    <span class="material-symbols-outlined text-lg">delete</span>
+                                                </button>
+                                            @else
+                                                <span class="material-symbols-outlined text-sm text-slate-300 cursor-help" title="Linked to loan repayment - Cannot delete from here">lock</span>
+                                            @endif
+                                        @endcan
                                     </td>
                                 </tr>
                             @empty

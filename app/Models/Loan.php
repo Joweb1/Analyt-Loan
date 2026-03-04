@@ -210,11 +210,47 @@ class Loan extends Model
 
         // Also sync overall loan status
         $totalInterest = $this->amount * (($this->interest_rate ?? 0) / 100);
-        $totalPayable = $this->amount + $totalInterest;
+        $totalPayable = round($this->amount + $totalInterest, 2);
 
         if ($totalPaid >= $totalPayable && $totalPayable > 0) {
             if ($this->status !== 'repaid') {
                 $this->update(['status' => 'repaid']);
+            }
+
+            $borrower = $this->borrower;
+            /** @var \App\Models\SavingsAccount $account */
+            $account = $borrower->savingsAccount()->firstOrCreate([
+                'organization_id' => $borrower->organization_id,
+            ], [
+                'account_number' => 'SAV-'.strtoupper(\Illuminate\Support\Str::random(8)),
+                'balance' => 0,
+                'interest_rate' => 0,
+                'status' => 'active',
+            ]);
+
+            // Process each repayment that has an extra_amount and isn't already linked to a savings transaction
+            foreach ($repayments->where('extra_amount', '>', 0.01) as $repayment) {
+                /** @var \App\Models\Repayment $repayment */
+                if ($repayment->savingsTransactions()->count() === 0) {
+                    $account->transactions()->create([
+                        'repayment_id' => $repayment->id,
+                        'amount' => $repayment->extra_amount,
+                        'type' => 'deposit',
+                        'reference' => 'EXTRA-'.strtoupper(\Illuminate\Support\Str::random(8)),
+                        'notes' => "Extra balance from Loan #{$this->loan_number} (Repayment ID: {$repayment->id})",
+                        'staff_id' => $repayment->collected_by ?? \Illuminate\Support\Facades\Auth::id() ?? $this->loan_officer_id ?? $this->organization->owner_id,
+                        'transaction_date' => now(),
+                    ]);
+
+                    $account->increment('balance', $repayment->extra_amount);
+
+                    \App\Helpers\SystemLogger::success(
+                        'Extra Balance to Savings',
+                        '₦'.number_format($repayment->extra_amount, 2)." from Loan #{$this->loan_number} has been moved to savings.",
+                        'savings',
+                        $borrower
+                    );
+                }
             }
         } elseif ($this->status === 'repaid') {
             $this->update(['status' => 'active']);

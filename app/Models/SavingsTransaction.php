@@ -43,6 +43,7 @@ class SavingsTransaction extends Model
 
     protected $fillable = [
         'savings_account_id',
+        'repayment_id',
         'amount',
         'type',
         'reference',
@@ -58,6 +59,11 @@ class SavingsTransaction extends Model
     public function savingsAccount(): BelongsTo
     {
         return $this->belongsTo(SavingsAccount::class);
+    }
+
+    public function repayment(): BelongsTo
+    {
+        return $this->belongsTo(Repayment::class);
     }
 
     public function staff(): BelongsTo

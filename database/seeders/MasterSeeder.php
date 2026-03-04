@@ -22,23 +22,23 @@ class MasterSeeder extends Seeder
         Schema::disableForeignKeyConstraints();
 
         // Truncate all relevant tables
-        DB::table('users')->truncate();
-        DB::table('organizations')->truncate();
-        DB::table('borrowers')->truncate();
-        DB::table('loans')->truncate();
-        DB::table('repayments')->truncate();
-        DB::table('scheduled_repayments')->truncate();
-        DB::table('form_field_configs')->truncate();
-        DB::table('collaterals')->truncate();
-        DB::table('comments')->truncate();
-        DB::table('system_notifications')->truncate();
+        DB::table('users')->delete();
+        DB::table('organizations')->delete();
+        DB::table('borrowers')->delete();
+        DB::table('loans')->delete();
+        DB::table('repayments')->delete();
+        DB::table('scheduled_repayments')->delete();
+        DB::table('form_field_configs')->delete();
+        DB::table('collaterals')->delete();
+        DB::table('comments')->delete();
+        DB::table('system_notifications')->delete();
 
         // Truncate Permission tables (Spatie)
-        DB::table('model_has_permissions')->truncate();
-        DB::table('model_has_roles')->truncate();
-        DB::table('role_has_permissions')->truncate();
-        DB::table('roles')->truncate();
-        DB::table('permissions')->truncate();
+        DB::table('model_has_permissions')->delete();
+        DB::table('model_has_roles')->delete();
+        DB::table('role_has_permissions')->delete();
+        DB::table('roles')->delete();
+        DB::table('permissions')->delete();
 
         Schema::enableForeignKeyConstraints();
 

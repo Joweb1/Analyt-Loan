@@ -6,8 +6,8 @@ use App\Models\Borrower;
 use App\Models\Organization;
 use App\Models\Portfolio;
 use App\Models\User;
-use Illuminate\Database\Seeder;
 use Carbon\Carbon;
+use Illuminate\Database\Seeder;
 
 class PortfolioTimeSeeder extends Seeder
 {
@@ -17,7 +17,7 @@ class PortfolioTimeSeeder extends Seeder
     public function run(): void
     {
         $org = Organization::first();
-        if (!$org) {
+        if (! $org) {
             return;
         }
 
@@ -45,7 +45,7 @@ class PortfolioTimeSeeder extends Seeder
 
             // Assign random staff to this portfolio
             $staff = User::where('organization_id', $org->id)
-                ->whereHas('roles', function($q) {
+                ->whereHas('roles', function ($q) {
                     $q->whereNotIn('name', ['Borrower']);
                 })
                 ->inRandomOrder()

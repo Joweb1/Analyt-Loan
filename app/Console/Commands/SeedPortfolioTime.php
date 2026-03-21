@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use Database\Seeders\PortfolioTimeSeeder;
+use Illuminate\Console\Command;
 
 class SeedPortfolioTime extends Command
 {
@@ -28,7 +28,7 @@ class SeedPortfolioTime extends Command
     {
         $this->info('Seeding Portfolio and Time Management data...');
 
-        $seeder = new PortfolioTimeSeeder();
+        $seeder = new PortfolioTimeSeeder;
         $seeder->run();
 
         $this->success('Portfolio and Time Management seeded successfully!');

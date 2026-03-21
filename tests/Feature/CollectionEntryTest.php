@@ -43,6 +43,16 @@ class CollectionEntryTest extends TestCase
             'num_repayments' => 1,
         ]);
 
+        \App\Models\ScheduledRepayment::create([
+            'loan_id' => $loan->id,
+            'installment_number' => 1,
+            'amount' => 11000,
+            'principal_amount' => 10000,
+            'interest_amount' => 1000,
+            'due_date' => now()->subDays(5),
+            'status' => 'overdue',
+        ]);
+
         Livewire::actingAs($user)
             ->test(CollectionEntry::class)
             ->assertSee($loan->loan_number)

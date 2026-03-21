@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Borrower;
+use App\Models\Portfolio;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -12,6 +13,10 @@ class SavingsEntry extends Component
     use WithPagination;
 
     public $search = '';
+
+    public $portfolioId = null;
+
+    public $portfolios = [];
 
     public $showSavingsModal = false;
 
@@ -26,12 +31,26 @@ class SavingsEntry extends Component
 
     public $notes = '';
 
+    protected $updatesQueryString = ['search', 'portfolioId'];
+
     public function mount()
     {
+        $user = Auth::user();
+        if ($user->hasRole('Admin') || $user->isOrgOwner() || $user->isAppOwner()) {
+            $this->portfolios = Portfolio::all();
+        } else {
+            $this->portfolios = $user->portfolios;
+        }
+
         $this->transaction_date = now()->format('Y-m-d');
     }
 
     public function updatingSearch()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingPortfolioId()
     {
         $this->resetPage();
     }
@@ -113,6 +132,10 @@ class SavingsEntry extends Component
                     ->orWhere('bvn', 'like', '%'.$search.'%')
                     ->orWhere('national_identity_number', 'like', '%'.$search.'%');
             });
+        }
+
+        if ($this->portfolioId) {
+            $query->where('portfolio_id', $this->portfolioId);
         }
 
         $borrowers = $query->latest()->paginate(15);

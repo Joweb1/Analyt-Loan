@@ -1,26 +1,155 @@
 <div class="flex flex-col gap-4">
-    <!-- Welcome/Context -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-2">
-        <div>
-            <h2 class="text-2xl font-bold text-primary dark:text-white tracking-tight">Financial Pulse</h2>
-            <p class="text-slate-500 text-sm mt-1">System Lending Overview</p>
-        </div>
-        <div class="flex flex-wrap gap-2">
-            @can('approve_kyc')
-                <a href="{{ route('kyc.approval') }}" class="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-white dark:bg-[#1a1f2e] border border-[#020617] text-[#020617] dark:text-white rounded-lg text-sm font-medium hover:bg-slate-50 transition-all whitespace-nowrap shadow-sm">
-                    <span class="material-symbols-outlined text-base">verified_user</span> KYC Approval
-                </a>
-            @endcan
-            @can('approve_loans')
-                <a href="{{ route('loan.approval') }}" class="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-white dark:bg-[#1a1f2e] border border-[#020617] text-[#020617] dark:text-white rounded-lg text-sm font-medium hover:bg-slate-50 transition-all whitespace-nowrap shadow-sm">
-                    <span class="material-symbols-outlined text-base">fact_check</span> Loan Approval
-                </a>
-            @endcan
-            <a href="{{ route('loan.create') }}" class="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20 whitespace-nowrap">
-                <span class="material-symbols-outlined text-base">add</span> New Loan
+    @php
+        $org = Auth::user()->organization;
+    @endphp
+
+    @if($org && $org->use_manual_date)
+        <div class="bg-orange-600 text-white px-6 py-4 rounded-2xl shadow-xl flex flex-col sm:flex-row items-center justify-between gap-4 animate-in fade-in slide-in-from-top-4 duration-500">
+            <div class="flex items-center gap-4">
+                <div class="size-12 rounded-full bg-white/20 flex items-center justify-center">
+                    <span class="material-symbols-outlined text-3xl font-black">history</span>
+                </div>
+                <div>
+                    <h4 class="text-sm font-black uppercase tracking-tight">Time Override Active</h4>
+                    <p class="text-xs text-white/80 font-medium">The system is operating at <b class="text-white">{{ now()->format('l, F d, Y') }}</b>. All metrics and timestamps reflect this date.</p>
+                </div>
+            </div>
+            <a href="{{ route('settings') }}" class="px-5 py-2 bg-white text-orange-600 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-orange-50 transition-colors shadow-lg">
+                Manage Clock
             </a>
         </div>
+    @endif
+
+    <!-- Welcome/Context -->
+    <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-4">
+        <div class="flex flex-col gap-1">
+            <h2 class="text-3xl font-black text-primary dark:text-white tracking-tighter uppercase">Financial Pulse</h2>
+            <div class="flex items-center gap-3">
+                <span class="flex items-center gap-1.5 px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded-full text-[10px] font-black text-slate-500 uppercase tracking-widest border border-slate-200 dark:border-slate-700">
+                    <span class="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></span> Live System Overview
+                </span>
+                @if($selectedPortfolioId)
+                    <span class="px-2 py-0.5 bg-primary/10 rounded-full text-[10px] font-black text-primary uppercase tracking-widest border border-primary/20">
+                        Portfolio: {{ collect($portfolios)->firstWhere('id', $selectedPortfolioId)->name ?? 'Unknown' }}
+                    </span>
+                @endif
+            </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-3 bg-white dark:bg-[#1a1f2e] p-2 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
+            <!-- View Toggle -->
+            <div class="flex items-center gap-1 bg-slate-100 dark:bg-slate-900 p-1 rounded-xl">
+                <button wire:click="$set('selectedPortfolioId', null)" 
+                        class="px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all {{ !$selectedPortfolioId ? 'bg-white dark:bg-slate-800 text-primary shadow-sm' : 'text-slate-500 hover:text-primary' }}">
+                    Org Wide
+                </button>
+                <div class="relative" x-data="{ open: false }">
+                    <button @click="open = !open" 
+                            class="px-4 py-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 {{ $selectedPortfolioId ? 'bg-white dark:bg-slate-800 text-primary shadow-sm' : 'text-slate-500 hover:text-primary' }}">
+                        <span>{{ $selectedPortfolioId ? 'By Portfolio' : 'Select Portfolio' }}</span>
+                        <span class="material-symbols-outlined text-sm">expand_more</span>
+                    </button>
+                    <div x-show="open" @click.away="open = false" x-cloak
+                         class="absolute right-0 mt-2 w-56 bg-white dark:bg-zinc-900 rounded-xl shadow-2xl border border-slate-100 dark:border-zinc-800 z-50 overflow-hidden py-1">
+                        @forelse($portfolios as $p)
+                            <button wire:click="$set('selectedPortfolioId', '{{ $p->id }}'); open = false;" 
+                                    class="w-full text-left px-4 py-2.5 text-xs font-bold hover:bg-slate-50 dark:hover:bg-zinc-800 dark:text-white flex items-center justify-between group transition-colors">
+                                <span>{{ $p->name }}</span>
+                                @if($selectedPortfolioId === $p->id)
+                                    <span class="material-symbols-outlined text-primary text-sm">check_circle</span>
+                                @endif
+                            </button>
+                        @empty
+                            <div class="px-4 py-3 text-center">
+                                <p class="text-[10px] font-bold text-slate-400 uppercase">No portfolios found</p>
+                                <a href="{{ route('settings.portfolios') }}" class="text-[10px] text-primary font-black uppercase mt-1 inline-block hover:underline">Create One</a>
+                            </div>
+                        @endforelse
+                    </div>
+                </div>
+            </div>
+
+            <div class="h-8 w-[1px] bg-slate-100 dark:bg-slate-800 hidden sm:block"></div>
+
+            <div class="flex gap-2 w-full sm:w-auto mt-2 sm:mt-0">
+                @can('approve_loans')
+                    <a href="{{ route('loan.approval') }}" class="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-50 dark:bg-slate-800 text-primary dark:text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-slate-100 transition-all border border-slate-200 dark:border-slate-700">
+                        <span class="material-symbols-outlined text-base">fact_check</span> Approvals
+                    </a>
+                @endcan
+                <a href="{{ route('loan.create') }}" class="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-2.5 bg-primary text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-primary/90 transition-all shadow-lg shadow-primary/20">
+                    <span class="material-symbols-outlined text-base font-bold">add</span> New Loan
+                </a>
+            </div>
+        </div>
     </div>
+
+    @if($selectedPortfolioId)
+        <!-- Portfolio Specific Metrics Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-2 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <!-- Portfolio Balance -->
+            <div class="bg-primary text-white rounded-2xl p-5 shadow-xl relative overflow-hidden group">
+                <div class="absolute -right-4 -top-4 opacity-10 group-hover:scale-110 transition-transform duration-500">
+                    <span class="material-symbols-outlined text-[100px]">account_balance_wallet</span>
+                </div>
+                <div class="relative z-10 flex flex-col gap-3">
+                    <span class="text-[10px] font-black uppercase tracking-widest text-white/60">Portfolio Balance</span>
+                    <h3 class="text-2xl font-black tracking-tight">₦ {{ number_format($portfolioBalance, 2) }}</h3>
+                    <div class="flex items-center gap-1 text-[9px] font-black uppercase bg-white/10 w-fit px-2 py-0.5 rounded-full">
+                        <span class="material-symbols-outlined text-[12px]">trending_up</span> Active Lending Value
+                    </div>
+                </div>
+            </div>
+
+            <!-- Savings Balance -->
+            <div class="bg-emerald-600 text-white rounded-2xl p-5 shadow-xl relative overflow-hidden group font-mono_">
+                <div class="absolute -right-4 -top-4 opacity-10 group-hover:scale-110 transition-transform duration-500">
+                    <span class="material-symbols-outlined text-[100px]">savings</span>
+                </div>
+                <div class="relative z-10 flex flex-col gap-3">
+                    <span class="text-[10px] font-black uppercase tracking-widest text-white/60">Savings Amount</span>
+                    <h3 class="text-2xl font-black tracking-tight">₦ {{ number_format($savingsBalance, 2) }}</h3>
+                    <div class="flex items-center gap-1 text-[9px] font-black uppercase bg-white/10 w-fit px-2 py-0.5 rounded-full">
+                        <span class="material-symbols-outlined text-[12px]">lock_clock</span> Vaulted Security
+                    </div>
+                </div>
+            </div>
+
+            <!-- Portfolio at Risk (PAR) -->
+            <div class="bg-red-600 text-white rounded-2xl p-5 shadow-xl relative overflow-hidden group">
+                <div class="absolute -right-4 -top-4 opacity-10 group-hover:scale-110 transition-transform duration-500">
+                    <span class="material-symbols-outlined text-[100px]">warning</span>
+                </div>
+                <div class="relative z-10 flex flex-col gap-3">
+                    <div class="flex justify-between items-start">
+                        <span class="text-[10px] font-black uppercase tracking-widest text-white/60">Portfolio At Risk (PAR)</span>
+                        <span class="bg-white/20 px-2 py-0.5 rounded-lg text-[10px] font-black">{{ $parPercentage }}%</span>
+                    </div>
+                    <h3 class="text-2xl font-black tracking-tight">₦ {{ number_format($portfolioAtRisk, 2) }}</h3>
+                    <div class="flex items-center gap-1 text-[9px] font-black uppercase bg-white/10 w-fit px-2 py-0.5 rounded-full">
+                        <span class="material-symbols-outlined text-[12px]">dangerous</span> Overdue Principal
+                    </div>
+                </div>
+            </div>
+
+            <!-- Profit and Loss (PnL) -->
+            <div class="bg-slate-900 text-white rounded-2xl p-5 shadow-xl relative overflow-hidden group border border-white/5">
+                <div class="absolute -right-4 -top-4 opacity-10 group-hover:scale-110 transition-transform duration-500">
+                    <span class="material-symbols-outlined text-[100px]">insights</span>
+                </div>
+                <div class="relative z-10 flex flex-col gap-3">
+                    <span class="text-[10px] font-black uppercase tracking-widest text-white/60">Profit & Loss (PnL)</span>
+                    <h3 class="text-2xl font-black tracking-tight {{ $profitLoss >= 0 ? 'text-green-400' : 'text-red-400' }}">
+                        ₦ {{ number_format($profitLoss, 2) }}
+                    </h3>
+                    <div class="flex items-center gap-1 text-[9px] font-black uppercase bg-white/10 w-fit px-2 py-0.5 rounded-full">
+                        <span class="material-symbols-outlined text-[12px]">analytics</span> Net Performance
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
     <!-- Health Cards Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Total Loaned Card -->

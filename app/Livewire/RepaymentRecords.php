@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Models\Portfolio;
 use App\Models\Repayment;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -20,12 +21,33 @@ class RepaymentRecords extends Component
 
     public $search = '';
 
+    public $portfolioId = null;
+
+    public $portfolios = [];
+
+    protected $updatesQueryString = ['search', 'dateRange', 'portfolioId'];
+
+    public function mount()
+    {
+        $user = Auth::user();
+        if ($user->hasRole('Admin') || $user->isOrgOwner() || $user->isAppOwner()) {
+            $this->portfolios = Portfolio::all();
+        } else {
+            $this->portfolios = $user->portfolios;
+        }
+    }
+
     public function updatingSearch()
     {
         $this->resetPage();
     }
 
     public function updatingDateRange()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingPortfolioId()
     {
         $this->resetPage();
     }
@@ -37,6 +59,9 @@ class RepaymentRecords extends Component
             ->with(['loan.borrower.user', 'collector'])
             ->whereHas('loan', function ($q) use ($orgId) {
                 $q->where('organization_id', $orgId);
+                if ($this->portfolioId) {
+                    $q->where('portfolio_id', $this->portfolioId);
+                }
             });
 
         // Search
@@ -59,6 +84,9 @@ class RepaymentRecords extends Component
         // Stats
         $statsQuery = Repayment::whereHas('loan', function ($q) use ($orgId) {
             $q->where('organization_id', $orgId);
+            if ($this->portfolioId) {
+                $q->where('portfolio_id', $this->portfolioId);
+            }
         });
         $this->applyDateFilter($statsQuery);
 
@@ -117,6 +145,9 @@ class RepaymentRecords extends Component
             ->with(['loan.borrower.user', 'collector'])
             ->whereHas('loan', function ($q) use ($orgId) {
                 $q->where('organization_id', $orgId);
+                if ($this->portfolioId) {
+                    $q->where('portfolio_id', $this->portfolioId);
+                }
             });
 
         // Apply same filters as render

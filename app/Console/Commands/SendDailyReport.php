@@ -2,6 +2,8 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Organization;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 
 class SendDailyReport extends Command
@@ -26,9 +28,16 @@ class SendDailyReport extends Command
     public function handle()
     {
         \App\Services\SystemHealthService::log('Reports', 'info', 'Generating daily business summary...');
-        $organizations = \App\Models\Organization::where('status', 'active')->get();
+        $organizations = Organization::where('status', 'active')->get();
 
         foreach ($organizations as $org) {
+            // Set test time if manual date is enabled
+            if ($org->use_manual_date && $org->operating_date) {
+                Carbon::setTestNow($org->operating_date);
+            } else {
+                Carbon::setTestNow(); // Use real time
+            }
+
             $today = now()->startOfDay();
 
             // Stats
@@ -58,6 +67,9 @@ class SendDailyReport extends Command
                 'medium'
             );
         }
+
+        // Reset
+        Carbon::setTestNow();
 
         \App\Services\SystemHealthService::log('Reports', 'success', 'Daily performance reports dispatched.');
         $this->info('Daily reports sent successfully.');

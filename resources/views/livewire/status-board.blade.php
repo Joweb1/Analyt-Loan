@@ -21,6 +21,8 @@
 
         <!-- Search & Filters -->
         <div class="flex flex-row items-center gap-3 overflow-x-auto pb-2 custom-scrollbar whitespace-nowrap">
+            <x-portfolio-filter :portfolios="$portfolios" :portfolioId="$portfolioId" />
+            
             <div class="relative flex-1 min-w-[300px]">
                 <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <span class="material-symbols-outlined text-slate-400 text-sm">search</span>
@@ -69,7 +71,7 @@
                 </div>
                 <div class="flex flex-col gap-4 overflow-y-auto pb-8 custom-scrollbar h-full">
                     @foreach($pending as $loan)
-                        @php $risk = $this->getRiskLevel($loan->borrower->credit_score ?? 0); @endphp
+                        @php $risk = $this->getRiskLevel($loan->borrower->trust_score ?? 0); @endphp
                         <div class="bg-white dark:bg-[#1c2433] p-4 shadow-sm border border-[#dbdee6] dark:border-white/5 hover:shadow-md transition-all group cursor-pointer" onclick="window.location='{{ route('loan.show', $loan->id) }}'">
                             <div class="flex justify-between items-start mb-3">
                                 <span class="bg-{{ $risk['color'] }}-100 text-{{ $risk['color'] }}-700 text-[10px] font-bold px-2 py-1 rounded-lg uppercase">{{ $risk['label'] }}</span>
@@ -218,10 +220,9 @@
                 </thead>
                 <tbody class="divide-y divide-slate-50 dark:divide-slate-800">
                     @foreach($allLoans as $loan)
-                        @php 
-                            $risk = $this->getRiskLevel($loan->borrower->credit_score ?? 0);
-                            $paid = $loan->repayments->sum('amount');
-                            $balance = max(0, $loan->amount - $paid);
+                        @php
+                            $risk = $this->getRiskLevel($loan->borrower->trust_score ?? 0);
+                            $paid = $loan->repayments->sum('amount');                            $balance = max(0, $loan->amount - $paid);
                         @endphp
                         <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group" onclick="window.location='{{ route('loan.show', $loan->id) }}'">
                             <td class="px-6 py-4">

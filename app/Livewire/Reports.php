@@ -4,6 +4,8 @@ namespace App\Livewire;
 
 use App\Models\Loan;
 use App\Models\Repayment;
+use App\Models\SavingsAccount;
+use App\Models\ScheduledRepayment;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
@@ -55,7 +57,7 @@ class Reports extends Component
 
         $callback = function () use ($borrowers) {
             $file = fopen('php://output', 'w');
-            fputcsv($file, ['Name', 'Email', 'Phone', 'BVN', 'NIN', 'Credit Score', 'Gender']);
+            fputcsv($file, ['Name', 'Email', 'Phone', 'BVN', 'NIN', 'Credit Score', 'Repayment Score', 'Gender']);
             foreach ($borrowers as $b) {
                 fputcsv($file, [
                     $b->user->name,
@@ -64,6 +66,7 @@ class Reports extends Component
                     $b->bvn,
                     $b->national_identity_number,
                     $b->credit_score,
+                    $b->trust_score.'%',
                     $b->gender,
                 ]);
             }
@@ -166,6 +169,44 @@ class Reports extends Component
             ->whereBetween('created_at', [$startDate, $endDate])
             ->count();
 
+        // New Org-wide Metrics
+        $totalSavings = SavingsAccount::where('organization_id', $orgId)->sum('balance');
+
+        $totalInterest = Repayment::whereHas('loan', function ($q) use ($orgId) {
+            $q->where('organization_id', $orgId);
+        })->sum('interest_amount');
+
+        // Standard PAR: Outstanding principal of any loan that has an installment overdue
+        $overdueLoanIds = ScheduledRepayment::where('status', 'overdue')
+            ->whereHas('loan', function ($q) use ($orgId) {
+                $q->where('organization_id', $orgId);
+            })
+            ->pluck('loan_id')
+            ->unique();
+
+        $totalPAR = Loan::whereIn('id', $overdueLoanIds)->get()->sum(function ($loan) {
+            $totalPaidPrincipal = $loan->repayments()->sum('principal_amount');
+
+            return max(0, (float) $loan->amount - (float) $totalPaidPrincipal);
+        });
+
+        // Profit & Loss (PnL): Total Interest - Principal of Loans overdue > 7 days
+        $defaultedLoanIds = ScheduledRepayment::where('status', 'overdue')
+            ->where('due_date', '<=', now()->subDays(7))
+            ->whereHas('loan', function ($q) use ($orgId) {
+                $q->where('organization_id', $orgId);
+            })
+            ->pluck('loan_id')
+            ->unique();
+
+        $totalLossPrincipal = Loan::whereIn('id', $defaultedLoanIds)->get()->sum(function ($loan) {
+            $totalPaidPrincipal = $loan->repayments()->sum('principal_amount');
+
+            return max(0, (float) $loan->amount - (float) $totalPaidPrincipal);
+        });
+
+        $totalPnL = $totalInterest - $totalLossPrincipal;
+
         // Chart Data
         $chartData = $this->getChartData($orgId);
 
@@ -173,6 +214,10 @@ class Reports extends Component
             'disbursed' => $disbursed,
             'collected' => $collected,
             'newCustomers' => $newCustomers,
+            'totalSavings' => $totalSavings,
+            'totalInterest' => $totalInterest,
+            'totalPAR' => $totalPAR,
+            'totalPnL' => $totalPnL,
             'chartData' => $chartData,
         ])->layout('layouts.app', ['title' => 'Organization Reports']);
     }

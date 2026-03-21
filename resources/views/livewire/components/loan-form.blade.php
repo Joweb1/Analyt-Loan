@@ -152,6 +152,41 @@
                 </div>
 
                 <div>
+                    <!-- Portfolio Custom Dropdown -->
+                    <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Portfolio (Optional)</label>
+                    <div class="relative custom-dropdown" id="dd-portfolio">
+                        <button type="button" onclick="toggleDropdown('dd-portfolio')" class="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-4 pr-10 flex items-center justify-between text-left focus:outline-none focus:ring-2 focus:ring-blue-700 focus:border-blue-700 sm:text-sm">
+                            <span class="block truncate {{ $portfolio_id ? 'text-gray-900 font-medium' : 'text-gray-500' }}">
+                                @if($portfolio_id)
+                                    {{ $portfolios->firstWhere('id', $portfolio_id)->name ?? 'Select Portfolio...' }}
+                                @else
+                                    Select Portfolio...
+                                @endif
+                            </span>
+                            <span class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-4">
+                                <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            </span>
+                        </button>
+                        <div wire:ignore class="hidden absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-xl py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm dd-menu">
+                            <div onclick="selectOption('portfolio_id', '')" class="cursor-pointer select-none relative py-3 pl-4 pr-9 hover:bg-blue-50 text-gray-500 italic hover:text-blue-900">
+                                <span class="block truncate font-normal">None (Unassigned)</span>
+                            </div>
+                            @foreach($portfolios as $portfolio)
+                                <div onclick="selectOption('portfolio_id', '{{ $portfolio->id }}')" class="cursor-pointer select-none relative py-3 pl-4 pr-9 hover:bg-blue-50 text-gray-900 hover:text-blue-900">
+                                    <span class="block truncate font-normal">{{ $portfolio->name }}</span>
+                                    @if($portfolio_id == $portfolio->id)
+                                        <span class="absolute inset-y-0 right-0 flex items-center pr-4 text-blue-700">
+                                            <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
+                                        </span>
+                                    @endif
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                    @error('portfolio_id') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
+                </div>
+
+                <div>
                     <!-- Collateral Custom Dropdown -->
                     <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Collateral (Optional)</label>
                     <div class="relative custom-dropdown" id="dd-collateral">

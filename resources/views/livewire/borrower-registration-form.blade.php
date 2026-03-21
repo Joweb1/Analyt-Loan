@@ -25,6 +25,19 @@
                 </select>
                 @error('organization_id') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
             </div>
+
+            @if($organization_id && $portfolios->isNotEmpty())
+                <div class="flex flex-col gap-2 mt-4">
+                    <label class="text-xs font-bold text-zinc-500 uppercase tracking-widest px-1">Portfolio (Optional)</label>
+                    <select wire:model="portfolio_id" class="w-full px-5 py-4 bg-white dark:bg-zinc-900 border-2 border-zinc-100 dark:border-zinc-700 rounded-2xl focus:border-primary focus:ring-0 transition-all font-medium text-sm">
+                        <option value="">No Portfolio (Unassigned)</option>
+                        @foreach($portfolios as $portfolio)
+                            <option value="{{ $portfolio->id }}">{{ $portfolio->name }}</option>
+                        @endforeach
+                    </select>
+                    @error('portfolio_id') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                </div>
+            @endif
         </div>
     @endif
 

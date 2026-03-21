@@ -20,10 +20,10 @@ class UserLoans extends Component
 
     public function getRiskLevel($score)
     {
-        if ($score >= 750) {
+        if ($score >= 80) {
             return ['label' => 'Low Risk', 'color' => 'green'];
         }
-        if ($score >= 600) {
+        if ($score >= 50) {
             return ['label' => 'Medium Risk', 'color' => 'yellow'];
         }
 

@@ -153,6 +153,11 @@ class User extends Authenticatable
         return $this->hasMany(Loan::class, 'loan_officer_id');
     }
 
+    public function portfolios(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Portfolio::class, 'portfolio_user');
+    }
+
     public function isAppOwner(): bool
     {
         return $this->email === config('app.owner');

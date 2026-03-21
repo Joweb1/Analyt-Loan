@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\Borrower;
 use App\Models\FormFieldConfig;
 use App\Models\Organization;
+use App\Models\Portfolio;
 use App\Models\User;
 use App\Traits\SterilizesPhone;
 use Illuminate\Support\Facades\Auth;
@@ -21,6 +22,8 @@ class BorrowerRegistrationForm extends Component
 
     // Organization
     public $organization_id;
+
+    public $portfolio_id;
 
     // System Fields
     public $name;
@@ -329,6 +332,7 @@ class BorrowerRegistrationForm extends Component
 
             $borrower = Borrower::where('user_id', $user->id)->first() ?? new Borrower;
             $borrower->organization_id = $this->organization_id;
+            $borrower->portfolio_id = $this->portfolio_id;
             $borrower->user_id = $user->id;
             $borrower->kyc_status = 'approved';
 
@@ -473,6 +477,10 @@ class BorrowerRegistrationForm extends Component
     {
         $organizations = Organization::where('status', 'active')->where('kyc_status', 'approved')->get();
 
+        $portfolios = $this->organization_id
+            ? Portfolio::where('organization_id', $this->organization_id)->get()
+            : collect();
+
         $users = $this->organization_id
             ? User::where('organization_id', $this->organization_id)->get()
             : collect();
@@ -480,6 +488,7 @@ class BorrowerRegistrationForm extends Component
         return view('livewire.borrower-registration-form', [
             'users' => $users,
             'organizations' => $organizations,
+            'portfolios' => $portfolios,
         ]);
     }
 }

@@ -3,6 +3,8 @@
 namespace App\Livewire;
 
 use App\Models\Borrower;
+use App\Models\Portfolio;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -14,9 +16,28 @@ class BorrowerList extends Component
 
     public $search = '';
 
-    protected $updatesQueryString = ['search'];
+    public $portfolioId = null;
+
+    public $portfolios = [];
+
+    protected $updatesQueryString = ['search', 'portfolioId'];
+
+    public function mount()
+    {
+        $user = Auth::user();
+        if ($user->hasRole('Admin') || $user->isOrgOwner() || $user->isAppOwner()) {
+            $this->portfolios = Portfolio::all();
+        } else {
+            $this->portfolios = $user->portfolios;
+        }
+    }
 
     public function updatingSearch()
+    {
+        $this->resetPage();
+    }
+
+    public function updatingPortfolioId()
     {
         $this->resetPage();
     }
@@ -43,7 +64,11 @@ class BorrowerList extends Component
             });
         }
 
-        $borrowers = $query->latest()->paginate(11); // 11 to leave room for "Add Card" in grid
+        if ($this->portfolioId) {
+            $query->where('portfolio_id', $this->portfolioId);
+        }
+
+        $borrowers = $query->latest()->paginate(11);
 
         return view('livewire.borrower-list', [
             'borrowers' => $borrowers,

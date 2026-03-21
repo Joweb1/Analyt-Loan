@@ -87,6 +87,7 @@ class Loan extends Model
 
     protected $fillable = [
         'organization_id',
+        'portfolio_id',
         'borrower_id',
         'loan_officer_id',
         'guarantor_id',
@@ -150,6 +151,11 @@ class Loan extends Model
         return $this->belongsTo(Borrower::class);
     }
 
+    public function portfolio(): BelongsTo
+    {
+        return $this->belongsTo(Portfolio::class);
+    }
+
     public function loanOfficer(): BelongsTo
     {
         return $this->belongsTo(User::class, 'loan_officer_id');
@@ -176,6 +182,15 @@ class Loan extends Model
         return collect($this->attachments)->map(function ($path) use ($disk) {
             return \Illuminate\Support\Facades\Storage::disk($disk)->url($path);
         })->toArray();
+    }
+
+    public function getBalanceAttribute(): float
+    {
+        $totalInterest = (float) $this->amount * (($this->interest_rate ?? 0) / 100);
+        $totalPayable = (float) $this->amount + $totalInterest;
+        $totalPaid = (float) $this->repayments()->sum('amount');
+
+        return max(0, round($totalPayable - $totalPaid, 2));
     }
 
     /**

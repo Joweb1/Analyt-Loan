@@ -40,6 +40,8 @@
 
     <!-- Search & Filters Bar -->
     <div class="flex flex-col gap-3 md:flex-row md:items-center">
+        <x-portfolio-filter :portfolios="$portfolios" :portfolioId="$portfolioId" />
+
         <div class="relative group w-full flex-1">
             <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                 <span class="material-symbols-outlined text-slate-400 text-xl group-focus-within:text-primary transition-colors">search</span>

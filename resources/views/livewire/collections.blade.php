@@ -45,6 +45,9 @@
                 </div>
             @endunless
 
+            <!-- Portfolio Filter -->
+            <x-portfolio-filter :portfolios="$portfolios" :portfolioId="$portfolioId" />
+
             <!-- Custom Date Filter Dropdown -->
             <div x-data="{ open: false, selected: @entangle('filter') }" class="relative flex-1 sm:flex-none">
                 <button @click="open = !open" @click.outside="open = false" type="button" class="flex items-center justify-between gap-2 w-full sm:w-40 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 py-2 pl-4 pr-3 rounded-xl text-xs font-bold shadow-sm hover:border-primary/50 transition-colors">

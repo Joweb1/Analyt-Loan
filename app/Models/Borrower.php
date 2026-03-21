@@ -99,6 +99,7 @@ class Borrower extends Model
 
     protected $fillable = [
         'organization_id',
+        'portfolio_id',
         'user_id',
         'custom_id',
         'guarantor_id',
@@ -153,6 +154,11 @@ class Borrower extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function portfolio(): BelongsTo
+    {
+        return $this->belongsTo(Portfolio::class);
     }
 
     public function guarantor(): BelongsTo

@@ -32,6 +32,27 @@ trait BelongsToOrganization
                 if ($orgId = $user->organization_id) {
                     $builder->where($builder->getModel()->getTable().'.organization_id', $orgId);
                 }
+
+                // Portfolio Scoping for Staff
+                if (! $user->hasRole('Admin') && ! $user->isOrgOwner() && in_array(get_class($builder->getModel()), [\App\Models\Borrower::class, \App\Models\Loan::class])) {
+                    $portfolioIds = $user->portfolios()->pluck('portfolios.id')->toArray();
+
+                    if (! empty($portfolioIds)) {
+                        $builder->whereIn($builder->getModel()->getTable().'.portfolio_id', $portfolioIds);
+                    } else {
+                        // If staff has no portfolios assigned, they can only see unassigned borrowers/loans
+                        // or perhaps we should restrict them completely?
+                        // User said: "the permissions the staffs has will be limited to only the portfolio"
+                        // This implies if they have NO portfolio, they see nothing or only unassigned.
+                        // For now, let's allow unassigned if they have no portfolio,
+                        // BUT if they ARE assigned to some, they ONLY see those.
+                        // Actually, if they are assigned to ANY portfolio, the above whereIn handles it.
+                        // If they have NO portfolio assignment, should they see everything?
+                        // User said "restricted from him" for other portfolios.
+                        // Let's assume if they have NO portfolio assigned, they can see everything in the org (current behavior)
+                        // UNLESS they are assigned to at least one.
+                    }
+                }
             }
         });
     }

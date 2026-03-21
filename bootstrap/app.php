@@ -20,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'update_last_seen' => \App\Http\Middleware\UpdateUserLastSeen::class,
         ]);
         $middleware->append(\App\Http\Middleware\CheckOrganizationStatus::class);
+        $middleware->append(\App\Http\Middleware\OverrideOrganizationTime::class);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->render(function (\Spatie\Permission\Exceptions\UnauthorizedException|\Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException|\Illuminate\Auth\Access\AuthorizationException $e, \Illuminate\Http\Request $request) {

@@ -21,9 +21,10 @@
     </div>
 
     <div class="bg-white dark:bg-[#1a1f2b] rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 p-6 mb-6">
-        <div class="flex items-center gap-4 mb-4">
-            <div class="flex-1">
-                <input wire:model.live.debounce.300ms="search" type="text" placeholder="Search by Loan ID, Name, Phone, staff:name..." class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-sm focus:ring-2 focus:ring-primary/40">
+        <div class="flex flex-col sm:flex-row items-center gap-4 mb-4">
+            <x-portfolio-filter :portfolios="$portfolios" :portfolioId="$portfolioId" />
+            <div class="flex-1 w-full">
+                <input wire:model.live.debounce.300ms="search" type="text" placeholder="Search by Loan ID, Name, Phone..." class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-sm focus:ring-2 focus:ring-primary/40">
             </div>
         </div>
 

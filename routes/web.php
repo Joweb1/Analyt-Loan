@@ -98,6 +98,7 @@ Route::middleware(['auth', 'update_last_seen'])->group(function () {
         Route::get('settings/roles', RolesManagement::class)->middleware('permission:manage_settings')->name('settings.roles');
         Route::get('settings/team-members', TeamManagement::class)->middleware('permission:manage_settings')->name('settings.team-members');
         Route::get('settings/loan-products', \App\Livewire\Settings\LoanProducts::class)->middleware('permission:manage_settings')->name('settings.loan-products');
+        Route::get('settings/portfolios', \App\Livewire\Settings\Portfolios::class)->middleware('permission:manage_settings')->name('settings.portfolios');
         Route::view('customer', 'pages.customer')->middleware('permission:manage_borrowers')->name('customer');
         Route::view('customer/create', 'pages.customer-registration')->middleware('permission:manage_borrowers')->name('customer.create');
         Route::get('customer/guarantor/create', \App\Livewire\Borrower\GuarantorRegistration::class)->middleware('permission:manage_guarantors')->name('guarantor.create');

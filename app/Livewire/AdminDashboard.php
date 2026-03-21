@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\Borrower;
 use App\Models\Loan;
+use App\Models\Portfolio;
 use App\Models\Repayment;
 use App\Models\SystemNotification;
 use Illuminate\Support\Facades\Auth;
@@ -25,6 +26,17 @@ class AdminDashboard extends Component
 
     public $defaultedLoansCount = 0;
 
+    // Portfolio Metrics
+    public $portfolioBalance = 0;
+
+    public $savingsBalance = 0;
+
+    public $portfolioAtRisk = 0;
+
+    public $parPercentage = 0;
+
+    public $profitLoss = 0;
+
     // Chart Data
     public $activeAmount = 0;
 
@@ -37,7 +49,32 @@ class AdminDashboard extends Component
 
     public $actionItems = [];
 
+    // Portfolio Selection
+    public $portfolios = [];
+
+    public $selectedPortfolioId = null;
+
     public function mount()
+    {
+        $user = Auth::user();
+        $orgId = $user->organization_id;
+
+        // Load portfolios for the selector
+        if ($user->hasRole('Admin') || $user->isOrgOwner() || $user->isAppOwner()) {
+            $this->portfolios = Portfolio::all();
+        } else {
+            $this->portfolios = $user->portfolios;
+        }
+
+        $this->loadStats();
+    }
+
+    public function updatedSelectedPortfolioId()
+    {
+        $this->loadStats();
+    }
+
+    public function loadStats()
     {
         $user = Auth::user();
         $orgId = $user->organization_id;
@@ -56,6 +93,23 @@ class AdminDashboard extends Component
             $loanQuery->where('organization_id', $orgId);
             $repaymentQuery->whereHas('loan', fn ($q) => $q->where('organization_id', $orgId));
             $borrowerQuery->where('organization_id', $orgId);
+        }
+
+        // Apply Portfolio Filter if selected
+        if ($this->selectedPortfolioId) {
+            $loanQuery->where('portfolio_id', $this->selectedPortfolioId);
+            $repaymentQuery->whereHas('loan', fn ($q) => $q->where('portfolio_id', $this->selectedPortfolioId));
+            $borrowerQuery->where('portfolio_id', $this->selectedPortfolioId);
+
+            // Fetch specific portfolio metrics from model
+            $portfolio = Portfolio::find($this->selectedPortfolioId);
+            if ($portfolio) {
+                $this->portfolioBalance = $portfolio->portfolio_balance;
+                $this->savingsBalance = $portfolio->savings_balance;
+                $this->portfolioAtRisk = $portfolio->portfolio_at_risk;
+                $this->parPercentage = $portfolio->par_percentage;
+                $this->profitLoss = $portfolio->profit_loss;
+            }
         }
 
         $this->totalLoaned = (clone $loanQuery)->whereIn('status', ['approved', 'active', 'repaid', 'overdue'])->sum('amount');

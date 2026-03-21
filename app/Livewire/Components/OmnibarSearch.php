@@ -28,19 +28,14 @@ class OmnibarSearch extends Component
         ['title' => 'KYC Approval', 'keywords' => 'kyc, approval, review, identity', 'route' => 'kyc.approval', 'permission' => 'approve_kyc', 'icon' => 'verified_user'],
         ['title' => 'Loan Approval', 'keywords' => 'loan, approval, review, pending', 'route' => 'loan.approval', 'permission' => 'approve_loans', 'icon' => 'fact_check'],
         ['title' => 'Guarantor Form Builder', 'keywords' => 'guarantor, form, builder, fields', 'route' => 'settings.guarantor-form', 'permission' => 'manage_settings', 'icon' => 'dynamic_form'],
-        ['title' => 'Create Guarantor', 'keywords' => 'guarantor, register, new', 'route' => 'guarantor.create', 'permission' => 'manage_guarantors', 'icon' => 'person_add'],
-        ['title' => 'Repayment Records', 'keywords' => 'repayments, history, payments', 'route' => 'repayments.records', 'permission' => 'manage_collections', 'icon' => 'history'],
-        ['title' => 'Vault', 'keywords' => 'vault, storage, assets, collateral list', 'route' => 'vault', 'permission' => 'manage_vault', 'icon' => 'shield'],
-        ['title' => 'Add Collateral', 'keywords' => 'add collateral, new asset, deposit', 'route' => 'collateral.create', 'permission' => 'manage_vault', 'icon' => 'add_moderator'],
-        ['title' => 'Customers', 'keywords' => 'customers, borrowers, clients, people', 'route' => 'customer', 'permission' => 'manage_borrowers', 'icon' => 'group'],
-        ['title' => 'Create Customer', 'keywords' => 'create customer, new borrower, register', 'route' => 'customer.create', 'permission' => 'manage_borrowers', 'icon' => 'person_add'],
-        ['title' => 'General Settings', 'keywords' => 'settings, configuration, general', 'route' => 'settings', 'permission' => 'manage_settings', 'icon' => 'settings'],
-        ['title' => 'Security Settings', 'keywords' => 'security, password, 2fa, privacy', 'route' => 'settings.security', 'permission' => null, 'icon' => 'lock'],
-        ['title' => 'Notification Settings', 'keywords' => 'notifications, alerts, mail, push', 'route' => 'settings.notifications', 'permission' => 'manage_settings', 'icon' => 'notifications_active'],
-        ['title' => 'Form Builder', 'keywords' => 'forms, builder, fields, kyc config', 'route' => 'settings.form-builder', 'permission' => 'manage_settings', 'icon' => 'dynamic_form'],
-        ['title' => 'Roles Management', 'keywords' => 'roles, permissions, access, security', 'route' => 'settings.roles', 'permission' => 'manage_settings', 'icon' => 'admin_panel_settings'],
-        ['title' => 'Team Management', 'keywords' => 'team, staff, members, users', 'route' => 'settings.team-members', 'permission' => 'manage_settings', 'icon' => 'badge'],
+        ['title' => 'Borrower Form Builder', 'keywords' => 'borrower, fields, registration, form', 'route' => 'settings.form-builder', 'permission' => 'manage_settings', 'icon' => 'settings_input_component'],
+        ['title' => 'Team Management', 'keywords' => 'staff, users, management, permissions', 'route' => 'settings.team', 'permission' => 'manage_settings', 'icon' => 'group'],
+        ['title' => 'General Settings', 'keywords' => 'organization, settings, logo, config', 'route' => 'settings', 'permission' => 'manage_settings', 'icon' => 'settings'],
+        ['title' => 'Notification Settings', 'keywords' => 'notifications, alert, push, email', 'route' => 'settings.notifications', 'permission' => 'manage_settings', 'icon' => 'notifications'],
+        ['title' => 'Security Settings', 'keywords' => 'password, security, two factor, account', 'route' => 'settings.security', 'permission' => 'manage_settings', 'icon' => 'security'],
+        ['title' => 'Roles & Permissions', 'keywords' => 'roles, access, levels, permissions', 'route' => 'settings.roles', 'permission' => 'manage_settings', 'icon' => 'verified_user'],
         ['title' => 'Loan Products', 'keywords' => 'products, interest, plans, loan types', 'route' => 'settings.loan-products', 'permission' => 'manage_settings', 'icon' => 'inventory'],
+        ['title' => 'Portfolios', 'keywords' => 'portfolios, groups, collections, management', 'route' => 'settings.portfolios', 'permission' => 'manage_settings', 'icon' => 'folder_shared'],
     ];
 
     public function updatedQuery()
@@ -156,7 +151,29 @@ class OmnibarSearch extends Component
             $allResults = $allResults->concat($loans);
         }
 
-        // 4. Search Collateral
+        // 4. Search Portfolios
+        if (! $prefix || $prefix === 'portfolio') {
+            $portfolios = \App\Models\Portfolio::where('organization_id', $orgId)
+                ->where(function ($q) use ($search) {
+                    $q->where('name', 'like', '%'.$search.'%')
+                        ->orWhere('description', 'like', '%'.$search.'%');
+                })
+                ->take(5)
+                ->get()
+                ->map(function ($p) {
+                    return [
+                        'type' => 'portfolio',
+                        'title' => $p->name,
+                        'subtitle' => 'Portfolio | '.$p->borrowers()->count().' Borrowers',
+                        'link' => route('settings.portfolios'),
+                        'permission' => 'manage_settings',
+                        'icon' => 'folder_shared',
+                    ];
+                });
+            $allResults = $allResults->concat($portfolios);
+        }
+
+        // 5. Search Collateral
         if (! $prefix || $prefix === 'collateral') {
             $collateral = Collateral::where('organization_id', $orgId)
                 ->where(function ($q) use ($search) {

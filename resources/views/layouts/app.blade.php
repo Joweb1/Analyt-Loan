@@ -212,6 +212,17 @@
     </nav>
     
     <div class="px-4 pb-6 shrink-0">
+        @if($org && $org->use_manual_date)
+            <div class="mb-4 px-4 py-3 bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-900/30 rounded-2xl sidebar-nav-text">
+                <div class="flex items-center gap-2 text-orange-700 dark:text-orange-400 mb-1">
+                    <span class="material-symbols-outlined text-sm font-black">simulation</span>
+                    <span class="text-[10px] font-black uppercase tracking-widest">Simulated Time</span>
+                </div>
+                <p class="text-xs font-bold text-orange-800 dark:text-orange-300">
+                    {{ now()->format('M d, Y') }}
+                </p>
+            </div>
+        @endif
         <livewire:components.sidebar-profile />
     </div>
 </aside>

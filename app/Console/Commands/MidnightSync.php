@@ -2,6 +2,10 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Organization;
+use App\Services\SystemHealthService;
+use App\Services\SystemMaintenanceService;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 
 class MidnightSync extends Command
@@ -26,97 +30,32 @@ class MidnightSync extends Command
     public function handle()
     {
         $this->info('Starting Midnight Sync ['.now()->toDateTimeString().']...');
-        \App\Services\SystemHealthService::log('Scheduler', 'info', 'MidnightSync started.');
+        SystemHealthService::log('Scheduler', 'info', 'MidnightSync started.');
 
-        // 1. Sync Loan Statuses & Apply Penalties
-        $this->syncLoans();
+        Organization::where('status', 'active')->chunk(50, function ($organizations) {
+            foreach ($organizations as $org) {
+                $this->info("Processing Organization: {$org->name}");
 
-        // 2. Generate Action Tasks for each Organization
-        $this->generateTasks();
+                // If using manual date, we increment it by 1 day at midnight real-time
+                // or should we only run if real-time midnight matches?
+                // Requirements say: "this will also affect the cron jobs".
+                // If manual date is ON, the job should run for the operating_date.
 
-        // 3. Recalculate Trust Scores for all active borrowers
-        $this->syncTrustScores();
+                $dateToRun = $org->use_manual_date ? $org->operating_date : now();
 
-        \App\Services\SystemHealthService::log('Scheduler', 'success', 'MidnightSync completed successfully.');
+                SystemMaintenanceService::runMaintenanceForDate($org->id, $dateToRun);
+
+                // If it was manual, maybe we should auto-increment it to simulate passage of time?
+                // User didn't explicitly ask for auto-increment, but usually, midnight sync implies a day passed.
+                // However, they said "admin can set current date manually".
+                // Let's stick to what they asked: use the operating date.
+            }
+        });
+
+        // Reset time for the rest of the console process
+        Carbon::setTestNow();
+
+        SystemHealthService::log('Scheduler', 'success', 'MidnightSync completed successfully.');
         $this->info('Midnight Sync completed successfully.');
-    }
-
-    private function syncLoans()
-    {
-        $this->info('Syncing loan statuses and applying penalties...');
-
-        \App\Models\Loan::whereIn('status', ['active', 'overdue'])->chunk(100, function (\Illuminate\Database\Eloquent\Collection $loans) {
-            foreach ($loans as $loan) {
-                /** @var \App\Models\Loan $loan */
-                $overdueSchedules = $loan->scheduledRepayments()
-                    ->where('due_date', '<', now()->startOfDay())
-                    ->whereIn('status', ['applied', 'partial', 'overdue'])
-                    ->get();
-
-                if ($overdueSchedules->isNotEmpty()) {
-                    if ($loan->status !== 'overdue') {
-                        $loan->update(['status' => 'overdue']);
-                    }
-
-                    foreach ($overdueSchedules as $schedule) {
-                        /** @var \App\Models\ScheduledRepayment $schedule */
-                        if ($schedule->status !== 'overdue') {
-                            $schedule->update(['status' => 'overdue']);
-                        }
-
-                        // Apply penalties based on frequency
-                        $this->applyPenalty($loan, $schedule);
-                    }
-                }
-            }
-        });
-    }
-
-    private function applyPenalty($loan, $schedule)
-    {
-        if (! ($loan->penalty_value > 0)) {
-            return;
-        }
-
-        $shouldApply = false;
-        $today = now()->startOfDay();
-        $daysOverdue = $schedule->due_date->diffInDays($today);
-
-        match ($loan->penalty_frequency) {
-            'one_time' => $shouldApply = ($daysOverdue === 1),
-            'daily' => $shouldApply = true,
-            'weekly' => $shouldApply = ($daysOverdue > 0 && $daysOverdue % 7 === 0),
-            'monthly' => $shouldApply = ($daysOverdue > 0 && $daysOverdue % 30 === 0),
-            'yearly' => $shouldApply = ($daysOverdue > 0 && $daysOverdue % 365 === 0),
-            default => $shouldApply = false,
-        };
-
-        if ($shouldApply) {
-            $penaltyAmount = $loan->penalty_type === 'fixed'
-                ? $loan->penalty_value
-                : ($schedule->principal_amount * ($loan->penalty_value / 100));
-
-            $schedule->increment('penalty_amount', $penaltyAmount);
-        }
-    }
-
-    private function generateTasks()
-    {
-        $this->info('Generating daily action tasks...');
-        $organizations = \App\Models\Organization::where('status', 'active')->get();
-        foreach ($organizations as $org) {
-            \App\Services\ActionTaskService::generateDailyTasks($org->id);
-        }
-    }
-
-    private function syncTrustScores()
-    {
-        $this->info('Recalculating trust scores...');
-        \App\Models\Borrower::chunk(100, function (\Illuminate\Database\Eloquent\Collection $borrowers) {
-            foreach ($borrowers as $borrower) {
-                /** @var \App\Models\Borrower $borrower */
-                $borrower->recalculateTrustScore();
-            }
-        });
     }
 }

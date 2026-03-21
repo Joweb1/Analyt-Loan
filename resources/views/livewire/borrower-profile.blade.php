@@ -114,12 +114,21 @@
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div class="bg-white/10 rounded-xl p-3 text-center">
-                            <p class="text-[9px] font-bold uppercase opacity-60">Credit Score</p>
-                            <p class="text-lg font-black">{{ $borrower->credit_score ?? 0 }}</p>
+                            <p class="text-[9px] font-bold uppercase opacity-60">Repayment Score</p>
+                            <p class="text-lg font-black">{{ $borrower->trust_score ?? 0 }}%</p>
                         </div>
                         <div class="bg-white/10 rounded-xl p-3 text-center">
                             <p class="text-[9px] font-bold uppercase opacity-60">Trust Level</p>
-                            <p class="text-lg font-black">Grade A</p>
+                            <p class="text-lg font-black">
+                                @php
+                                    $grade = match(true) {
+                                        $borrower->trust_score >= 80 => 'Grade A',
+                                        $borrower->trust_score >= 50 => 'Grade B',
+                                        default => 'Grade C'
+                                    };
+                                @endphp
+                                {{ $grade }}
+                            </p>
                         </div>
                     </div>
                 </div>

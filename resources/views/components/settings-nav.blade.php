@@ -22,6 +22,10 @@
            class="px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all {{ $active === 'loan-products' ? 'bg-white dark:bg-slate-800 text-primary shadow-sm' : 'text-slate-500 hover:text-primary' }}">
             Loan Products
         </a>
+        <a href="{{ route('settings.portfolios') }}" 
+           class="px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all {{ $active === 'portfolios' ? 'bg-white dark:bg-slate-800 text-primary shadow-sm' : 'text-slate-500 hover:text-primary' }}">
+            Portfolios
+        </a>
         <a href="{{ route('settings.form-builder') }}" 
            class="px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all {{ $active === 'form' ? 'bg-white dark:bg-slate-800 text-primary shadow-sm' : 'text-slate-500 hover:text-primary' }}">
             Borrower Form

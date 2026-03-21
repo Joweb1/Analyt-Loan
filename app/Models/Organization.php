@@ -131,6 +131,8 @@ class Organization extends Model
         'repayment_bank_name',
         'repayment_account_number',
         'repayment_account_name',
+        'use_manual_date',
+        'operating_date',
     ];
 
     protected $appends = [
@@ -154,6 +156,8 @@ class Organization extends Model
             'overdue_notifications_enabled' => 'boolean',
             'new_borrower_notifications_enabled' => 'boolean',
             'allow_flexible_repayments' => 'boolean',
+            'use_manual_date' => 'boolean',
+            'operating_date' => 'datetime',
             'default_interest_rate' => 'decimal:2',
             'grace_period_days' => 'integer',
         ];

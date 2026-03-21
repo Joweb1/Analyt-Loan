@@ -190,6 +190,41 @@
                     </div>
                 </div>
 
+                <!-- Time Control Configuration -->
+                <div class="bg-white dark:bg-zinc-900 rounded-xl p-6 shadow-sm border border-brand-orange/20 dark:border-zinc-800">
+                    <div class="flex items-center gap-2 mb-6">
+                        <span class="material-symbols-outlined text-brand-orange">schedule</span>
+                        <h2 class="text-lg font-bold text-primary dark:text-white">Time Control (Simulation)</h2>
+                    </div>
+                    
+                    <div class="space-y-6">
+                        <div class="flex items-center justify-between p-4 bg-orange-50 dark:bg-orange-900/10 rounded-xl border border-orange-100 dark:border-orange-900/20">
+                            <div class="flex flex-col gap-1">
+                                <span class="text-sm font-bold text-orange-800 dark:text-orange-400">Enable Manual Operating Date</span>
+                                <span class="text-xs text-orange-700/70 dark:text-orange-500/70">When enabled, the entire system will operate at the date specified below. This affects overdue calculations, reports, and timestamps.</span>
+                            </div>
+                            <button 
+                                type="button" 
+                                @click="$wire.set('use_manual_date', !@js($use_manual_date))"
+                                class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none {{ $use_manual_date ? 'bg-brand-orange' : 'bg-gray-200 dark:bg-zinc-700' }}"
+                            >
+                                <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {{ $use_manual_date ? 'translate-x-5' : 'translate-x-0' }}"></span>
+                            </button>
+                        </div>
+
+                        @if($use_manual_date)
+                            <div class="flex flex-col gap-2 animate-in fade-in slide-in-from-top-2">
+                                <label class="text-sm font-bold text-gray-700 dark:text-gray-300">Set Operating Date</label>
+                                <input wire:model="operating_date" type="date" class="rounded-xl border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white focus:ring-brand-orange focus:border-brand-orange text-sm max-w-xs">
+                                <p class="text-[10px] text-gray-500 italic mt-1 font-medium">
+                                    * Advancing the date will automatically trigger daily sync tasks (penalties, status updates) for skipped days.
+                                </p>
+                                @error('operating_date') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                            </div>
+                        @endif
+                    </div>
+                </div>
+
                 <div class="flex justify-end gap-4">
                     <button type="submit" class="px-8 py-3 bg-primary text-white font-bold rounded-xl text-sm shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform active:scale-95">
                         Save Changes

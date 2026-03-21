@@ -27,6 +27,26 @@
             </div>
         </div>
 
+        {{-- Org Health Row --}}
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-white dark:bg-zinc-900 p-6 rounded-2xl border border-gray-100 dark:border-zinc-800 shadow-sm">
+                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Total Savings</p>
+                <h3 class="text-2xl font-black text-emerald-600">₦ {{ number_format($totalSavings, 2) }}</h3>
+            </div>
+            <div class="bg-white dark:bg-zinc-900 p-6 rounded-2xl border border-gray-100 dark:border-zinc-800 shadow-sm">
+                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Total Interest</p>
+                <h3 class="text-2xl font-black text-blue-600">₦ {{ number_format($totalInterest, 2) }}</h3>
+            </div>
+            <div class="bg-white dark:bg-zinc-900 p-6 rounded-2xl border border-gray-100 dark:border-zinc-800 shadow-sm">
+                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Portfolio at Risk (PAR)</p>
+                <h3 class="text-2xl font-black text-red-600">₦ {{ number_format($totalPAR, 2) }}</h3>
+            </div>
+            <div class="bg-white dark:bg-zinc-900 p-6 rounded-2xl border border-gray-100 dark:border-zinc-800 shadow-sm">
+                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Profit & Loss (PnL)</p>
+                <h3 class="text-2xl font-black {{ $totalPnL >= 0 ? 'text-green-600' : 'text-red-600' }}">₦ {{ number_format($totalPnL, 2) }}</h3>
+            </div>
+        </div>
+
         <!-- Action Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
             <!-- Data Export Section -->

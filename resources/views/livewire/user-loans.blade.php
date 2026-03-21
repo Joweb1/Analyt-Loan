@@ -63,6 +63,10 @@
                             <span class="text-sm font-bold text-slate-900 dark:text-white">{{ $borrower->credit_score ?? '0' }}</span>
                         </div>
                          <div class="flex justify-between items-center py-2 border-b border-slate-50 dark:border-slate-800/50">
+                            <span class="text-xs font-bold text-slate-500 uppercase tracking-wide">Repayment Score</span>
+                            <span class="text-sm font-bold text-primary">{{ $borrower->trust_score ?? '0' }}%</span>
+                        </div>
+                         <div class="flex justify-between items-center py-2 border-b border-slate-50 dark:border-slate-800/50">
                             <span class="text-xs font-bold text-slate-500 uppercase tracking-wide">Total Loans</span>
                             <span class="text-sm font-bold text-slate-900 dark:text-white">{{ $borrower->loans->count() }}</span>
                         </div>
@@ -108,7 +112,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 @forelse($loans as $loan)
                     @php 
-                        $risk = $this->getRiskLevel($borrower->credit_score ?? 0);
+                        $risk = $this->getRiskLevel($borrower->trust_score ?? 0);
                         $paid = $loan->repayments->sum('amount');
                         $progress = $loan->amount > 0 ? min(100, ($paid / $loan->amount) * 100) : 0;
                         $statusColor = match($loan->status) {

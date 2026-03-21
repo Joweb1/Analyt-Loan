@@ -3,8 +3,14 @@
 namespace Database\Seeders;
 
 use App\Models\Borrower;
+use App\Models\Collateral;
+use App\Models\Comment;
+use App\Models\FormFieldConfig;
 use App\Models\Loan;
 use App\Models\Organization;
+use App\Models\Portfolio;
+use App\Models\Repayment;
+use App\Models\ScheduledRepayment;
 use App\Models\SystemNotification;
 use App\Models\User;
 use Illuminate\Database\Seeder;
@@ -22,23 +28,25 @@ class MasterSeeder extends Seeder
         Schema::disableForeignKeyConstraints();
 
         // Truncate all relevant tables
-        DB::table('users')->delete();
-        DB::table('organizations')->delete();
-        DB::table('borrowers')->delete();
-        DB::table('loans')->delete();
-        DB::table('repayments')->delete();
-        DB::table('scheduled_repayments')->delete();
-        DB::table('form_field_configs')->delete();
-        DB::table('collaterals')->delete();
-        DB::table('comments')->delete();
-        DB::table('system_notifications')->delete();
+        User::truncate();
+        Organization::truncate();
+        Borrower::truncate();
+        Loan::truncate();
+        Repayment::truncate();
+        ScheduledRepayment::truncate();
+        FormFieldConfig::truncate();
+        Collateral::truncate();
+        Comment::truncate();
+        SystemNotification::truncate();
+        Portfolio::truncate();
+        DB::table('portfolio_user')->truncate();
 
         // Truncate Permission tables (Spatie)
-        DB::table('model_has_permissions')->delete();
-        DB::table('model_has_roles')->delete();
-        DB::table('role_has_permissions')->delete();
-        DB::table('roles')->delete();
-        DB::table('permissions')->delete();
+        DB::table('model_has_permissions')->truncate();
+        DB::table('model_has_roles')->truncate();
+        DB::table('role_has_permissions')->truncate();
+        DB::table('roles')->truncate();
+        DB::table('permissions')->truncate();
 
         Schema::enableForeignKeyConstraints();
 
@@ -55,9 +63,10 @@ class MasterSeeder extends Seeder
         // We ensure the observers catch these and create actionable tasks
         $this->call([
             LoanSeeder::class,
+            PortfolioSeeder::class,
             CollateralSeeder::class,
             StatusBoardSeeder::class,
-            ActionTaskSeeder::class, // Added this
+            ActionTaskSeeder::class,
         ]);
 
         // Fix missing organization_ids for everything created by standard seeders

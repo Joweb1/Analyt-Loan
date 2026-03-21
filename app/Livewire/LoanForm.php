@@ -58,6 +58,8 @@ class LoanForm extends Component
 
     public $insurance_fee;
 
+    public $portfolio_id;
+
     public $description;
 
     public $attachments; // File upload
@@ -88,6 +90,8 @@ class LoanForm extends Component
     public $staffMembers;
 
     public $loanProducts = [];
+
+    public $portfolios = [];
 
     // Edit Mode State
     public $loanId;
@@ -124,6 +128,7 @@ class LoanForm extends Component
     {
         $orgId = Auth::user()->organization_id;
         $this->loanProducts = \App\Models\LoanProduct::orderBy('name')->get();
+        $this->portfolios = \App\Models\Portfolio::orderBy('name')->get();
 
         if ($loan && $loan->exists) {
             $this->isEditMode = true;
@@ -146,6 +151,7 @@ class LoanForm extends Component
             $this->processing_fee = $loan->processing_fee;
             $this->processing_fee_type = $loan->processing_fee_type;
             $this->insurance_fee = $loan->insurance_fee;
+            $this->portfolio_id = $loan->portfolio_id;
             $this->description = $loan->description;
             $this->collateralId = $loan->collateral?->id;
             $this->loan_officer_id = $loan->loan_officer_id;
@@ -210,6 +216,7 @@ class LoanForm extends Component
         $borrower = Borrower::with('user')->find($id);
         $this->selectedBorrower = $borrower;
         $this->borrowerUserId = $borrower?->user_id;
+        $this->portfolio_id = $borrower?->portfolio_id;
         if (! $this->isEditMode) {
             $this->generateLoanNumber();
         }
@@ -271,6 +278,7 @@ class LoanForm extends Component
             'amount' => $this->amount,
             'interest_rate' => $this->interest_rate,
             'interest_type' => $this->interest_type,
+            'portfolio_id' => $this->portfolio_id,
             'duration' => $this->duration,
             'duration_unit' => $this->duration_unit,
             'repayment_cycle' => $this->repayment_cycle,

@@ -20,12 +20,14 @@
                 </div>
             @endif
         </div>
-        <div class="flex gap-3 items-center flex-1 max-w-md">
+        <div class="flex gap-3 items-center flex-1 max-w-2xl">
+            <x-portfolio-filter :portfolios="$portfolios" :portfolioId="$portfolioId" />
+            
             <div class="relative w-full">
                 <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <span class="material-symbols-outlined text-slate-400 text-[20px]">search</span>
                 </span>
-                <input wire:model.live.debounce.300ms="search" type="text" placeholder="Search by name, email, phone, BVN, NIN..." class="block w-full pl-10 pr-4 py-2 bg-white dark:bg-[#1a1f2e] border border-[#e5e7eb] dark:border-[#2d3344] rounded-xl text-sm focus:ring-2 focus:ring-primary/20 transition-all">
+                <input wire:model.live.debounce.300ms="search" type="text" placeholder="Search borrowers..." class="block w-full pl-10 pr-4 py-2 bg-white dark:bg-[#1a1f2e] border border-[#e5e7eb] dark:border-[#2d3344] rounded-xl text-sm focus:ring-2 focus:ring-primary/20 transition-all">
             </div>
             <div class="h-8 w-[1px] bg-[#e5e7eb] dark:bg-[#2d3344] mx-1"></div>
             <div class="flex bg-white dark:bg-[#1a1f2e] border border-[#e5e7eb] dark:border-[#2d3344] rounded-xl p-1 shadow-sm">
@@ -70,16 +72,16 @@
                     };
 
                     $riskColor = match(true) {
-                        $borrower->credit_score >= 750 => 'green',
-                        $borrower->credit_score >= 600 => 'amber',
+                        $borrower->trust_score >= 80 => 'green',
+                        $borrower->trust_score >= 50 => 'amber',
                         default => 'red'
                     };
                     $riskLabel = match(true) {
-                        $borrower->credit_score >= 750 => 'Low Risk',
-                        $borrower->credit_score >= 600 => 'Medium Risk',
+                        $borrower->trust_score >= 80 => 'Low Risk',
+                        $borrower->trust_score >= 50 => 'Medium Risk',
                         default => 'High Risk'
                     };
-                    $scorePercent = min(100, ($borrower->credit_score / 850) * 100);
+                    $scorePercent = $borrower->trust_score;
                     
                     $colors = ['bg-blue-50 text-blue-600', 'bg-purple-50 text-purple-600', 'bg-emerald-50 text-emerald-600', 'bg-rose-50 text-rose-600', 'bg-amber-50 text-amber-600'];
                     $colorClass = $colors[ord(substr($borrower->user->name, 0, 1)) % count($colors)];
@@ -148,10 +150,25 @@
                                 @endif
                             </div>
                             <div class="relative size-12">
-                                <svg class="size-full -rotate-90" viewbox="0 0 36 36">
-                                    <circle class="stroke-[#f0f1f5] dark:stroke-[#2d3344]" cx="18" cy="18" fill="none" r="16" stroke-width="3"></circle>
+                                <svg class="size-full -rotate-90" viewBox="0 0 36 36">
+                                    <circle class="stroke-slate-100 dark:stroke-slate-800" cx="18" cy="18" fill="none" r="16" stroke-width="3"></circle>
                                     @if($borrower->trust_score > 0)
-                                        <circle class="stroke-{{ $riskColor }}-500" cx="18" cy="18" fill="none" r="16" stroke-dasharray="100" stroke-dashoffset="{{ 100 - $scorePercent }}" stroke-linecap="round" stroke-width="3"></circle>
+                                        @php
+                                            $strokeColor = match($riskColor) {
+                                                'green' => 'text-emerald-500',
+                                                'amber' => 'text-amber-500',
+                                                'red' => 'text-red-500',
+                                                default => 'text-primary'
+                                            };
+                                        @endphp
+                                        <circle class="{{ $strokeColor }} transition-all duration-500" 
+                                                stroke="currentColor" 
+                                                cx="18" cy="18" fill="none" r="16" 
+                                                pathLength="100" 
+                                                stroke-dasharray="100" 
+                                                stroke-dashoffset="{{ 100 - $scorePercent }}" 
+                                                stroke-linecap="round" 
+                                                stroke-width="3"></circle>
                                     @endif
                                 </svg>
                                 <div class="absolute inset-0 flex items-center justify-center">
@@ -212,13 +229,13 @@
                                 };
 
                                 $riskColor = match(true) {
-                                    $borrower->trust_score >= 75 => 'green',
-                                    $borrower->trust_score >= 41 => 'amber',
+                                    $borrower->trust_score >= 80 => 'green',
+                                    $borrower->trust_score >= 50 => 'amber',
                                     default => 'red'
                                 };
                                 $riskLabel = match(true) {
-                                    $borrower->trust_score >= 75 => 'Low Risk',
-                                    $borrower->trust_score >= 41 => 'Medium Risk',
+                                    $borrower->trust_score >= 80 => 'Low Risk',
+                                    $borrower->trust_score >= 50 => 'Medium Risk',
                                     default => 'High Risk'
                                 };
 

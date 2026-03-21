@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Loan;
+use App\Models\Portfolio;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -19,13 +20,17 @@ class StatusBoard extends Component
 
     public $dateFilter = '';
 
+    public $portfolioId = null;
+
+    public $portfolios = [];
+
     public $counts = [];
 
     public $sums = [];
 
     public $totalPipelineValue = 0;
 
-    // Board specific collections (non-paginated for Kanban)
+    // Board specific collections
     public $pending;
 
     public $active;
@@ -35,6 +40,16 @@ class StatusBoard extends Component
     public $overdue;
 
     public $declined;
+
+    public function mount()
+    {
+        $user = Auth::user();
+        if ($user->hasRole('Admin') || $user->isOrgOwner() || $user->isAppOwner()) {
+            $this->portfolios = Portfolio::all();
+        } else {
+            $this->portfolios = $user->portfolios;
+        }
+    }
 
     public function updatingSearch()
     {
@@ -56,14 +71,13 @@ class StatusBoard extends Component
         $this->resetPage();
     }
 
-    public function mount()
+    public function updatingPortfolioId()
     {
-        // Initial fetch handled by render
+        $this->resetPage();
     }
 
     private function applyFilters($query)
     {
-        // Search Logic
         if ($this->search) {
             $query->where(function ($q) {
                 $q->where('loan_number', 'like', '%'.$this->search.'%')
@@ -78,12 +92,14 @@ class StatusBoard extends Component
             });
         }
 
-        // Status Filter
         if ($this->statusFilter) {
             $query->where('status', $this->statusFilter);
         }
 
-        // Date Filter
+        if ($this->portfolioId) {
+            $query->where('portfolio_id', $this->portfolioId);
+        }
+
         if ($this->dateFilter) {
             match ($this->dateFilter) {
                 'today' => $query->whereDate('created_at', today()),
@@ -93,13 +109,12 @@ class StatusBoard extends Component
             };
         }
 
-        // Risk Filter logic (approximate based on credit score ranges used in getRiskLevel)
         if ($this->riskFilter) {
             $query->whereHas('borrower', function ($q) {
                 match ($this->riskFilter) {
-                    'low' => $q->where('credit_score', '>=', 750),
-                    'medium' => $q->where('credit_score', '>=', 600)->where('credit_score', '<', 750),
-                    'high' => $q->where('credit_score', '<', 600),
+                    'low' => $q->where('trust_score', '>=', 80),
+                    'medium' => $q->where('trust_score', '>=', 50)->where('trust_score', '<', 80),
+                    'high' => $q->where('trust_score', '<', 50),
                     default => null
                 };
             });
@@ -170,7 +185,6 @@ class StatusBoard extends Component
 
     public function render()
     {
-        // Fetch Board Data (Card View) with filters
         $this->fetchBoardData();
 
         $user = Auth::user();

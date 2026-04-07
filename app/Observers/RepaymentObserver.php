@@ -71,7 +71,7 @@ class RepaymentObserver
      */
     public function deleted(Repayment $repayment): void
     {
-        LoanRepaymentReceived::dispatch($repayment->loan, $repayment);
+        LoanRepaymentReceived::dispatch($repayment->loan, null);
         \App\Events\DashboardUpdated::dispatch($repayment->loan->organization_id);
         \App\Livewire\LoanDashboard::clearCache($repayment->loan->organization_id);
         \App\Livewire\AdminDashboard::clearCache($repayment->loan->organization_id, $repayment->loan->portfolio_id);

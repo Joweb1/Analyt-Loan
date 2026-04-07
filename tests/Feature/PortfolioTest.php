@@ -28,8 +28,8 @@ class PortfolioTest extends TestCase
     {
         parent::setUp();
         $this->artisan('db:seed', ['--class' => 'RoleSeeder']);
-        
-        // We will set the tenant dynamically in each test for this file 
+
+        // We will set the tenant dynamically in each test for this file
         // since it uses Organization::factory()->create() inside them.
     }
 
@@ -183,7 +183,7 @@ class PortfolioTest extends TestCase
     {
         $org = Organization::factory()->create();
         app(\App\Services\TenantSession::class)->setTenantId($org->id);
-        
+
         $admin = User::factory()->create(['organization_id' => $org->id]);
         $admin->assignRole('Admin');
 

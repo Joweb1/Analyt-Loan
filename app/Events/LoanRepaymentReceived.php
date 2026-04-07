@@ -17,6 +17,6 @@ class LoanRepaymentReceived
      */
     public function __construct(
         public Loan $loan,
-        public Repayment $repayment
+        public ?Repayment $repayment = null
     ) {}
 }

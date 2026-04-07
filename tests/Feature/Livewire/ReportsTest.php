@@ -24,10 +24,10 @@ class ReportsTest extends TestCase
         parent::setUp();
         $this->organization = Organization::factory()->create();
         app(\App\Services\TenantSession::class)->setTenantId($this->organization->id);
-        
+
         // Clear all caches for this org to be absolutely sure
         Reports::clearCache($this->organization->id);
-        
+
         $this->admin = User::factory()->create(['organization_id' => $this->organization->id]);
     }
 

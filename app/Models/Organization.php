@@ -265,7 +265,7 @@ class Organization extends Model
     {
         $loans = $this->loans()->whereNotIn('status', ['draft', 'rejected', 'applied'])->get();
 
-        $totalLoaned = $loans->sum(fn($loan) => (float) ($loan->amount ?? 0));
+        $totalLoaned = $loans->sum(fn ($loan) => (float) ($loan->amount ?? 0));
         $totalInterest = $loans->sum(function ($loan) {
             /** @var Loan $loan */
             return (float) ($loan->amount ?? 0) * (($loan->interest_rate ?? 0) / 100);

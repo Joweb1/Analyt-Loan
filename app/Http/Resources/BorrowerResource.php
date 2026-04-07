@@ -7,6 +7,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
  * @mixin \App\Models\Borrower
+ *
  * @property string $name
  * @property string $email
  */

@@ -64,7 +64,7 @@ class Tracing
             return null;
         }
 
-        $context = new SpanContext();
+        $context = new SpanContext;
         $context->setOp($op);
         $context->setDescription($description);
 

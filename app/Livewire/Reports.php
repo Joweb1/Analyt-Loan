@@ -178,9 +178,9 @@ class Reports extends Component
     {
         $orgId = Auth::user()->organization_id;
 
-        $suffix = ($this->reportType === 'custom' && $this->customStartDate && $this->customEndDate) 
-            ? "_" . md5($this->customStartDate.$this->customEndDate) 
-            : "";
+        $suffix = ($this->reportType === 'custom' && $this->customStartDate && $this->customEndDate)
+            ? '_'.md5($this->customStartDate.$this->customEndDate)
+            : '';
         $cacheKey = "reports_stats_{$orgId}_{$this->reportType}{$suffix}";
 
         if ($force) {

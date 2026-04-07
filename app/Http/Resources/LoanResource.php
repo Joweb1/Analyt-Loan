@@ -7,6 +7,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
  * @mixin \App\Models\Loan
+ *
  * @property string $repayment_status
  * @property \Illuminate\Support\Carbon|null $disbursed_at
  * @property \Illuminate\Support\Carbon|null $due_at

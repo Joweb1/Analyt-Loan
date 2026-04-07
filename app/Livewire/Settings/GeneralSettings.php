@@ -56,6 +56,8 @@ class GeneralSettings extends Component
 
     public $currency = 'NGN';
 
+    public $timezone;
+
     public $allow_flexible_repayments = false;
 
     // Time Control (NEW)
@@ -87,12 +89,13 @@ class GeneralSettings extends Component
             $this->interest_rate = $this->organization->default_interest_rate;
             $this->grace_period = $this->organization->grace_period_days;
             $this->currency = $this->organization->currency_code ?? 'NGN';
+            $this->timezone = $this->organization->timezone ?? 'UTC';
             $this->allow_flexible_repayments = $this->organization->allow_flexible_repayments;
 
             $this->use_manual_date = $this->organization->use_manual_date;
             $this->operating_date = $this->organization->operating_date
                 ? \Carbon\Carbon::parse($this->organization->operating_date)->format('Y-m-d')
-                : now()->format('Y-m-d');
+                : now($this->timezone)->format('Y-m-d');
         }
     }
 
@@ -107,11 +110,12 @@ class GeneralSettings extends Component
             'repayment_account_name' => 'nullable|string|max:100',
             'interest_rate' => 'required|numeric|min:0',
             'operating_date' => 'required_if:use_manual_date,true|date',
+            'timezone' => 'required|string',
         ]);
 
         $oldManualDate = $this->organization->use_manual_date;
         $oldOperatingDate = $this->organization->operating_date ? $this->organization->operating_date->startOfDay() : null;
-        $newOperatingDate = Carbon::parse($this->operating_date)->startOfDay();
+        $newOperatingDate = Carbon::parse($this->operating_date, $this->timezone)->startOfDay();
 
         $data = [
             'name' => $this->name,
@@ -130,6 +134,7 @@ class GeneralSettings extends Component
             'allow_flexible_repayments' => $this->allow_flexible_repayments,
             'use_manual_date' => $this->use_manual_date,
             'operating_date' => $this->use_manual_date ? $newOperatingDate : null,
+            'timezone' => $this->timezone,
         ];
 
         // Handle File Uploads
@@ -178,7 +183,7 @@ class GeneralSettings extends Component
             $startDate = $oldOperatingDate ?? now()->startOfDay();
 
             if ($newOperatingDate->isAfter($startDate)) {
-                $days = $startDate->diffInDays($newOperatingDate);
+                $days = (int) $startDate->diffInDays($newOperatingDate);
 
                 for ($i = 1; $i <= $days; $i++) {
                     $runDate = $startDate->copy()->addDays($i);
@@ -187,7 +192,17 @@ class GeneralSettings extends Component
             } elseif ($newOperatingDate->isBefore($startDate)) {
                 // Backdating: Just run once for the target date to fix statuses
                 SystemMaintenanceService::runMaintenanceForDate($this->organization->id, $newOperatingDate);
+            } else {
+                // Same day: Run once to ensure today's maintenance is current
+                SystemMaintenanceService::runMaintenanceForDate($this->organization->id, $newOperatingDate);
             }
+        }
+
+        // Reset Carbon for the remainder of this request to the actual operating date
+        if ($this->use_manual_date && $this->organization->operating_date) {
+            \Carbon\Carbon::setTestNow($this->organization->operating_date);
+        } else {
+            \Carbon\Carbon::setTestNow();
         }
 
         $this->dispatch('custom-alert', ['type' => 'success', 'message' => 'Settings updated successfully. Time override active.']);

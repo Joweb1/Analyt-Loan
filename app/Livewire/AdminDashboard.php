@@ -6,6 +6,7 @@ use App\Models\Borrower;
 use App\Models\Loan;
 use App\Models\Portfolio;
 use App\Models\Repayment;
+use App\Models\SavingsAccount;
 use App\Models\SystemNotification;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
@@ -54,6 +55,29 @@ class AdminDashboard extends Component
 
     public $selectedPortfolioId = null;
 
+    public static function clearCache(string $orgId, ?string $portfolioId = null): void
+    {
+        \Illuminate\Support\Facades\Cache::forget("admin_dashboard_stats_{$orgId}_all");
+        if ($portfolioId) {
+            \Illuminate\Support\Facades\Cache::forget("admin_dashboard_stats_{$orgId}_{$portfolioId}");
+        }
+    }
+
+    public function getListeners()
+    {
+        $orgId = Auth::user()->organization_id;
+
+        return [
+            "echo:organization.{$orgId},.dashboard.updated" => 'loadStatsAndForce',
+            'echo:dashboard,.dashboard.updated' => 'loadStatsAndForce',
+        ];
+    }
+
+    public function loadStatsAndForce()
+    {
+        $this->loadStats(true);
+    }
+
     public function mount()
     {
         $user = Auth::user();
@@ -74,81 +98,124 @@ class AdminDashboard extends Component
         $this->loadStats();
     }
 
-    public function loadStats()
+    public function loadStats($force = false)
     {
         $user = Auth::user();
         $orgId = $user->organization_id;
         $isOwner = $user->isAppOwner();
 
-        // Base queries
-        $loanQuery = Loan::query();
-        $repaymentQuery = Repayment::query();
-        $borrowerQuery = Borrower::query();
+        $cacheKey = "admin_dashboard_stats_{$orgId}_".($this->selectedPortfolioId ?? 'all');
 
-        if ($isOwner) {
-            $loanQuery->withoutGlobalScopes();
-            $repaymentQuery->withoutGlobalScopes();
-            $borrowerQuery->withoutGlobalScopes();
-        } else {
-            $loanQuery->where('organization_id', $orgId);
-            $repaymentQuery->whereHas('loan', fn ($q) => $q->where('organization_id', $orgId));
-            $borrowerQuery->where('organization_id', $orgId);
+        if ($force) {
+            \Illuminate\Support\Facades\Cache::forget($cacheKey);
         }
 
-        // Apply Portfolio Filter if selected
-        if ($this->selectedPortfolioId) {
-            $loanQuery->where('portfolio_id', $this->selectedPortfolioId);
-            $repaymentQuery->whereHas('loan', fn ($q) => $q->where('portfolio_id', $this->selectedPortfolioId));
-            $borrowerQuery->where('portfolio_id', $this->selectedPortfolioId);
+        $stats = \Illuminate\Support\Facades\Cache::remember($cacheKey, now()->addHour(), function () use ($orgId, $isOwner) {
+            $org = \App\Models\Organization::current();
+            // Base queries
+            $loanQuery = Loan::query();
+            $repaymentQuery = Repayment::query();
+            $borrowerQuery = Borrower::query();
 
-            // Fetch specific portfolio metrics from model
-            $portfolio = Portfolio::find($this->selectedPortfolioId);
-            if ($portfolio) {
-                $this->portfolioBalance = $portfolio->portfolio_balance;
-                $this->savingsBalance = $portfolio->savings_balance;
-                $this->portfolioAtRisk = $portfolio->portfolio_at_risk;
-                $this->parPercentage = $portfolio->par_percentage;
-                $this->profitLoss = $portfolio->profit_loss;
+            if ($isOwner) {
+                $loanQuery->withoutGlobalScopes();
+                $repaymentQuery->withoutGlobalScopes();
+                $borrowerQuery->withoutGlobalScopes();
+            } else {
+                $loanQuery->where('organization_id', $orgId);
+                $repaymentQuery->whereHas('loan', fn ($q) => $q->where('organization_id', $orgId));
+                $borrowerQuery->where('organization_id', $orgId);
+            }
+
+            // Apply Portfolio Filter if selected
+            $portfolioData = [
+                'portfolioBalance' => 0,
+                'savingsBalance' => 0,
+                'portfolioAtRisk' => 0,
+                'parPercentage' => 0,
+                'profitLoss' => 0,
+            ];
+
+            if ($this->selectedPortfolioId) {
+                $loanQuery->where('portfolio_id', $this->selectedPortfolioId);
+                $repaymentQuery->whereHas('loan', fn ($q) => $q->where('portfolio_id', $this->selectedPortfolioId));
+                $borrowerQuery->where('portfolio_id', $this->selectedPortfolioId);
+
+                // Fetch specific portfolio metrics from model
+                $portfolio = Portfolio::find($this->selectedPortfolioId);
+                if ($portfolio) {
+                    $portfolioData = [
+                        'portfolioBalance' => (float) $portfolio->portfolio_balance,
+                        'savingsBalance' => (float) $portfolio->savings_balance,
+                        'portfolioAtRisk' => (float) $portfolio->portfolio_at_risk,
+                        'parPercentage' => (float) $portfolio->par_percentage,
+                        'profitLoss' => (float) $portfolio->profit_loss,
+                    ];
+                }
+            } else {
+                // Organization-wide metrics
+                if ($org) {
+                    $portfolioData = [
+                        'portfolioBalance' => (float) $org->organization_balance,
+                        'savingsBalance' => (float) SavingsAccount::where('organization_id', $orgId)->sum('balance'),
+                        'portfolioAtRisk' => (float) Portfolio::where('organization_id', $orgId)->sum('portfolio_at_risk'),
+                        'parPercentage' => 0, // Calculated below
+                        'profitLoss' => (float) Portfolio::where('organization_id', $orgId)->sum('profit_loss'),
+                    ];
+                    if ($portfolioData['portfolioBalance'] > 0) {
+                        $portfolioData['parPercentage'] = ($portfolioData['portfolioAtRisk'] / $portfolioData['portfolioBalance']) * 100;
+                    }
+                }
+            }
+
+            // Fetch Last 7 Days Pulse
+            $startDate = \App\Models\Organization::systemNow()->subDays(6)->startOfDay();
+            $pulseRepayments = (clone $repaymentQuery)
+                ->where('paid_at', '>=', $startDate)
+                ->selectRaw('DATE(paid_at) as paid_date, SUM(amount) as total')
+                ->groupBy('paid_date')
+                ->get()
+                ->pluck('total', 'paid_date');
+
+            $pulseData = collect(range(6, 0))->map(function ($daysAgo) use ($pulseRepayments) {
+                $date = \App\Models\Organization::systemNow()->subDays($daysAgo);
+                $dateKey = $date->format('Y-m-d');
+                $amount = $pulseRepayments->get($dateKey, 0);
+
+                return [
+                    'day' => $date->format('D'),
+                    'amount' => (float) $amount,
+                    'formatted' => number_format($amount, 0),
+                ];
+            })->toArray();
+
+            $res = array_merge([
+                'totalLoaned' => $portfolioData['portfolioBalance'],
+                'totalCollected' => (clone $repaymentQuery)->sum('amount'),
+                'totalCustomers' => (clone $borrowerQuery)->count(),
+                'activeLoansCount' => (clone $loanQuery)->whereIn('status', ['approved', 'active'])->count(),
+                'pendingApplicationsCount' => (clone $loanQuery)->whereIn('status', ['applied', 'verification_pending'])->count(),
+                'paidLoansCount' => (clone $loanQuery)->where('status', 'repaid')->count(),
+                'defaultedLoansCount' => (clone $loanQuery)->where('status', 'overdue')->count(),
+                'activeAmount' => (clone $loanQuery)->whereIn('status', ['approved', 'active'])->sum('amount'),
+                'repaidAmount' => (clone $loanQuery)->where('status', 'repaid')->sum('amount'),
+                'overdueAmount' => (clone $loanQuery)->where('status', 'overdue')->sum('amount'),
+                'pulseData' => $pulseData,
+            ], $portfolioData);
+
+            return $res;
+        });
+
+        foreach ($stats as $key => $value) {
+            if (property_exists($this, $key)) {
+                $this->{$key} = $value;
             }
         }
 
-        $this->totalLoaned = (clone $loanQuery)->whereIn('status', ['approved', 'active', 'repaid', 'overdue'])->sum('amount');
-        $this->totalCollected = (clone $repaymentQuery)->sum('amount');
-        $this->totalCustomers = (clone $borrowerQuery)->count();
-
-        $this->activeLoansCount = (clone $loanQuery)->whereIn('status', ['approved', 'active'])->count();
-        $this->pendingApplicationsCount = (clone $loanQuery)->whereIn('status', ['applied', 'verification_pending'])->count();
-        $this->paidLoansCount = (clone $loanQuery)->where('status', 'repaid')->count();
-        $this->defaultedLoansCount = (clone $loanQuery)->where('status', 'overdue')->count();
-
-        $this->activeAmount = (clone $loanQuery)->whereIn('status', ['approved', 'active'])->sum('amount');
-        $this->repaidAmount = (clone $loanQuery)->where('status', 'repaid')->sum('amount');
-        $this->overdueAmount = (clone $loanQuery)->where('status', 'overdue')->sum('amount');
-
-        // Fetch Last 7 Days Pulse
-        $startDate = now()->subDays(6)->startOfDay();
-        $pulseRepayments = (clone $repaymentQuery)
-            ->where('paid_at', '>=', $startDate)
-            ->selectRaw('DATE(paid_at) as paid_date, SUM(amount) as total')
-            ->groupBy('paid_date')
-            ->get()
-            ->pluck('total', 'paid_date');
-
-        $this->pulseData = collect(range(6, 0))->map(function ($daysAgo) use ($pulseRepayments) {
-            $date = now()->subDays($daysAgo);
-            $dateKey = $date->format('Y-m-d');
-            $amount = $pulseRepayments->get($dateKey, 0);
-
-            return [
-                'day' => $date->format('D'),
-                'amount' => (float) $amount,
-                'formatted' => number_format($amount, 0),
-            ];
-        })->toArray();
-
-        // Cache task generation to run only once every hour per organization
+        // Action Box Items & Task Generation
         if (! $isOwner) {
-            \Illuminate\Support\Facades\Cache::remember("daily_tasks_run_{$orgId}", now()->addHour(), function () use ($orgId) {
+            $currentDateStr = \App\Models\Organization::systemNow()->toDateString();
+            \Illuminate\Support\Facades\Cache::remember("daily_tasks_run_{$orgId}_{$currentDateStr}", now()->addHour(), function () use ($orgId) {
                 \App\Services\ActionTaskService::generateDailyTasks($orgId);
 
                 return true;

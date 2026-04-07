@@ -28,9 +28,16 @@ class CheckOrganizationStatus
 
             if ($organization) {
                 if ($organization->status === 'suspended') {
-                    Auth::logout();
+                    $excludedRoutes = [
+                        'logout',
+                        'profile',
+                    ];
 
-                    return redirect()->route('login')->with('error', 'Your organization account has been suspended. Please contact support.');
+                    if (! in_array($request->route()->getName(), $excludedRoutes)) {
+                        Auth::logout();
+
+                        return redirect()->route('login')->with('error', 'Your organization account has been suspended. Please contact support.');
+                    }
                 }
             }
         }

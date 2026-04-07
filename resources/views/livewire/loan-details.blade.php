@@ -194,11 +194,7 @@
                     </div>
                      <div>
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Current Balance</p>
-                        @php
-                            $paid = $loan->repayments->sum('amount');
-                            $balance = max(0, $loan->amount - $paid); // Simplified logic
-                        @endphp
-                        <p class="text-lg sm:text-xl font-black text-primary">₦{{ number_format($balance, 2) }}</p>
+                        <p class="text-lg sm:text-xl font-black text-primary">₦{{ number_format($loan->balance, 2) }}</p>
                     </div>
 
                     <div class="col-span-2 sm:col-span-3 h-px bg-slate-100 dark:bg-slate-800 my-2"></div>
@@ -220,11 +216,16 @@
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Interest Rate</p>
                         @php $interestNaira = $loan->amount * (($loan->interest_rate ?? 0) / 100); @endphp
                         <p class="text-sm font-bold text-slate-700 dark:text-slate-300">
-                            {{ $loan->interest_rate ?? '0' }}% 
-                            <span class="text-[10px] text-slate-400 font-medium">(₦{{ number_format($interestNaira, 2) }})</span>
+                            {{ $loan->interest_rate ?? '0' }}% every {{ $loan->interest_type ?? 'month' }}
+                            <span class="text-[10px] text-slate-400 font-medium">(₦{{ number_format($interestNaira, 2) }} per {{ $loan->interest_type ?? 'month' }})</span>
                         </p>
                     </div>
                     <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total Interest</p>
+                        <p class="text-sm font-bold text-blue-600 dark:text-blue-400">
+                            ₦{{ number_format($loan->getTotalExpectedInterest(), 2) }}
+                        </p>
+                    </div>                    <div>
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total Repayments</p>
                         <p class="text-sm font-bold text-slate-700 dark:text-slate-300">{{ $loan->num_repayments ?? '1' }} Installments</p>
                     </div>
@@ -234,7 +235,7 @@
                     </div>
                      <div>
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Paid Amount</p>
-                        <p class="text-sm font-bold text-green-600">₦{{ number_format($paid, 2) }}</p>
+                        <p class="text-sm font-bold text-green-600">₦{{ number_format($loan->repayments->sum('amount'), 2) }}</p>
                     </div>
                 </div>
 
@@ -248,11 +249,11 @@
                             </tr>
                             <tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/50">
                                 <td class="px-6 py-4 font-medium text-slate-500">Paid Amount</td>
-                                <td class="px-6 py-4 font-bold text-green-600 text-right">₦{{ number_format($paid, 2) }}</td>
+                                <td class="px-6 py-4 font-bold text-green-600 text-right">₦{{ number_format($loan->repayments->sum('amount'), 2) }}</td>
                             </tr>
                             <tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/50">
                                 <td class="px-6 py-4 font-medium text-slate-500">Balance</td>
-                                <td class="px-6 py-4 font-bold text-primary text-right">₦{{ number_format($balance, 2) }}</td>
+                                <td class="px-6 py-4 font-bold text-primary text-right">₦{{ number_format($loan->balance, 2) }}</td>
                             </tr>
                             <tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/50">
                                 <td class="px-6 py-4 font-medium text-slate-500">Repayment Cycle</td>
@@ -265,11 +266,14 @@
                             <tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/50">
                                 <td class="px-6 py-4 font-medium text-slate-500">Interest Rate</td>
                                 <td class="px-6 py-4 font-bold text-slate-700 dark:text-slate-300 text-right">
-                                    {{ $loan->interest_rate ?? '0' }}%
-                                    <span class="text-[10px] text-slate-400 font-medium">(₦{{ number_format($loan->amount * (($loan->interest_rate ?? 0) / 100), 2) }})</span>
+                                    {{ $loan->interest_rate ?? '0' }}% every {{ $loan->interest_type ?? 'month' }}
+                                    <span class="text-[10px] text-slate-400 font-medium">(₦{{ number_format($loan->amount * (($loan->interest_rate ?? 0) / 100), 2) }} per {{ $loan->interest_type ?? 'month' }})</span>
                                 </td>
                             </tr>
-                        </tbody>
+                            <tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                                <td class="px-6 py-4 font-medium text-slate-500">Total Expected Interest</td>
+                                <td class="px-6 py-4 font-bold text-blue-600 text-right">₦{{ number_format($loan->getTotalExpectedInterest(), 2) }}</td>
+                            </tr>                        </tbody>
                     </table>
                 </div>
             </div>
@@ -399,10 +403,11 @@
             <!-- Modal Content -->
             <div class="flex-1 overflow-y-auto p-6 custom-scrollbar" x-data="{ showForm: @entangle('showAddForm') }">
                 @php
-                    $totalInterest = $loan->amount * (($loan->interest_rate ?? 0) / 100);
-                    $totalPayable = $loan->amount + $totalInterest;
+                    $totalInterest = $loan->getTotalExpectedInterest();
+                    $totalFees = (float) ($loan->processing_fee ?? 0) + (float) ($loan->insurance_fee ?? 0);
+                    $totalPayable = (float) $loan->amount + $totalInterest + $totalFees;
                     $totalPaid = $loan->repayments->sum('amount');
-                    $remainingBalance = max(0, $totalPayable - $totalPaid);
+                    $remainingBalance = $loan->balance;
                 @endphp
 
                 <div class="flex justify-between items-center mb-8 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">

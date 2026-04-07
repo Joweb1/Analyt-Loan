@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="light">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ app(\App\Services\Localization::class)->getDirection() }}" class="light">
 <head>
     <meta charset="utf-8"/>
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -219,7 +219,7 @@
                     <span class="text-[10px] font-black uppercase tracking-widest">Simulated Time</span>
                 </div>
                 <p class="text-xs font-bold text-orange-800 dark:text-orange-300">
-                    {{ now()->format('M d, Y') }}
+                    {{ \App\Models\Organization::systemNow()->format('M d, Y') }}
                 </p>
             </div>
         @endif

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\Auditable;
 use App\Traits\BelongsToOrganization;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -83,7 +84,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 class Loan extends Model
 {
     /** @use HasFactory<\Database\Factories\LoanFactory> */
-    use BelongsToOrganization, HasFactory, HasUuids;
+    use Auditable, BelongsToOrganization, HasFactory, HasUuids;
 
     protected $fillable = [
         'organization_id',
@@ -184,10 +185,60 @@ class Loan extends Model
         })->toArray();
     }
 
+    /**
+     * Get the total expected interest for the entire duration of the loan.
+     */
+    public function getTotalExpectedInterest(): float
+    {
+        $principal = (float) $this->amount;
+        $rate = (float) ($this->interest_rate ?? 0) / 100;
+        $duration = (int) ($this->duration ?? 1);
+        $durationUnit = $this->duration_unit ?? 'month';
+        $interestType = $this->interest_type ?? 'year';
+
+        if ($durationUnit === $interestType) {
+            return round($principal * $rate * $duration, 2);
+        }
+
+        // Conversion factors to a base unit (days)
+        $conversion = [
+            'day' => 1,
+            'week' => 7,
+            'month' => 30.44, // average month length
+            'year' => 365.25,
+        ];
+
+        $durationInDays = $duration * ($conversion[$durationUnit] ?? 30.44);
+        $interestPeriodInDays = $conversion[$interestType] ?? 365.25;
+
+        $multiplier = $durationInDays / $interestPeriodInDays;
+
+        return round($principal * $rate * $multiplier, 2);
+    }
+
     public function getBalanceAttribute(): float
     {
-        $totalInterest = (float) $this->amount * (($this->interest_rate ?? 0) / 100);
-        $totalPayable = (float) $this->amount + $totalInterest;
+        $totalInterest = $this->getTotalExpectedInterest();
+        $totalFees = (float) ($this->processing_fee ?? 0) + (float) ($this->insurance_fee ?? 0);
+        $totalPenalties = (float) $this->scheduledRepayments()->sum('penalty_amount');
+
+        // Note: processing_fee and insurance_fee are already added to penalty_amount of the first schedule
+        // during schedule generation. To avoid double counting, we check if they are already accounted for.
+        // Actually, better logic: sum(principal) + sum(interest) + sum(penalty) - totalPaid.
+
+        $totalPrincipal = (float) $this->amount;
+        $totalPayable = $totalPrincipal + $totalInterest + max($totalFees, $totalPenalties);
+
+        // Let's use a more robust way:
+        $totalDueFromSchedules = (float) $this->scheduledRepayments()->sum(\Illuminate\Support\Facades\DB::raw('principal_amount + interest_amount + penalty_amount'));
+
+        if ($totalDueFromSchedules > 0) {
+            $totalPaid = (float) $this->repayments()->sum('amount');
+
+            return max(0, round($totalDueFromSchedules - $totalPaid, 2));
+        }
+
+        $totalPayable = (float) $this->amount + $totalInterest + $totalFees;
         $totalPaid = (float) $this->repayments()->sum('amount');
 
         return max(0, round($totalPayable - $totalPaid, 2));
@@ -198,77 +249,6 @@ class Loan extends Model
      */
     public function refreshRepaymentStatus(): void
     {
-        $repayments = $this->repayments()->orderBy('paid_at')->get();
-        $schedules = $this->scheduledRepayments()->orderBy('due_date')->get();
-
-        $totalPaid = $repayments->sum('amount');
-        $remaining = $totalPaid;
-
-        foreach ($schedules as $s) {
-            /** @var \App\Models\ScheduledRepayment $s */
-            $totalDue = ($s->principal_amount ?? 0) + ($s->interest_amount ?? 0) + ($s->penalty_amount ?? 0);
-
-            if ($remaining >= $totalDue && $totalDue > 0) {
-                $s->paid_amount = $totalDue;
-                $s->status = 'paid';
-                $remaining -= $totalDue;
-            } elseif ($remaining > 0) {
-                $s->paid_amount = $remaining;
-                $s->status = 'partial';
-                $remaining = 0;
-            } else {
-                $s->paid_amount = 0;
-                $s->status = $s->due_date->isPast() ? 'overdue' : 'applied';
-            }
-            $s->save();
-        }
-
-        // Also sync overall loan status
-        $totalInterest = $this->amount * (($this->interest_rate ?? 0) / 100);
-        $totalPayable = round($this->amount + $totalInterest, 2);
-
-        if ($totalPaid >= $totalPayable && $totalPayable > 0) {
-            if ($this->status !== 'repaid') {
-                $this->update(['status' => 'repaid']);
-            }
-
-            $borrower = $this->borrower;
-            /** @var \App\Models\SavingsAccount $account */
-            $account = $borrower->savingsAccount()->firstOrCreate([
-                'organization_id' => $borrower->organization_id,
-            ], [
-                'account_number' => 'SAV-'.strtoupper(\Illuminate\Support\Str::random(8)),
-                'balance' => 0,
-                'interest_rate' => 0,
-                'status' => 'active',
-            ]);
-
-            // Process each repayment that has an extra_amount and isn't already linked to a savings transaction
-            foreach ($repayments->where('extra_amount', '>', 0.01) as $repayment) {
-                /** @var \App\Models\Repayment $repayment */
-                if ($repayment->savingsTransactions()->count() === 0) {
-                    $account->transactions()->create([
-                        'repayment_id' => $repayment->id,
-                        'amount' => $repayment->extra_amount,
-                        'type' => 'deposit',
-                        'reference' => 'EXTRA-'.strtoupper(\Illuminate\Support\Str::random(8)),
-                        'notes' => "Extra balance from Loan #{$this->loan_number} (Repayment ID: {$repayment->id})",
-                        'staff_id' => $repayment->collected_by ?? \Illuminate\Support\Facades\Auth::id() ?? $this->loan_officer_id ?? $this->organization->owner_id,
-                        'transaction_date' => now(),
-                    ]);
-
-                    $account->increment('balance', $repayment->extra_amount);
-
-                    \App\Helpers\SystemLogger::success(
-                        'Extra Balance to Savings',
-                        '₦'.number_format($repayment->extra_amount, 2)." from Loan #{$this->loan_number} has been moved to savings.",
-                        'savings',
-                        $borrower
-                    );
-                }
-            }
-        } elseif ($this->status === 'repaid') {
-            $this->update(['status' => 'active']);
-        }
+        app(\App\Actions\Loans\SynchronizeLoanState::class)->execute($this);
     }
 }

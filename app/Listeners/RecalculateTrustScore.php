@@ -1,0 +1,21 @@
+<?php
+
+namespace App\Listeners;
+
+use App\Events\LoanRepaymentReceived;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\InteractsWithQueue;
+
+class RecalculateTrustScore implements ShouldQueue
+{
+    use InteractsWithQueue;
+
+    /**
+     * Handle the event.
+     */
+    public function handle(LoanRepaymentReceived $event): void
+    {
+        $borrower = $event->loan->borrower;
+        $borrower->recalculateTrustScore();
+    }
+}

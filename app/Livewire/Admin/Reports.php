@@ -20,8 +20,8 @@ class Reports extends Component
             abort(403);
         }
 
-        $this->startDate = now()->startOfMonth()->format('Y-m-d');
-        $this->endDate = now()->format('Y-m-d');
+        $this->startDate = \App\Models\Organization::systemNow()->startOfMonth()->format('Y-m-d');
+        $this->endDate = \App\Models\Organization::systemNow()->format('Y-m-d');
     }
 
     public function render()

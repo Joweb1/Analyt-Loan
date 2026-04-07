@@ -123,7 +123,7 @@
             </div>
             <div>
                 <p class="text-[9px] font-black text-slate-400 uppercase tracking-wider">Total Interest</p>
-                @php $totalInterest = $loan->amount * ($loan->interest_rate / 100); @endphp
+                @php $totalInterest = $loan->getTotalExpectedInterest(); @endphp
                 <p class="text-sm font-bold text-slate-900">₦{{ number_format($totalInterest, 2) }}</p>
             </div>
             <div>

@@ -56,7 +56,8 @@ class AuthenticationTest extends TestCase
 
     public function test_navigation_menu_can_be_rendered(): void
     {
-        $user = User::factory()->create();
+        $org = \App\Models\Organization::factory()->create();
+        $user = User::factory()->create(['organization_id' => $org->id]);
 
         // Seed roles and assign Admin
         $this->seed(\Database\Seeders\RoleSeeder::class);

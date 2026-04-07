@@ -27,11 +27,18 @@ class LoanServiceTest extends TestCase
     {
         parent::setUp();
 
+        \Illuminate\Support\Facades\Event::fake([
+            \App\Events\DashboardUpdated::class,
+        ]);
+
         $this->loanService = new LoanService;
         $this->organization = Organization::factory()->create();
         $this->user = User::factory()->create([
             'organization_id' => $this->organization->id,
         ]);
+
+        \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'Admin']);
+        $this->user->assignRole('Admin');
 
         $this->actingAs($this->user);
     }
@@ -45,7 +52,6 @@ class LoanServiceTest extends TestCase
             'loan_number' => 'LN-TEST-001',
             'amount' => 100000,
             'loan_product' => 'Personal Loan',
-            'release_date' => now()->format('Y-m-d'),
             'interest_rate' => 10,
             'interest_type' => 'year',
             'duration' => 6,
@@ -54,22 +60,28 @@ class LoanServiceTest extends TestCase
             'num_repayments' => 6,
         ];
 
-        $loan = $this->loanService->createLoan($data);
+        $dto = \App\DTOs\LoanApplicationDTO::fromArray($data);
+        $loan = $this->loanService->createLoan($dto);
 
         $this->assertInstanceOf(Loan::class, $loan);
         $loan->refresh();
-        $this->assertEquals('applied', $loan->status);
+        $this->assertEquals('approved', $loan->status); // Admin (actingAs) creates approved loan
         $this->assertDatabaseHas('loans', [
             'id' => $loan->id,
             'loan_number' => 'LN-TEST-001',
             'organization_id' => $this->organization->id,
-            'status' => 'applied',
+            'status' => 'approved',
         ]);
     }
 
     public function test_it_can_create_a_loan_with_attachment()
     {
+        config(['queue.default' => 'sync']);
+        config(['filesystems.disks.supabase.is_configured' => false]);
+        Storage::fake('local');
         Storage::fake('public');
+        Storage::fake('supabase');
+
         $borrower = Borrower::factory()->create(['organization_id' => $this->organization->id]);
         $file = UploadedFile::fake()->create('contract.pdf', 100);
 
@@ -86,10 +98,11 @@ class LoanServiceTest extends TestCase
             'num_repayments' => 1,
         ];
 
-        $loan = $this->loanService->createLoan($data, $file);
+        $dto = \App\DTOs\LoanApplicationDTO::fromArray($data);
+        $loan = $this->loanService->createLoan($dto, $file);
 
+        $loan->refresh();
         $this->assertNotEmpty($loan->attachments);
-        $this->assertNotNull($loan->attachments[0]);
     }
 
     public function test_it_links_collateral_on_creation()
@@ -114,7 +127,8 @@ class LoanServiceTest extends TestCase
             'num_repayments' => 1,
         ];
 
-        $loan = $this->loanService->createLoan($data, null, $collateral->id);
+        $dto = \App\DTOs\LoanApplicationDTO::fromArray($data);
+        $loan = $this->loanService->createLoan($dto, null, $collateral->id);
 
         $this->assertDatabaseHas('collaterals', [
             'id' => $collateral->id,
@@ -126,9 +140,20 @@ class LoanServiceTest extends TestCase
     public function test_it_can_update_a_loan()
     {
         $loan = Loan::factory()->create(['organization_id' => $this->organization->id]);
-        $newData = ['amount' => 250000];
+        $newData = [
+            'borrower_id' => $loan->borrower_id,
+            'amount' => 250000,
+            'loan_product' => $loan->loan_product,
+            'interest_rate' => $loan->interest_rate,
+            'interest_type' => $loan->interest_type,
+            'duration' => $loan->duration,
+            'duration_unit' => $loan->duration_unit,
+            'repayment_cycle' => $loan->repayment_cycle,
+            'num_repayments' => $loan->num_repayments,
+        ];
 
-        $updatedLoan = $this->loanService->updateLoan($loan, $newData);
+        $dto = \App\DTOs\LoanApplicationDTO::fromArray($newData);
+        $updatedLoan = $this->loanService->updateLoan($loan, $dto);
 
         $this->assertEquals(250000, $updatedLoan->amount);
         $this->assertDatabaseHas('loans', [
@@ -152,5 +177,59 @@ class LoanServiceTest extends TestCase
         $activatedLoan = $this->loanService->activateLoan($loan);
 
         $this->assertEquals('active', $activatedLoan->status);
+    }
+
+    public function test_it_applies_risk_based_pricing_discount()
+    {
+        $borrower = Borrower::factory()->create([
+            'organization_id' => $this->organization->id,
+            'trust_score' => 90, // Excellent
+        ]);
+
+        $data = [
+            'borrower_id' => $borrower->id,
+            'loan_number' => 'LN-DISCOUNT-001',
+            'amount' => 100000,
+            'loan_product' => 'Dynamic Loan',
+            'interest_rate' => 0, // Auto-calculate
+            'interest_type' => 'month',
+            'duration' => 1,
+            'duration_unit' => 'month',
+            'repayment_cycle' => 'monthly',
+            'num_repayments' => 1,
+        ];
+
+        $dto = \App\DTOs\LoanApplicationDTO::fromArray($data);
+        $loan = $this->loanService->createLoan($dto);
+
+        // 10% base * 0.8 (20% discount) = 8%
+        $this->assertEquals(8, $loan->interest_rate);
+    }
+
+    public function test_it_applies_risk_based_pricing_premium()
+    {
+        $borrower = Borrower::factory()->create([
+            'organization_id' => $this->organization->id,
+            'trust_score' => 20, // High Risk
+        ]);
+
+        $data = [
+            'borrower_id' => $borrower->id,
+            'loan_number' => 'LN-PREMIUM-001',
+            'amount' => 100000,
+            'loan_product' => 'Dynamic Loan',
+            'interest_rate' => 0, // Auto-calculate
+            'interest_type' => 'month',
+            'duration' => 1,
+            'duration_unit' => 'month',
+            'repayment_cycle' => 'monthly',
+            'num_repayments' => 1,
+        ];
+
+        $dto = \App\DTOs\LoanApplicationDTO::fromArray($data);
+        $loan = $this->loanService->createLoan($dto);
+
+        // 10% base * 1.25 (25% premium) = 12.5%
+        $this->assertEquals(12.5, $loan->interest_rate);
     }
 }

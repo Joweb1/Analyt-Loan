@@ -131,6 +131,9 @@ class SavingsDetails extends Component
             ]);
         });
 
+        \App\Events\DashboardUpdated::dispatch($this->borrower->organization_id);
+        \App\Livewire\Reports::clearCache($this->borrower->organization_id);
+
         $this->savingsAccount->refresh();
         $this->dispatch('custom-alert', ['type' => 'success', 'message' => ucfirst($this->transactionType).' recorded successfully.']);
     }
@@ -170,6 +173,9 @@ class SavingsDetails extends Component
 
             $transaction->delete();
         });
+
+        \App\Events\DashboardUpdated::dispatch($this->borrower->organization_id);
+        \App\Livewire\Reports::clearCache($this->borrower->organization_id);
 
         $this->savingsAccount->refresh();
         $this->dispatch('custom-alert', ['type' => 'warning', 'message' => 'Transaction deleted and balance adjusted.']);

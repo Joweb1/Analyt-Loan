@@ -22,6 +22,11 @@ class CollateralObserver
             'collateral',
             $collateral
         );
+
+        \App\Events\DashboardUpdated::dispatch($collateral->organization_id);
+        \App\Livewire\LoanDashboard::clearCache($collateral->organization_id);
+        \App\Livewire\AdminDashboard::clearCache($collateral->organization_id);
+        \App\Livewire\Reports::clearCache($collateral->organization_id);
     }
 
     /**
@@ -42,6 +47,11 @@ class CollateralObserver
                 $collateral
             );
         }
+
+        \App\Events\DashboardUpdated::dispatch($collateral->organization_id);
+        \App\Livewire\LoanDashboard::clearCache($collateral->organization_id);
+        \App\Livewire\AdminDashboard::clearCache($collateral->organization_id);
+        \App\Livewire\Reports::clearCache($collateral->organization_id);
     }
 
     /**
@@ -59,6 +69,11 @@ class CollateralObserver
             'collateral',
             $collateral
         );
+
+        \App\Events\DashboardUpdated::dispatch($collateral->organization_id);
+        \App\Livewire\LoanDashboard::clearCache($collateral->organization_id);
+        \App\Livewire\AdminDashboard::clearCache($collateral->organization_id);
+        \App\Livewire\Reports::clearCache($collateral->organization_id);
     }
 
     /**

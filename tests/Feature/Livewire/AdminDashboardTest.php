@@ -40,14 +40,24 @@ class AdminDashboardTest extends TestCase
         $borrower = Borrower::factory()->create(['organization_id' => $this->organization->id]);
 
         // Active loan: 100k
-        Loan::factory()->create([
+        $loan1 = Loan::factory()->create([
             'organization_id' => $this->organization->id,
             'borrower_id' => $borrower->id,
             'amount' => 100000,
+            'interest_rate' => 0,
             'status' => 'active',
         ]);
 
-        // Repaid loan: 50k
+        \App\Models\ScheduledRepayment::create([
+            'loan_id' => $loan1->id,
+            'installment_number' => 1,
+            'principal_amount' => 100000,
+            'interest_amount' => 0,
+            'due_date' => now()->addMonth(),
+            'status' => 'applied',
+        ]);
+
+        // Another loan: 50k
         $loan2 = Loan::factory()->create([
             'organization_id' => $this->organization->id,
             'borrower_id' => $borrower->id,
@@ -56,19 +66,31 @@ class AdminDashboardTest extends TestCase
             'status' => 'active',
         ]);
 
+        \App\Models\ScheduledRepayment::create([
+            'loan_id' => $loan2->id,
+            'installment_number' => 1,
+            'principal_amount' => 50000,
+            'interest_amount' => 5000,
+            'due_date' => now()->addMonth(),
+            'status' => 'applied',
+        ]);
+
         // Repayment for repaid loan: 55k (Covers 50k principal + 10% interest)
         Repayment::factory()->create([
             'loan_id' => $loan2->id,
             'amount' => 55000,
+            'principal_amount' => 50000,
+            'interest_amount' => 5000,
             'paid_at' => now(),
         ]);
 
+        // Organisation Total Balance = (100k + 0) + (50k + 5k) - 55k = 100k
         Livewire::actingAs($this->admin)
             ->test(AdminDashboard::class)
-            ->assertSet('totalLoaned', 150000)
+            ->assertSet('totalLoaned', 100000)
             ->assertSet('totalCollected', 55000)
-            ->assertSet('activeLoansCount', 1)
-            ->assertSet('paidLoansCount', 1);
+            ->assertSet('activeLoansCount', 1) // Only Loan 1 is active
+            ->assertSet('paidLoansCount', 1); // Loan 2 is repaid
     }
 
     public function test_it_loads_action_items()

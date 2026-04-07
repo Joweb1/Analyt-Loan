@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Contracts\StorageProvider;
+use App\Services\CircuitBreaker;
 use App\Traits\BelongsToOrganization;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,6 +15,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $id
  * @property string $phone
  * @property int $trust_score
+ * @property float $total_debt
+ * @property int $active_loans_count
  * @property int $portal_access
  * @property string|null $photo_url
  * @property \Illuminate\Support\Carbon|null $created_at
@@ -107,6 +111,8 @@ class Borrower extends Model
         'phone',
         'bvn',
         'trust_score',
+        'total_debt',
+        'active_loans_count',
         'kyc_status',
         'rejection_reason',
         'portal_access',
@@ -149,6 +155,8 @@ class Borrower extends Model
         'employment_information' => 'array',
         'next_of_kin_details' => 'array',
         'custom_data' => 'array',
+        'total_debt' => 'float',
+        'active_loans_count' => 'integer',
     ];
 
     public function user(): BelongsTo
@@ -176,19 +184,19 @@ class Borrower extends Model
         return $this->hasMany(Loan::class);
     }
 
+    public function savingsAccount(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(SavingsAccount::class);
+    }
+
     public function getTotalDebtAttribute(): float
     {
-        return (float) $this->loans()->whereIn('status', ['active', 'overdue'])->sum('amount');
+        return (float) $this->loans()->whereIn('status', ['active', 'defaulted'])->sum('amount');
     }
 
     public function getActiveLoansCountAttribute(): int
     {
-        return $this->loans()->whereIn('status', ['active', 'overdue'])->count();
-    }
-
-    public function savingsAccount(): \Illuminate\Database\Eloquent\Relations\HasOne
-    {
-        return $this->hasOne(SavingsAccount::class);
+        return $this->loans()->where('status', 'active')->count();
     }
 
     public function recalculateTrustScore(): void
@@ -209,9 +217,9 @@ class Borrower extends Model
             return $value;
         }
 
-        $disk = config('filesystems.disks.supabase.is_configured') ? 'supabase' : config('filesystems.default');
-
-        return \Illuminate\Support\Facades\Storage::disk($disk)->url($value);
+        return CircuitBreaker::run('storage', function () use ($value) {
+            return app(StorageProvider::class)->url($value);
+        }, 'https://via.placeholder.com/150?text=Service+Unavailable');
     }
 
     public function getPassportPhotographUrlAttribute(): ?string
@@ -219,9 +227,10 @@ class Borrower extends Model
         if (! $this->passport_photograph) {
             return null;
         }
-        $disk = config('filesystems.disks.supabase.is_configured') ? 'supabase' : config('filesystems.default');
 
-        return \Illuminate\Support\Facades\Storage::disk($disk)->url($this->passport_photograph);
+        return CircuitBreaker::run('storage', function () {
+            return app(StorageProvider::class)->url($this->passport_photograph);
+        }, 'https://via.placeholder.com/150?text=Service+Unavailable');
     }
 
     public function getIdentityDocumentUrlAttribute(): ?string
@@ -229,9 +238,10 @@ class Borrower extends Model
         if (! $this->identity_document) {
             return null;
         }
-        $disk = config('filesystems.disks.supabase.is_configured') ? 'supabase' : config('filesystems.default');
 
-        return \Illuminate\Support\Facades\Storage::disk($disk)->url($this->identity_document);
+        return CircuitBreaker::run('storage', function () {
+            return app(StorageProvider::class)->url($this->identity_document);
+        }, null);
     }
 
     public function getBankStatementUrlAttribute(): ?string
@@ -239,9 +249,10 @@ class Borrower extends Model
         if (! $this->bank_statement) {
             return null;
         }
-        $disk = config('filesystems.disks.supabase.is_configured') ? 'supabase' : config('filesystems.default');
 
-        return \Illuminate\Support\Facades\Storage::disk($disk)->url($this->bank_statement);
+        return CircuitBreaker::run('storage', function () {
+            return app(StorageProvider::class)->url($this->bank_statement);
+        }, null);
     }
 
     public function getIncomeProofUrlAttribute(): ?string
@@ -249,8 +260,9 @@ class Borrower extends Model
         if (! $this->income_proof) {
             return null;
         }
-        $disk = config('filesystems.disks.supabase.is_configured') ? 'supabase' : config('filesystems.default');
 
-        return \Illuminate\Support\Facades\Storage::disk($disk)->url($this->income_proof);
+        return CircuitBreaker::run('storage', function () {
+            return app(StorageProvider::class)->url($this->income_proof);
+        }, null);
     }
 }

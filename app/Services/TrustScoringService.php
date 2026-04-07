@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Borrower;
+use App\Models\Loan;
 use App\Models\Repayment;
 use App\Models\ScheduledRepayment;
 
@@ -29,18 +30,14 @@ class TrustScoringService
             $totalPossibleValue += $scheduleTotal;
 
             if ($schedule->status === 'paid') {
-                // Find the actual repayment date for this installment
-                // Note: This is an approximation as repayments are pooled in our current sync logic
                 $multiplier = self::getTimelinessMultiplier($schedule);
                 $totalWeightedValue += ($scheduleTotal * $multiplier);
             } elseif ($schedule->status === 'partial') {
                 $multiplier = self::getTimelinessMultiplier($schedule);
                 $totalWeightedValue += ($schedule->paid_amount * $multiplier);
             } elseif ($schedule->status === 'overdue') {
-                // Multiplier is 0 for overdue/unpaid past due date
                 $totalWeightedValue += 0;
             } else {
-                // Pending (future) - don't count towards current possible value to avoid penalizing new loans
                 $totalPossibleValue -= $scheduleTotal;
             }
         }
@@ -49,9 +46,48 @@ class TrustScoringService
             return 0;
         }
 
-        $score = ($totalWeightedValue / $totalPossibleValue) * 100;
+        $baseScore = ($totalWeightedValue / $totalPossibleValue) * 100;
+
+        // Apply Behavioral Bonuses
+        $score = self::applyBehavioralBonuses($borrower, $baseScore);
+
+        // Apply Hard Penalties (e.g., Defaulted Loans)
+        $score = self::applyHardPenalties($borrower, $score);
 
         return (int) round(max(0, min(100, $score)));
+    }
+
+    /**
+     * Apply behavioral bonuses based on loan history.
+     */
+    private static function applyBehavioralBonuses(Borrower $borrower, float $score): float
+    {
+        // 1. Loan Velocity: +2 points for every fully repaid loan
+        $repaidCount = Loan::where('borrower_id', $borrower->id)->where('status', 'repaid')->count();
+        $score += ($repaidCount * 2);
+
+        // 2. Frequency Consistency: Bonus for multiple repayments in a single schedule
+        // (Signals proactive financial management)
+        $multiPayBonus = Repayment::whereHas('loan', fn ($q) => $q->where('borrower_id', $borrower->id))
+            ->count() > ($repaidCount * 2) ? 5 : 0;
+        $score += $multiPayBonus;
+
+        return $score;
+    }
+
+    /**
+     * Apply hard penalties that override the base score.
+     */
+    private static function applyHardPenalties(Borrower $borrower, float $score): float
+    {
+        // If the borrower has any defaulted loans, cap the score at 30
+        $hasDefaulted = Loan::where('borrower_id', $borrower->id)->where('status', 'defaulted')->exists();
+
+        if ($hasDefaulted) {
+            return min(30, $score);
+        }
+
+        return $score;
     }
 
     /**
@@ -59,24 +95,26 @@ class TrustScoringService
      */
     private static function getTimelinessMultiplier(ScheduledRepayment $schedule): float
     {
-        // If unpaid and overdue, it's 0
         if ($schedule->status === 'overdue' || ($schedule->status === 'applied' && $schedule->due_date->isPast())) {
             return 0.0;
         }
 
-        // If paid or partial, we check how late it was
-        // Since our sync logic aggregates, we look at the last repayment for this loan
         $lastRepayment = Repayment::where('loan_id', $schedule->loan_id)
             ->where('paid_at', '<=', now())
             ->latest('paid_at')
             ->first();
 
         if (! $lastRepayment) {
-            return 1.0; // Should not happen if status is paid/partial
+            return 1.0;
         }
 
         $dueDate = $schedule->due_date;
         $paidDate = $lastRepayment->paid_at;
+
+        // Early Payment Bonus: Paid 7+ days early gets a 1.1x multiplier
+        if ($paidDate->diffInDays($dueDate, false) >= 7) {
+            return 1.1;
+        }
 
         if ($paidDate->lessThanOrEqualTo($dueDate)) {
             return 1.0; // On-time
@@ -84,14 +122,16 @@ class TrustScoringService
 
         $daysLate = $dueDate->diffInDays($paidDate);
 
-        if ($daysLate <= 3) {
-            return 0.8; // Grace Period
+        if ($daysLate <= 1) {
+            return 0.9; // 1-day grace period
+        } elseif ($daysLate <= 3) {
+            return 0.8; // Minor late
         } elseif ($daysLate <= 14) {
             return 0.5; // Late
         } elseif ($daysLate <= 30) {
             return 0.2; // Very Late
         }
 
-        return 0.0; // Default/Defaulted
+        return 0.0;
     }
 }

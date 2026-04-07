@@ -15,7 +15,7 @@ class ActionTaskService
         // 1. Check for Overdue Loans > 3 days that don't have a notification yet
         $overdueLoans = Loan::where('organization_id', $orgId)
             ->where('status', 'overdue')
-            ->where('updated_at', '<', now()->subDays(3))
+            ->where('updated_at', '<', \App\Models\Organization::systemNow()->subDays(3))
             ->get();
 
         foreach ($overdueLoans as $loan) {
@@ -44,7 +44,7 @@ class ActionTaskService
                 $q->whereNotIn('name', ['Borrower']);
             })
             ->whereNull('last_login_at')
-            ->where('created_at', '<', now()->subDays(3))
+            ->where('created_at', '<', \App\Models\Organization::systemNow()->subDays(3))
             ->get();
 
         foreach ($inactiveStaff as $staff) {
@@ -68,7 +68,7 @@ class ActionTaskService
         }
 
         // 3. Daily Report Review Task
-        $today = now()->startOfDay();
+        $today = \App\Models\Organization::systemNow()->startOfDay();
         $exists = SystemNotification::where('organization_id', $orgId)
             ->where('category', 'report')
             ->whereDate('created_at', $today)

@@ -180,26 +180,20 @@ class Borrow extends Component
 
         $data = [
             'borrower_id' => $user->borrower->id,
-            'organization_id' => $user->organization_id,
-            'loan_officer_id' => null,
-            'amount' => $this->amount,
-            'loan_number' => 'LN-'.date('Y').'-'.strtoupper(Str::random(5)),
             'loan_product' => $this->selectedProduct->name,
-            'release_date' => now()->format('Y-m-d'),
-            'interest_rate' => $this->interest_rate,
+            'amount' => (float) $this->amount,
+            'interest_rate' => (float) $this->interest_rate,
             'interest_type' => $this->interest_type,
-            'duration' => $this->duration,
+            'duration' => (int) $this->duration,
             'duration_unit' => $this->duration_unit,
             'repayment_cycle' => $this->repayment_cycle,
-            'num_repayments' => $this->num_repayments,
-            'processing_fee' => $this->processing_fee,
-            'processing_fee_type' => $this->processing_fee_type,
-            'insurance_fee' => 0,
+            'num_repayments' => (int) $this->num_repayments,
             'description' => 'Applied via Borrower App',
-            'status' => 'applied',
+            'loan_number' => 'LN-'.date('Y').'-'.strtoupper(Str::random(5)),
         ];
 
-        $loanService->createLoan($data);
+        $dto = \App\DTOs\LoanApplicationDTO::fromArray($data);
+        $loanService->createLoan($dto);
 
         $this->showBreakdown = false;
         $this->showSuccess = true;

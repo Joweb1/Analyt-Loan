@@ -5,6 +5,7 @@ namespace App\Observers;
 use App\Models\Organization;
 use App\Models\SystemNotification;
 use App\Models\User;
+use Illuminate\Support\Facades\Cache;
 
 class OrganizationObserver
 {
@@ -20,6 +21,8 @@ class OrganizationObserver
 
     public function updated(Organization $organization)
     {
+        Cache::forget("organization_{$organization->id}");
+
         if ($organization->isDirty('kyc_status')) {
             $this->notifyAppOwner(
                 'Organization KYC Update',
@@ -37,6 +40,11 @@ class OrganizationObserver
                 route('admin.organizations')
             );
         }
+    }
+
+    public function deleted(Organization $organization)
+    {
+        Cache::forget("organization_{$organization->id}");
     }
 
     private function notifyAppOwner($title, $message, $category, $link)

@@ -51,6 +51,31 @@ class TimeControlTest extends TestCase
     }
 
     #[Test]
+    public function simulation_date_is_maintained_across_multiple_requests()
+    {
+        $org = Organization::factory()->create([
+            'use_manual_date' => true,
+            'operating_date' => '2028-10-10',
+        ]);
+        $admin = User::factory()->create(['organization_id' => $org->id]);
+        $admin->assignRole('Admin');
+
+        $this->actingAs($admin);
+
+        // First request to dashboard
+        $response1 = $this->get(route('dashboard'));
+        $response1->assertStatus(200);
+        $this->assertEquals('2028-10-10', now()->format('Y-m-d'));
+
+        // Second request to reports
+        $response2 = $this->get(route('reports'));
+        $response2->assertStatus(200);
+        $this->assertEquals('2028-10-10', now()->format('Y-m-d'));
+
+        Carbon::setTestNow(); // Clean up
+    }
+
+    #[Test]
     public function advancing_time_triggers_overdue_sync_and_penalties()
     {
         $org = Organization::factory()->create();
@@ -163,6 +188,44 @@ class TimeControlTest extends TestCase
         $this->assertEquals('2027-05-20', $repayment->created_at->format('Y-m-d'));
         $this->assertEquals('2027-05-20', $borrower->created_at->format('Y-m-d'));
 
+        Carbon::setTestNow();
+    }
+
+    #[Test]
+    public function switching_to_manual_for_today_triggers_maintenance()
+    {
+        $org = Organization::factory()->create();
+        $admin = User::factory()->create(['organization_id' => $org->id]);
+        $admin->assignRole('Admin');
+
+        $borrower = Borrower::factory()->create(['organization_id' => $org->id]);
+        $today = now()->startOfDay();
+
+        // Ensure we have an overdue schedule that hasn't been processed yet
+        $loan = Loan::factory()->create([
+            'organization_id' => $org->id,
+            'borrower_id' => $borrower->id,
+            'status' => 'active',
+        ]);
+
+        $pastDueDate = $today->copy()->subDays(1);
+        ScheduledRepayment::create([
+            'loan_id' => $loan->id,
+            'installment_number' => 1,
+            'principal_amount' => 1000,
+            'interest_amount' => 0,
+            'due_date' => $pastDueDate,
+            'status' => 'applied',
+        ]);
+
+        // Just switching to manual for the same day should trigger maintenance and catch the overdue
+        Livewire::actingAs($admin)
+            ->test(GeneralSettings::class)
+            ->set('use_manual_date', true)
+            ->set('operating_date', $today->format('Y-m-d'))
+            ->call('save');
+
+        $this->assertEquals('overdue', $loan->fresh()->status);
         Carbon::setTestNow();
     }
 }

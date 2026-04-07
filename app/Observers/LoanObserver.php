@@ -13,10 +13,11 @@ class LoanObserver
     public function created(Loan $loan): void
     {
         $org = $loan->organization;
+        $borrowerName = $loan->borrower->user->name ?? 'a borrower';
 
         SystemLogger::success(
             'New Loan Application',
-            'A new loan of ₦'.number_format($loan->amount).' was applied for by '.($loan->borrower->user->name ?? 'a borrower'),
+            'A new loan of ₦'.number_format($loan->amount)." was applied for by {$borrowerName}",
             'loan',
             $loan
         );
@@ -33,16 +34,23 @@ class LoanObserver
         }
 
         // Notify the Borrower
-        SystemLogger::success(
-            'Application Submitted',
-            'Your application for a loan of ₦'.number_format($loan->amount)." (Loan #{$loan->loan_number}) has been submitted successfully.",
-            'loan',
-            $loan,
-            false,
-            null,
-            'low',
-            $loan->borrower->user_id
-        );
+        if ($loan->borrower && $loan->borrower->user_id) {
+            SystemLogger::success(
+                'Application Submitted',
+                'Your application for a loan of ₦'.number_format($loan->amount)." (Loan #{$loan->loan_number}) has been submitted successfully.",
+                'loan',
+                $loan,
+                false,
+                null,
+                'low',
+                $loan->borrower->user_id
+            );
+        }
+
+        \App\Events\DashboardUpdated::dispatch($loan->organization_id);
+        \App\Livewire\LoanDashboard::clearCache($loan->organization_id);
+        \App\Livewire\AdminDashboard::clearCache($loan->organization_id, $loan->portfolio_id);
+        \App\Livewire\Reports::clearCache($loan->organization_id);
     }
 
     /**
@@ -64,22 +72,25 @@ class LoanObserver
             };
 
             // 1. Notify the Borrower
-            SystemLogger::log(
-                $title,
-                "Your Loan #{$loan->loan_number} is now ".strtoupper($status),
-                $type,
-                'loan',
-                $loan,
-                false,
-                null,
-                'low',
-                $loan->borrower->user_id // RECIPIENT
-            );
+            if ($loan->borrower && $loan->borrower->user_id) {
+                SystemLogger::log(
+                    $title,
+                    "Your Loan #{$loan->loan_number} is now ".strtoupper($status),
+                    $type,
+                    'loan',
+                    $loan,
+                    false,
+                    null,
+                    'low',
+                    $loan->borrower->user_id // RECIPIENT
+                );
+            }
 
             // 2. Notify the Organization Staff
+            $borrowerName = $loan->borrower->user->name ?? 'a borrower';
             SystemLogger::log(
                 $title,
-                "Loan #{$loan->loan_number} for {$loan->borrower->user->name} is now ".strtoupper($status),
+                "Loan #{$loan->loan_number} for {$borrowerName} is now ".strtoupper($status),
                 $type,
                 'loan',
                 $loan,
@@ -94,16 +105,32 @@ class LoanObserver
         $feeColumns = [
             'processing_fee',
             'insurance_fee',
-            'penalty_value',
-            'penalty_type',
-            'penalty_frequency',
-            'override_system_penalty',
         ];
 
-        if ($loan->wasChanged($feeColumns)) {
+        if ($loan->wasChanged($feeColumns) && in_array($loan->status, ['active', 'overdue', 'approved'])) {
+            $diff = 0;
+            if ($loan->wasChanged('processing_fee')) {
+                $diff += (float) $loan->processing_fee - (float) $loan->getOriginal('processing_fee');
+            }
+            if ($loan->wasChanged('insurance_fee')) {
+                $diff += (float) $loan->insurance_fee - (float) $loan->getOriginal('insurance_fee');
+            }
+
+            if ($diff != 0) {
+                // Find next unpaid schedule
+                $nextSchedule = $loan->scheduledRepayments()
+                    ->whereIn('status', ['applied', 'partial', 'overdue'])
+                    ->orderBy('due_date')
+                    ->first();
+
+                if ($nextSchedule) {
+                    $nextSchedule->increment('penalty_amount', $diff);
+                }
+            }
+
             SystemLogger::log(
                 'Loan Fees Updated',
-                "Fee or penalty configuration for Loan #{$loan->loan_number} has been updated.",
+                "Fee configuration for Loan #{$loan->loan_number} has been updated. Adjustment of ₦".number_format($diff, 2).' applied to next schedule.',
                 'info',
                 'loan',
                 $loan
@@ -121,6 +148,11 @@ class LoanObserver
                 $loan
             );
         }
+
+        \App\Events\DashboardUpdated::dispatch($loan->organization_id);
+        \App\Livewire\LoanDashboard::clearCache($loan->organization_id);
+        \App\Livewire\AdminDashboard::clearCache($loan->organization_id, $loan->portfolio_id);
+        \App\Livewire\Reports::clearCache($loan->organization_id);
     }
 
     /**
@@ -128,13 +160,19 @@ class LoanObserver
      */
     public function deleted(Loan $loan): void
     {
+        $borrowerName = $loan->borrower->user->name ?? 'a borrower';
         SystemLogger::log(
             'Loan Deleted',
-            "Loan #{$loan->loan_number} for {$loan->borrower->user->name} has been permanently deleted.",
+            "Loan #{$loan->loan_number} for {$borrowerName} has been permanently deleted.",
             'danger',
             'loan',
             null // Subject is null as it's deleted
         );
+
+        \App\Events\DashboardUpdated::dispatch($loan->organization_id);
+        \App\Livewire\LoanDashboard::clearCache($loan->organization_id);
+        \App\Livewire\AdminDashboard::clearCache($loan->organization_id, $loan->portfolio_id);
+        \App\Livewire\Reports::clearCache($loan->organization_id);
     }
 
     /**

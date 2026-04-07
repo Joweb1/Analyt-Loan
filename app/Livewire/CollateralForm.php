@@ -47,7 +47,7 @@ class CollateralForm extends Component
     public function mount()
     {
         $this->loan_id = request()->query('loan_id');
-        $this->registered_date = now()->format('Y-m-d');
+        $this->registered_date = \App\Models\Organization::systemNow()->format('Y-m-d');
 
         if ($this->loan_id) {
             $this->selectLoan($this->loan_id);

@@ -28,6 +28,9 @@ class PortfolioTest extends TestCase
     {
         parent::setUp();
         $this->artisan('db:seed', ['--class' => 'RoleSeeder']);
+        
+        // We will set the tenant dynamically in each test for this file 
+        // since it uses Organization::factory()->create() inside them.
     }
 
     #[Test]
@@ -54,6 +57,24 @@ class PortfolioTest extends TestCase
             'status' => 'active',
         ]);
 
+        // Manually create scheduled repayments to represent Principal + Interest (Total 11,000)
+        ScheduledRepayment::create([
+            'loan_id' => $loan->id,
+            'installment_number' => 1,
+            'principal_amount' => 5000,
+            'interest_amount' => 500,
+            'due_date' => now()->addDays(30),
+            'status' => 'applied',
+        ]);
+        ScheduledRepayment::create([
+            'loan_id' => $loan->id,
+            'installment_number' => 2,
+            'principal_amount' => 5000,
+            'interest_amount' => 500,
+            'due_date' => now()->addDays(60),
+            'status' => 'applied',
+        ]);
+
         // Add a repayment
         Repayment::create([
             'loan_id' => $loan->id,
@@ -63,7 +84,7 @@ class PortfolioTest extends TestCase
             'paid_at' => now(),
         ]);
 
-        // 1. Balance: (10000 + 1000) - 2000 = 9000
+        // 1. Balance: (11,000 scheduled) - 2000 paid = 9000
         $this->assertEquals(9000, $portfolio->portfolio_balance);
 
         // 2. Savings Balance
@@ -87,7 +108,8 @@ class PortfolioTest extends TestCase
         ]);
 
         $this->assertEquals(8500, $portfolio->portfolio_at_risk);
-        $this->assertEquals(round((8500 / 9000) * 100, 2), $portfolio->par_percentage);
+        // Balance is 11,000 (initial) - 2,000 (paid) = 9,000
+        $this->assertEquals(94.44, $portfolio->par_percentage);
 
         // 4. PnL
         $this->assertEquals(500, $portfolio->profit_loss);
@@ -160,15 +182,25 @@ class PortfolioTest extends TestCase
     public function reports_page_shows_org_wide_metrics()
     {
         $org = Organization::factory()->create();
+        app(\App\Services\TenantSession::class)->setTenantId($org->id);
+        
         $admin = User::factory()->create(['organization_id' => $org->id]);
         $admin->assignRole('Admin');
 
         $borrower = Borrower::factory()->create(['organization_id' => $org->id]);
-        SavingsAccount::create([
+        $account = \App\Models\SavingsAccount::create([
             'organization_id' => $org->id,
             'borrower_id' => $borrower->id,
             'account_number' => 'SAV-1',
-            'balance' => 1500,
+            'balance' => 0,
+        ]);
+
+        \App\Models\SavingsTransaction::create([
+            'savings_account_id' => $account->id,
+            'amount' => 1500,
+            'type' => 'deposit',
+            'staff_id' => $admin->id,
+            'transaction_date' => now(),
         ]);
 
         Livewire::actingAs($admin)
@@ -249,19 +281,39 @@ class PortfolioTest extends TestCase
         $portfolio = Portfolio::create(['organization_id' => $org->id, 'name' => 'Filtered']);
 
         // Loan in portfolio
-        Loan::factory()->create([
+        $loan1 = Loan::factory()->create([
             'organization_id' => $org->id,
             'portfolio_id' => $portfolio->id,
             'amount' => 5000,
+            'interest_rate' => 0,
             'status' => 'active',
         ]);
 
+        ScheduledRepayment::create([
+            'loan_id' => $loan1->id,
+            'principal_amount' => 5000,
+            'interest_amount' => 0,
+            'due_date' => now()->addMonth(),
+            'installment_number' => 1,
+            'status' => 'applied',
+        ]);
+
         // Loan outside portfolio
-        Loan::factory()->create([
+        $loan2 = Loan::factory()->create([
             'organization_id' => $org->id,
             'portfolio_id' => null,
             'amount' => 10000,
+            'interest_rate' => 0,
             'status' => 'active',
+        ]);
+
+        ScheduledRepayment::create([
+            'loan_id' => $loan2->id,
+            'principal_amount' => 10000,
+            'interest_amount' => 0,
+            'due_date' => now()->addMonth(),
+            'installment_number' => 1,
+            'status' => 'applied',
         ]);
 
         Livewire::actingAs($admin)

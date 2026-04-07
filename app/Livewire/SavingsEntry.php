@@ -42,7 +42,7 @@ class SavingsEntry extends Component
             $this->portfolios = $user->portfolios;
         }
 
-        $this->transaction_date = now()->format('Y-m-d');
+        $this->transaction_date = \App\Models\Organization::systemNow()->format('Y-m-d');
     }
 
     public function updatingSearch()
@@ -60,7 +60,7 @@ class SavingsEntry extends Component
         $this->selectedBorrowerId = $id;
         $this->amount = null;
         $this->payment_method = 'Cash';
-        $this->transaction_date = now()->format('Y-m-d');
+        $this->transaction_date = \App\Models\Organization::systemNow()->format('Y-m-d');
         $this->notes = '';
         $this->showSavingsModal = true;
     }
@@ -109,6 +109,9 @@ class SavingsEntry extends Component
             'savings',
             $borrower
         );
+
+        \App\Events\DashboardUpdated::dispatch($borrower->organization_id);
+        \App\Livewire\Reports::clearCache($borrower->organization_id);
 
         $this->showSavingsModal = false;
         $this->dispatch('custom-alert', ['type' => 'success', 'message' => 'Savings deposit added successfully.']);

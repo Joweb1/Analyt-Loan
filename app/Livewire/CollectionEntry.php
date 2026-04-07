@@ -45,7 +45,7 @@ class CollectionEntry extends Component
         } else {
             $this->portfolios = $user->portfolios;
         }
-        $this->paid_at = now()->format('Y-m-d');
+        $this->paid_at = \App\Models\Organization::systemNow()->format('Y-m-d');
         $this->collected_by = Auth::id();
     }
 
@@ -140,7 +140,7 @@ class CollectionEntry extends Component
             // Default: Show those with installments due today or overdue
             $query->whereHas('scheduledRepayments', function ($q) {
                 $q->whereIn('status', ['pending', 'partial', 'overdue'])
-                    ->whereDate('due_date', '<=', today());
+                    ->whereDate('due_date', '<=', \App\Models\Organization::systemNow());
             });
         }
 

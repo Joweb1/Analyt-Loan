@@ -157,6 +157,18 @@
                                 <option value="GBP">British Pound (£)</option>
                             </select>
                         </div>
+                        <div class="flex flex-col gap-2">
+                            <label class="text-sm font-bold text-gray-700 dark:text-gray-300">System Timezone</label>
+                            <select wire:model="timezone" class="w-full rounded-xl border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white focus:ring-primary focus:border-primary text-sm">
+                                <option value="UTC">UTC (Universal Time)</option>
+                                <option value="Africa/Lagos">Africa/Lagos (WAT)</option>
+                                <option value="Africa/Nairobi">Africa/Nairobi (EAT)</option>
+                                <option value="Africa/Johannesburg">Africa/Johannesburg (SAST)</option>
+                                <option value="America/New_York">America/New_York (EST/EDT)</option>
+                                <option value="Europe/London">Europe/London (GMT/BST)</option>
+                            </select>
+                            <p class="text-[10px] text-gray-500 font-medium">* This affects all date and time displays across the platform.</p>
+                        </div>
                     </div>
                 </div>
 

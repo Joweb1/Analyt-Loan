@@ -23,6 +23,11 @@ class ReportsTest extends TestCase
     {
         parent::setUp();
         $this->organization = Organization::factory()->create();
+        app(\App\Services\TenantSession::class)->setTenantId($this->organization->id);
+        
+        // Clear all caches for this org to be absolutely sure
+        Reports::clearCache($this->organization->id);
+        
         $this->admin = User::factory()->create(['organization_id' => $this->organization->id]);
     }
 
@@ -54,11 +59,14 @@ class ReportsTest extends TestCase
 
     public function test_it_calculates_correct_summary_stats()
     {
+        $now = Organization::systemNow();
+        Reports::clearCache($this->organization->id);
+
         // Create loan disbursed today
         Loan::factory()->create([
             'organization_id' => $this->organization->id,
             'amount' => 50000,
-            'release_date' => now(),
+            'release_date' => $now,
             'status' => 'active',
         ]);
 
@@ -67,7 +75,7 @@ class ReportsTest extends TestCase
         Repayment::factory()->create([
             'loan_id' => $loan->id,
             'amount' => 10000,
-            'paid_at' => now(),
+            'paid_at' => $now,
         ]);
 
         Livewire::actingAs($this->admin)

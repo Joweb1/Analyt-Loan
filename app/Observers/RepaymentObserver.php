@@ -2,6 +2,7 @@
 
 namespace App\Observers;
 
+use App\Events\LoanRepaymentReceived;
 use App\Helpers\SystemLogger;
 use App\Models\Repayment;
 
@@ -13,6 +14,10 @@ class RepaymentObserver
     public function created(Repayment $repayment): void
     {
         $loan = $repayment->loan;
+        if (! $loan) {
+            return;
+        }
+
         $org = $loan->organization;
         $borrowerName = $loan->borrower->user->name ?? 'Borrower';
 
@@ -26,7 +31,7 @@ class RepaymentObserver
                 false,
                 null,
                 'low',
-                $loan->borrower->user_id // RECIPIENT
+                $loan->borrower->user_id ?? null // RECIPIENT
             );
 
             // 2. Notify the Organization Staff
@@ -42,11 +47,11 @@ class RepaymentObserver
             );
         }
 
-        // Trigger Trust Score Recalculation
-        $repayment->loan->borrower->recalculateTrustScore();
-
-        // Sync Schedule Statuses
-        $repayment->loan->refreshRepaymentStatus();
+        LoanRepaymentReceived::dispatch($loan, $repayment);
+        \App\Events\DashboardUpdated::dispatch($repayment->loan->organization_id);
+        \App\Livewire\LoanDashboard::clearCache($repayment->loan->organization_id);
+        \App\Livewire\AdminDashboard::clearCache($repayment->loan->organization_id, $repayment->loan->portfolio_id);
+        \App\Livewire\Reports::clearCache($repayment->loan->organization_id);
     }
 
     /**
@@ -54,7 +59,11 @@ class RepaymentObserver
      */
     public function updated(Repayment $repayment): void
     {
-        $repayment->loan->refreshRepaymentStatus();
+        LoanRepaymentReceived::dispatch($repayment->loan, $repayment);
+        \App\Events\DashboardUpdated::dispatch($repayment->loan->organization_id);
+        \App\Livewire\LoanDashboard::clearCache($repayment->loan->organization_id);
+        \App\Livewire\AdminDashboard::clearCache($repayment->loan->organization_id, $repayment->loan->portfolio_id);
+        \App\Livewire\Reports::clearCache($repayment->loan->organization_id);
     }
 
     /**
@@ -62,7 +71,11 @@ class RepaymentObserver
      */
     public function deleted(Repayment $repayment): void
     {
-        $repayment->loan->refreshRepaymentStatus();
+        LoanRepaymentReceived::dispatch($repayment->loan, $repayment);
+        \App\Events\DashboardUpdated::dispatch($repayment->loan->organization_id);
+        \App\Livewire\LoanDashboard::clearCache($repayment->loan->organization_id);
+        \App\Livewire\AdminDashboard::clearCache($repayment->loan->organization_id, $repayment->loan->portfolio_id);
+        \App\Livewire\Reports::clearCache($repayment->loan->organization_id);
     }
 
     /**

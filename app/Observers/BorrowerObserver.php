@@ -31,6 +31,11 @@ class BorrowerObserver
                 'medium'
             );
         }
+
+        \App\Events\DashboardUpdated::dispatch($borrower->organization_id);
+        \App\Livewire\LoanDashboard::clearCache($borrower->organization_id);
+        \App\Livewire\AdminDashboard::clearCache($borrower->organization_id);
+        \App\Livewire\Reports::clearCache($borrower->organization_id);
     }
 
     /**
@@ -93,6 +98,11 @@ class BorrowerObserver
                 );
             }
         }
+
+        \App\Events\DashboardUpdated::dispatch($borrower->organization_id);
+        \App\Livewire\LoanDashboard::clearCache($borrower->organization_id);
+        \App\Livewire\AdminDashboard::clearCache($borrower->organization_id);
+        \App\Livewire\Reports::clearCache($borrower->organization_id);
     }
 
     /**
@@ -100,7 +110,10 @@ class BorrowerObserver
      */
     public function deleted(Borrower $borrower): void
     {
-        //
+        \App\Events\DashboardUpdated::dispatch($borrower->organization_id);
+        \App\Livewire\LoanDashboard::clearCache($borrower->organization_id);
+        \App\Livewire\AdminDashboard::clearCache($borrower->organization_id);
+        \App\Livewire\Reports::clearCache($borrower->organization_id);
     }
 
     /**

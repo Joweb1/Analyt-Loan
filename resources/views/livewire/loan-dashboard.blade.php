@@ -6,29 +6,45 @@
     "
 >
     <!-- Section Title -->
-    <div class="flex justify-between items-center">
+    <div class="flex flex-col md:flex-row md:justify-between md:items-center gap-6">
         <div>
             <h2 class="text-2xl font-bold tracking-tight dark:text-white">Loan Center</h2>
             <p class="text-gray-500 text-sm">Performance Status engine</p>
         </div>
-        <div class="flex items-center gap-4">
+        
+        <div class="flex flex-wrap items-center gap-3 sm:gap-4">
+            <!-- Global Filter Dropdown -->
+            <div class="relative flex-1 sm:flex-none min-w-[120px]">
+                <select wire:model.live="filter" class="w-full appearance-none bg-white dark:bg-white/5 border border-[#dbdee6] dark:border-gray-800 text-gray-700 dark:text-gray-300 text-xs font-bold rounded-2xl py-2.5 pl-4 pr-10 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all uppercase tracking-wide cursor-pointer shadow-sm">
+                    <option value="today">Today</option>
+                    <option value="week">Week</option>
+                    <option value="month">Month</option>
+                    <option value="year">Year</option>
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+                    <span class="material-symbols-outlined text-lg">expand_more</span>
+                </div>
+            </div>
+
             @if(Auth::user()->organization && Auth::user()->organization->kyc_status !== 'approved')
-                <div class="flex items-center gap-2 px-4 py-2 bg-amber-50 text-amber-700 border border-amber-100 rounded-xl text-xs font-bold animate-pulse">
+                <div class="flex items-center gap-2 px-3 py-2 bg-amber-50 text-amber-700 border border-amber-100 rounded-xl text-[10px] font-bold animate-pulse">
                     <span class="material-symbols-outlined text-sm">info</span>
-                    KYC Pending Approval
+                    KYC Pending
                 </div>
             @endif
+
             <!-- Terminal Toggle -->
-            <div class="flex items-center gap-2">
-                <span class="text-xs font-bold text-gray-500 uppercase">Terminal</span>
-                <button @click="showTerminal = !showTerminal" :class="showTerminal ? 'bg-primary' : 'bg-gray-200'" class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none">
-                    <span :class="showTerminal ? 'translate-x-5' : 'translate-x-0'" class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
+            <div class="flex items-center gap-2 bg-gray-50 dark:bg-white/5 px-3 py-2 rounded-2xl border border-transparent dark:border-gray-800">
+                <span class="text-[10px] font-bold text-gray-500 uppercase">Term</span>
+                <button @click="showTerminal = !showTerminal" :class="showTerminal ? 'bg-primary' : 'bg-gray-200'" class="relative inline-flex h-5 w-9 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none">
+                    <span :class="showTerminal ? 'translate-x-4' : 'translate-x-0'" class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"></span>
                 </button>
             </div>
 
-            <a href="{{ route('status-board') }}" class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-white/5 border border-[#dbdee6] rounded-2xl text-sm font-bold text-[#111318] dark:text-white hover:bg-background-light transition-colors">
+            <a href="{{ route('status-board') }}" class="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2 bg-white dark:bg-white/5 border border-[#dbdee6] dark:border-gray-800 rounded-2xl text-xs font-bold text-[#111318] dark:text-white hover:bg-gray-50 transition-colors shadow-sm">
                 <span class="material-symbols-outlined text-lg">monitoring</span>
-                Status Board
+                <span class="hidden sm:inline">Status Board</span>
+                <span class="sm:hidden">Board</span>
             </a>
         </div>
     </div>
@@ -38,24 +54,24 @@
             </a>        </div>
     
     <!-- Control Cards (KPIs) -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <!-- Repaid Today -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" wire:loading.class="opacity-50">
+        <!-- Repaid Period -->
         <div class="bg-white dark:bg-gray-900 p-4 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-md transition-shadow">
             <div class="flex items-center justify-between mb-2">
-                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Repaid Today</p>
+                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Repaid ({{ $filter }})</p>
                 <div class="p-1 bg-green-50 rounded-lg">
                     <span class="material-symbols-outlined text-green-600 text-base">payments</span>
                 </div>
             </div>
             <div class="flex items-end justify-between">
                 <h3 class="text-xl font-black dark:text-white tracking-tight">₦{{ number_format($repaidToday, 2) }}</h3>
-                <span class="flex items-center text-green-600 text-[9px] font-bold mb-0.5 bg-green-50 px-1.5 py-0.5 rounded-full">
-                    Daily
+                <span class="flex items-center text-green-600 text-[9px] font-bold mb-0.5 bg-green-50 px-1.5 py-0.5 rounded-full uppercase">
+                    Collected
                 </span>
             </div>
         </div>
 
-        <!-- Total Lent (Month) -->
+        <!-- Total Lent (Period) -->
         <div class="bg-white dark:bg-gray-900 p-4 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-md transition-shadow">
             <div class="flex items-center justify-between mb-2">
                 <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Total Lent</p>
@@ -65,29 +81,29 @@
             </div>
             <div class="flex items-end justify-between">
                 <h3 class="text-xl font-black dark:text-white tracking-tight">₦{{ number_format($totalLent, 2) }}</h3>
-                <span class="flex items-center text-blue-600 text-[9px] font-bold mb-0.5 bg-blue-50 px-1.5 py-0.5 rounded-full">
-                    This Month
+                <span class="flex items-center text-blue-600 text-[9px] font-bold mb-0.5 bg-blue-50 px-1.5 py-0.5 rounded-full uppercase">
+                    {{ $filter === 'today' ? 'Today' : ($filter === 'week' ? 'This Week' : ($filter === 'month' ? 'This Month' : 'This Year')) }}
                 </span>
             </div>
         </div>
 
-        <!-- Active Customers -->
+        <!-- Active Customers (Period) -->
         <div class="bg-white dark:bg-gray-900 p-4 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-md transition-shadow">
             <div class="flex items-center justify-between mb-2">
-                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Active Customers</p>
+                <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">New Customers</p>
                 <div class="p-1 bg-purple-50 rounded-lg">
                     <span class="material-symbols-outlined text-purple-600 text-base">group</span>
                 </div>
             </div>
             <div class="flex items-end justify-between">
                 <h3 class="text-xl font-black dark:text-white tracking-tight">{{ number_format($activeCustomers) }}</h3>
-                <span class="flex items-center text-purple-600 text-[9px] font-bold mb-0.5 bg-purple-50 px-1.5 py-0.5 rounded-full">
-                    Total
+                <span class="flex items-center text-purple-600 text-[9px] font-bold mb-0.5 bg-purple-50 px-1.5 py-0.5 rounded-full uppercase">
+                    Joined
                 </span>
             </div>
         </div>
 
-        <!-- Overdue Amount -->
+        <!-- Overdue Amount (Period) -->
         <div class="bg-white dark:bg-gray-900 p-4 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-md transition-shadow">
             <div class="flex items-center justify-between mb-2">
                 <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Overdue Amount</p>
@@ -110,18 +126,6 @@
         <div class="bg-white dark:bg-gray-900 p-6 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm flex-1">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="font-bold text-base dark:text-white">Loan Pipeline</h3>
-                <!-- Filter Dropdown -->
-                <div class="relative">
-                    <select wire:model.live="filter" class="appearance-none bg-gray-50 border border-gray-200 text-gray-700 text-[10px] font-bold rounded-lg py-1.5 pl-2 pr-7 focus:outline-none focus:bg-white focus:border-gray-500 uppercase tracking-wide cursor-pointer">
-                        <option value="today">Today</option>
-                        <option value="week">This Week</option>
-                        <option value="month">This Month</option>
-                        <option value="year">This Year</option>
-                    </select>
-                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                        <svg class="fill-current h-3 w-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
-                    </div>
-                </div>
             </div>
             <div class="space-y-3" wire:loading.class="opacity-50 transition-opacity">
                 <!-- Funnel Stages -->

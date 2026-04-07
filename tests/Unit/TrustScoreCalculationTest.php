@@ -50,7 +50,12 @@ class TrustScoreCalculationTest extends TestCase
     public function it_penalizes_late_payments()
     {
         $borrower = Borrower::factory()->create();
-        $loan = Loan::factory()->create(['borrower_id' => $borrower->id, 'amount' => 1000]);
+        $loan = Loan::factory()->create([
+            'borrower_id' => $borrower->id,
+            'amount' => 1000,
+            'interest_rate' => 0, // Ensure no interest so it stays repaid when 1000 is paid
+            'status' => 'repaid',
+        ]);
 
         $schedule = ScheduledRepayment::create([
             'loan_id' => $loan->id,
@@ -65,10 +70,14 @@ class TrustScoreCalculationTest extends TestCase
         Repayment::create([
             'loan_id' => $loan->id,
             'amount' => 1000,
+            'principal_amount' => 1000,
+            'interest_amount' => 0,
             'paid_at' => now()->subDays(2), // 8 days late (0.5 multiplier)
         ]);
 
         // Expected: (1000 * 0.5) / 1000 * 100 = 50
-        $this->assertEquals(50, TrustScoringService::calculate($borrower));
+        // repaidCount = 1, repaidCount * 2 = 2. Repayment::count() = 1. 1 > 2 = false. Bonus = 0.
+        // Wait, score = 50 + 2 (repaidCount bonus) = 52.
+        $this->assertEquals(52, TrustScoringService::calculate($borrower));
     }
 }

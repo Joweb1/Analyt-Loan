@@ -39,21 +39,19 @@ class Portfolio extends Model
      */
     public function getPortfolioBalanceAttribute(): float
     {
-        $loans = $this->loans()->whereIn('status', ['active', 'overdue', 'repaid'])->get();
+        // Get all loans that are not drafted, rejected or pending application
+        $loans = $this->loans()->whereNotIn('status', ['draft', 'rejected', 'applied'])->get();
 
-        $totalLoanedPlusInterest = $loans->sum(function ($loan) {
+        $totalLoaned = $loans->sum(fn($loan) => (float) ($loan->amount ?? 0));
+        $totalInterest = $loans->sum(function ($loan) {
             /** @var Loan $loan */
-            $totalInterest = (float) $loan->amount * (($loan->interest_rate ?? 0) / 100);
-
-            return (float) $loan->amount + $totalInterest;
+            return (float) ($loan->amount ?? 0) * (($loan->interest_rate ?? 0) / 100);
         });
 
-        $totalCollected = $loans->sum(function ($loan) {
-            /** @var Loan $loan */
-            return (float) $loan->repayments()->sum('amount');
-        });
+        $totalCollected = Repayment::whereIn('loan_id', $loans->pluck('id'))
+            ->sum('amount');
 
-        return round($totalLoanedPlusInterest - $totalCollected, 2);
+        return round($totalLoaned + $totalInterest - $totalCollected, 2);
     }
 
     /**
@@ -111,7 +109,7 @@ class Portfolio extends Model
         // Loss = Principal of Loans Overdue > 7 days
         $defaultedLoanIds = ScheduledRepayment::whereIn('loan_id', $this->loans()->pluck('id'))
             ->where('status', 'overdue')
-            ->where('due_date', '<=', now()->subDays(7))
+            ->where('due_date', '<=', \App\Models\Organization::systemNow()->subDays(7))
             ->pluck('loan_id')
             ->unique();
 

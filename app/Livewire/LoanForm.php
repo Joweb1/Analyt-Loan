@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\DTOs\LoanApplicationDTO;
 use App\Models\Borrower;
 use App\Models\Collateral;
 use App\Models\Loan;
@@ -140,7 +141,7 @@ class LoanForm extends Component
             $this->borrowerUserId = $borrower?->user_id;
             $this->loan_number = $loan->loan_number;
             $this->loan_product = $loan->loan_product;
-            $this->release_date = $loan->release_date ? $loan->release_date->format('Y-m-d') : now()->format('Y-m-d');
+            $this->release_date = $loan->release_date ? $loan->release_date->format('Y-m-d') : \App\Models\Organization::systemNow()->format('Y-m-d');
             $this->amount = $loan->amount;
             $this->interest_rate = $loan->interest_rate;
             $this->interest_type = $loan->interest_type;
@@ -164,7 +165,7 @@ class LoanForm extends Component
                 $this->guarantor_type = 'internal';
             }
         } else {
-            $this->release_date = now()->format('Y-m-d');
+            $this->release_date = \App\Models\Organization::systemNow()->format('Y-m-d');
 
             // Check for borrower_id in query string
             if ($borrowerId = request()->query('borrower_id')) {
@@ -292,12 +293,14 @@ class LoanForm extends Component
             'external_guarantor_id' => $this->guarantor_type === 'external' ? $this->guarantor_id : null,
         ];
 
+        $dto = LoanApplicationDTO::fromArray($data);
+
         if ($this->isEditMode) {
             $loan = Loan::find($this->loanId);
-            $loanService->updateLoan($loan, $data, $this->attachments, $this->collateralId);
+            $loanService->updateLoan($loan, $dto, $this->attachments, $this->collateralId);
             $message = 'Loan details updated successfully.';
         } else {
-            $loan = $loanService->createLoan($data, $this->attachments, $this->collateralId);
+            $loan = $loanService->createLoan($dto, $this->attachments, $this->collateralId);
             $message = 'Loan created successfully with Number: '.$this->loan_number;
         }
 

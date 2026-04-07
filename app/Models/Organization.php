@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * @property string $id
@@ -105,6 +106,13 @@ class Organization extends Model
 {
     use HasFactory, HasUuids;
 
+    protected static function booted()
+    {
+        static::updated(function ($organization) {
+            Cache::forget("organization_{$organization->id}");
+        });
+    }
+
     protected $fillable = [
         'name',
         'rc_number',
@@ -133,6 +141,7 @@ class Organization extends Model
         'repayment_account_name',
         'use_manual_date',
         'operating_date',
+        'timezone',
     ];
 
     protected $appends = [
@@ -140,6 +149,37 @@ class Organization extends Model
         'signature_url',
         'kyc_document_url',
     ];
+
+    /**
+     * Get the current system time for this organization.
+     * Bypasses Carbon::setTestNow() and uses the DB stored value if manual date is enabled.
+     */
+    public function getSystemTime(): \Illuminate\Support\Carbon
+    {
+        $tz = $this->timezone ?: config('app.timezone', 'UTC');
+
+        if ($this->use_manual_date && $this->operating_date) {
+            // We return the operating date at the start of day in the org's timezone
+            return \Illuminate\Support\Carbon::parse($this->operating_date)
+                ->setTimezone($tz)
+                ->startOfDay();
+        }
+
+        return \Illuminate\Support\Carbon::now($tz);
+    }
+
+    /**
+     * Static helper to get current org's system time.
+     */
+    public static function systemNow(): \Illuminate\Support\Carbon
+    {
+        $current = self::current();
+        if ($current) {
+            return $current->getSystemTime();
+        }
+
+        return \Illuminate\Support\Carbon::now();
+    }
 
     /**
      * Get the attributes that should be cast.
@@ -161,6 +201,24 @@ class Organization extends Model
             'default_interest_rate' => 'decimal:2',
             'grace_period_days' => 'integer',
         ];
+    }
+
+    public static function current(bool $fresh = false): ?self
+    {
+        $tenantSession = app(\App\Services\TenantSession::class);
+        $orgId = $tenantSession->getTenantId();
+
+        if (! $orgId) {
+            return null;
+        }
+
+        if ($fresh) {
+            Cache::forget("organization_{$orgId}");
+        }
+
+        return Cache::remember("organization_{$orgId}", 3600, function () use ($orgId) {
+            return self::find($orgId);
+        });
     }
 
     public function owner(): BelongsTo
@@ -198,6 +256,25 @@ class Organization extends Model
     public function collaterals(): HasMany
     {
         return $this->hasMany(Collateral::class);
+    }
+
+    /**
+     * Total Organization Portfolio Balance: total loaned + interest - repayments
+     */
+    public function getOrganizationBalanceAttribute(): float
+    {
+        $loans = $this->loans()->whereNotIn('status', ['draft', 'rejected', 'applied'])->get();
+
+        $totalLoaned = $loans->sum(fn($loan) => (float) ($loan->amount ?? 0));
+        $totalInterest = $loans->sum(function ($loan) {
+            /** @var Loan $loan */
+            return (float) ($loan->amount ?? 0) * (($loan->interest_rate ?? 0) / 100);
+        });
+
+        $totalCollected = Repayment::whereIn('loan_id', $loans->pluck('id'))
+            ->sum('amount');
+
+        return round($totalLoaned + $totalInterest - $totalCollected, 2);
     }
 
     public function getLogoUrlAttribute(): ?string

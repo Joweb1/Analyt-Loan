@@ -15,8 +15,14 @@ trait BelongsToOrganization
     protected static function bootBelongsToOrganization(): void
     {
         static::creating(function ($model) {
-            if (Auth::check() && ! $model->organization_id) {
-                $model->organization_id = Auth::user()->organization_id;
+            $tenantSession = app(\App\Services\TenantSession::class);
+
+            if (Auth::check() && ! $tenantSession->hasTenant()) {
+                $tenantSession->setTenantFromUser();
+            }
+
+            if ($tenantSession->hasTenant() && ! $model->organization_id) {
+                $model->organization_id = $tenantSession->getTenantId();
             }
         });
 
@@ -29,8 +35,15 @@ trait BelongsToOrganization
                     return;
                 }
 
-                if ($orgId = $user->organization_id) {
+                $tenantSession = app(\App\Services\TenantSession::class);
+                $tenantSession->setTenantFromUser();
+
+                if ($orgId = $tenantSession->getTenantId()) {
                     $builder->where($builder->getModel()->getTable().'.organization_id', $orgId);
+                } else {
+                    // Hard Enforcement: If no tenant session exists and it's not the app owner,
+                    // we block all data as a failsafe.
+                    $builder->whereRaw('1 = 0');
                 }
 
                 // Portfolio Scoping for Staff

@@ -6,7 +6,6 @@ use App\Models\Loan;
 use App\Models\Repayment;
 use App\Models\ScheduledRepayment;
 use App\Models\User;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
@@ -91,7 +90,7 @@ class LoanDetails extends Component
             ->role(['Admin', 'Loan Analyst', 'Vault Manager', 'Credit Analyst', 'Collection Specialist'])
             ->get();
 
-        $this->paid_at = now()->format('Y-m-d');
+        $this->paid_at = \App\Models\Organization::systemNow()->format('Y-m-d');
 
         $this->calculateSuggestions();
         $this->loadPendingProofs();
@@ -212,39 +211,8 @@ class LoanDetails extends Component
 
     public function generateSchedule()
     {
-        $numRepayments = max(1, $this->loan->num_repayments ?? 1);
-        $principalShare = $this->loan->amount / $numRepayments;
-        $totalInterest = $this->loan->amount * (($this->loan->interest_rate ?? 0) / 100);
-        $interestShare = $totalInterest / $numRepayments;
-
-        $startDate = Carbon::parse($this->loan->release_date ?? now());
-        $cycle = $this->loan->repayment_cycle ?? 'monthly';
-
-        for ($i = 1; $i <= $numRepayments; $i++) {
-            $dueDate = $startDate->copy();
-
-            match ($cycle) {
-                'daily' => $dueDate->addDays($i),
-                'weekly' => $dueDate->addWeeks($i),
-                'biweekly' => $dueDate->addWeeks($i * 2),
-                'monthly' => $dueDate->addMonths($i),
-                'yearly' => $dueDate->addYears($i),
-                default => $dueDate->addMonths($i),
-            };
-
-            ScheduledRepayment::create([
-                'loan_id' => $this->loan->id,
-                'due_date' => $dueDate,
-                'principal_amount' => $principalShare,
-                'interest_amount' => $interestShare,
-                'penalty_amount' => 0,
-                'installment_number' => $i,
-                'status' => 'applied',
-            ]);
-        }
-
+        app(\App\Services\LoanService::class)->generateRepaymentSchedule($this->loan);
         $this->loan->load('scheduledRepayments');
-        $this->loan->refreshRepaymentStatus();
     }
 
     public function editSchedule($id)
@@ -509,7 +477,7 @@ class LoanDetails extends Component
         $this->amount = $this->suggestedPrincipal + $this->suggestedInterest;
         $this->payment_method = 'Cash';
         $this->collected_by = null;
-        $this->paid_at = now()->format('Y-m-d');
+        $this->paid_at = \App\Models\Organization::systemNow()->format('Y-m-d');
         $this->principal_amount = $this->suggestedPrincipal;
         $this->interest_amount = $this->suggestedInterest;
         $this->extra_amount = 0;

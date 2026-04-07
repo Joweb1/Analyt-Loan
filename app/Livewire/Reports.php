@@ -4,27 +4,41 @@ namespace App\Livewire;
 
 use App\Models\Loan;
 use App\Models\Repayment;
-use App\Models\SavingsAccount;
 use App\Models\ScheduledRepayment;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
 class Reports extends Component
 {
-    public $reportType = 'daily'; // daily, weekly, monthly
+    public $reportType = 'daily'; // daily, weekly, monthly, yearly, custom
+
+    public $customStartDate;
+
+    public $customEndDate;
 
     public function setReportType($type)
     {
         $this->reportType = $type;
         $orgId = Auth::user()->organization_id;
-        $this->dispatch('chartUpdated', chartData: $this->getChartData($orgId));
+        self::clearCache($orgId);
+        $this->render(true);
+    }
+
+    public function setCustomDates($start, $end)
+    {
+        $this->customStartDate = $start;
+        $this->customEndDate = $end;
+        $this->reportType = 'custom';
+        $orgId = Auth::user()->organization_id;
+        self::clearCache($orgId);
+        $this->render(true);
     }
 
     public function exportLoans()
     {
         $orgId = Auth::user()->organization_id;
         $loans = Loan::where('organization_id', $orgId)->with('borrower.user')->latest()->get();
-        $filename = 'loans_export_'.now()->format('Y-m-d').'.csv';
+        $filename = 'loans_export_'.\App\Models\Organization::systemNow()->format('Y-m-d').'.csv';
 
         $callback = function () use ($loans) {
             $file = fopen('php://output', 'w');
@@ -53,7 +67,7 @@ class Reports extends Component
     {
         $orgId = Auth::user()->organization_id;
         $borrowers = \App\Models\Borrower::where('organization_id', $orgId)->with('user')->latest()->get();
-        $filename = 'customers_export_'.now()->format('Y-m-d').'.csv';
+        $filename = 'customers_export_'.\App\Models\Organization::systemNow()->format('Y-m-d').'.csv';
 
         $callback = function () use ($borrowers) {
             $file = fopen('php://output', 'w');
@@ -83,7 +97,7 @@ class Reports extends Component
     {
         $orgId = Auth::user()->organization_id;
         $assets = \App\Models\Collateral::where('organization_id', $orgId)->with('loan.borrower.user')->latest()->get();
-        $filename = 'collateral_export_'.now()->format('Y-m-d').'.csv';
+        $filename = 'collateral_export_'.\App\Models\Organization::systemNow()->format('Y-m-d').'.csv';
 
         $callback = function () use ($assets) {
             $file = fopen('php://output', 'w');
@@ -115,7 +129,7 @@ class Reports extends Component
                 $q->whereNotIn('name', ['Borrower']);
             })
             ->get();
-        $filename = 'staff_export_'.now()->format('Y-m-d').'.csv';
+        $filename = 'staff_export_'.\App\Models\Organization::systemNow()->format('Y-m-d').'.csv';
 
         $callback = function () use ($staff) {
             $file = fopen('php://output', 'w');
@@ -137,89 +151,197 @@ class Reports extends Component
         ]);
     }
 
-    public function render()
+    public static function clearCache(string $orgId): void
+    {
+        $types = ['daily', 'weekly', 'monthly', 'yearly', 'custom'];
+        foreach ($types as $t) {
+            \Illuminate\Support\Facades\Cache::forget("reports_stats_{$orgId}_{$t}");
+        }
+    }
+
+    public function getListeners()
     {
         $orgId = Auth::user()->organization_id;
-        $startDate = now();
-        $endDate = now();
 
-        if ($this->reportType === 'daily') {
-            $startDate = now()->startOfDay();
-            $endDate = now()->endOfDay();
-        } elseif ($this->reportType === 'weekly') {
-            $startDate = now()->startOfWeek();
-            $endDate = now()->endOfWeek();
-        } else {
-            $startDate = now()->startOfMonth();
-            $endDate = now()->endOfMonth();
+        return [
+            "echo:organization.{$orgId},.dashboard.updated" => 'refreshReportsAndForce',
+            'echo:dashboard,.dashboard.updated' => 'refreshReportsAndForce',
+        ];
+    }
+
+    public function refreshReportsAndForce()
+    {
+        $this->render(true);
+    }
+
+    public function render($force = false)
+    {
+        $orgId = Auth::user()->organization_id;
+
+        $suffix = ($this->reportType === 'custom' && $this->customStartDate && $this->customEndDate) 
+            ? "_" . md5($this->customStartDate.$this->customEndDate) 
+            : "";
+        $cacheKey = "reports_stats_{$orgId}_{$this->reportType}{$suffix}";
+
+        if ($force) {
+            \Illuminate\Support\Facades\Cache::forget($cacheKey);
         }
 
-        $disbursed = Loan::where('organization_id', $orgId)
-            ->whereIn('status', ['approved', 'active', 'repaid', 'overdue'])
-            ->whereBetween('release_date', [$startDate, $endDate])
-            ->sum('amount');
+        $data = \Illuminate\Support\Facades\Cache::remember($cacheKey, now()->addHour(), function () use ($orgId) {
+            $startDate = \App\Models\Organization::systemNow();
+            $endDate = \App\Models\Organization::systemNow();
 
-        $collected = Repayment::whereHas('loan', function ($q) use ($orgId) {
-            $q->where('organization_id', $orgId);
-        })
-            ->whereBetween('paid_at', [$startDate, $endDate])
-            ->sum('amount');
+            if ($this->reportType === 'daily') {
+                $startDate = \App\Models\Organization::systemNow()->startOfDay();
+                $endDate = \App\Models\Organization::systemNow()->endOfDay();
+            } elseif ($this->reportType === 'weekly') {
+                $startDate = \App\Models\Organization::systemNow()->startOfWeek();
+                $endDate = \App\Models\Organization::systemNow()->endOfWeek();
+            } elseif ($this->reportType === 'monthly') {
+                $startDate = \App\Models\Organization::systemNow()->startOfMonth();
+                $endDate = \App\Models\Organization::systemNow()->endOfMonth();
+            } elseif ($this->reportType === 'yearly') {
+                $startDate = \App\Models\Organization::systemNow()->startOfYear();
+                $endDate = \App\Models\Organization::systemNow()->endOfYear();
+            } elseif ($this->reportType === 'custom' && $this->customStartDate && $this->customEndDate) {
+                $startDate = \Carbon\Carbon::parse($this->customStartDate)->startOfDay();
+                $endDate = \Carbon\Carbon::parse($this->customEndDate)->endOfDay();
+            }
 
-        $newCustomers = \App\Models\Borrower::where('organization_id', $orgId)
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->count();
+            // 1. Total Disbursed (Period)
+            $disbursed = (float) Loan::where('organization_id', $orgId)
+                ->whereIn('status', ['approved', 'active', 'repaid', 'overdue'])
+                ->where(function ($q) use ($startDate, $endDate) {
+                    $q->whereBetween('release_date', [$startDate->startOfDay()->toDateTimeString(), $endDate->endOfDay()->toDateTimeString()])
+                        ->orWhere(function ($sq) use ($startDate, $endDate) {
+                            $sq->whereNull('release_date')
+                                ->whereBetween('created_at', [$startDate->startOfDay(), $endDate->endOfDay()]);
+                        });
+                })
+                ->sum('amount');
 
-        // New Org-wide Metrics
-        $totalSavings = SavingsAccount::where('organization_id', $orgId)->sum('balance');
+            // 2. Total Loans Count (Period)
+            $totalLoansCount = Loan::where('organization_id', $orgId)
+                ->whereIn('status', ['approved', 'active', 'repaid', 'overdue'])
+                ->where(function ($q) use ($startDate, $endDate) {
+                    $q->whereBetween('release_date', [$startDate->toDateString(), $endDate->toDateString()])
+                        ->orWhere(function ($sq) use ($startDate, $endDate) {
+                            $sq->whereNull('release_date')
+                                ->whereBetween('created_at', [$startDate, $endDate]);
+                        });
+                })
+                ->count();
 
-        $totalInterest = Repayment::whereHas('loan', function ($q) use ($orgId) {
-            $q->where('organization_id', $orgId);
-        })->sum('interest_amount');
-
-        // Standard PAR: Outstanding principal of any loan that has an installment overdue
-        $overdueLoanIds = ScheduledRepayment::where('status', 'overdue')
-            ->whereHas('loan', function ($q) use ($orgId) {
+            // 3. Collected in Period
+            $collected = (float) Repayment::whereHas('loan', function ($q) use ($orgId) {
                 $q->where('organization_id', $orgId);
             })
-            ->pluck('loan_id')
-            ->unique();
+                ->whereBetween('paid_at', [$startDate, $endDate])
+                ->sum('amount');
 
-        $totalPAR = Loan::whereIn('id', $overdueLoanIds)->get()->sum(function ($loan) {
-            $totalPaidPrincipal = $loan->repayments()->sum('principal_amount');
+            // 4. New Customers in Period
+            $newCustomers = \App\Models\Borrower::where('organization_id', $orgId)
+                ->whereBetween('created_at', [$startDate, $endDate])
+                ->count();
 
-            return max(0, (float) $loan->amount - (float) $totalPaidPrincipal);
-        });
-
-        // Profit & Loss (PnL): Total Interest - Principal of Loans overdue > 7 days
-        $defaultedLoanIds = ScheduledRepayment::where('status', 'overdue')
-            ->where('due_date', '<=', now()->subDays(7))
-            ->whereHas('loan', function ($q) use ($orgId) {
+            // 5. Net Savings Growth in Period
+            $savingsDeposits = \App\Models\SavingsTransaction::whereHas('savingsAccount', function ($q) use ($orgId) {
                 $q->where('organization_id', $orgId);
             })
-            ->pluck('loan_id')
-            ->unique();
+                ->where('type', 'deposit')
+                ->whereBetween('transaction_date', [$startDate, $endDate])
+                ->sum('amount');
 
-        $totalLossPrincipal = Loan::whereIn('id', $defaultedLoanIds)->get()->sum(function ($loan) {
-            $totalPaidPrincipal = $loan->repayments()->sum('principal_amount');
+            $savingsWithdrawals = \App\Models\SavingsTransaction::whereHas('savingsAccount', function ($q) use ($orgId) {
+                $q->where('organization_id', $orgId);
+            })
+                ->where('type', 'withdrawal')
+                ->whereBetween('transaction_date', [$startDate, $endDate])
+                ->sum('amount');
 
-            return max(0, (float) $loan->amount - (float) $totalPaidPrincipal);
+            $totalSavingsPeriod = (float) ($savingsDeposits - $savingsWithdrawals);
+
+            // 6. Total Expected Interest (LIFETIME)
+            $totalExpectedInterestLifetime = (float) Loan::where('organization_id', $orgId)
+                ->whereIn('status', ['approved', 'active', 'repaid', 'overdue'])
+                ->get()
+                ->reduce(function ($carry, $loan) {
+                    return $carry + $loan->getTotalExpectedInterest();
+                }, 0.0);
+
+            // 7. Total Paid Interest (LIFETIME) - for the Rem calculation
+            $totalPaidInterestLifetime = (float) Repayment::whereHas('loan', function ($q) use ($orgId) {
+                $q->where('organization_id', $orgId);
+            })->sum('interest_amount');
+
+            $remainingInterestLifetime = max(0, $totalExpectedInterestLifetime - $totalPaidInterestLifetime);
+
+            // 8. Portfolio at Risk (Loans that became overdue in period)
+            $overdueLoanIds = ScheduledRepayment::where('status', 'overdue')
+                ->whereHas('loan', function ($q) use ($orgId) {
+                    $q->where('organization_id', $orgId);
+                })
+                ->whereBetween('due_date', [$startDate, $endDate])
+                ->pluck('loan_id')
+                ->unique();
+
+            $totalPAR = Loan::whereIn('id', $overdueLoanIds)->get()->sum(function ($loan) {
+                $totalPaidPrincipal = $loan->repayments()->sum('principal_amount');
+
+                return max(0, (float) $loan->amount - (float) $totalPaidPrincipal);
+            });
+
+            // 9. Profit & Loss (PnL) in Period
+            $periodPaidInterest = (float) Repayment::whereHas('loan', function ($q) use ($orgId) {
+                $q->where('organization_id', $orgId);
+            })
+                ->whereBetween('paid_at', [$startDate, $endDate])
+                ->sum('interest_amount');
+
+            $totalFeesPeriod = (float) Loan::where('organization_id', $orgId)
+                ->whereIn('status', ['approved', 'active', 'repaid', 'overdue'])
+                ->where(function ($q) use ($startDate, $endDate) {
+                    $q->whereBetween('release_date', [$startDate->startOfDay()->toDateTimeString(), $endDate->endOfDay()->toDateTimeString()])
+                        ->orWhere(function ($sq) use ($startDate, $endDate) {
+                            $sq->whereNull('release_date')
+                                ->whereBetween('created_at', [$startDate->startOfDay(), $endDate->endOfDay()]);
+                        });
+                })
+                ->sum(\Illuminate\Support\Facades\DB::raw('processing_fee + insurance_fee'));
+
+            $totalPnLPeriod = $periodPaidInterest + $totalFeesPeriod;
+
+            // 10. Organization Balance (Snapshot of Outstanding Principal + Expected Interest)
+            // This is the true "Balance" of what is out in the field.
+            $orgBalance = Loan::where('organization_id', $orgId)
+                ->whereIn('status', ['approved', 'active', 'overdue'])
+                ->get()
+                ->sum(function ($loan) {
+                    return $loan->balance; // using getBalanceAttribute
+                });
+
+            // Chart Data (History based on type, independent of period filters)
+            $chartData = $this->getChartData($orgId);
+
+            return [
+                'disbursed' => $disbursed,
+                'totalLoansCount' => $totalLoansCount,
+                'collected' => $collected,
+                'newCustomers' => $newCustomers,
+                'totalSavings' => $totalSavingsPeriod,
+                'totalInterest' => $totalExpectedInterestLifetime,
+                'totalPaidInterest' => $totalPaidInterestLifetime,
+                'remainingInterest' => $remainingInterestLifetime,
+                'totalPAR' => $totalPAR,
+                'totalPnL' => $totalPnLPeriod,
+                'orgBalance' => $orgBalance,
+                'chartData' => $chartData,
+            ];
         });
 
-        $totalPnL = $totalInterest - $totalLossPrincipal;
+        $this->dispatch('chartUpdated', chartData: $data['chartData']);
 
-        // Chart Data
-        $chartData = $this->getChartData($orgId);
-
-        return view('livewire.reports', [
-            'disbursed' => $disbursed,
-            'collected' => $collected,
-            'newCustomers' => $newCustomers,
-            'totalSavings' => $totalSavings,
-            'totalInterest' => $totalInterest,
-            'totalPAR' => $totalPAR,
-            'totalPnL' => $totalPnL,
-            'chartData' => $chartData,
-        ])->layout('layouts.app', ['title' => 'Organization Reports']);
+        return view('livewire.reports', $data)->layout('layouts.app', ['title' => 'Organization Reports']);
     }
 
     protected function getChartData($orgId)
@@ -227,67 +349,138 @@ class Reports extends Component
         $labels = [];
         $disbursedData = [];
         $collectedData = [];
+        $interestExpectedData = [];
+        $interestPaidData = [];
+        $customerData = [];
+        $loanCountData = [];
+        $savingsData = [];
 
+        $steps = 12;
+        $interval = 'month';
+
+        // Filter affects granularity but not specific range
         if ($this->reportType === 'daily') {
-            // Last 14 days
-            for ($i = 13; $i >= 0; $i--) {
-                $date = now()->subDays($i);
-                $labels[] = $date->format('D, d M');
-
-                $disbursedData[] = Loan::where('organization_id', $orgId)
-                    ->whereIn('status', ['approved', 'active', 'repaid', 'overdue'])
-                    ->whereDate('release_date', $date->toDateString())
-                    ->sum('amount');
-
-                $collectedData[] = Repayment::whereHas('loan', function ($q) use ($orgId) {
-                    $q->where('organization_id', $orgId);
-                })
-                    ->whereDate('paid_at', $date->toDateString())
-                    ->sum('amount');
-            }
+            $steps = 14;
+            $interval = 'day';
         } elseif ($this->reportType === 'weekly') {
-            // Last 8 weeks
-            for ($i = 7; $i >= 0; $i--) {
-                $start = now()->subWeeks($i)->startOfWeek();
-                $end = now()->subWeeks($i)->endOfWeek();
-                $labels[] = 'Week '.$start->format('W');
+            $steps = 8;
+            $interval = 'week';
+        } elseif ($this->reportType === 'monthly' || $this->reportType === 'custom') {
+            $steps = 12;
+            $interval = 'month';
+        } elseif ($this->reportType === 'yearly') {
+            $steps = 5;
+            $interval = 'year';
+        }
 
-                $disbursedData[] = Loan::where('organization_id', $orgId)
-                    ->whereIn('status', ['approved', 'active', 'repaid', 'overdue'])
-                    ->whereBetween('release_date', [$start, $end])
-                    ->sum('amount');
+        for ($i = $steps - 1; $i >= 0; $i--) {
+            $currentStart = null;
+            $currentEnd = null;
+            $label = '';
 
-                $collectedData[] = Repayment::whereHas('loan', function ($q) use ($orgId) {
-                    $q->where('organization_id', $orgId);
-                })
-                    ->whereBetween('paid_at', [$start, $end])
-                    ->sum('amount');
+            if ($interval === 'day') {
+                $date = \App\Models\Organization::systemNow()->subDays($i);
+                $currentStart = $date->copy()->startOfDay();
+                $currentEnd = $date->copy()->endOfDay();
+                $label = $date->format('D, d M');
+            } elseif ($interval === 'week') {
+                $date = \App\Models\Organization::systemNow()->subWeeks($i);
+                $currentStart = $date->copy()->startOfWeek();
+                $currentEnd = $date->copy()->endOfWeek();
+                $label = 'Wk '.$date->format('W');
+            } elseif ($interval === 'month') {
+                $date = \App\Models\Organization::systemNow()->subMonths($i);
+                $currentStart = $date->copy()->startOfMonth();
+                $currentEnd = $date->copy()->endOfMonth();
+                $label = $date->format('M Y');
+            } elseif ($interval === 'year') {
+                $year = \App\Models\Organization::systemNow()->subYears($i)->year;
+                $currentStart = \Carbon\Carbon::create($year, 1, 1)->startOfDay();
+                $currentEnd = \Carbon\Carbon::create($year, 12, 31)->endOfDay();
+                $label = (string) $year;
             }
-        } else {
-            // Last 12 months
-            for ($i = 11; $i >= 0; $i--) {
-                $month = now()->subMonths($i);
-                $labels[] = $month->format('M Y');
 
-                $disbursedData[] = Loan::where('organization_id', $orgId)
-                    ->whereIn('status', ['approved', 'active', 'repaid', 'overdue'])
-                    ->whereMonth('release_date', $month->month)
-                    ->whereYear('release_date', $month->year)
-                    ->sum('amount');
+            $labels[] = $label;
 
-                $collectedData[] = Repayment::whereHas('loan', function ($q) use ($orgId) {
-                    $q->where('organization_id', $orgId);
+            // Trends (Historical)
+            $disbursedData[] = Loan::where('organization_id', $orgId)
+                ->whereIn('status', ['approved', 'active', 'repaid', 'overdue'])
+                ->where(function ($q) use ($currentStart, $currentEnd) {
+                    $q->whereBetween('release_date', [$currentStart->toDateString(), $currentEnd->toDateString()])
+                        ->orWhere(function ($sq) use ($currentStart, $currentEnd) {
+                            $sq->whereNull('release_date')
+                                ->whereBetween('created_at', [$currentStart, $currentEnd]);
+                        });
                 })
-                    ->whereMonth('paid_at', $month->month)
-                    ->whereYear('paid_at', $month->year)
-                    ->sum('amount');
-            }
+                ->sum('amount');
+
+            $collectedData[] = Repayment::whereHas('loan', function ($q) use ($orgId) {
+                $q->where('organization_id', $orgId);
+            })
+                ->whereBetween('paid_at', [$currentStart, $currentEnd])
+                ->sum('amount');
+
+            $interestExpectedData[] = Loan::where('organization_id', $orgId)
+                ->whereIn('status', ['approved', 'active', 'repaid', 'overdue'])
+                ->where(function ($q) use ($currentStart, $currentEnd) {
+                    $q->whereBetween('release_date', [$currentStart->toDateString(), $currentEnd->toDateString()])
+                        ->orWhere(function ($sq) use ($currentStart, $currentEnd) {
+                            $sq->whereNull('release_date')
+                                ->whereBetween('created_at', [$currentStart, $currentEnd]);
+                        });
+                })
+                ->get()
+                ->reduce(function ($carry, $loan) {
+                    return $carry + $loan->getTotalExpectedInterest();
+                }, 0.0);
+
+            $interestPaidData[] = Repayment::whereHas('loan', function ($q) use ($orgId) {
+                $q->where('organization_id', $orgId);
+            })
+                ->whereBetween('paid_at', [$currentStart, $currentEnd])
+                ->sum('interest_amount');
+
+            $customerData[] = \App\Models\Borrower::where('organization_id', $orgId)
+                ->whereBetween('created_at', [$currentStart, $currentEnd])
+                ->count();
+
+            $loanCountData[] = Loan::where('organization_id', $orgId)
+                ->whereIn('status', ['approved', 'active', 'repaid', 'overdue'])
+                ->where(function ($q) use ($currentStart, $currentEnd) {
+                    $q->whereBetween('release_date', [$currentStart->toDateString(), $currentEnd->toDateString()])
+                        ->orWhere(function ($sq) use ($currentStart, $currentEnd) {
+                            $sq->whereNull('release_date')
+                                ->whereBetween('created_at', [$currentStart, $currentEnd]);
+                        });
+                })
+                ->count();
+
+            $dep = \App\Models\SavingsTransaction::whereHas('savingsAccount', function ($q) use ($orgId) {
+                $q->where('organization_id', $orgId);
+            })
+                ->where('type', 'deposit')
+                ->whereBetween('transaction_date', [$currentStart->toDateString(), $currentEnd->toDateString()])
+                ->sum('amount');
+
+            $wit = \App\Models\SavingsTransaction::whereHas('savingsAccount', function ($q) use ($orgId) {
+                $q->where('organization_id', $orgId);
+            })
+                ->where('type', 'withdrawal')
+                ->whereBetween('transaction_date', [$currentStart->toDateString(), $currentEnd->toDateString()])
+                ->sum('amount');
+
+            $savingsData[] = (float) ($dep - $wit);
         }
 
         return [
             'labels' => $labels,
             'disbursed' => $disbursedData,
             'collected' => $collectedData,
+            'interestExpected' => $interestExpectedData,
+            'interestPaid' => $interestPaidData,
+            'customers' => $customerData,
+            'loans' => $loanCountData,
+            'savings' => $savingsData,
         ];
     }
 }

@@ -11,7 +11,7 @@
                 </div>
                 <div>
                     <h4 class="text-sm font-black uppercase tracking-tight">Time Override Active</h4>
-                    <p class="text-xs text-white/80 font-medium">The system is operating at <b class="text-white">{{ now()->format('l, F d, Y') }}</b>. All metrics and timestamps reflect this date.</p>
+                    <p class="text-xs text-white/80 font-medium">The system is operating at <b class="text-white">{{ \App\Models\Organization::systemNow()->format('l, F d, Y') }}</b>. All metrics and timestamps reflect this date.</p>
                 </div>
             </div>
             <a href="{{ route('settings') }}" class="px-5 py-2 bg-white text-orange-600 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-orange-50 transition-colors shadow-lg">
@@ -162,7 +162,7 @@
                     <div class="w-8 h-8 rounded-full bg-brand-blue/10 flex items-center justify-center text-brand-blue">
                         <span class="material-symbols-outlined text-sm font-bold">payments</span>
                     </div>
-                    <p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Total Loaned</p>
+                    <p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Organisation Total balance</p>
                 </div>
                 <div>
                     <h3 class="text-primary dark:text-white text-3xl font-extrabold tracking-tight">₦ {{ number_format($totalLoaned, 2) }}</h3>

@@ -77,9 +77,10 @@ class LoanDetailsTest extends TestCase
         // 5 installments -> 22k each.
 
         $schedule = ScheduledRepayment::first();
-        $expectedAmount = (100000 + 10000) / 5;
+        $totalInterest = $this->loan->getTotalExpectedInterest();
+        $expectedAmount = (100000 + $totalInterest) / 5;
 
-        $this->assertEquals($expectedAmount, $schedule->principal_amount + $schedule->interest_amount);
+        $this->assertEquals(round($expectedAmount, 2), round($schedule->principal_amount + $schedule->interest_amount, 2));
     }
 
     public function test_it_adds_repayment_and_updates_schedule()

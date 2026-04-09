@@ -18,7 +18,7 @@
                     <div class="flex justify-between items-start mb-2">
                         <div>
                             <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">{{ $loan->loan_number }}</span>
-                            <h3 class="font-black text-xl text-slate-900">₦{{ number_format($loan->amount, 2) }}</h3>
+                            <h3 class="font-black text-xl text-slate-900">₦{{ $loan->amount->format() }}</h3>
                         </div>
                         @php
                             $statusColors = [
@@ -53,7 +53,7 @@
                             <span class="material-symbols-outlined">arrow_downward</span>
                         </div>
                         <div>
-                            <h3 class="font-bold text-slate-900">₦{{ number_format($repayment->amount, 2) }}</h3>
+                            <h3 class="font-bold text-slate-900">₦{{ $repayment->amount->format() }}</h3>
                             <p class="text-xs text-slate-500">{{ $repayment->paid_at->format('M d, Y') }}</p>
                         </div>
                     </div>

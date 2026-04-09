@@ -58,7 +58,7 @@ class ReportsDataIntegrityTest extends TestCase
             'status' => 'active',
         ]);
 
-        $expectedInterest = $loan->getTotalExpectedInterest();
+        $expectedInterest = $loan->getTotalExpectedInterest()->getMajorAmount();
 
         Livewire::actingAs($this->admin)
             ->test(Reports::class)
@@ -88,7 +88,7 @@ class ReportsDataIntegrityTest extends TestCase
             'status' => 'active',
         ]);
 
-        $expectedTotal = $repaidLoan->getTotalExpectedInterest() + $activeLoan->getTotalExpectedInterest();
+        $expectedTotal = $repaidLoan->getTotalExpectedInterest()->add($activeLoan->getTotalExpectedInterest())->getMajorAmount();
 
         // Total Interest reflects lifetime total expected interest
         Livewire::actingAs($this->admin)

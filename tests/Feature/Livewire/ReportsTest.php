@@ -65,7 +65,7 @@ class ReportsTest extends TestCase
         // Create loan disbursed today
         Loan::factory()->create([
             'organization_id' => $this->organization->id,
-            'amount' => 50000,
+            'amount' => 500,
             'release_date' => $now,
             'status' => 'active',
         ]);
@@ -74,13 +74,13 @@ class ReportsTest extends TestCase
         $loan = Loan::factory()->create(['organization_id' => $this->organization->id]);
         Repayment::factory()->create([
             'loan_id' => $loan->id,
-            'amount' => 10000,
+            'amount' => 100,
             'paid_at' => $now,
         ]);
 
         Livewire::actingAs($this->admin)
             ->test(Reports::class)
-            ->assertViewHas('disbursed', 50000)
-            ->assertViewHas('collected', 10000);
+            ->assertViewHas('disbursed', 500.0)
+            ->assertViewHas('collected', 100.0);
     }
 }

@@ -42,18 +42,20 @@ class PaymentVerifications extends Component
             $remaining = $amount;
 
             // Prioritize Interest
-            $interestPart = min($remaining, $sugInterest);
-            $remaining -= $interestPart;
+            $interestPart = new \App\ValueObjects\Money(min($remaining->getMinorAmount(), $sugInterest->getMinorAmount()), $amount->getCurrency());
+            $remaining = $remaining->subtract($interestPart);
 
             // Then Principal
-            $principalPart = min($remaining, $sugPrincipal);
-            $remaining -= $principalPart;
+            $principalPart = new \App\ValueObjects\Money(min($remaining->getMinorAmount(), $sugPrincipal->getMinorAmount()), $amount->getCurrency());
+            $remaining = $remaining->subtract($principalPart);
 
             // Rest is Extra
             $extraPart = $remaining;
         } else {
             // No schedule? Just treat as principal
             $principalPart = $amount;
+            $interestPart = new \App\ValueObjects\Money(0, $amount->getCurrency());
+            $extraPart = new \App\ValueObjects\Money(0, $amount->getCurrency());
         }
 
         // Create Repayment

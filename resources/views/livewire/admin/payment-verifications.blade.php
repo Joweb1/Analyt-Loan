@@ -41,7 +41,7 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 font-bold text-slate-900 dark:text-white">
-                                    ₦{{ number_format($proof->amount, 2) }}
+                                    ₦{{ $proof->amount->format() }}
                                 </td>
                                 <td class="px-6 py-4 text-sm font-mono text-slate-500">
                                     {{ $proof->reference_code }}

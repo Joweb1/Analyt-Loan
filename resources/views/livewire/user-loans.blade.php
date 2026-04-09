@@ -113,8 +113,9 @@
                 @forelse($loans as $loan)
                     @php 
                         $risk = $this->getRiskLevel($borrower->trust_score ?? 0);
-                        $paid = $loan->repayments->sum('amount');
-                        $progress = $loan->amount > 0 ? min(100, ($paid / $loan->amount) * 100) : 0;
+                        $paidMinor = (int) $loan->repayments->sum(fn($r) => $r->amount->getMinorAmount());
+                        $paid = new \App\ValueObjects\Money($paidMinor, $loan->amount->getCurrency());
+                        $progress = $loan->amount->isPositive() ? min(100, ($paid->getMajorAmount() / $loan->amount->getMajorAmount()) * 100) : 0;
                         $statusColor = match($loan->status) {
                             'active', 'approved' => 'green',
                             'overdue' => 'red',
@@ -136,7 +137,7 @@
 
                         <div class="mb-4">
                             <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Loan Amount</p>
-                            <h4 class="text-xl font-black text-slate-900 dark:text-white">₦{{ number_format($loan->amount, 2) }}</h4>
+                            <h4 class="text-xl font-black text-slate-900 dark:text-white">₦{{ $loan->amount->format() }}</h4>
                         </div>
 
                         <div class="space-y-3">
@@ -145,7 +146,7 @@
                             </div>
                             <div class="flex justify-between items-center text-[10px] font-black uppercase tracking-wider">
                                 <span class="text-slate-400">{{ round($progress) }}% REPAID</span>
-                                <span class="text-{{ $statusColor }}-600">BAL: ₦{{ number_format(max(0, $loan->amount - $paid), 2) }}</span>
+                                <span class="text-{{ $statusColor }}-600">BAL: ₦{{ $loan->amount->subtract($paid)->format() }}</span>
                             </div>
                         </div>
 

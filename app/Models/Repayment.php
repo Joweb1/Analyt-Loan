@@ -11,15 +11,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * @property string $id
  * @property string $loan_id
- * @property numeric $amount
+ * @property \App\ValueObjects\Money $amount
  * @property \Illuminate\Support\Carbon $paid_at
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property string|null $payment_method
  * @property string|null $collected_by
- * @property numeric $principal_amount
- * @property numeric $interest_amount
- * @property numeric $extra_amount
+ * @property \App\ValueObjects\Money $principal_amount
+ * @property \App\ValueObjects\Money $interest_amount
+ * @property \App\ValueObjects\Money $extra_amount
  * @property-read \App\Models\User|null $collector
  * @property-read \App\Models\Loan $loan
  *
@@ -57,7 +57,11 @@ class Repayment extends Model
     ];
 
     protected $casts = [
-        'paid_at' => 'date',
+        'paid_at' => 'datetime',
+        'amount' => \App\Casts\MoneyCast::class,
+        'principal_amount' => \App\Casts\MoneyCast::class,
+        'interest_amount' => \App\Casts\MoneyCast::class,
+        'extra_amount' => \App\Casts\MoneyCast::class,
     ];
 
     public function loan(): BelongsTo

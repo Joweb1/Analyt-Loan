@@ -115,7 +115,7 @@
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="flex flex-col">
-                                        <span class="text-sm font-black text-green-600">₦{{ number_format($repayment->amount, 2) }}</span>
+                                        <span class="text-sm font-black text-green-600">₦{{ $repayment->amount->format() }}</span>
                                         <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{{ $repayment->payment_method }}</span>
                                     </div>
                                 </td>

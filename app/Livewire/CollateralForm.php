@@ -117,7 +117,7 @@ class CollateralForm extends Component
         $this->name = $collateral->name;
         $this->type = $collateral->type;
         $this->condition = $collateral->condition;
-        $this->value = $collateral->value;
+        $this->value = $collateral->value->getMajorAmount();
         $this->description = $collateral->description;
         $this->registered_date = $collateral->registered_date ? $collateral->registered_date->format('Y-m-d') : null;
         $this->status = $collateral->status;

@@ -24,7 +24,7 @@ class LoanResource extends JsonResource
         return [
             'id' => $this->id,
             'loan_number' => $this->loan_number,
-            'amount' => (float) $this->amount,
+            'amount' => (float) $this->amount->getMajorAmount(),
             'interest_rate' => (float) $this->interest_rate,
             'status' => $this->status,
             'repayment_status' => $this->repayment_status,

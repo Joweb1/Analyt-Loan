@@ -43,7 +43,7 @@ class SendDailyReport extends Command
             // Stats
             $repayments = \App\Models\Repayment::whereHas('loan', function ($q) use ($org) {
                 $q->where('organization_id', $org->id);
-            })->where('paid_at', '>=', $today)->sum('amount');
+            })->where('paid_at', '>=', $today)->sum('amount') / 100;
 
             $newLoansCount = \App\Models\Loan::where('organization_id', $org->id)
                 ->where('created_at', '>=', $today)->count();

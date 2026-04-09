@@ -6,6 +6,7 @@ use App\Models\Loan;
 use App\Models\Repayment;
 use App\Models\ScheduledRepayment;
 use App\Models\User;
+use App\ValueObjects\Money;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
@@ -113,22 +114,28 @@ class LoanDetails extends Component
         }
 
         // Distribution Logic (Match with PaymentVerifications logic)
+        /** @var \App\ValueObjects\Money $amount */
         $amount = $proof->amount;
+        $currency = $amount->getCurrency();
+
         $nextSchedule = $this->loan->scheduledRepayments()
             ->whereIn('status', ['applied', 'overdue', 'partial'])
             ->orderBy('due_date')
             ->first();
 
-        $interestPart = 0;
-        $principalPart = 0;
-        $extraPart = 0;
+        /** @var \App\ValueObjects\Money $interestPart */
+        $interestPart = new \App\ValueObjects\Money(0, $currency);
+        /** @var \App\ValueObjects\Money $principalPart */
+        $principalPart = new \App\ValueObjects\Money(0, $currency);
+        /** @var \App\ValueObjects\Money $extraPart */
+        $extraPart = new \App\ValueObjects\Money(0, $currency);
 
         if ($nextSchedule) {
             /** @var \App\Models\ScheduledRepayment $nextSchedule */
-            $interestPart = min($amount, $nextSchedule->interest_amount);
-            $remaining = $amount - $interestPart;
-            $principalPart = min($remaining, $nextSchedule->principal_amount);
-            $extraPart = $remaining - $principalPart;
+            $interestPart = new \App\ValueObjects\Money(min($amount->getMinorAmount(), $nextSchedule->interest_amount->getMinorAmount()), $currency);
+            $remaining = $amount->subtract($interestPart);
+            $principalPart = new \App\ValueObjects\Money(min($remaining->getMinorAmount(), $nextSchedule->principal_amount->getMinorAmount()), $currency);
+            $extraPart = $remaining->subtract($principalPart);
         } else {
             $principalPart = $amount;
         }
@@ -171,26 +178,28 @@ class LoanDetails extends Component
 
     private function calculateSuggestions()
     {
+        $currency = $this->loan->amount->getCurrency();
+
         // Find the earliest schedule that isn't fully paid
         $nextSchedule = $this->loan->scheduledRepayments->sortBy('due_date')->first(function ($schedule) {
             return in_array($schedule->status, ['applied', 'overdue', 'partial']);
         });
 
         if ($nextSchedule) {
-            $this->suggestedPrincipal = $nextSchedule->principal_amount;
+            $this->suggestedPrincipal = $nextSchedule->principal_amount->getMajorAmount();
             // Calculate remaining interest + penalty needed
-            $totalDueForSchedule = $nextSchedule->principal_amount + $nextSchedule->interest_amount + $nextSchedule->penalty_amount;
-            $remainingDue = max(0, $totalDueForSchedule - $nextSchedule->paid_amount);
+            $totalDueForSchedule = $nextSchedule->principal_amount->add($nextSchedule->interest_amount)->add($nextSchedule->penalty_amount);
+            $remainingDue = new \App\ValueObjects\Money(max(0, $totalDueForSchedule->getMinorAmount() - $nextSchedule->paid_amount->getMinorAmount()), $currency);
 
             // We attribute the 'suggested interest' to be the remaining amount needed after principal
             // This is a simplification for the UI suggestion
-            $this->suggestedInterest = max(0, $remainingDue - $this->suggestedPrincipal);
+            $this->suggestedInterest = max(0, $remainingDue->getMajorAmount() - $this->suggestedPrincipal);
         } else {
             $numRepayments = max(1, $this->loan->num_repayments ?? 1);
-            $this->suggestedPrincipal = $this->loan->amount / $numRepayments;
+            $this->suggestedPrincipal = $this->loan->amount->divide($numRepayments)->getMajorAmount();
 
-            $totalInterestNaira = $this->loan->amount * (($this->loan->interest_rate ?? 0) / 100);
-            $this->suggestedInterest = $totalInterestNaira / $numRepayments;
+            $totalInterest = $this->loan->getTotalExpectedInterest();
+            $this->suggestedInterest = $totalInterest->divide($numRepayments)->getMajorAmount();
         }
 
         if (! $this->editingRepaymentId) {
@@ -219,9 +228,9 @@ class LoanDetails extends Component
     {
         $schedule = ScheduledRepayment::find($id);
         $this->editingScheduleId = $id;
-        $this->schedulePrincipal = $schedule->principal_amount;
-        $this->scheduleInterest = $schedule->interest_amount;
-        $this->schedulePenalty = $schedule->penalty_amount;
+        $this->schedulePrincipal = $schedule->principal_amount->getMajorAmount();
+        $this->scheduleInterest = $schedule->interest_amount->getMajorAmount();
+        $this->schedulePenalty = $schedule->penalty_amount->getMajorAmount();
     }
 
     public function cancelEditSchedule()
@@ -254,9 +263,9 @@ class LoanDetails extends Component
 
     public function openFeesModal()
     {
-        $this->feeProcessing = $this->loan->processing_fee;
-        $this->feeInsurance = $this->loan->insurance_fee;
-        $this->feePenaltyValue = $this->loan->penalty_value;
+        $this->feeProcessing = $this->loan->processing_fee ? $this->loan->processing_fee->getMajorAmount() : 0;
+        $this->feeInsurance = $this->loan->insurance_fee ? $this->loan->insurance_fee->getMajorAmount() : 0;
+        $this->feePenaltyValue = $this->loan->penalty_value->getMajorAmount();
         $this->feePenaltyType = $this->loan->penalty_type ?? 'fixed';
         $this->feePenaltyFrequency = $this->loan->penalty_frequency ?? 'one_time';
         $this->overridePenalty = $this->loan->override_system_penalty;
@@ -362,22 +371,27 @@ class LoanDetails extends Component
 
         $this->validate($rules, $messages);
 
+        $currency = $this->loan->amount->getCurrency();
+        $amountMoney = Money::fromMajor($this->amount, $currency);
+
         if ($allowFlexible) {
             // Distribute flexible amount: prioritize interest, then principal, then extra
-            $remaining = $this->amount;
+            $remaining = $amountMoney;
 
             // Interest share
-            $intPart = min($remaining, $this->suggestedInterest);
-            $this->interest_amount = $intPart;
-            $remaining -= $intPart;
+            $suggestedIntMoney = Money::fromMajor($this->suggestedInterest, $currency);
+            $intPart = new Money(min($remaining->getMinorAmount(), $suggestedIntMoney->getMinorAmount()), $currency);
+            $this->interest_amount = $intPart->getMajorAmount();
+            $remaining = $remaining->subtract($intPart);
 
             // Principal share
-            $priPart = min($remaining, $this->suggestedPrincipal);
-            $this->principal_amount = $priPart;
-            $remaining -= $priPart;
+            $suggestedPriMoney = Money::fromMajor($this->suggestedPrincipal, $currency);
+            $priPart = new Money(min($remaining->getMinorAmount(), $suggestedPriMoney->getMinorAmount()), $currency);
+            $this->principal_amount = $priPart->getMajorAmount();
+            $remaining = $remaining->subtract($priPart);
 
             // Extra
-            $this->extra_amount = $remaining;
+            $this->extra_amount = $remaining->getMajorAmount();
         } else {
             $this->extra_amount = $this->amount - $minRequired;
             $this->principal_amount = $this->suggestedPrincipal;
@@ -406,13 +420,13 @@ class LoanDetails extends Component
         $this->editingRepaymentId = $id;
         $this->showAddForm = true;
         $repayment = Repayment::find($id);
-        $this->amount = $repayment->amount;
+        $this->amount = $repayment->amount->getMajorAmount();
         $this->payment_method = $repayment->payment_method;
         $this->collected_by = $repayment->collected_by;
         $this->paid_at = $repayment->paid_at->format('Y-m-d');
-        $this->principal_amount = $repayment->principal_amount;
-        $this->interest_amount = $repayment->interest_amount;
-        $this->extra_amount = $repayment->extra_amount;
+        $this->principal_amount = $repayment->principal_amount->getMajorAmount();
+        $this->interest_amount = $repayment->interest_amount->getMajorAmount();
+        $this->extra_amount = $repayment->extra_amount->getMajorAmount();
     }
 
     public function saveRepayment()
@@ -430,16 +444,22 @@ class LoanDetails extends Component
         $this->validate($rules);
 
         $repayment = Repayment::find($this->editingRepaymentId);
+        $currency = $this->loan->amount->getCurrency();
+        $amountMoney = Money::fromMajor($this->amount, $currency);
 
         if ($allowFlexible) {
-            $remaining = $this->amount;
-            $intPart = min($remaining, $this->suggestedInterest);
-            $this->interest_amount = $intPart;
-            $remaining -= $intPart;
-            $priPart = min($remaining, $this->suggestedPrincipal);
-            $this->principal_amount = $priPart;
-            $remaining -= $priPart;
-            $this->extra_amount = $remaining;
+            $remaining = $amountMoney;
+            $suggestedIntMoney = Money::fromMajor($this->suggestedInterest, $currency);
+            $intPart = new Money(min($remaining->getMinorAmount(), $suggestedIntMoney->getMinorAmount()), $currency);
+            $this->interest_amount = $intPart->getMajorAmount();
+            $remaining = $remaining->subtract($intPart);
+
+            $suggestedPriMoney = Money::fromMajor($this->suggestedPrincipal, $currency);
+            $priPart = new Money(min($remaining->getMinorAmount(), $suggestedPriMoney->getMinorAmount()), $currency);
+            $this->principal_amount = $priPart->getMajorAmount();
+            $remaining = $remaining->subtract($priPart);
+
+            $this->extra_amount = $remaining->getMajorAmount();
         } else {
             $this->extra_amount = $this->amount - $minRequired;
             $this->principal_amount = $this->suggestedPrincipal;

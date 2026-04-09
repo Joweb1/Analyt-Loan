@@ -133,11 +133,11 @@
                         <div class="flex justify-between items-end">
                             <div>
                                 <p class="text-[#606b8a] text-[11px] uppercase tracking-wider font-semibold">Total Debt</p>
-                                <p class="text-[#111318] dark:text-white text-lg font-bold">₦{{ number_format($totalDebt, 2) }}</p>
+                                <p class="text-[#111318] dark:text-white text-lg font-bold">₦{{ $borrower->total_debt->format() }}</p>
                             </div>
                             <div class="text-right">
                                 <p class="text-[#606b8a] text-[11px] uppercase tracking-wider font-semibold">Savings</p>
-                                <p class="text-green-600 text-lg font-bold">₦{{ number_format($borrower->savingsAccount->balance ?? 0, 2) }}</p>
+                                <p class="text-green-600 text-lg font-bold">₦{{ $borrower->savingsAccount?->balance?->format() ?? '0.00' }}</p>
                             </div>
                         </div>
                         <div class="flex items-center justify-between pt-2">
@@ -262,10 +262,10 @@
                                     </div>
                                 </th>
                                 <td class="px-6 py-4">
-                                    ₦{{ number_format($totalDebt, 2) }}
+                                    ₦{{ $borrower->total_debt->format() }}
                                 </td>
                                 <td class="px-6 py-4 text-green-600 font-bold">
-                                    ₦{{ number_format($savingsBalance, 2) }}
+                                    ₦{{ $borrower->savingsAccount?->balance?->format() ?? '0.00' }}
                                 </td>
                                 <td class="px-6 py-4">
                                      <span class="px-2 py-0.5 rounded-full bg-{{ $kycColor }}-100 dark:bg-{{ $kycColor }}-900/30 text-{{ $kycColor }}-700 dark:text-{{ $kycColor }}-400 text-[10px] font-bold uppercase">KYC {{ ucfirst($borrower->kyc_status) }}</span>

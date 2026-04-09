@@ -32,10 +32,11 @@ class Reports extends Component
             }], 'amount')
             ->get()
             ->map(function ($org) {
+                $org->total_lent = (float) ($org->total_lent ?? 0) / 100;
                 $org->total_collected = Repayment::withoutGlobalScopes()
                     ->whereHas('loan', function ($q) use ($org) {
                         $q->where('organization_id', $org->id);
-                    })->sum('amount');
+                    })->sum('amount') / 100;
 
                 return $org;
             });
@@ -44,10 +45,10 @@ class Reports extends Component
         $totals = [
             'lent' => Loan::withoutGlobalScopes()
                 ->whereIn('status', ['active', 'repaid', 'overdue'])
-                ->sum('amount'),
-            'collected' => Repayment::withoutGlobalScopes()->sum('amount'),
+                ->sum('amount') / 100,
+            'collected' => Repayment::withoutGlobalScopes()->sum('amount') / 100,
             'organizations' => Organization::count(),
-            'borrowers' => Organization::sum('id'), // Just a placeholder, actually need to sum borrower counts
+            'borrowers' => \App\Models\Borrower::count(),
         ];
 
         return view('livewire.admin.reports', [

@@ -15,10 +15,12 @@ class PaymentProofObserver
         $borrowerName = $paymentProof->borrower->user->name ?? 'A borrower';
         $loanNumber = $paymentProof->loan->loan_number ?? 'N/A';
 
+        /** @var \App\ValueObjects\Money $amount */
+        $amount = $paymentProof->amount;
         // 1. Notify the Admins (Broadcast)
         SystemLogger::action(
             'New Payment Proof Uploaded',
-            "{$borrowerName} uploaded a payment proof of ₦".number_format($paymentProof->amount, 2)." for Loan #{$loanNumber}.",
+            "{$borrowerName} uploaded a payment proof of ₦".$amount->format()." for Loan #{$loanNumber}.",
             route('loan.show', $paymentProof->loan_id, false),
             'repayment',
             $paymentProof->loan,

@@ -6,16 +6,17 @@ use App\Models\Borrower;
 use App\Models\Loan;
 use App\Models\Repayment;
 use App\Models\SystemNotification;
+use App\ValueObjects\Money;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
 class LoanDashboard extends Component
 {
-    public $repaidToday = 0;
+    public ?Money $repaidToday = null;
 
-    public $overdueAmount = 0;
+    public ?Money $overdueAmount = null;
 
-    public $totalLent = 0;
+    public ?Money $totalLent = null;
 
     public $activeCustomers = 0;
 
@@ -35,17 +36,17 @@ class LoanDashboard extends Component
 
     public $pulseData = [];
 
-    public $activeAmount = 0;
+    public ?Money $activeAmount = null;
 
-    public $repaidAmount = 0;
+    public ?Money $repaidAmount = null;
 
-    public $overdueAmountTotal = 0;
+    public ?Money $overdueAmountTotal = null;
 
     public static function clearCache(string $orgId): void
     {
         $filters = ['today', 'week', 'month', 'year'];
         foreach ($filters as $f) {
-            \Illuminate\Support\Facades\Cache::forget("dashboard_stats_{$orgId}_filter_{$f}");
+            \Illuminate\Support\Facades\Cache::forget("dashboard_stats_v2_{$orgId}_filter_{$f}");
         }
     }
 
@@ -80,7 +81,7 @@ class LoanDashboard extends Component
         $orgId = $user->organization_id;
         $isOwner = $user->isAppOwner();
 
-        $cacheKey = "dashboard_stats_{$orgId}_filter_{$this->filter}";
+        $cacheKey = "dashboard_stats_v2_{$orgId}_filter_{$this->filter}";
 
         if ($force) {
             \Illuminate\Support\Facades\Cache::forget($cacheKey);
@@ -127,26 +128,34 @@ class LoanDashboard extends Component
             }
 
             $res = [];
+            $org = \App\Models\Organization::current();
+            $currency = $org ? $org->currency_code : 'NGN';
+
             // Repaid in period
-            $res['repaidToday'] = (clone $repaymentQuery)
+            $repaidTodayMinor = (int) ((clone $repaymentQuery)
                 ->whereBetween('paid_at', [$startDate, $endDate])
-                ->sum('amount');
+                ->sum('amount'));
+            /** @var \App\ValueObjects\Money $repaidToday */
+            $repaidToday = new Money($repaidTodayMinor, $currency);
+            $res['repaidToday'] = $repaidToday;
 
             // Overdue Amount
-            $res['overdueAmount'] = (clone $loanQuery)
+            $overdueAmountMinor = (int) ((clone $loanQuery)
                 ->where('status', 'overdue')
                 ->whereBetween('updated_at', [$startDate, $endDate])
-                ->sum('amount');
+                ->sum('amount'));
 
-            if ($res['overdueAmount'] == 0 && $this->filter === 'today') {
-                $res['overdueAmount'] = (clone $loanQuery)->where('status', 'overdue')->sum('amount');
+            if ($overdueAmountMinor == 0 && $this->filter === 'today') {
+                $overdueAmountMinor = (int) ((clone $loanQuery)->where('status', 'overdue')->sum('amount'));
             }
+            $res['overdueAmount'] = new Money($overdueAmountMinor, $currency);
 
             // Total Lent in period
-            $res['totalLent'] = (clone $loanQuery)
+            $totalLentMinor = (int) ((clone $loanQuery)
                 ->whereIn('status', ['approved', 'active', 'repaid', 'overdue'])
                 ->whereBetween('created_at', [$startDate, $endDate])
-                ->sum('amount');
+                ->sum('amount'));
+            $res['totalLent'] = new Money($totalLentMinor, $currency);
 
             // Active Customers
             $res['activeCustomers'] = (clone $borrowerQuery)
@@ -175,21 +184,27 @@ class LoanDashboard extends Component
                 ->get()
                 ->pluck('total', 'paid_date');
 
-            $res['pulseData'] = collect(range(6, 0))->map(function ($daysAgo) use ($pulseRepayments) {
+            $res['pulseData'] = collect(range(6, 0))->map(function ($daysAgo) use ($pulseRepayments, $currency) {
                 $date = \App\Models\Organization::systemNow()->subDays($daysAgo);
                 $dateKey = $date->format('Y-m-d');
-                $amount = $pulseRepayments->get($dateKey, 0);
+                $amountMinor = (int) $pulseRepayments->get($dateKey, 0);
+                $money = new Money($amountMinor, $currency);
 
                 return [
                     'day' => $date->format('D'),
-                    'amount' => (float) $amount,
-                    'formatted' => number_format($amount, 0),
+                    'amount' => $money->getMajorAmount(),
+                    'formatted' => $money->format(),
                 ];
             })->toArray();
 
-            $res['activeAmount'] = (clone $loanQuery)->whereIn('status', ['approved', 'active'])->sum('amount');
-            $res['repaidAmount'] = (clone $loanQuery)->where('status', 'repaid')->sum('amount');
-            $res['overdueAmountTotal'] = (clone $loanQuery)->where('status', 'overdue')->sum('amount');
+            $activeAmountMinor = (int) ((clone $loanQuery)->whereIn('status', ['approved', 'active'])->sum('amount'));
+            $res['activeAmount'] = new Money($activeAmountMinor, $currency);
+
+            $repaidAmountMinor = (int) ((clone $loanQuery)->where('status', 'repaid')->sum('amount'));
+            $res['repaidAmount'] = new Money($repaidAmountMinor, $currency);
+
+            $overdueAmountTotalMinor = (int) ((clone $loanQuery)->where('status', 'overdue')->sum('amount'));
+            $res['overdueAmountTotal'] = new Money($overdueAmountTotalMinor, $currency);
 
             return $res;
         });
@@ -258,9 +273,9 @@ class LoanDashboard extends Component
         }
 
         // Collection Pulse: Defaulted vs Active vs Refunded (Repaid)
-        $active = (clone $query)->where('status', 'active')->sum('amount');
-        $repaid = (clone $query)->where('status', 'repaid')->sum('amount');
-        $overdue = (clone $query)->where('status', 'overdue')->sum('amount');
+        $active = (float) ((clone $query)->where('status', 'active')->sum('amount') / 100);
+        $repaid = (float) ((clone $query)->where('status', 'repaid')->sum('amount') / 100);
+        $overdue = (float) ((clone $query)->where('status', 'overdue')->sum('amount') / 100);
 
         $this->collectionPulse = [
             'series' => [$active, $repaid, $overdue],

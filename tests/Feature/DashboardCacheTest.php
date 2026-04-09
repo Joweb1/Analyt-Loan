@@ -40,9 +40,11 @@ class DashboardCacheTest extends TestCase
         // 1. Visit dashboard to prime cache
         Livewire::actingAs($this->user)
             ->test(LoanDashboard::class)
-            ->assertSet('totalLent', 0);
+            ->assertSet('totalLent', function ($val) {
+                return $val instanceof \App\ValueObjects\Money && $val->isZero();
+            });
 
-        $cacheKey = "dashboard_stats_{$orgId}_filter_today";
+        $cacheKey = "dashboard_stats_v2_{$orgId}_filter_today";
         $this->assertTrue(Cache::has($cacheKey), 'Cache should be primed for today filter');
 
         // 2. Create a loan (this should trigger the observer)
@@ -71,9 +73,11 @@ class DashboardCacheTest extends TestCase
         // 1. Visit admin dashboard to prime cache
         Livewire::actingAs($this->user)
             ->test(AdminDashboard::class)
-            ->assertSet('totalCollected', 0);
+            ->assertSet('totalCollected', function ($val) {
+                return $val instanceof \App\ValueObjects\Money && $val->isZero();
+            });
 
-        $cacheKey = "admin_dashboard_stats_{$orgId}_all";
+        $cacheKey = "admin_dashboard_stats_v2_{$orgId}_all";
         $this->assertTrue(Cache::has($cacheKey), 'Admin dashboard cache should be primed');
 
         // 2. Create a loan and repayment

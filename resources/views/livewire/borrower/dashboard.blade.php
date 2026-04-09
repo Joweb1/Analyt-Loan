@@ -11,7 +11,7 @@
                 <h3 class="text-xs font-bold uppercase text-gray-500 tracking-widest mb-4">Current Balance</h3>
                 @if($activeLoan)
                     <div class="flex items-end gap-2">
-                        <span class="text-3xl font-black dark:text-white">₦{{ number_format($activeLoan->amount) }}</span>
+                        <span class="text-3xl font-black dark:text-white">₦{{ $activeLoan->amount->format() }}</span>
                         <span class="text-xs text-green-600 font-bold mb-1">Active</span>
                     </div>
                     <p class="text-xs text-gray-500 mt-2">Next payment due: {{ $activeLoan->scheduledRepayments->where('status', 'pending')->first()?->due_date?->format('M d, Y') ?? 'N/A' }}</p>
@@ -53,7 +53,7 @@
                         @forelse($loans as $loan)
                             <tr>
                                 <td class="px-6 py-4 text-sm font-medium dark:text-white">{{ $loan->loan_number }}</td>
-                                <td class="px-6 py-4 text-sm dark:text-white">₦{{ number_format($loan->amount) }}</td>
+                                <td class="px-6 py-4 text-sm dark:text-white">₦{{ $loan->amount->format() }}</td>
                                 <td class="px-6 py-4">
                                     <span class="px-2 py-1 text-[10px] font-bold uppercase rounded-full {{ $loan->status === 'active' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700' }}">
                                         {{ $loan->status }}

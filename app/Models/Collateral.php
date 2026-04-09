@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $id
  * @property string $name
  * @property string|null $description
- * @property numeric $value
+ * @property \App\ValueObjects\Money $value
  * @property string|null $image_path
  * @property string|null $loan_id
  * @property string $status
@@ -73,7 +73,7 @@ class Collateral extends Model
     protected $casts = [
         'documents' => 'array',
         'registered_date' => 'date',
-        'value' => 'decimal:2',
+        'value' => \App\Casts\MoneyCast::class,
     ];
 
     public function loan(): BelongsTo

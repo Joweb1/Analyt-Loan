@@ -22,31 +22,38 @@ class TrustScoringService
             return 0; // Unscored
         }
 
-        $totalWeightedValue = 0;
-        $totalPossibleValue = 0;
+        $totalWeightedMinor = 0;
+        $totalPossibleMinor = 0;
 
         foreach ($schedules as $schedule) {
-            $scheduleTotal = $schedule->principal_amount + $schedule->interest_amount + $schedule->penalty_amount;
-            $totalPossibleValue += $scheduleTotal;
+            $currency = $schedule->loan->organization->currency_code ?? 'NGN';
+            $principal = $schedule->principal_amount ?? new \App\ValueObjects\Money(0, $currency);
+            $interest = $schedule->interest_amount ?? new \App\ValueObjects\Money(0, $currency);
+            $penalty = $schedule->penalty_amount ?? new \App\ValueObjects\Money(0, $currency);
+
+            $scheduleTotal = $principal->add($interest)->add($penalty);
+            $scheduleTotalMinor = $scheduleTotal->getMinorAmount();
+            $totalPossibleMinor += $scheduleTotalMinor;
 
             if ($schedule->status === 'paid') {
                 $multiplier = self::getTimelinessMultiplier($schedule);
-                $totalWeightedValue += ($scheduleTotal * $multiplier);
+                $totalWeightedMinor += (int) ($scheduleTotalMinor * $multiplier);
             } elseif ($schedule->status === 'partial') {
                 $multiplier = self::getTimelinessMultiplier($schedule);
-                $totalWeightedValue += ($schedule->paid_amount * $multiplier);
+                $paidMinor = $schedule->paid_amount ? $schedule->paid_amount->getMinorAmount() : 0;
+                $totalWeightedMinor += (int) ($paidMinor * $multiplier);
             } elseif ($schedule->status === 'overdue') {
-                $totalWeightedValue += 0;
+                $totalWeightedMinor += 0;
             } else {
-                $totalPossibleValue -= $scheduleTotal;
+                $totalPossibleMinor -= $scheduleTotalMinor;
             }
         }
 
-        if ($totalPossibleValue <= 0) {
+        if ($totalPossibleMinor <= 0) {
             return 0;
         }
 
-        $baseScore = ($totalWeightedValue / $totalPossibleValue) * 100;
+        $baseScore = ($totalWeightedMinor / $totalPossibleMinor) * 100;
 
         // Apply Behavioral Bonuses
         $score = self::applyBehavioralBonuses($borrower, $baseScore);

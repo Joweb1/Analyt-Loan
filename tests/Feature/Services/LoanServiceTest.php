@@ -50,7 +50,7 @@ class LoanServiceTest extends TestCase
         $data = [
             'borrower_id' => $borrower->id,
             'loan_number' => 'LN-TEST-001',
-            'amount' => 100000,
+            'amount' => 1000.0, // 1,000 Major = 100,000 Minor
             'loan_product' => 'Personal Loan',
             'interest_rate' => 10,
             'interest_type' => 'year',
@@ -71,6 +71,7 @@ class LoanServiceTest extends TestCase
             'loan_number' => 'LN-TEST-001',
             'organization_id' => $this->organization->id,
             'status' => 'approved',
+            'amount' => 100000,
         ]);
     }
 
@@ -142,7 +143,7 @@ class LoanServiceTest extends TestCase
         $loan = Loan::factory()->create(['organization_id' => $this->organization->id]);
         $newData = [
             'borrower_id' => $loan->borrower_id,
-            'amount' => 250000,
+            'amount' => 2500.0, // 2,500 Major = 250,000 Minor
             'loan_product' => $loan->loan_product,
             'interest_rate' => $loan->interest_rate,
             'interest_type' => $loan->interest_type,
@@ -155,7 +156,7 @@ class LoanServiceTest extends TestCase
         $dto = \App\DTOs\LoanApplicationDTO::fromArray($newData);
         $updatedLoan = $this->loanService->updateLoan($loan, $dto);
 
-        $this->assertEquals(250000, $updatedLoan->amount);
+        $this->assertEquals(250000, $updatedLoan->amount->getMinorAmount());
         $this->assertDatabaseHas('loans', [
             'id' => $loan->id,
             'amount' => 250000,

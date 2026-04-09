@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $organization_id
  * @property string $loan_id
  * @property string $borrower_id
- * @property numeric $amount
+ * @property \App\ValueObjects\Money $amount
  * @property string $payment_method
  * @property string $reference_code
  * @property string|null $receipt_path
@@ -67,7 +67,7 @@ class PaymentProof extends Model
 
     protected $casts = [
         'paid_at' => 'datetime',
-        'amount' => 'decimal:2',
+        'amount' => \App\Casts\MoneyCast::class,
     ];
 
     public function organization(): BelongsTo

@@ -25,7 +25,7 @@ class RepaymentObserver
             // 1. Notify the Borrower
             SystemLogger::success(
                 'Repayment Received',
-                'Your repayment of ₦'.number_format($repayment->amount, 2)." for Loan #{$loan->loan_number} has been recorded.",
+                'Your repayment of ₦'.$repayment->amount->format()." for Loan #{$loan->loan_number} has been recorded.",
                 'repayment',
                 $repayment,
                 false,
@@ -37,7 +37,7 @@ class RepaymentObserver
             // 2. Notify the Organization Staff
             SystemLogger::success(
                 'Repayment Received',
-                'A repayment of ₦'.number_format($repayment->amount, 2)." has been recorded for Loan #{$loan->loan_number} ({$borrowerName}).",
+                'A repayment of ₦'.$repayment->amount->format()." has been recorded for Loan #{$loan->loan_number} ({$borrowerName}).",
                 'repayment',
                 $repayment,
                 false,
@@ -88,7 +88,9 @@ class RepaymentObserver
         foreach ($repayment->savingsTransactions as $transaction) {
             /** @var \App\Models\SavingsTransaction $transaction */
             $account = $transaction->savingsAccount;
-            $account->decrement('balance', $transaction->amount);
+            $account->update([
+                'balance' => $account->balance->subtract($transaction->amount),
+            ]);
             $transaction->delete();
         }
     }

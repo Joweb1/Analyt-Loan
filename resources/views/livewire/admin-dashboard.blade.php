@@ -94,7 +94,7 @@
                 </div>
                 <div class="relative z-10 flex flex-col gap-3">
                     <span class="text-[10px] font-black uppercase tracking-widest text-white/60">Portfolio Balance</span>
-                    <h3 class="text-2xl font-black tracking-tight">₦ {{ number_format($portfolioBalance, 2) }}</h3>
+                    <h3 class="text-2xl font-black tracking-tight">₦ {{ $portfolioBalance->format() }}</h3>
                     <div class="flex items-center gap-1 text-[9px] font-black uppercase bg-white/10 w-fit px-2 py-0.5 rounded-full">
                         <span class="material-symbols-outlined text-[12px]">trending_up</span> Active Lending Value
                     </div>
@@ -108,7 +108,7 @@
                 </div>
                 <div class="relative z-10 flex flex-col gap-3">
                     <span class="text-[10px] font-black uppercase tracking-widest text-white/60">Savings Amount</span>
-                    <h3 class="text-2xl font-black tracking-tight">₦ {{ number_format($savingsBalance, 2) }}</h3>
+                    <h3 class="text-2xl font-black tracking-tight">₦ {{ $savingsBalance->format() }}</h3>
                     <div class="flex items-center gap-1 text-[9px] font-black uppercase bg-white/10 w-fit px-2 py-0.5 rounded-full">
                         <span class="material-symbols-outlined text-[12px]">lock_clock</span> Vaulted Security
                     </div>
@@ -125,7 +125,7 @@
                         <span class="text-[10px] font-black uppercase tracking-widest text-white/60">Portfolio At Risk (PAR)</span>
                         <span class="bg-white/20 px-2 py-0.5 rounded-lg text-[10px] font-black">{{ $parPercentage }}%</span>
                     </div>
-                    <h3 class="text-2xl font-black tracking-tight">₦ {{ number_format($portfolioAtRisk, 2) }}</h3>
+                    <h3 class="text-2xl font-black tracking-tight">₦ {{ $portfolioAtRisk->format() }}</h3>
                     <div class="flex items-center gap-1 text-[9px] font-black uppercase bg-white/10 w-fit px-2 py-0.5 rounded-full">
                         <span class="material-symbols-outlined text-[12px]">dangerous</span> Overdue Principal
                     </div>
@@ -139,8 +139,8 @@
                 </div>
                 <div class="relative z-10 flex flex-col gap-3">
                     <span class="text-[10px] font-black uppercase tracking-widest text-white/60">Profit & Loss (PnL)</span>
-                    <h3 class="text-2xl font-black tracking-tight {{ $profitLoss >= 0 ? 'text-green-400' : 'text-red-400' }}">
-                        ₦ {{ number_format($profitLoss, 2) }}
+                    <h3 class="text-2xl font-black tracking-tight {{ $profitLoss->isPositive() ? 'text-green-400' : ($profitLoss->isNegative() ? 'text-red-400' : '') }}">
+                        ₦ {{ $profitLoss->format() }}
                     </h3>
                     <div class="flex items-center gap-1 text-[9px] font-black uppercase bg-white/10 w-fit px-2 py-0.5 rounded-full">
                         <span class="material-symbols-outlined text-[12px]">analytics</span> Net Performance
@@ -165,7 +165,7 @@
                     <p class="text-slate-500 dark:text-slate-400 text-sm font-medium">Organisation Total balance</p>
                 </div>
                 <div>
-                    <h3 class="text-primary dark:text-white text-3xl font-extrabold tracking-tight">₦ {{ number_format($totalLoaned, 2) }}</h3>
+                    <h3 class="text-primary dark:text-white text-3xl font-extrabold tracking-tight">₦ {{ $totalLoaned->format() }}</h3>
                 </div>
             </div>
         </a>
@@ -190,7 +190,7 @@
                     </a>
                 </div>
                 <div>
-                    <h3 class="text-primary dark:text-white text-3xl font-extrabold tracking-tight">₦ {{ number_format($totalCollected, 2) }}</h3>
+                    <h3 class="text-primary dark:text-white text-3xl font-extrabold tracking-tight">₦ {{ $totalCollected->format() }}</h3>
                 </div>
             </div>
         </div>
@@ -376,21 +376,21 @@
                         <span class="w-2 h-2 rounded-full bg-brand-green"></span>
                         <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider">Repaid</span>
                     </div>
-                    <span class="text-sm font-black text-primary dark:text-white">₦ {{ number_format($repaidAmount) }}</span>
+                    <span class="text-sm font-black text-primary dark:text-white">₦ {{ $repaidAmount->format() }}</span>
                 </div>
                 <div class="flex flex-col gap-1 border-x border-slate-100 dark:border-slate-800 px-4">
                     <div class="flex items-center gap-1.5">
                         <span class="w-2 h-2 rounded-full bg-brand-blue"></span>
                         <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider">Active</span>
                     </div>
-                    <span class="text-sm font-black text-primary dark:text-white">₦ {{ number_format($activeAmount) }}</span>
+                    <span class="text-sm font-black text-primary dark:text-white">₦ {{ $activeAmount->format() }}</span>
                 </div>
                 <div class="flex flex-col gap-1 pl-4">
                     <div class="flex items-center gap-1.5">
                         <span class="w-2 h-2 rounded-full bg-brand-red"></span>
                         <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider">Overdue</span>
                     </div>
-                    <span class="text-sm font-black text-primary dark:text-white">₦ {{ number_format($overdueAmount) }}</span>
+                    <span class="text-sm font-black text-primary dark:text-white">₦ {{ $overdueAmount->format() }}</span>
                 </div>
             </div>
         </div>

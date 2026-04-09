@@ -25,20 +25,28 @@
                 <div class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Outstanding Balance</span>
                     @php
-                        $repaid = $activeLoan->repayments->sum('amount');
+                        $currency = $activeLoan->amount->getCurrency();
+                        $repaidMinor = (int) $activeLoan->repayments->sum(fn($r) => $r->amount->getMinorAmount());
+                        $repaid = new \App\ValueObjects\Money($repaidMinor, $currency);
                         $schedules = $activeLoan->scheduledRepayments;
                         
                         if ($schedules->isNotEmpty()) {
-                            $totalDue = $schedules->sum(fn($s) => $s->principal_amount + $s->interest_amount + $s->penalty_amount);
+                            $totalDueMinor = (int) $schedules->sum(fn($s) => 
+                                $s->principal_amount->getMinorAmount() + 
+                                $s->interest_amount->getMinorAmount() + 
+                                $s->penalty_amount->getMinorAmount()
+                            );
+                            $totalDue = new \App\ValueObjects\Money($totalDueMinor, $currency);
                         } else {
-                            $totalInterest = $activeLoan->amount * (($activeLoan->interest_rate ?? 0) / 100);
-                            $totalDue = $activeLoan->amount + $totalInterest;
+                            $totalDue = $activeLoan->amount->add($activeLoan->getTotalExpectedInterest());
                         }
                         
-                        $balance = max(0, $totalDue - $repaid);
-                        $progress = $totalDue > 0 ? ($repaid / $totalDue) * 100 : 0;
+                        $balance = $totalDue->subtract($repaid);
+                        if ($balance->getMinorAmount() < 0) $balance = new \App\ValueObjects\Money(0, $currency);
+                        
+                        $progress = $totalDue->isPositive() ? ($repaid->getMajorAmount() / $totalDue->getMajorAmount()) * 100 : 0;
                     @endphp
-                    <h2 class="text-4xl font-bold tracking-tight">₦{{ number_format($balance, 2) }}</h2>
+                    <h2 class="text-4xl font-bold tracking-tight">₦{{ $balance->format() }}</h2>
                     <div class="flex items-center gap-2 mt-2">
                         <div class="h-1.5 flex-1 bg-white/20 rounded-full overflow-hidden">
                             <div class="h-full bg-emerald-400 rounded-full" style="width: {{ $progress }}%"></div>
@@ -54,7 +62,7 @@
             @else
                 <div class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Available Limit</span>
-                    <h2 class="text-4xl font-bold tracking-tight">₦{{ number_format($creditLimit) }}</h2>
+                    <h2 class="text-4xl font-bold tracking-tight">₦{{ $creditLimit->format() }}</h2>
                     <p class="text-sm text-slate-400 mt-1">You are eligible for a new loan.</p>
                     
                     <div class="mt-6 flex gap-3">

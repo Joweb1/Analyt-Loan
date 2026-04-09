@@ -71,7 +71,9 @@ class BorrowTest extends TestCase
             ->set('duration_unit', 'month')
             ->set('repayment_cycle', 'monthly')
             ->assertSet('num_repayments', 3)
-            ->assertSet('calculated.installment_amount', 11000 / 3); // 10000 + 1000 interest
+            ->assertSet('calculated.installment_amount', function ($val) {
+                return abs($val - (11000 / 3)) < 0.01;
+            });
     }
 
     #[\PHPUnit\Framework\Attributes\Test]
@@ -86,7 +88,7 @@ class BorrowTest extends TestCase
 
         $this->assertDatabaseHas('loans', [
             'borrower_id' => $this->borrower->id,
-            'amount' => 5000,
+            'amount' => 500000, // Minor units
             'status' => 'applied',
         ]);
     }

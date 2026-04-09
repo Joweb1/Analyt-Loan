@@ -17,7 +17,7 @@ class LoanObserver
 
         SystemLogger::success(
             'New Loan Application',
-            'A new loan of ₦'.number_format($loan->amount)." was applied for by {$borrowerName}",
+            'A new loan of ₦'.$loan->amount->format()." was applied for by {$borrowerName}",
             'loan',
             $loan
         );
@@ -25,7 +25,7 @@ class LoanObserver
         if ($org && $org->loan_approval_alerts_enabled) {
             SystemLogger::action(
                 'Approve Disbursement',
-                "Loan #{$loan->loan_number} for ₦".number_format($loan->amount).' is pending approval.',
+                "Loan #{$loan->loan_number} for ₦".$loan->amount->format().' is pending approval.',
                 route('loan.show', $loan->id, false),
                 'loan',
                 $loan,
@@ -37,7 +37,7 @@ class LoanObserver
         if ($loan->borrower && $loan->borrower->user_id) {
             SystemLogger::success(
                 'Application Submitted',
-                'Your application for a loan of ₦'.number_format($loan->amount)." (Loan #{$loan->loan_number}) has been submitted successfully.",
+                'Your application for a loan of ₦'.$loan->amount->format()." (Loan #{$loan->loan_number}) has been submitted successfully.",
                 'loan',
                 $loan,
                 false,
@@ -108,29 +108,45 @@ class LoanObserver
         ];
 
         if ($loan->wasChanged($feeColumns) && in_array($loan->status, ['active', 'overdue', 'approved'])) {
-            $diff = 0;
+            $currency = $loan->amount->getCurrency();
+            $diffMinor = 0;
+
             if ($loan->wasChanged('processing_fee')) {
-                $diff += (float) $loan->processing_fee - (float) $loan->getOriginal('processing_fee');
-            }
-            if ($loan->wasChanged('insurance_fee')) {
-                $diff += (float) $loan->insurance_fee - (float) $loan->getOriginal('insurance_fee');
+                /** @var \App\ValueObjects\Money $newProc */
+                $newProc = $loan->processing_fee ?? new \App\ValueObjects\Money(0, $currency);
+                /** @var \App\ValueObjects\Money $oldProc */
+                $oldProc = $loan->getOriginal('processing_fee') ?? new \App\ValueObjects\Money(0, $currency);
+                $diffMinor += ($newProc->getMinorAmount() - $oldProc->getMinorAmount());
             }
 
-            if ($diff != 0) {
+            if ($loan->wasChanged('insurance_fee')) {
+                /** @var \App\ValueObjects\Money $newIns */
+                $newIns = $loan->insurance_fee ?? new \App\ValueObjects\Money(0, $currency);
+                /** @var \App\ValueObjects\Money $oldIns */
+                $oldIns = $loan->getOriginal('insurance_fee') ?? new \App\ValueObjects\Money(0, $currency);
+                $diffMinor += ($newIns->getMinorAmount() - $oldIns->getMinorAmount());
+            }
+
+            if ($diffMinor != 0) {
                 // Find next unpaid schedule
+                /** @var \App\Models\ScheduledRepayment|null $nextSchedule */
                 $nextSchedule = $loan->scheduledRepayments()
                     ->whereIn('status', ['applied', 'partial', 'overdue'])
                     ->orderBy('due_date')
                     ->first();
 
                 if ($nextSchedule) {
-                    $nextSchedule->increment('penalty_amount', $diff);
+                    $nextSchedule->update([
+                        'penalty_amount' => $nextSchedule->penalty_amount->add(new \App\ValueObjects\Money($diffMinor, $currency)),
+                    ]);
                 }
             }
 
+            $diffMoney = new \App\ValueObjects\Money($diffMinor, $currency);
+
             SystemLogger::log(
                 'Loan Fees Updated',
-                "Fee configuration for Loan #{$loan->loan_number} has been updated. Adjustment of ₦".number_format($diff, 2).' applied to next schedule.',
+                "Fee configuration for Loan #{$loan->loan_number} has been updated. Adjustment of ₦".$diffMoney->format().' applied to next schedule.',
                 'info',
                 'loan',
                 $loan

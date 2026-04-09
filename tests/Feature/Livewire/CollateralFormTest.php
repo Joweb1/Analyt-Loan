@@ -57,7 +57,7 @@ class CollateralFormTest extends TestCase
             'organization_id' => $this->organization->id,
             'loan_id' => $this->loan->id,
             'name' => 'Toyota Camry',
-            'value' => 2000000,
+            'value' => 200000000, // Minor units
         ]);
     }
 
@@ -79,6 +79,7 @@ class CollateralFormTest extends TestCase
             'organization_id' => $this->organization->id,
             'loan_id' => null,
             'name' => 'Office Generator',
+            'value' => 50000000, // Minor units
         ]);
     }
 
@@ -87,7 +88,7 @@ class CollateralFormTest extends TestCase
         $collateral = Collateral::factory()->create([
             'organization_id' => $this->organization->id,
             'loan_id' => $this->loan->id,
-            'value' => 1000000,
+            'value' => 1000000, // 1,000,000 Major = 100,000,000 Minor
         ]);
 
         Livewire::actingAs($this->admin)
@@ -101,7 +102,7 @@ class CollateralFormTest extends TestCase
 
         $this->assertDatabaseHas('collaterals', [
             'id' => $collateral->id,
-            'value' => 1500000,
+            'value' => 150000000, // Minor units
         ]);
     }
 }

@@ -36,7 +36,10 @@ class FiftyPercentRule implements Rule
             return false;
         }
 
-        return $collateral->value >= ($this->loanAmount / 2);
+        /** @var \App\ValueObjects\Money $val */
+        $val = $collateral->value;
+
+        return $val->getMajorAmount() >= ($this->loanAmount / 2);
     }
 
     /**

@@ -43,15 +43,18 @@ class AdminDashboardTest extends TestCase
         $loan1 = Loan::factory()->create([
             'organization_id' => $this->organization->id,
             'borrower_id' => $borrower->id,
-            'amount' => 100000,
+            'amount' => 100000.0,
             'interest_rate' => 0,
+            'interest_type' => 'year',
+            'duration' => 1,
+            'duration_unit' => 'year',
             'status' => 'active',
         ]);
 
         \App\Models\ScheduledRepayment::create([
             'loan_id' => $loan1->id,
             'installment_number' => 1,
-            'principal_amount' => 100000,
+            'principal_amount' => 100000.0,
             'interest_amount' => 0,
             'due_date' => now()->addMonth(),
             'status' => 'applied',
@@ -61,16 +64,19 @@ class AdminDashboardTest extends TestCase
         $loan2 = Loan::factory()->create([
             'organization_id' => $this->organization->id,
             'borrower_id' => $borrower->id,
-            'amount' => 50000,
+            'amount' => 50000.0,
             'interest_rate' => 10,
+            'interest_type' => 'year',
+            'duration' => 1,
+            'duration_unit' => 'year',
             'status' => 'active',
         ]);
 
         \App\Models\ScheduledRepayment::create([
             'loan_id' => $loan2->id,
             'installment_number' => 1,
-            'principal_amount' => 50000,
-            'interest_amount' => 5000,
+            'principal_amount' => 50000.0,
+            'interest_amount' => 5000.0,
             'due_date' => now()->addMonth(),
             'status' => 'applied',
         ]);
@@ -78,17 +84,26 @@ class AdminDashboardTest extends TestCase
         // Repayment for repaid loan: 55k (Covers 50k principal + 10% interest)
         Repayment::factory()->create([
             'loan_id' => $loan2->id,
-            'amount' => 55000,
-            'principal_amount' => 50000,
-            'interest_amount' => 5000,
+            'amount' => 55000.0,
+            'principal_amount' => 50000.0,
+            'interest_amount' => 5000.0,
             'paid_at' => now(),
         ]);
 
+        $loan2->refreshRepaymentStatus();
+
         // Organisation Total Balance = (100k + 0) + (50k + 5k) - 55k = 100k
+        $currency = $this->organization->currency_code ?: 'NGN';
         Livewire::actingAs($this->admin)
             ->test(AdminDashboard::class)
-            ->assertSet('totalLoaned', 100000)
-            ->assertSet('totalCollected', 55000)
+            ->assertSet('totalLoaned', function ($val) {
+                // \Log::info('Val type: ' . get_class($val));
+                // \Log::info('Val minor: ' . $val->getMinorAmount());
+                return $val instanceof \App\ValueObjects\Money && $val->getMinorAmount() === 10000000;
+            })
+            ->assertSet('totalCollected', function ($val) {
+                return $val instanceof \App\ValueObjects\Money && $val->getMinorAmount() === 5500000;
+            })
             ->assertSet('activeLoansCount', 1) // Only Loan 1 is active
             ->assertSet('paidLoansCount', 1); // Loan 2 is repaid
     }

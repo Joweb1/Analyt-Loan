@@ -69,7 +69,7 @@ class CollectionEntry extends Component
     {
         $this->selectedLoanId = $id;
         $loan = Loan::findOrFail($id);
-        $this->amount = $loan->balance; // Default to full balance
+        $this->amount = $loan->balance->getMajorAmount(); // Default to full balance
         $this->showRepaymentModal = true;
     }
 
@@ -85,12 +85,12 @@ class CollectionEntry extends Component
         $loan = Loan::findOrFail($this->selectedLoanId);
 
         // Simple Split Logic (Priority: Interest -> Principal -> Extra)
-        $totalInterest = (float) $loan->amount * (($loan->interest_rate ?? 0) / 100);
-        $interestPaid = (float) $loan->repayments()->sum('interest_amount');
+        $totalInterest = $loan->amount->getMajorAmount() * (($loan->interest_rate ?? 0) / 100);
+        $interestPaid = (float) $loan->repayments()->sum('interest_amount') / 100;
         $interestDue = max(0, $totalInterest - $interestPaid);
 
-        $principalPaid = (float) $loan->repayments()->sum('principal_amount');
-        $principalDue = max(0, (float) $loan->amount - $principalPaid);
+        $principalPaid = (float) $loan->repayments()->sum('principal_amount') / 100;
+        $principalDue = max(0, $loan->amount->getMajorAmount() - $principalPaid);
 
         $remainingAmount = (float) $this->amount;
         $interestToPay = min($remainingAmount, $interestDue);

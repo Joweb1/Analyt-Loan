@@ -190,11 +190,11 @@
                 <div x-show="view === 'card'" class="p-6 grid grid-cols-2 sm:grid-cols-3 gap-y-8 gap-x-4">
                     <div>
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total Loan Amount</p>
-                        <p class="text-lg sm:text-xl font-black text-slate-900 dark:text-white">₦{{ number_format($loan->amount, 2) }}</p>
+                        <p class="text-lg sm:text-xl font-black text-slate-900 dark:text-white">₦{{ $loan->amount->format() }}</p>
                     </div>
                      <div>
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Current Balance</p>
-                        <p class="text-lg sm:text-xl font-black text-primary">₦{{ number_format($loan->balance, 2) }}</p>
+                        <p class="text-lg sm:text-xl font-black text-primary">₦{{ $loan->balance->format() }}</p>
                     </div>
 
                     <div class="col-span-2 sm:col-span-3 h-px bg-slate-100 dark:bg-slate-800 my-2"></div>
@@ -214,16 +214,16 @@
                     
                     <div>
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Interest Rate</p>
-                        @php $interestNaira = $loan->amount * (($loan->interest_rate ?? 0) / 100); @endphp
+                        @php $interestNaira = $loan->amount->multiply(($loan->interest_rate ?? 0) / 100); @endphp
                         <p class="text-sm font-bold text-slate-700 dark:text-slate-300">
                             {{ $loan->interest_rate ?? '0' }}% every {{ $loan->interest_type ?? 'month' }}
-                            <span class="text-[10px] text-slate-400 font-medium">(₦{{ number_format($interestNaira, 2) }} per {{ $loan->interest_type ?? 'month' }})</span>
+                            <span class="text-[10px] text-slate-400 font-medium">(₦{{ $interestNaira }} per {{ $loan->interest_type ?? 'month' }})</span>
                         </p>
                     </div>
                     <div>
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total Interest</p>
                         <p class="text-sm font-bold text-blue-600 dark:text-blue-400">
-                            ₦{{ number_format($loan->getTotalExpectedInterest(), 2) }}
+                            ₦{{ $loan->getTotalExpectedInterest() }}
                         </p>
                     </div>                    <div>
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total Repayments</p>
@@ -231,11 +231,16 @@
                     </div>
                     <div>
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Fees & Charges</p>
-                        <p class="text-sm font-bold text-slate-700 dark:text-slate-300">₦{{ number_format(($loan->processing_fee ?? 0) + ($loan->insurance_fee ?? 0), 2) }}</p>
+                        @php
+                            $currency = $loan->amount->getCurrency();
+                            $totalFees = ($loan->processing_fee ?? new \App\ValueObjects\Money(0, $currency))
+                                ->add($loan->insurance_fee ?? new \App\ValueObjects\Money(0, $currency));
+                        @endphp
+                        <p class="text-sm font-bold text-slate-700 dark:text-slate-300">₦{{ $totalFees }}</p>
                     </div>
                      <div>
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Paid Amount</p>
-                        <p class="text-sm font-bold text-green-600">₦{{ number_format($loan->repayments->sum('amount'), 2) }}</p>
+                        <p class="text-sm font-bold text-green-600">₦{{ new \App\ValueObjects\Money($loan->repayments()->sum('amount'), $loan->amount->getCurrency()) }}</p>
                     </div>
                 </div>
 
@@ -245,15 +250,15 @@
                         <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
                             <tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/50">
                                 <td class="px-6 py-4 font-medium text-slate-500">Loan Amount</td>
-                                <td class="px-6 py-4 font-bold text-slate-900 dark:text-white text-right">₦{{ number_format($loan->amount, 2) }}</td>
+                                <td class="px-6 py-4 font-bold text-slate-900 dark:text-white text-right">₦{{ $loan->amount }}</td>
                             </tr>
                             <tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/50">
                                 <td class="px-6 py-4 font-medium text-slate-500">Paid Amount</td>
-                                <td class="px-6 py-4 font-bold text-green-600 text-right">₦{{ number_format($loan->repayments->sum('amount'), 2) }}</td>
+                                <td class="px-6 py-4 font-bold text-green-600 text-right">₦{{ new \App\ValueObjects\Money($loan->repayments()->sum('amount'), $loan->amount->getCurrency()) }}</td>
                             </tr>
                             <tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/50">
                                 <td class="px-6 py-4 font-medium text-slate-500">Balance</td>
-                                <td class="px-6 py-4 font-bold text-primary text-right">₦{{ number_format($loan->balance, 2) }}</td>
+                                <td class="px-6 py-4 font-bold text-primary text-right">₦{{ $loan->balance }}</td>
                             </tr>
                             <tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/50">
                                 <td class="px-6 py-4 font-medium text-slate-500">Repayment Cycle</td>
@@ -267,12 +272,12 @@
                                 <td class="px-6 py-4 font-medium text-slate-500">Interest Rate</td>
                                 <td class="px-6 py-4 font-bold text-slate-700 dark:text-slate-300 text-right">
                                     {{ $loan->interest_rate ?? '0' }}% every {{ $loan->interest_type ?? 'month' }}
-                                    <span class="text-[10px] text-slate-400 font-medium">(₦{{ number_format($loan->amount * (($loan->interest_rate ?? 0) / 100), 2) }} per {{ $loan->interest_type ?? 'month' }})</span>
+                                    <span class="text-[10px] text-slate-400 font-medium">(₦{{ $loan->amount->multiply(($loan->interest_rate ?? 0) / 100) }} per {{ $loan->interest_type ?? 'month' }})</span>
                                 </td>
                             </tr>
                             <tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/50">
                                 <td class="px-6 py-4 font-medium text-slate-500">Total Expected Interest</td>
-                                <td class="px-6 py-4 font-bold text-blue-600 text-right">₦{{ number_format($loan->getTotalExpectedInterest(), 2) }}</td>
+                                <td class="px-6 py-4 font-bold text-blue-600 text-right">₦{{ $loan->getTotalExpectedInterest() }}</td>
                             </tr>                        </tbody>
                     </table>
                 </div>
@@ -297,7 +302,7 @@
                                     </div>
                                     <div>
                                         <div class="flex items-center gap-2">
-                                            <p class="text-lg font-black text-slate-900">₦{{ number_format($proof->amount, 2) }}</p>
+                                            <p class="text-lg font-black text-slate-900">₦{{ $proof->amount }}</p>
                                             <span class="text-[10px] font-bold text-amber-700 bg-amber-200/50 px-2 py-0.5 rounded uppercase font-mono tracking-tighter">{{ $proof->reference_code }}</span>
                                         </div>
                                         <div class="flex items-center gap-3 mt-1">
@@ -314,7 +319,7 @@
                                     <button wire:click="declineProof('{{ $proof->id }}')" wire:confirm="Are you sure you want to decline this payment proof?" class="flex-1 sm:flex-none px-4 py-2 bg-white text-red-600 border border-red-100 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-50 transition-all">
                                         Decline
                                     </button>
-                                    <button wire:click="approveProof('{{ $proof->id }}')" wire:confirm="Confirm and record this ₦{{ number_format($proof->amount) }} payment?" class="flex-1 sm:flex-none px-6 py-2 bg-green-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-green-600/20 hover:bg-green-700 transition-all">
+                                    <button wire:click="approveProof('{{ $proof->id }}')" wire:confirm="Confirm and record this ₦{{ $proof->amount }} payment?" class="flex-1 sm:flex-none px-6 py-2 bg-green-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-green-600/20 hover:bg-green-700 transition-all">
                                         Approve & Record
                                     </button>
                                 </div>
@@ -403,10 +408,13 @@
             <!-- Modal Content -->
             <div class="flex-1 overflow-y-auto p-6 custom-scrollbar" x-data="{ showForm: @entangle('showAddForm') }">
                 @php
+                    $currency = $loan->amount->getCurrency();
                     $totalInterest = $loan->getTotalExpectedInterest();
-                    $totalFees = (float) ($loan->processing_fee ?? 0) + (float) ($loan->insurance_fee ?? 0);
-                    $totalPayable = (float) $loan->amount + $totalInterest + $totalFees;
-                    $totalPaid = $loan->repayments->sum('amount');
+                    $processingFee = $loan->processing_fee ?? new \App\ValueObjects\Money(0, $currency);
+                    $insuranceFee = $loan->insurance_fee ?? new \App\ValueObjects\Money(0, $currency);
+                    $totalFees = $processingFee->add($insuranceFee);
+                    $totalPayable = $loan->amount->add($totalInterest)->add($totalFees);
+                    $totalPaid = new \App\ValueObjects\Money($loan->repayments()->sum('amount'), $currency);
                     $remainingBalance = $loan->balance;
                 @endphp
 
@@ -414,15 +422,15 @@
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-8">
                         <div>
                             <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Payable</p>
-                            <p class="text-sm font-black text-slate-900 dark:text-white">₦{{ number_format($totalPayable, 2) }}</p>
+                            <p class="text-sm font-black text-slate-900 dark:text-white">₦{{ $totalPayable }}</p>
                         </div>
                         <div>
                             <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Paid</p>
-                            <p class="text-sm font-black text-green-600">₦{{ number_format($totalPaid, 2) }}</p>
+                            <p class="text-sm font-black text-green-600">₦{{ $totalPaid }}</p>
                         </div>
                         <div>
                             <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Balance</p>
-                            <p class="text-sm font-black text-primary">₦{{ number_format($remainingBalance, 2) }}</p>
+                            <p class="text-sm font-black text-primary">₦{{ $remainingBalance }}</p>
                         </div>
                         <div class="flex items-center">
                              <button @click="showForm = !showForm" class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-105 transition-all">
@@ -533,7 +541,7 @@
                                             </div>
                                             <div>
                                                 <div class="flex items-center gap-2">
-                                                    <h5 class="text-lg font-black text-slate-900 dark:text-white">₦{{ number_format($repayment->amount, 2) }}</h5>
+                                                    <h5 class="text-lg font-black text-slate-900 dark:text-white">₦{{ $repayment->amount }}</h5>
                                                     <span class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 text-[9px] font-black uppercase">{{ $repayment->payment_method }}</span>
                                                 </div>
                                                 <p class="text-xs text-slate-500 font-medium mt-1">
@@ -541,10 +549,10 @@
                                                     on <span class="font-bold">{{ $repayment->paid_at->format('M d, Y') }}</span>
                                                 </p>
                                                 <div class="flex flex-wrap gap-4 mt-3">
-                                                    <div class="text-[10px] text-slate-400 font-bold uppercase">P: <span class="text-slate-600 dark:text-slate-300">₦{{ number_format($repayment->principal_amount, 2) }}</span></div>
-                                                    <div class="text-[10px] text-slate-400 font-bold uppercase">I: <span class="text-slate-600 dark:text-slate-300">₦{{ number_format($repayment->interest_amount, 2) }}</span></div>
-                                                    @if($repayment->extra_amount > 0)
-                                                        <div class="text-[10px] text-emerald-500 font-black uppercase">Extra: <span>₦{{ number_format($repayment->extra_amount, 2) }}</span></div>
+                                                    <div class="text-[10px] text-slate-400 font-bold uppercase">P: <span class="text-slate-600 dark:text-slate-300">₦{{ $repayment->principal_amount }}</span></div>
+                                                    <div class="text-[10px] text-slate-400 font-bold uppercase">I: <span class="text-slate-600 dark:text-slate-300">₦{{ $repayment->interest_amount }}</span></div>
+                                                    @if($repayment->extra_amount->isPositive())
+                                                        <div class="text-[10px] text-emerald-500 font-black uppercase">Extra: <span>₦{{ $repayment->extra_amount }}</span></div>
                                                     @endif
                                                 </div>
                                             </div>
@@ -655,17 +663,17 @@
                                             </div>
                                         </td>
                                     @else
-                                        <td class="px-4 py-4 text-right font-medium text-slate-600 dark:text-slate-300">₦{{ number_format($schedule->principal_amount, 2) }}</td>
-                                        <td class="px-4 py-4 text-right font-medium text-slate-600 dark:text-slate-300">₦{{ number_format($schedule->interest_amount, 2) }}</td>
+                                        <td class="px-4 py-4 text-right font-medium text-slate-600 dark:text-slate-300">₦{{ $schedule->principal_amount }}</td>
+                                        <td class="px-4 py-4 text-right font-medium text-slate-600 dark:text-slate-300">₦{{ $schedule->interest_amount }}</td>
                                         <td class="px-4 py-4 text-right font-medium text-slate-600 dark:text-slate-300">
-                                            @if($schedule->penalty_amount > 0)
-                                                <span class="text-red-500">₦{{ number_format($schedule->penalty_amount, 2) }}</span>
+                                            @if($schedule->penalty_amount->isPositive())
+                                                <span class="text-red-500">₦{{ $schedule->penalty_amount }}</span>
                                             @else
                                                 -
                                             @endif
                                         </td>
                                         <td class="px-4 py-4 text-right font-black text-slate-900 dark:text-white">
-                                            ₦{{ number_format($schedule->principal_amount + $schedule->interest_amount + $schedule->penalty_amount, 2) }}
+                                            ₦{{ $schedule->principal_amount->add($schedule->interest_amount)->add($schedule->penalty_amount) }}
                                         </td>
                                         <td class="px-4 py-4 text-center">
                                             @php
@@ -955,12 +963,12 @@
                             <div class="grid grid-cols-2 gap-4">
                                 <div class="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
                                     <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Asset Value</p>
-                                    <p class="text-lg font-black text-slate-900 dark:text-white">₦{{ number_format($loan->collateral->value, 2) }}</p>
+                                    <p class="text-lg font-black text-slate-900 dark:text-white">₦{{ $loan->collateral->value }}</p>
                                 </div>
                                 <div class="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
                                     <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">LTV Ratio</p>
                                     @php
-                                        $ltv = $loan->collateral->value > 0 ? ($loan->amount / $loan->collateral->value) * 100 : 0;
+                                        $ltv = $loan->collateral->value->getMajorAmount() > 0 ? ($loan->amount->getMajorAmount() / $loan->collateral->value->getMajorAmount()) * 100 : 0;
                                         $ltvColor = $ltv > 80 ? 'text-red-500' : ($ltv > 50 ? 'text-amber-500' : 'text-green-500');
                                     @endphp
                                     <p class="text-lg font-black {{ $ltvColor }}">{{ number_format($ltv, 1) }}%</p>

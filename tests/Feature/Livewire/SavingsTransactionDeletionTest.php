@@ -35,13 +35,13 @@ class SavingsTransactionDeletionTest extends TestCase
             'organization_id' => $org->id,
             'borrower_id' => $borrower->id,
             'account_number' => 'TEST-123',
-            'balance' => 5000,
+            'balance' => 5000, // 5,000 Major = 500,000 Minor
             'status' => 'active',
         ]);
 
         $transaction = SavingsTransaction::create([
             'savings_account_id' => $account->id,
-            'amount' => 5000,
+            'amount' => 5000, // 5,000 Major = 500,000 Minor
             'type' => 'deposit',
             'staff_id' => $admin->id,
             'transaction_date' => now(),
@@ -53,7 +53,7 @@ class SavingsTransactionDeletionTest extends TestCase
             ->assertDispatched('custom-alert');
 
         $this->assertDatabaseMissing('savings_transactions', ['id' => $transaction->id]);
-        $this->assertEquals(0, $account->fresh()->balance);
+        $this->assertEquals(0, $account->fresh()->balance->getMinorAmount());
     }
 
     public function test_cannot_delete_transaction_linked_to_repayment()
@@ -67,7 +67,7 @@ class SavingsTransactionDeletionTest extends TestCase
             'organization_id' => $org->id,
             'borrower_id' => $borrower->id,
             'account_number' => 'TEST-456',
-            'balance' => 2000,
+            'balance' => 2000, // 2,000 Major = 200,000 Minor
             'status' => 'active',
         ]);
 
@@ -75,15 +75,15 @@ class SavingsTransactionDeletionTest extends TestCase
         $loan = \App\Models\Loan::factory()->create(['organization_id' => $org->id, 'borrower_id' => $borrower->id]);
         $repayment = Repayment::create([
             'loan_id' => $loan->id,
-            'amount' => 10000,
-            'extra_amount' => 2000,
+            'amount' => 10000, // 10k major
+            'extra_amount' => 2000, // 2k major
             'paid_at' => now(),
         ]);
 
         $transaction = SavingsTransaction::create([
             'savings_account_id' => $account->id,
             'repayment_id' => $repayment->id, // LINKED
-            'amount' => 2000,
+            'amount' => 2000, // 2k major
             'type' => 'deposit',
             'staff_id' => $admin->id,
             'transaction_date' => now(),
@@ -95,7 +95,7 @@ class SavingsTransactionDeletionTest extends TestCase
             ->assertDispatched('custom-alert');
 
         $this->assertDatabaseHas('savings_transactions', ['id' => $transaction->id]);
-        $this->assertEquals(2000, $account->fresh()->balance);
+        $this->assertEquals(200000, $account->fresh()->balance->getMinorAmount());
     }
 
     public function test_unauthorized_user_cannot_delete_savings()
@@ -109,13 +109,13 @@ class SavingsTransactionDeletionTest extends TestCase
             'organization_id' => $org->id,
             'borrower_id' => $borrower->id,
             'account_number' => 'TEST-789',
-            'balance' => 1000,
+            'balance' => 1000, // 1k major
             'status' => 'active',
         ]);
 
         $transaction = SavingsTransaction::create([
             'savings_account_id' => $account->id,
-            'amount' => 1000,
+            'amount' => 1000, // 1k major
             'type' => 'deposit',
             'staff_id' => $staff->id,
             'transaction_date' => now(),

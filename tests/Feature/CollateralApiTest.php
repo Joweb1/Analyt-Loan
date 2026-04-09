@@ -27,6 +27,7 @@ class CollateralApiTest extends TestCase
         $response = $this->postJson('/api/collaterals', $collateralData);
 
         $response->assertStatus(201);
+        $collateralData['value'] = 100000; // Minor units (1000 * 100)
         $this->assertDatabaseHas('collaterals', $collateralData);
     }
 

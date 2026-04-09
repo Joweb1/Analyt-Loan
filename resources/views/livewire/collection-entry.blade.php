@@ -50,10 +50,10 @@
                                 {{ $loan->loanOfficer->name ?? 'Unassigned' }}
                             </td>
                             <td class="px-4 py-4 font-medium text-slate-900 dark:text-white">
-                                ₦{{ number_format($loan->amount, 2) }}
+                                ₦{{ $loan->amount->format() }}
                             </td>
                             <td class="px-4 py-4 font-medium text-slate-900 dark:text-white">
-                                ₦{{ number_format($loan->balance, 2) }}
+                                ₦{{ $loan->balance->format() }}
                                 @if($loan->status === 'overdue')
                                     <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-700 ml-2">Overdue</span>
                                 @endif

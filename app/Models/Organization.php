@@ -261,20 +261,27 @@ class Organization extends Model
     /**
      * Total Organization Portfolio Balance: total loaned + interest - repayments
      */
-    public function getOrganizationBalanceAttribute(): float
+    public function getOrganizationBalanceAttribute(): \App\ValueObjects\Money
     {
         $loans = $this->loans()->whereNotIn('status', ['draft', 'rejected', 'applied'])->get();
+        $currency = $this->currency_code ?: config('app.currency', 'NGN');
 
-        $totalLoaned = $loans->sum(fn ($loan) => (float) ($loan->amount ?? 0));
-        $totalInterest = $loans->sum(function ($loan) {
-            /** @var Loan $loan */
-            return (float) ($loan->amount ?? 0) * (($loan->interest_rate ?? 0) / 100);
-        });
+        $totalLoaned = new \App\ValueObjects\Money(0, $currency);
+        foreach ($loans as $loan) {
+            $totalLoaned = $totalLoaned->add($loan->amount ?? new \App\ValueObjects\Money(0, $currency));
+        }
 
-        $totalCollected = Repayment::whereIn('loan_id', $loans->pluck('id'))
+        $totalInterest = new \App\ValueObjects\Money(0, $currency);
+        foreach ($loans as $loan) {
+            /** @var \App\Models\Loan $loan */
+            $totalInterest = $totalInterest->add($loan->getTotalExpectedInterest());
+        }
+
+        $totalCollectedMinor = (int) Repayment::whereIn('loan_id', $loans->pluck('id'))
             ->sum('amount');
+        $totalCollected = new \App\ValueObjects\Money($totalCollectedMinor, $currency);
 
-        return round($totalLoaned + $totalInterest - $totalCollected, 2);
+        return $totalLoaned->add($totalInterest)->subtract($totalCollected);
     }
 
     public function getLogoUrlAttribute(): ?string

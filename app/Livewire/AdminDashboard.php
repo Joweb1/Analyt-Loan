@@ -8,14 +8,15 @@ use App\Models\Portfolio;
 use App\Models\Repayment;
 use App\Models\SavingsAccount;
 use App\Models\SystemNotification;
+use App\ValueObjects\Money;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
 class AdminDashboard extends Component
 {
-    public $totalLoaned = 0;
+    public ?Money $totalLoaned = null;
 
-    public $totalCollected = 0;
+    public ?Money $totalCollected = null;
 
     public $totalCustomers = 0;
 
@@ -28,22 +29,22 @@ class AdminDashboard extends Component
     public $defaultedLoansCount = 0;
 
     // Portfolio Metrics
-    public $portfolioBalance = 0;
+    public ?Money $portfolioBalance = null;
 
-    public $savingsBalance = 0;
+    public ?Money $savingsBalance = null;
 
-    public $portfolioAtRisk = 0;
+    public ?Money $portfolioAtRisk = null;
 
     public $parPercentage = 0;
 
-    public $profitLoss = 0;
+    public ?Money $profitLoss = null;
 
     // Chart Data
-    public $activeAmount = 0;
+    public ?Money $activeAmount = null;
 
-    public $repaidAmount = 0;
+    public ?Money $repaidAmount = null;
 
-    public $overdueAmount = 0;
+    public ?Money $overdueAmount = null;
 
     // Pulse Trend Data
     public $pulseData = [];
@@ -57,9 +58,9 @@ class AdminDashboard extends Component
 
     public static function clearCache(string $orgId, ?string $portfolioId = null): void
     {
-        \Illuminate\Support\Facades\Cache::forget("admin_dashboard_stats_{$orgId}_all");
+        \Illuminate\Support\Facades\Cache::forget("admin_dashboard_stats_v2_{$orgId}_all");
         if ($portfolioId) {
-            \Illuminate\Support\Facades\Cache::forget("admin_dashboard_stats_{$orgId}_{$portfolioId}");
+            \Illuminate\Support\Facades\Cache::forget("admin_dashboard_stats_v2_{$orgId}_{$portfolioId}");
         }
     }
 
@@ -104,7 +105,7 @@ class AdminDashboard extends Component
         $orgId = $user->organization_id;
         $isOwner = $user->isAppOwner();
 
-        $cacheKey = "admin_dashboard_stats_{$orgId}_".($this->selectedPortfolioId ?? 'all');
+        $cacheKey = "admin_dashboard_stats_v2_{$orgId}_".($this->selectedPortfolioId ?? 'all');
 
         if ($force) {
             \Illuminate\Support\Facades\Cache::forget($cacheKey);
@@ -145,25 +146,35 @@ class AdminDashboard extends Component
                 $portfolio = Portfolio::find($this->selectedPortfolioId);
                 if ($portfolio) {
                     $portfolioData = [
-                        'portfolioBalance' => (float) $portfolio->portfolio_balance,
-                        'savingsBalance' => (float) $portfolio->savings_balance,
-                        'portfolioAtRisk' => (float) $portfolio->portfolio_at_risk,
+                        'portfolioBalance' => $portfolio->portfolio_balance,
+                        'savingsBalance' => $portfolio->savings_balance,
+                        'portfolioAtRisk' => $portfolio->portfolio_at_risk,
                         'parPercentage' => (float) $portfolio->par_percentage,
-                        'profitLoss' => (float) $portfolio->profit_loss,
+                        'profitLoss' => $portfolio->profit_loss,
                     ];
                 }
             } else {
                 // Organization-wide metrics
                 if ($org) {
+                    $currency = $org->currency_code ?: config('app.currency', 'NGN');
+                    $portfolios = Portfolio::where('organization_id', $orgId)->get();
+
+                    $totalPARMinor = (int) $portfolios->sum(function ($p) {
+                        return $p->portfolio_at_risk->getMinorAmount();
+                    });
+                    $totalPnLMinor = (int) $portfolios->sum(function ($p) {
+                        return $p->profit_loss->getMinorAmount();
+                    });
+
                     $portfolioData = [
-                        'portfolioBalance' => (float) $org->organization_balance,
-                        'savingsBalance' => (float) SavingsAccount::where('organization_id', $orgId)->sum('balance'),
-                        'portfolioAtRisk' => (float) Portfolio::where('organization_id', $orgId)->sum('portfolio_at_risk'),
+                        'portfolioBalance' => $org->organization_balance,
+                        'savingsBalance' => new \App\ValueObjects\Money((int) SavingsAccount::where('organization_id', $orgId)->sum('balance'), $currency),
+                        'portfolioAtRisk' => new \App\ValueObjects\Money($totalPARMinor, $currency),
                         'parPercentage' => 0, // Calculated below
-                        'profitLoss' => (float) Portfolio::where('organization_id', $orgId)->sum('profit_loss'),
+                        'profitLoss' => new \App\ValueObjects\Money($totalPnLMinor, $currency),
                     ];
-                    if ($portfolioData['portfolioBalance'] > 0) {
-                        $portfolioData['parPercentage'] = ($portfolioData['portfolioAtRisk'] / $portfolioData['portfolioBalance']) * 100;
+                    if (! $portfolioData['portfolioBalance']->isZero()) {
+                        $portfolioData['parPercentage'] = ($portfolioData['portfolioAtRisk']->getMajorAmount() / $portfolioData['portfolioBalance']->getMajorAmount()) * 100;
                     }
                 }
             }
@@ -177,29 +188,44 @@ class AdminDashboard extends Component
                 ->get()
                 ->pluck('total', 'paid_date');
 
-            $pulseData = collect(range(6, 0))->map(function ($daysAgo) use ($pulseRepayments) {
+            $currency = $org->currency_code ?: config('app.currency', 'NGN');
+            $pulseData = collect(range(6, 0))->map(function ($daysAgo) use ($pulseRepayments, $currency) {
                 $date = \App\Models\Organization::systemNow()->subDays($daysAgo);
                 $dateKey = $date->format('Y-m-d');
-                $amount = $pulseRepayments->get($dateKey, 0);
+                $amountMinor = (int) $pulseRepayments->get($dateKey, 0);
+                $money = new \App\ValueObjects\Money($amountMinor, $currency);
 
                 return [
                     'day' => $date->format('D'),
-                    'amount' => (float) $amount,
-                    'formatted' => number_format($amount, 0),
+                    'amount' => $money->getMajorAmount(),
+                    'formatted' => $money->format(),
                 ];
             })->toArray();
 
+            $totalLoaned = $portfolioData['portfolioBalance'];
+            $totalCollectedMinor = (int) (clone $repaymentQuery)->sum('amount');
+            $totalCollected = new \App\ValueObjects\Money($totalCollectedMinor, $currency);
+
+            $activeAmountMinor = (int) (clone $loanQuery)->whereIn('status', ['approved', 'active'])->sum('amount');
+            $activeAmount = new \App\ValueObjects\Money($activeAmountMinor, $currency);
+
+            $repaidAmountMinor = (int) (clone $loanQuery)->where('status', 'repaid')->sum('amount');
+            $repaidAmount = new \App\ValueObjects\Money($repaidAmountMinor, $currency);
+
+            $overdueAmountMinor = (int) (clone $loanQuery)->where('status', 'overdue')->sum('amount');
+            $overdueAmount = new \App\ValueObjects\Money($overdueAmountMinor, $currency);
+
             $res = array_merge([
-                'totalLoaned' => $portfolioData['portfolioBalance'],
-                'totalCollected' => (clone $repaymentQuery)->sum('amount'),
+                'totalLoaned' => $totalLoaned,
+                'totalCollected' => $totalCollected,
                 'totalCustomers' => (clone $borrowerQuery)->count(),
                 'activeLoansCount' => (clone $loanQuery)->whereIn('status', ['approved', 'active'])->count(),
                 'pendingApplicationsCount' => (clone $loanQuery)->whereIn('status', ['applied', 'verification_pending'])->count(),
                 'paidLoansCount' => (clone $loanQuery)->where('status', 'repaid')->count(),
                 'defaultedLoansCount' => (clone $loanQuery)->where('status', 'overdue')->count(),
-                'activeAmount' => (clone $loanQuery)->whereIn('status', ['approved', 'active'])->sum('amount'),
-                'repaidAmount' => (clone $loanQuery)->where('status', 'repaid')->sum('amount'),
-                'overdueAmount' => (clone $loanQuery)->where('status', 'overdue')->sum('amount'),
+                'activeAmount' => $activeAmount,
+                'repaidAmount' => $repaidAmount,
+                'overdueAmount' => $overdueAmount,
                 'pulseData' => $pulseData,
             ], $portfolioData);
 

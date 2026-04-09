@@ -15,7 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $id
  * @property string $phone
  * @property int $trust_score
- * @property float $total_debt
+ * @property \App\ValueObjects\Money $total_debt
  * @property int $active_loans_count
  * @property int $portal_access
  * @property string|null $photo_url
@@ -155,7 +155,6 @@ class Borrower extends Model
         'employment_information' => 'array',
         'next_of_kin_details' => 'array',
         'custom_data' => 'array',
-        'total_debt' => 'float',
         'active_loans_count' => 'integer',
     ];
 
@@ -189,9 +188,12 @@ class Borrower extends Model
         return $this->hasOne(SavingsAccount::class);
     }
 
-    public function getTotalDebtAttribute(): float
+    public function getTotalDebtAttribute(): \App\ValueObjects\Money
     {
-        return (float) $this->loans()->whereIn('status', ['active', 'defaulted'])->sum('amount');
+        $currency = $this->organization->currency_code ?? config('app.currency', 'NGN');
+        $minorAmount = (int) $this->loans()->whereIn('status', ['active', 'defaulted', 'overdue'])->sum('amount');
+
+        return new \App\ValueObjects\Money($minorAmount, $currency);
     }
 
     public function getActiveLoansCountAttribute(): int

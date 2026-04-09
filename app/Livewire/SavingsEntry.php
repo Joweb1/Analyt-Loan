@@ -100,7 +100,10 @@ class SavingsEntry extends Component
         ]);
 
         // Update balance
-        $account->increment('balance', $this->amount);
+        $amountMoney = \App\ValueObjects\Money::fromMajor($this->amount, $borrower->organization->currency_code ?? 'NGN');
+        /** @var \App\ValueObjects\Money $balance */
+        $balance = $account->balance;
+        $account->update(['balance' => $balance->add($amountMoney)]);
 
         // Trigger Push Notification
         \App\Helpers\SystemLogger::success(

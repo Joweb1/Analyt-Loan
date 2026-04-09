@@ -73,6 +73,8 @@ class LoanDashboardTest extends TestCase
 
         Livewire::actingAs($this->staff)
             ->test(LoanDashboard::class)
-            ->assertSet('repaidToday', 1000);
+            ->assertSet('repaidToday', function ($val) {
+                return $val instanceof \App\ValueObjects\Money && $val->getMinorAmount() === 100000;
+            });
     }
 }

@@ -29,7 +29,7 @@ class BorrowerResource extends JsonResource
             'kyc_status' => $this->kyc_status,
             'trust_score' => $this->trust_score,
             'active_loans_count' => $this->loans()->where('status', 'active')->count(),
-            'total_debt' => (float) $this->loans()->where('status', 'active')->sum('amount'),
+            'total_debt' => (float) $this->loans()->where('status', 'active')->sum('amount') / 100,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

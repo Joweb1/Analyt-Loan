@@ -71,8 +71,8 @@ class Dashboard extends Component
         })->count();
 
         // Summing across all organizations
-        $this->totalLent = Loan::withoutGlobalScopes()->whereIn('status', ['active', 'repaid', 'overdue'])->sum('amount');
-        $this->totalCollected = Repayment::withoutGlobalScopes()->sum('amount');
+        $this->totalLent = Loan::withoutGlobalScopes()->whereIn('status', ['active', 'repaid', 'overdue'])->sum('amount') / 100;
+        $this->totalCollected = Repayment::withoutGlobalScopes()->sum('amount') / 100;
     }
 
     public function loadTrends()
@@ -95,7 +95,7 @@ class Dashboard extends Component
             $date = now()->subDays($daysAgo)->startOfDay();
             $amount = Repayment::withoutGlobalScopes()
                 ->whereDate('paid_at', $date)
-                ->sum('amount');
+                ->sum('amount') / 100;
 
             return [
                 'day' => $date->format('D'),

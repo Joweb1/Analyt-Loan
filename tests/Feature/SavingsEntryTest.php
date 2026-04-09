@@ -44,11 +44,11 @@ class SavingsEntryTest extends TestCase
 
         $this->assertDatabaseHas('savings_accounts', [
             'borrower_id' => $borrower->id,
-            'balance' => 5000,
+            'balance' => 500000,
         ]);
 
         $this->assertDatabaseHas('savings_transactions', [
-            'amount' => 5000,
+            'amount' => 500000,
             'type' => 'deposit',
         ]);
     }

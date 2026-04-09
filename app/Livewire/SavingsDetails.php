@@ -78,17 +78,19 @@ class SavingsDetails extends Component
             'reference' => 'nullable|string|max:50',
         ]);
 
-        if ($this->transactionType === 'withdrawal' && $this->savingsAccount->balance < $this->amount) {
+        $amountMoney = \App\ValueObjects\Money::fromMajor($this->amount, $this->borrower->organization->currency_code ?? 'NGN');
+
+        if ($this->transactionType === 'withdrawal' && $this->savingsAccount->balance->getMinorAmount() < $amountMoney->getMinorAmount()) {
             $this->addError('amount', 'Insufficient balance for this withdrawal.');
 
             return;
         }
 
-        DB::transaction(function () {
+        DB::transaction(function () use ($amountMoney) {
             // Create transaction record
             SavingsTransaction::create([
                 'savings_account_id' => $this->savingsAccount->id,
-                'amount' => $this->amount,
+                'amount' => $amountMoney,
                 'type' => $this->transactionType,
                 'reference' => $this->reference,
                 'notes' => $this->notes,
@@ -98,10 +100,11 @@ class SavingsDetails extends Component
 
             // Update account balance
             if ($this->transactionType === 'deposit') {
-                $this->savingsAccount->increment('balance', $this->amount);
+                $this->savingsAccount->balance = $this->savingsAccount->balance->add($amountMoney);
             } else {
-                $this->savingsAccount->decrement('balance', $this->amount);
+                $this->savingsAccount->balance = $this->savingsAccount->balance->subtract($amountMoney);
             }
+            $this->savingsAccount->save();
 
             // Create notification for the borrower (if they have a user account)
             if ($this->borrower->user_id) {
@@ -110,7 +113,7 @@ class SavingsDetails extends Component
                     'user_id' => Auth::id(),
                     'recipient_id' => $this->borrower->user_id,
                     'title' => ucfirst($this->transactionType).' Successful',
-                    'message' => 'A '.$this->transactionType.' of ₦'.number_format($this->amount, 2).' has been recorded in your savings account.',
+                    'message' => 'A '.$this->transactionType.' of ₦'.number_format($amountMoney->getMajorAmount(), 2).' has been recorded in your savings account.',
                     'type' => 'info',
                     'category' => 'savings',
                     'is_actionable' => false,
@@ -123,7 +126,7 @@ class SavingsDetails extends Component
                 'organization_id' => $this->borrower->organization_id,
                 'user_id' => Auth::id(),
                 'title' => 'Savings Transaction Recorded',
-                'message' => ucfirst($this->transactionType).' of ₦'.number_format($this->amount, 2).' for '.$this->borrower->user->name.' has been recorded.',
+                'message' => ucfirst($this->transactionType).' of ₦'.number_format($amountMoney->getMajorAmount(), 2).' for '.$this->borrower->user->name.' has been recorded.',
                 'type' => 'success',
                 'category' => 'savings',
                 'is_actionable' => false,
@@ -166,10 +169,11 @@ class SavingsDetails extends Component
         DB::transaction(function () use ($transaction) {
             // Revert balance
             if ($transaction->type === 'deposit') {
-                $this->savingsAccount->decrement('balance', $transaction->amount);
+                $this->savingsAccount->balance = $this->savingsAccount->balance->subtract($transaction->amount);
             } else {
-                $this->savingsAccount->increment('balance', $transaction->amount);
+                $this->savingsAccount->balance = $this->savingsAccount->balance->add($transaction->amount);
             }
+            $this->savingsAccount->save();
 
             $transaction->delete();
         });

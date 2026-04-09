@@ -90,7 +90,7 @@ class RepaymentRecords extends Component
         });
         $this->applyDateFilter($statsQuery);
 
-        $totalAmount = $statsQuery->sum('amount');
+        $totalAmount = $statsQuery->sum('amount') / 100;
         $totalCount = $statsQuery->count();
 
         return view('livewire.repayment-records', [

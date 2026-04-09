@@ -96,7 +96,7 @@
         <div class="grid grid-cols-4 gap-6 p-6 border border-slate-200 rounded-xl">
             <div>
                 <p class="text-[9px] font-black text-slate-400 uppercase tracking-wider">Principal Amount</p>
-                <p class="text-lg font-black text-slate-900">₦{{ number_format($loan->amount, 2) }}</p>
+                <p class="text-lg font-black text-slate-900">₦{{ $loan->amount->format() }}</p>
             </div>
             <div>
                 <p class="text-[9px] font-black text-slate-400 uppercase tracking-wider">Interest Rate</p>

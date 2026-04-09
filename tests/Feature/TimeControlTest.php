@@ -119,7 +119,7 @@ class TimeControlTest extends TestCase
 
         $this->assertEquals('overdue', $loan->fresh()->status);
         $this->assertEquals('overdue', $schedule->fresh()->status);
-        $this->assertEquals(200, (float) $schedule->fresh()->penalty_amount);
+        $this->assertEquals(20000, $schedule->fresh()->penalty_amount->getMinorAmount());
 
         Carbon::setTestNow();
     }

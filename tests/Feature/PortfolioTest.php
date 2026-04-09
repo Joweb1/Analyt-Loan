@@ -54,6 +54,9 @@ class PortfolioTest extends TestCase
             'borrower_id' => $borrower->id,
             'amount' => 10000,
             'interest_rate' => 10,
+            'interest_type' => 'month',
+            'duration' => 1,
+            'duration_unit' => 'month',
             'status' => 'active',
         ]);
 
@@ -84,17 +87,17 @@ class PortfolioTest extends TestCase
             'paid_at' => now(),
         ]);
 
-        // 1. Balance: (11,000 scheduled) - 2000 paid = 9000
-        $this->assertEquals(9000, $portfolio->portfolio_balance);
+        // 1. Balance: (1,000,000 principal + 100,000 interest) - 200,000 paid = 900,000
+        $this->assertEquals(900000, $portfolio->portfolio_balance->getMinorAmount());
 
         // 2. Savings Balance
         $account = SavingsAccount::create([
             'organization_id' => $org->id,
             'borrower_id' => $borrower->id,
             'account_number' => 'SAV-TEST',
-            'balance' => 5000,
+            'balance' => 5000, // 5,000 Major = 500,000 Minor
         ]);
-        $this->assertEquals(5000, $portfolio->savings_balance);
+        $this->assertEquals(500000, $portfolio->savings_balance->getMinorAmount());
 
         // 3. PAR (Portfolio at Risk)
         ScheduledRepayment::create([
@@ -107,15 +110,15 @@ class PortfolioTest extends TestCase
             'status' => 'overdue',
         ]);
 
-        $this->assertEquals(8500, $portfolio->portfolio_at_risk);
+        $this->assertEquals(850000, $portfolio->portfolio_at_risk->getMinorAmount());
         // Balance is 11,000 (initial) - 2,000 (paid) = 9,000
         $this->assertEquals(94.44, $portfolio->par_percentage);
 
         // 4. PnL
-        $this->assertEquals(500, $portfolio->profit_loss);
+        $this->assertEquals(50000, $portfolio->profit_loss->getMinorAmount());
 
         ScheduledRepayment::where('loan_id', $loan->id)->update(['due_date' => now()->subDays(10)]);
-        $this->assertEquals(-8000, $portfolio->profit_loss);
+        $this->assertEquals(-800000, $portfolio->profit_loss->getMinorAmount());
     }
 
     #[Test]
@@ -197,7 +200,7 @@ class PortfolioTest extends TestCase
 
         \App\Models\SavingsTransaction::create([
             'savings_account_id' => $account->id,
-            'amount' => 1500,
+            'amount' => 15, // 15 Major = 1500 Minor
             'type' => 'deposit',
             'staff_id' => $admin->id,
             'transaction_date' => now(),
@@ -205,7 +208,7 @@ class PortfolioTest extends TestCase
 
         Livewire::actingAs($admin)
             ->test(Reports::class)
-            ->assertViewHas('totalSavings', 1500);
+            ->assertViewHas('totalSavings', 15.0);
     }
 
     #[Test]
@@ -318,9 +321,13 @@ class PortfolioTest extends TestCase
 
         Livewire::actingAs($admin)
             ->test(AdminDashboard::class)
-            ->assertSet('totalLoaned', 15000)
+            ->assertSet('totalLoaned', function ($val) {
+                return $val instanceof \App\ValueObjects\Money && $val->getMinorAmount() === 1500000;
+            })
             ->set('selectedPortfolioId', $portfolio->id)
-            ->assertSet('totalLoaned', 5000);
+            ->assertSet('totalLoaned', function ($val) {
+                return $val instanceof \App\ValueObjects\Money && $val->getMinorAmount() === 500000;
+            });
     }
 
     #[Test]

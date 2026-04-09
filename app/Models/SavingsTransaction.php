@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * @property string $id
  * @property string $savings_account_id
- * @property numeric $amount
+ * @property \App\ValueObjects\Money $amount
  * @property string $type
  * @property string|null $reference
  * @property string|null $notes
@@ -54,6 +54,7 @@ class SavingsTransaction extends Model
 
     protected $casts = [
         'transaction_date' => 'datetime',
+        'amount' => \App\Casts\MoneyCast::class,
     ];
 
     public function savingsAccount(): BelongsTo

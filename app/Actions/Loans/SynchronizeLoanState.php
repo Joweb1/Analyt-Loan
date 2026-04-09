@@ -19,43 +19,46 @@ class SynchronizeLoanState
     {
         $span = \App\Support\Tracing::startSpan('loan.synchronize', "Synchronizing state for loan #{$loan->loan_number}");
 
+        /** @var \Illuminate\Database\Eloquent\Collection<int, \App\Models\Repayment> $repayments */
         $repayments = $loan->repayments()->orderBy('paid_at')->get();
         $schedules = $loan->scheduledRepayments()->orderBy('due_date')->get();
 
         $currency = $loan->organization->currency_code ?? 'NGN';
 
-        $totalPaidMinor = (int) round($repayments->sum('amount') * 100);
+        $totalPaidMinor = (int) $repayments->sum(fn (\App\Models\Repayment $r) => $r->amount->getMinorAmount());
         $remaining = new Money($totalPaidMinor, $currency);
 
         foreach ($schedules as $s) {
             /** @var \App\Models\ScheduledRepayment $s */
-            $principal = Money::fromMajor($s->principal_amount ?? 0, $currency);
-            $interest = Money::fromMajor($s->interest_amount ?? 0, $currency);
-            $penalty = Money::fromMajor($s->penalty_amount ?? 0, $currency);
+            /** @var \App\ValueObjects\Money $principal */
+            $principal = $s->principal_amount ?? new Money(0, $currency);
+            /** @var \App\ValueObjects\Money $interest */
+            $interest = $s->interest_amount ?? new Money(0, $currency);
+            /** @var \App\ValueObjects\Money $penalty */
+            $penalty = $s->penalty_amount ?? new Money(0, $currency);
 
             $totalDue = $principal->add($interest)->add($penalty);
 
             if ($remaining->getMinorAmount() >= $totalDue->getMinorAmount() && $totalDue->getMinorAmount() > 0) {
-                $s->paid_amount = $totalDue->getMajorAmount();
+                $s->paid_amount = $totalDue;
                 $s->status = 'paid';
                 $remaining = $remaining->subtract($totalDue);
             } elseif ($remaining->getMinorAmount() > 0) {
-                $s->paid_amount = $remaining->getMajorAmount();
+                $s->paid_amount = $remaining;
                 $s->status = 'partial';
                 $remaining = new Money(0, $currency);
             } else {
-                $s->paid_amount = 0;
+                $s->paid_amount = new Money(0, $currency);
                 $s->status = $s->due_date->isPast() ? 'overdue' : 'applied';
             }
             $s->save();
         }
 
         // Also sync overall loan status
-        $loanAmount = Money::fromMajor($loan->amount, $currency);
-        $totalInterest = Money::fromMajor($loan->getTotalExpectedInterest(), $currency);
-        $totalPayable = $loanAmount->add($totalInterest);
+        $totalInterest = $loan->getTotalExpectedInterest();
+        $totalPayable = $loan->amount->add($totalInterest);
 
-        $totalPaid = Money::fromMajor($repayments->sum('amount'), $currency);
+        $totalPaid = new Money($totalPaidMinor, $currency);
 
         if ($totalPaid->getMinorAmount() >= $totalPayable->getMinorAmount() && $totalPayable->getMinorAmount() > 0) {
             if ($loan->status !== 'repaid') {
@@ -89,7 +92,7 @@ class SynchronizeLoanState
         ]);
 
         // Process each repayment that has an extra_amount and isn't already linked to a savings transaction
-        foreach ($repayments->where('extra_amount', '>', 0.01) as $repayment) {
+        foreach ($repayments->filter(fn ($r) => $r->extra_amount->isPositive()) as $repayment) {
             /** @var Repayment $repayment */
             if ($repayment->savingsTransactions()->count() === 0) {
                 $account->transactions()->create([
@@ -102,11 +105,13 @@ class SynchronizeLoanState
                     'transaction_date' => \App\Models\Organization::systemNow(),
                 ]);
 
-                $account->increment('balance', $repayment->extra_amount);
+                /** @var \App\ValueObjects\Money $balance */
+                $balance = $account->balance;
+                $account->update(['balance' => $balance->add($repayment->extra_amount)]);
 
                 SystemLogger::success(
                     'Extra Balance to Savings',
-                    '₦'.number_format($repayment->extra_amount, 2)." from Loan #{$loan->loan_number} has been moved to savings.",
+                    '₦'.$repayment->extra_amount->format()." from Loan #{$loan->loan_number} has been moved to savings.",
                     'savings',
                     $borrower
                 );

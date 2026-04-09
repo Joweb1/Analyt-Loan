@@ -64,7 +64,7 @@ class CollectionEntryTest extends TestCase
 
         $this->assertDatabaseHas('repayments', [
             'loan_id' => $loan->id,
-            'amount' => 11000,
+            'amount' => 1100000, // Minor units
             'collected_by' => $user->id,
         ]);
     }

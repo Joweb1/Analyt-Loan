@@ -49,16 +49,19 @@ class DistributionPanel extends Component
         // Assuming reasonably small number of orgs for now.
 
         foreach ($organizations as $org) {
-            $org->total_collected = $org->loans->flatMap->repayments->sum('amount');
+            $org->total_lent = (float) ($org->total_lent ?? 0) / 100;
+            $org->total_collected = \App\Models\Repayment::whereHas('loan', function ($q) use ($org) {
+                $q->where('organization_id', $org->id);
+            })->sum('amount') / 100;
 
             // Monthly Activity
             $org->monthly_lent = $org->loans()
                 ->whereIn('status', ['active', 'repaid', 'overdue'])
                 ->whereMonth('created_at', now()->month)
-                ->sum('amount');
+                ->sum('amount') / 100;
             $org->monthly_collected = \App\Models\Repayment::whereHas('loan', function ($q) use ($org) {
                 $q->where('organization_id', $org->id);
-            })->whereMonth('paid_at', now()->month)->sum('amount');
+            })->whereMonth('paid_at', now()->month)->sum('amount') / 100;
 
             $org->active_loans_count = $org->loans->whereIn('status', ['active', 'overdue'])->count();
         }

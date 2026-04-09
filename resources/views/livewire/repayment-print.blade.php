@@ -50,13 +50,20 @@
             <h2 class="text-xs font-black bg-slate-900 text-white px-3 py-1 uppercase tracking-[0.2em] mb-4 inline-block">Loan Summary</h2>
             <div class="space-y-2">
                 <p class="text-sm font-bold text-slate-900 font-mono">{{ $loan->loan_number }}</p>
-                <p class="text-xs text-slate-600">Principal: ₦{{ number_format($loan->amount, 2) }}</p>
+                <p class="text-xs text-slate-600">Principal: ₦{{ $loan->amount->format() }}</p>
                 @php 
-                    $totalPaid = $loan->repayments->sum('amount');
-                    $totalInterest = $loan->amount * ($loan->interest_rate / 100);
-                    $totalPayable = $loan->amount + $totalInterest + ($loan->processing_fee ?? 0) + ($loan->insurance_fee ?? 0);
+                    $currency = $loan->amount->getCurrency();
+                    $totalPaidMinor = (int) $loan->repayments->sum(fn($r) => $r->amount->getMinorAmount());
+                    $totalPaid = new \App\ValueObjects\Money($totalPaidMinor, $currency);
+                    
+                    $totalInterest = $loan->getTotalExpectedInterest();
+                    $totalPayable = $loan->amount->add($totalInterest)
+                        ->add($loan->processing_fee ?? new \App\ValueObjects\Money(0, $currency))
+                        ->add($loan->insurance_fee ?? new \App\ValueObjects\Money(0, $currency));
+                    
+                    $balance = $totalPayable->subtract($totalPaid);
                 @endphp
-                <p class="text-xs text-slate-600 font-bold">Balance: <span class="text-primary">₦{{ number_format($totalPayable - $totalPaid, 2) }}</span></p>
+                <p class="text-xs text-slate-600 font-bold">Balance: <span class="text-primary">₦{{ $balance->format() }}</span></p>
             </div>
         </section>
     </div>
@@ -79,9 +86,9 @@
                     <tr class="text-xs">
                         <td class="px-4 py-3 border-r border-slate-200 font-medium">{{ $repayment->paid_at->format('M d, Y') }}</td>
                         <td class="px-4 py-3 border-r border-slate-200 uppercase font-bold text-slate-500">{{ $repayment->payment_method }}</td>
-                        <td class="px-4 py-3 border-r border-slate-200">₦{{ number_format($repayment->principal_amount, 2) }}</td>
-                        <td class="px-4 py-3 border-r border-slate-200">₦{{ number_format($repayment->interest_amount, 2) }}</td>
-                        <td class="px-4 py-3 text-right font-black text-slate-900">₦{{ number_format($repayment->amount, 2) }}</td>
+                        <td class="px-4 py-3 border-r border-slate-200">₦{{ $repayment->principal_amount->format() }}</td>
+                        <td class="px-4 py-3 border-r border-slate-200">₦{{ $repayment->interest_amount->format() }}</td>
+                        <td class="px-4 py-3 text-right font-black text-slate-900">₦{{ $repayment->amount->format() }}</td>
                     </tr>
                 @empty
                     <tr>
@@ -92,7 +99,7 @@
             <tfoot>
                 <tr class="bg-slate-900 text-white font-black">
                     <td colspan="4" class="px-4 py-3 text-right uppercase tracking-widest text-[10px]">Total Paid to Date</td>
-                    <td class="px-4 py-3 text-right">₦{{ number_format($totalPaid, 2) }}</td>
+                    <td class="px-4 py-3 text-right">₦{{ $totalPaid->format() }}</td>
                 </tr>
             </tfoot>
         </table>

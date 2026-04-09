@@ -142,7 +142,7 @@ class OmnibarSearch extends Component
                     return [
                         'type' => 'loan',
                         'title' => 'Loan '.$l->loan_number,
-                        'subtitle' => strtoupper($l->status).' | ₦'.number_format($l->amount).' | '.$l->borrower->user->name,
+                        'subtitle' => strtoupper($l->status).' | ₦'.number_format($l->amount->getMajorAmount()).' | '.$l->borrower->user->name,
                         'link' => route('loan.show', $l->id),
                         'permission' => 'manage_loans',
                         'icon' => 'payments',
@@ -186,7 +186,7 @@ class OmnibarSearch extends Component
                     return [
                         'type' => 'collateral',
                         'title' => $c->name,
-                        'subtitle' => 'Collateral | Value: ₦'.number_format($c->value),
+                        'subtitle' => 'Collateral | Value: ₦'.number_format($c->value->getMajorAmount()),
                         'link' => route('vault'),
                         'permission' => 'manage_vault',
                         'icon' => 'inventory_2',

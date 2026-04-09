@@ -181,7 +181,7 @@
                             <span class="bg-{{ $riskColor }}-100 text-{{ $riskColor }}-700 text-[10px] font-extrabold px-2 py-0.5 rounded-full border border-{{ $riskColor }}-200">{{ intval($daysOverdue) }} DAYS</span>
                         </td>
                         <td class="px-6 py-3 text-right">
-                            <p class="text-xs font-extrabold">₦{{ number_format($loan->amount, 2) }}</p>
+                            <p class="text-xs font-extrabold">₦{{ $loan->amount->format() }}</p>
                         </td>
                         <td class="px-6 py-3">
                             <div class="flex items-center justify-center gap-2">

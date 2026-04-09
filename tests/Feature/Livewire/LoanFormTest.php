@@ -65,7 +65,7 @@ class LoanFormTest extends TestCase
 
         $this->assertDatabaseHas('loans', [
             'borrower_id' => $borrower->id,
-            'amount' => 100000,
+            'amount' => 10000000,
             'organization_id' => $this->organization->id,
             'status' => 'applied',
         ]);
@@ -118,6 +118,7 @@ class LoanFormTest extends TestCase
 
         $this->assertDatabaseHas('loans', [
             'loan_number' => 'LN-TEST-002',
+            'amount' => 10000000,
             'status' => 'applied',
         ]);
     }

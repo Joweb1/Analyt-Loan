@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $borrower_id
  * @property string $organization_id
  * @property string $account_number
- * @property numeric $balance
+ * @property \App\ValueObjects\Money $balance
  * @property numeric $interest_rate
  * @property string $status
  * @property \Illuminate\Support\Carbon|null $created_at
@@ -51,6 +51,10 @@ class SavingsAccount extends Model
         'balance',
         'interest_rate',
         'status',
+    ];
+
+    protected $casts = [
+        'balance' => \App\Casts\MoneyCast::class,
     ];
 
     public function borrower(): BelongsTo

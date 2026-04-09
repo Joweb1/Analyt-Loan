@@ -109,7 +109,7 @@
                     <div class="flex justify-between items-start mb-6">
                         <div>
                             <p class="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Current Balance</p>
-                            <h3 class="text-4xl font-black text-slate-900 dark:text-white">₦{{ number_format($savingsAccount->balance, 2) }}</h3>
+                            <h3 class="text-4xl font-black text-slate-900 dark:text-white">₦{{ $savingsAccount->balance->format() }}</h3>
                         </div>
                         <div class="size-14 rounded-2xl bg-green-600 flex items-center justify-center text-white shadow-lg shadow-green-600/20">
                             <span class="material-symbols-outlined text-3xl">savings</span>
@@ -119,11 +119,20 @@
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-6 pt-6 border-t border-slate-100 dark:border-slate-800">
                         <div>
                             <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total Deposits</p>
-                            <p class="text-sm font-black text-slate-700 dark:text-slate-200">₦{{ number_format($savingsAccount->transactions()->where('type', 'deposit')->sum('amount'), 2) }}</p>
+                            @php
+                                $currency = $savingsAccount->balance->getCurrency();
+                                $depositsMinor = (int) $savingsAccount->transactions()->where('type', 'deposit')->sum('amount');
+                                $deposits = new \App\ValueObjects\Money($depositsMinor, $currency);
+                            @endphp
+                            <p class="text-sm font-black text-slate-700 dark:text-slate-200">₦{{ $deposits->format() }}</p>
                         </div>
                         <div>
                             <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total Withdrawals</p>
-                            <p class="text-sm font-black text-slate-700 dark:text-slate-200">₦{{ number_format($savingsAccount->transactions()->where('type', 'withdrawal')->sum('amount'), 2) }}</p>
+                            @php
+                                $withdrawalsMinor = (int) $savingsAccount->transactions()->where('type', 'withdrawal')->sum('amount');
+                                $withdrawals = new \App\ValueObjects\Money($withdrawalsMinor, $currency);
+                            @endphp
+                            <p class="text-sm font-black text-slate-700 dark:text-slate-200">₦{{ $withdrawals->format() }}</p>
                         </div>
                         <div>
                             <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Interest Rate</p>
@@ -131,7 +140,7 @@
                         </div>
                         <div>
                             <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Est. Interest</p>
-                            <p class="text-sm font-black text-slate-700 dark:text-slate-200">₦{{ number_format($savingsAccount->balance * ($savingsAccount->interest_rate / 100), 2) }}</p>
+                            <p class="text-sm font-black text-slate-700 dark:text-slate-200">₦{{ $savingsAccount->balance->multiply($savingsAccount->interest_rate / 100)->format() }}</p>
                         </div>
                     </div>
                 </div>
@@ -175,7 +184,7 @@
                                     </td>
                                     <td class="px-6 py-4 text-right">
                                         <span class="text-sm font-black {{ $transaction->type === 'deposit' ? 'text-green-600' : 'text-red-500' }}">
-                                            {{ $transaction->type === 'deposit' ? '+' : '-' }}₦{{ number_format($transaction->amount, 2) }}
+                                            {{ $transaction->type === 'deposit' ? '+' : '-' }}₦{{ $transaction->amount->format() }}
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 text-center">

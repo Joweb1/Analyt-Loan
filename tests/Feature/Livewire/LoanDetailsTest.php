@@ -77,10 +77,10 @@ class LoanDetailsTest extends TestCase
         // 5 installments -> 22k each.
 
         $schedule = ScheduledRepayment::first();
-        $totalInterest = $this->loan->getTotalExpectedInterest();
+        $totalInterest = $this->loan->getTotalExpectedInterest()->getMajorAmount();
         $expectedAmount = (100000 + $totalInterest) / 5;
 
-        $this->assertEquals(round($expectedAmount, 2), round($schedule->principal_amount + $schedule->interest_amount, 2));
+        $this->assertEquals(round($expectedAmount, 2), round($schedule->principal_amount->getMajorAmount() + $schedule->interest_amount->getMajorAmount(), 2));
     }
 
     public function test_it_adds_repayment_and_updates_schedule()
@@ -108,14 +108,14 @@ class LoanDetailsTest extends TestCase
 
         $this->assertDatabaseHas('repayments', [
             'loan_id' => $this->loan->id,
-            'amount' => 22000,
+            'amount' => 2200000, // Minor units
         ]);
 
         // Check if schedule updated
         $this->assertDatabaseHas('scheduled_repayments', [
             'loan_id' => $this->loan->id,
             'status' => 'paid',
-            'paid_amount' => 22000,
+            'paid_amount' => 2200000, // Minor units
         ]);
     }
 
@@ -177,7 +177,7 @@ class LoanDetailsTest extends TestCase
 
         $this->assertDatabaseHas('repayments', [
             'loan_id' => $this->loan->id,
-            'amount' => 5000,
+            'amount' => 500000, // Minor units
         ]);
     }
 

@@ -16,9 +16,11 @@ class CollateralObserver
             ? "to Loan #{$collateral->loan->loan_number}"
             : 'as Company Asset';
 
+        /** @var \App\ValueObjects\Money $value */
+        $value = $collateral->value;
         SystemLogger::success(
             'New Collateral Added',
-            "Collateral '{$collateral->name}' (₦".number_format($collateral->value).") has been added {$context}.",
+            "Collateral '{$collateral->name}' (₦".$value->format().") has been added {$context}.",
             'collateral',
             $collateral
         );

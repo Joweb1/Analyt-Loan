@@ -8,7 +8,7 @@
         <div class="flex flex-col sm:flex-row justify-between sm:items-end gap-4">
             <div>
                 <h2 class="text-2xl sm:text-3xl font-extrabold text-[#111318] dark:text-white tracking-tight">Status Board</h2>
-                <p class="text-[#606e8a] text-sm mt-1">Total Active Pipeline: ₦{{ number_format($totalPipelineValue, 2) }}</p>
+                <p class="text-[#606e8a] text-sm mt-1">Total Active Pipeline: ₦{{ $totalPipelineValue?->format() ?? '0.00' }}</p>
             </div>
             
             <div class="flex items-center gap-3">
@@ -67,7 +67,7 @@
                         <span class="font-bold text-sm tracking-wide uppercase">Pending</span>
                         <span class="bg-[#dbdee6] text-[#111318] text-[10px] font-black px-2 py-0.5 rounded-full">{{ $counts['pending'] }}</span>
                     </div>
-                    <span class="text-xs font-bold text-[#606e8a]">₦{{ number_format($sums['pending']) }}</span>
+                    <span class="text-xs font-bold text-[#606e8a]">₦{{ $sums['pending']->format() }}</span>
                 </div>
                 <div class="flex flex-col gap-4 overflow-y-auto pb-8 custom-scrollbar h-full">
                     @foreach($pending as $loan)
@@ -78,7 +78,7 @@
                                 <span class="material-symbols-outlined text-gray-300 group-hover:text-primary text-lg transition-colors">more_horiz</span>
                             </div>
                             <p class="text-sm font-extrabold dark:text-white mb-1">{{ $loan->borrower->user->name }}</p>
-                            <p class="text-lg font-black text-primary dark:text-slate-200 mb-3">₦{{ number_format($loan->amount, 2) }}</p>
+                            <p class="text-lg font-black text-primary dark:text-slate-200 mb-3">₦{{ $loan->amount->format() }}</p>
                             <div class="mt-4 flex items-center justify-between">
                                 <div class="size-6 rounded-full border-2 border-white bg-cover bg-center" style="background-image: url('{{ $loan->borrower->photo_url ?? 'https://ui-avatars.com/api/?name='.urlencode($loan->borrower->user->name) }}')"></div>
                                 <p class="text-[10px] text-[#606e8a] font-medium">{{ $loan->updated_at->diffForHumans(null, true, true) }}</p>
@@ -95,26 +95,27 @@
                         <span class="font-bold text-sm tracking-wide uppercase">Active</span>
                         <span class="bg-[#dbdee6] text-[#111318] text-[10px] font-black px-2 py-0.5 rounded-full">{{ $counts['active'] }}</span>
                     </div>
-                    <span class="text-xs font-bold text-[#606e8a]">₦{{ number_format($sums['active']) }}</span>
+                    <span class="text-xs font-bold text-[#606e8a]">₦{{ $sums['active']->format() }}</span>
                 </div>
                 <div class="flex flex-col gap-4 overflow-y-auto pb-8 h-full custom-scrollbar">
                     @foreach($active as $loan)
                         @php 
-                            $paid = $loan->repayments->sum('amount');
-                            $progress = $loan->amount > 0 ? min(100, ($paid / $loan->amount) * 100) : 0;
+                            $paidMinor = (int) $loan->repayments->sum(fn($r) => $r->amount->getMinorAmount());
+                            $paid = new \App\ValueObjects\Money($paidMinor, $loan->amount->getCurrency());
+                            $progress = $loan->amount->isPositive() ? min(100, ($paid->getMajorAmount() / $loan->amount->getMajorAmount()) * 100) : 0;
                         @endphp
                         <div class="bg-white dark:bg-[#1c2433] p-4 shadow-sm border border-[#dbdee6] hover:border-primary/50 transition-all group cursor-pointer border-l-4 border-l-green-500" onclick="window.location='{{ route('loan.show', $loan->id) }}'">
                             <div class="flex justify-between items-start mb-2">
                                 <p class="text-sm font-extrabold dark:text-white">{{ $loan->borrower->user->name }}</p>
                                 <span class="material-symbols-outlined text-gray-300 group-hover:text-primary text-lg">open_in_new</span>
                             </div>
-                            <p class="text-lg font-black text-primary mb-3">₦{{ number_format($loan->amount, 2) }}</p>
+                            <p class="text-lg font-black text-primary mb-3">₦{{ $loan->amount->format() }}</p>
                             <div class="w-full h-1 bg-slate-100 dark:bg-white/10 rounded-full mb-1">
                                 <div class="bg-green-500 h-1 rounded-full transition-all" style="width: {{ $progress }}%;"></div>
                             </div>
                             <div class="flex justify-between text-[9px] font-black uppercase text-slate-400">
                                 <span>{{ round($progress) }}% PAID</span>
-                                <span>₦{{ number_format($loan->amount - $paid) }} REM.</span>
+                                <span>₦{{ $loan->amount->subtract($paid)->format() }} REM.</span>
                             </div>
                         </div>
                     @endforeach
@@ -128,13 +129,13 @@
                         <span class="font-bold text-sm tracking-wide uppercase text-red-500">Overdue</span>
                         <span class="bg-red-100 text-red-700 text-[10px] font-black px-2 py-0.5 rounded-full">{{ $counts['overdue'] }}</span>
                     </div>
-                    <span class="text-xs font-bold text-red-400">₦{{ number_format($sums['overdue']) }}</span>
+                    <span class="text-xs font-bold text-red-400">₦{{ $sums['overdue']->format() }}</span>
                 </div>
                 <div class="flex flex-col gap-4 overflow-y-auto pb-8 h-full custom-scrollbar">
                     @foreach($overdue as $loan)
                         @php 
-                            $paid = $loan->repayments->sum('amount');
-                            $balance = $loan->amount - $paid;
+                            $paidMinor = (int) $loan->repayments->sum(fn($r) => $r->amount->getMinorAmount());
+                            $paid = new \App\ValueObjects\Money($paidMinor, $loan->amount->getCurrency());
                         @endphp
                         <div class="bg-white dark:bg-[#1c2433] p-4 shadow-sm border border-red-200 dark:border-red-900/30 hover:shadow-md transition-all group cursor-pointer border-l-4 border-l-red-500" onclick="window.location='{{ route('loan.show', $loan->id) }}'">
                             <div class="flex justify-between items-start mb-3">
@@ -142,7 +143,7 @@
                                 <span class="material-symbols-outlined text-gray-300 group-hover:text-red-500 text-lg transition-colors">warning</span>
                             </div>
                             <p class="text-sm font-extrabold dark:text-white mb-1">{{ $loan->borrower->user->name }}</p>
-                            <p class="text-lg font-black text-red-600 mb-3">₦{{ number_format($balance, 2) }}</p>
+                            <p class="text-lg font-black text-red-600 mb-3">₦{{ $loan->amount->subtract($paid)->format() }}</p>
                             <div class="flex items-center justify-between">
                                 <div class="size-6 rounded-full border-2 border-white bg-cover bg-center" style="background-image: url('{{ $loan->borrower->photo_url ?? 'https://ui-avatars.com/api/?name='.urlencode($loan->borrower->user->name) }}')"></div>
                                 <p class="text-[10px] text-red-400 font-bold uppercase">Action Required</p>
@@ -159,7 +160,7 @@
                         <span class="font-bold text-sm tracking-wide uppercase text-slate-500">Declined</span>
                         <span class="bg-slate-200 text-slate-700 text-[10px] font-black px-2 py-0.5 rounded-full">{{ $counts['declined'] }}</span>
                     </div>
-                    <span class="text-xs font-bold text-slate-400">₦{{ number_format($sums['declined']) }}</span>
+                    <span class="text-xs font-bold text-slate-400">₦{{ $sums['declined']->format() }}</span>
                 </div>
                 <div class="flex flex-col gap-4 overflow-y-auto pb-8 h-full custom-scrollbar opacity-75">
                     @foreach($declined as $loan)
@@ -169,7 +170,7 @@
                                 <span class="material-symbols-outlined text-gray-300 group-hover:text-red-500 text-lg transition-colors">block</span>
                             </div>
                             <p class="text-sm font-extrabold dark:text-white mb-1">{{ $loan->borrower->user->name }}</p>
-                            <p class="text-lg font-black text-slate-400 mb-3 line-through">₦{{ number_format($loan->amount, 2) }}</p>
+                            <p class="text-lg font-black text-slate-400 mb-3 line-through">₦{{ $loan->amount->format() }}</p>
                             <div class="flex items-center justify-between">
                                 <div class="size-6 rounded-full border-2 border-white bg-cover bg-center grayscale" style="background-image: url('{{ $loan->borrower->photo_url ?? 'https://ui-avatars.com/api/?name='.urlencode($loan->borrower->user->name) }}')"></div>
                                 <p class="text-[10px] text-slate-400 font-bold uppercase">Application Rejected</p>
@@ -186,13 +187,13 @@
                         <span class="font-bold text-sm tracking-wide uppercase text-[#606e8a]">Repaid</span>
                         <span class="bg-[#dbdee6] text-[#111318] text-[10px] font-black px-2 py-0.5 rounded-full">{{ $counts['repaid'] }}</span>
                     </div>
-                    <span class="text-xs font-bold text-[#606e8a]">₦{{ number_format($sums['repaid']) }}</span>
+                    <span class="text-xs font-bold text-[#606e8a]">₦{{ $sums['repaid']->format() }}</span>
                 </div>
                 <div class="flex flex-col gap-4 overflow-y-auto pb-8 h-full custom-scrollbar opacity-60">
                     @foreach($repaid as $loan)
                         <div class="bg-white dark:bg-[#1c2433] p-4 shadow-sm border border-[#dbdee6] hover:border-slate-400 transition-all grayscale cursor-pointer" onclick="window.location='{{ route('loan.show', $loan->id) }}'">
                             <p class="text-sm font-extrabold dark:text-white mb-1">{{ $loan->borrower->user->name }}</p>
-                            <p class="text-lg font-black text-slate-500">₦{{ number_format($loan->amount, 2) }}</p>
+                            <p class="text-lg font-black text-slate-500">₦{{ $loan->amount->format() }}</p>
                             <div class="flex items-center gap-1 text-[9px] font-black text-green-600 mt-2">
                                 <span class="material-symbols-outlined text-xs">verified</span> FULLY REPAID
                             </div>
@@ -222,7 +223,9 @@
                     @foreach($allLoans as $loan)
                         @php
                             $risk = $this->getRiskLevel($loan->borrower->trust_score ?? 0);
-                            $paid = $loan->repayments->sum('amount');                            $balance = max(0, $loan->amount - $paid);
+                            $paidMinor = (int) $loan->repayments->sum(fn($r) => $r->amount->getMinorAmount());
+                            $paid = new \App\ValueObjects\Money($paidMinor, $loan->amount->getCurrency());
+                            $balance = $loan->balance;
                         @endphp
                         <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer group" onclick="window.location='{{ route('loan.show', $loan->id) }}'">
                             <td class="px-6 py-4">
@@ -243,13 +246,13 @@
                             <td class="px-6 py-4">
                                 <div class="flex flex-col">
                                     <span class="text-[10px] font-black text-slate-400 uppercase">{{ $loan->loan_product ?? 'Personal Loan' }}</span>
-                                    <span class="text-sm font-black text-slate-900 dark:text-white">₦{{ number_format($loan->amount, 2) }}</span>
+                                    <span class="text-sm font-black text-slate-900 dark:text-white">₦{{ $loan->amount->format() }}</span>
                                 </div>
                             </td>
                             <td class="px-6 py-4">
                                 <div class="flex flex-col">
-                                    <span class="text-[10px] font-black text-primary">BAL: ₦{{ number_format($balance, 2) }}</span>
-                                    <span class="text-[10px] font-black text-green-600">PAID: ₦{{ number_format($paid, 2) }}</span>
+                                    <span class="text-[10px] font-black text-primary">BAL: ₦{{ $balance->format() }}</span>
+                                    <span class="text-[10px] font-black text-green-600">PAID: ₦{{ $paid->format() }}</span>
                                 </div>
                             </td>
                             <td class="px-6 py-4 text-center">

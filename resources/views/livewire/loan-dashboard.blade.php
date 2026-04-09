@@ -64,7 +64,7 @@
                 </div>
             </div>
             <div class="flex items-end justify-between">
-                <h3 class="text-xl font-black dark:text-white tracking-tight">₦{{ number_format($repaidToday, 2) }}</h3>
+                <h3 class="text-xl font-black dark:text-white tracking-tight">₦{{ $repaidToday?->format() ?? '0.00' }}</h3>
                 <span class="flex items-center text-green-600 text-[9px] font-bold mb-0.5 bg-green-50 px-1.5 py-0.5 rounded-full uppercase">
                     Collected
                 </span>
@@ -80,7 +80,7 @@
                 </div>
             </div>
             <div class="flex items-end justify-between">
-                <h3 class="text-xl font-black dark:text-white tracking-tight">₦{{ number_format($totalLent, 2) }}</h3>
+                <h3 class="text-xl font-black dark:text-white tracking-tight">₦{{ $totalLent?->format() ?? '0.00' }}</h3>
                 <span class="flex items-center text-blue-600 text-[9px] font-bold mb-0.5 bg-blue-50 px-1.5 py-0.5 rounded-full uppercase">
                     {{ $filter === 'today' ? 'Today' : ($filter === 'week' ? 'This Week' : ($filter === 'month' ? 'This Month' : 'This Year')) }}
                 </span>
@@ -112,7 +112,7 @@
                 </div>
             </div>
             <div class="flex items-end justify-between">
-                <h3 class="text-xl font-black dark:text-white tracking-tight">₦{{ number_format($overdueAmount, 2) }}</h3>
+                <h3 class="text-xl font-black dark:text-white tracking-tight">₦{{ $overdueAmount?->format() ?? '0.00' }}</h3>
                 <span class="flex items-center text-red-600 text-[9px] font-bold mb-0.5 bg-red-50 px-1.5 py-0.5 rounded-full">
                     At Risk
                 </span>
@@ -279,21 +279,21 @@
                         <span class="w-2 h-2 rounded-full bg-brand-green"></span>
                         <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider">Repaid</span>
                     </div>
-                    <span class="text-sm font-black text-primary dark:text-white">₦ {{ number_format($repaidAmount) }}</span>
+                    <span class="text-sm font-black text-primary dark:text-white">₦ {{ $repaidAmount?->format() ?? '0.00' }}</span>
                 </div>
                 <div class="flex flex-col gap-1 border-x border-slate-100 dark:border-slate-800 px-4">
                     <div class="flex items-center gap-1.5">
                         <span class="w-2 h-2 rounded-full bg-brand-blue"></span>
                         <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider">Active</span>
                     </div>
-                    <span class="text-sm font-black text-primary dark:text-white">₦ {{ number_format($activeAmount) }}</span>
+                    <span class="text-sm font-black text-primary dark:text-white">₦ {{ $activeAmount?->format() ?? '0.00' }}</span>
                 </div>
                 <div class="flex flex-col gap-1 pl-4">
                     <div class="flex items-center gap-1.5">
                         <span class="w-2 h-2 rounded-full bg-brand-red"></span>
                         <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider">Overdue</span>
                     </div>
-                    <span class="text-sm font-black text-primary dark:text-white">₦ {{ number_format($overdueAmountTotal) }}</span>
+                    <span class="text-sm font-black text-primary dark:text-white">₦ {{ $overdueAmountTotal?->format() ?? '0.00' }}</span>
                 </div>
             </div>
         </div>

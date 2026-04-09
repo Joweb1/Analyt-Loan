@@ -66,13 +66,18 @@ class LoanService
     public function generateRepaymentSchedule(Loan $loan): void
     {
         $numRepayments = max(1, $loan->num_repayments ?? 1);
-        $principalShare = (float) $loan->amount / $numRepayments;
+
+        /** @var \App\ValueObjects\Money $principal */
+        $principal = $loan->amount;
+        $principalShare = $principal->divide($numRepayments);
+
         $totalInterest = $loan->getTotalExpectedInterest();
-        $interestShare = $totalInterest / $numRepayments;
+        $interestShare = $totalInterest->divide($numRepayments);
 
         // Fees added to first installment during creation
-        $processingFee = (float) ($loan->processing_fee ?? 0);
-        $insuranceFee = (float) ($loan->insurance_fee ?? 0);
+        $currency = $principal->getCurrency();
+        $processingFee = $loan->processing_fee ?? new \App\ValueObjects\Money(0, $currency);
+        $insuranceFee = $loan->insurance_fee ?? new \App\ValueObjects\Money(0, $currency);
 
         $startDate = \Carbon\Carbon::parse($loan->release_date ?? $loan->created_at);
         $cycle = $loan->repayment_cycle ?? 'monthly';
@@ -92,9 +97,10 @@ class LoanService
                 default => $dueDate->addMonths($i),
             };
 
-            $penaltyForInstallment = 0;
+            /** @var \App\ValueObjects\Money $initialFee */
+            $initialFee = new \App\ValueObjects\Money(0, $currency);
             if ($i === 1) {
-                $penaltyForInstallment = $processingFee + $insuranceFee;
+                $initialFee = $processingFee->add($insuranceFee);
             }
 
             ScheduledRepayment::create([
@@ -102,7 +108,7 @@ class LoanService
                 'due_date' => $dueDate,
                 'principal_amount' => $principalShare,
                 'interest_amount' => $interestShare,
-                'penalty_amount' => $penaltyForInstallment,
+                'penalty_amount' => $initialFee, // Using 'penalty_amount' as a catch-all for upfront fees
                 'installment_number' => $i,
                 'status' => 'applied',
             ]);

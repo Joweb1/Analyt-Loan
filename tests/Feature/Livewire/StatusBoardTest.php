@@ -56,20 +56,24 @@ class StatusBoardTest extends TestCase
         Loan::factory()->create([
             'organization_id' => $this->organization->id,
             'status' => 'active',
-            'amount' => 10000,
+            'amount' => 10000.0,
         ]);
 
         Loan::factory()->create([
             'organization_id' => $this->organization->id,
             'status' => 'repaid',
-            'amount' => 5000,
+            'amount' => 5000.0,
         ]);
 
         Livewire::actingAs($this->admin)
             ->test(StatusBoard::class)
             ->assertSet('counts.active', 1)
             ->assertSet('counts.repaid', 1)
-            ->assertSet('sums.active', 10000)
-            ->assertSet('sums.repaid', 5000);
+            ->assertSet('sums.active', function ($val) {
+                return $val instanceof \App\ValueObjects\Money && $val->getMinorAmount() === 1000000;
+            })
+            ->assertSet('sums.repaid', function ($val) {
+                return $val instanceof \App\ValueObjects\Money && $val->getMinorAmount() === 500000;
+            });
     }
 }

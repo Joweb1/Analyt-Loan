@@ -218,7 +218,7 @@ class Reports extends Component
                                 ->whereBetween('created_at', [$startDate->startOfDay(), $endDate->endOfDay()]);
                         });
                 })
-                ->sum('amount');
+                ->sum('amount') / 100;
 
             // 2. Total Loans Count (Period)
             $totalLoansCount = Loan::where('organization_id', $orgId)
@@ -237,7 +237,7 @@ class Reports extends Component
                 $q->where('organization_id', $orgId);
             })
                 ->whereBetween('paid_at', [$startDate, $endDate])
-                ->sum('amount');
+                ->sum('amount') / 100;
 
             // 4. New Customers in Period
             $newCustomers = \App\Models\Borrower::where('organization_id', $orgId)
@@ -250,14 +250,14 @@ class Reports extends Component
             })
                 ->where('type', 'deposit')
                 ->whereBetween('transaction_date', [$startDate, $endDate])
-                ->sum('amount');
+                ->sum('amount') / 100;
 
             $savingsWithdrawals = \App\Models\SavingsTransaction::whereHas('savingsAccount', function ($q) use ($orgId) {
                 $q->where('organization_id', $orgId);
             })
                 ->where('type', 'withdrawal')
                 ->whereBetween('transaction_date', [$startDate, $endDate])
-                ->sum('amount');
+                ->sum('amount') / 100;
 
             $totalSavingsPeriod = (float) ($savingsDeposits - $savingsWithdrawals);
 
@@ -266,13 +266,13 @@ class Reports extends Component
                 ->whereIn('status', ['approved', 'active', 'repaid', 'overdue'])
                 ->get()
                 ->reduce(function ($carry, $loan) {
-                    return $carry + $loan->getTotalExpectedInterest();
+                    return $carry + $loan->getTotalExpectedInterest()->getMajorAmount();
                 }, 0.0);
 
             // 7. Total Paid Interest (LIFETIME) - for the Rem calculation
             $totalPaidInterestLifetime = (float) Repayment::whereHas('loan', function ($q) use ($orgId) {
                 $q->where('organization_id', $orgId);
-            })->sum('interest_amount');
+            })->sum('interest_amount') / 100;
 
             $remainingInterestLifetime = max(0, $totalExpectedInterestLifetime - $totalPaidInterestLifetime);
 
@@ -286,9 +286,9 @@ class Reports extends Component
                 ->unique();
 
             $totalPAR = Loan::whereIn('id', $overdueLoanIds)->get()->sum(function ($loan) {
-                $totalPaidPrincipal = $loan->repayments()->sum('principal_amount');
+                $totalPaidPrincipal = $loan->repayments()->sum('principal_amount') / 100;
 
-                return max(0, (float) $loan->amount - (float) $totalPaidPrincipal);
+                return max(0, $loan->amount->getMajorAmount() - (float) $totalPaidPrincipal);
             });
 
             // 9. Profit & Loss (PnL) in Period
@@ -296,7 +296,7 @@ class Reports extends Component
                 $q->where('organization_id', $orgId);
             })
                 ->whereBetween('paid_at', [$startDate, $endDate])
-                ->sum('interest_amount');
+                ->sum('interest_amount') / 100;
 
             $totalFeesPeriod = (float) Loan::where('organization_id', $orgId)
                 ->whereIn('status', ['approved', 'active', 'repaid', 'overdue'])
@@ -307,7 +307,7 @@ class Reports extends Component
                                 ->whereBetween('created_at', [$startDate->startOfDay(), $endDate->endOfDay()]);
                         });
                 })
-                ->sum(\Illuminate\Support\Facades\DB::raw('processing_fee + insurance_fee'));
+                ->sum(\Illuminate\Support\Facades\DB::raw('processing_fee + insurance_fee')) / 100;
 
             $totalPnLPeriod = $periodPaidInterest + $totalFeesPeriod;
 
@@ -317,7 +317,7 @@ class Reports extends Component
                 ->whereIn('status', ['approved', 'active', 'overdue'])
                 ->get()
                 ->sum(function ($loan) {
-                    return $loan->balance; // using getBalanceAttribute
+                    return $loan->balance->getMajorAmount(); // using getBalanceAttribute
                 });
 
             // Chart Data (History based on type, independent of period filters)
@@ -412,13 +412,13 @@ class Reports extends Component
                                 ->whereBetween('created_at', [$currentStart, $currentEnd]);
                         });
                 })
-                ->sum('amount');
+                ->sum('amount') / 100;
 
             $collectedData[] = Repayment::whereHas('loan', function ($q) use ($orgId) {
                 $q->where('organization_id', $orgId);
             })
                 ->whereBetween('paid_at', [$currentStart, $currentEnd])
-                ->sum('amount');
+                ->sum('amount') / 100;
 
             $interestExpectedData[] = Loan::where('organization_id', $orgId)
                 ->whereIn('status', ['approved', 'active', 'repaid', 'overdue'])
@@ -431,14 +431,14 @@ class Reports extends Component
                 })
                 ->get()
                 ->reduce(function ($carry, $loan) {
-                    return $carry + $loan->getTotalExpectedInterest();
+                    return $carry + $loan->getTotalExpectedInterest()->getMajorAmount();
                 }, 0.0);
 
             $interestPaidData[] = Repayment::whereHas('loan', function ($q) use ($orgId) {
                 $q->where('organization_id', $orgId);
             })
                 ->whereBetween('paid_at', [$currentStart, $currentEnd])
-                ->sum('interest_amount');
+                ->sum('interest_amount') / 100;
 
             $customerData[] = \App\Models\Borrower::where('organization_id', $orgId)
                 ->whereBetween('created_at', [$currentStart, $currentEnd])
@@ -460,14 +460,14 @@ class Reports extends Component
             })
                 ->where('type', 'deposit')
                 ->whereBetween('transaction_date', [$currentStart->toDateString(), $currentEnd->toDateString()])
-                ->sum('amount');
+                ->sum('amount') / 100;
 
             $wit = \App\Models\SavingsTransaction::whereHas('savingsAccount', function ($q) use ($orgId) {
                 $q->where('organization_id', $orgId);
             })
                 ->where('type', 'withdrawal')
                 ->whereBetween('transaction_date', [$currentStart->toDateString(), $currentEnd->toDateString()])
-                ->sum('amount');
+                ->sum('amount') / 100;
 
             $savingsData[] = (float) ($dep - $wit);
         }

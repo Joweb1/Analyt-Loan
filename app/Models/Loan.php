@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 /**
  * @property string $id
  * @property string $borrower_id
- * @property numeric $amount
+ * @property \App\ValueObjects\Money $amount
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property string $loan_number
@@ -25,13 +25,13 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property string $duration_unit
  * @property string $repayment_cycle
  * @property int $num_repayments
- * @property numeric|null $processing_fee
+ * @property \App\ValueObjects\Money|null $processing_fee
  * @property string|null $processing_fee_type
- * @property numeric|null $insurance_fee
+ * @property \App\ValueObjects\Money|null $insurance_fee
  * @property string|null $description
  * @property array<array-key, mixed>|null $attachments
  * @property string $status
- * @property numeric $penalty_value
+ * @property \App\ValueObjects\Money $penalty_value
  * @property string $penalty_type
  * @property string $penalty_frequency
  * @property bool $override_system_penalty
@@ -121,10 +121,12 @@ class Loan extends Model
 
     protected $casts = [
         'release_date' => 'date',
-        'amount' => 'decimal:2',
+        'amount' => \App\Casts\MoneyCast::class,
         'attachments' => 'array',
         'override_system_penalty' => 'boolean',
-        'penalty_value' => 'decimal:2',
+        'penalty_value' => \App\Casts\MoneyCast::class,
+        'processing_fee' => \App\Casts\MoneyCast::class,
+        'insurance_fee' => \App\Casts\MoneyCast::class,
     ];
 
     public function repayments(): \Illuminate\Database\Eloquent\Relations\HasMany
@@ -188,60 +190,69 @@ class Loan extends Model
     /**
      * Get the total expected interest for the entire duration of the loan.
      */
-    public function getTotalExpectedInterest(): float
+    public function getTotalExpectedInterest(): \App\ValueObjects\Money
     {
-        $principal = (float) $this->amount;
-        $rate = (float) ($this->interest_rate ?? 0) / 100;
+        /** @var \App\ValueObjects\Money $principal */
+        $principal = $this->amount;
+        $currency = $principal->getCurrency();
+
+        $rate = (string) (($this->interest_rate ?? 0) / 100);
         $duration = (int) ($this->duration ?? 1);
         $durationUnit = $this->duration_unit ?? 'month';
         $interestType = $this->interest_type ?? 'year';
 
         if ($durationUnit === $interestType) {
-            return round($principal * $rate * $duration, 2);
+            return $principal->multiply(bcmul($rate, (string) $duration, 4));
         }
 
         // Conversion factors to a base unit (days)
         $conversion = [
-            'day' => 1,
-            'week' => 7,
-            'month' => 30.44, // average month length
-            'year' => 365.25,
+            'day' => '1',
+            'week' => '7',
+            'month' => '30.44', // average month length
+            'year' => '365.25',
         ];
 
-        $durationInDays = $duration * ($conversion[$durationUnit] ?? 30.44);
-        $interestPeriodInDays = $conversion[$interestType] ?? 365.25;
+        $durationInDays = bcmul((string) $duration, ($conversion[$durationUnit] ?? '30.44'), 4);
+        $interestPeriodInDays = $conversion[$interestType] ?? '365.25';
 
-        $multiplier = $durationInDays / $interestPeriodInDays;
+        $multiplier = bcdiv($durationInDays, $interestPeriodInDays, 4);
+        $totalMultiplier = bcmul($rate, $multiplier, 4);
 
-        return round($principal * $rate * $multiplier, 2);
+        return $principal->multiply($totalMultiplier);
     }
 
-    public function getBalanceAttribute(): float
+    public function getBalanceAttribute(): \App\ValueObjects\Money
     {
-        $totalInterest = $this->getTotalExpectedInterest();
-        $totalFees = (float) ($this->processing_fee ?? 0) + (float) ($this->insurance_fee ?? 0);
-        $totalPenalties = (float) $this->scheduledRepayments()->sum('penalty_amount');
+        /** @var \App\ValueObjects\Money $principal */
+        $principal = $this->amount;
+        $currency = $principal->getCurrency();
 
-        // Note: processing_fee and insurance_fee are already added to penalty_amount of the first schedule
-        // during schedule generation. To avoid double counting, we check if they are already accounted for.
-        // Actually, better logic: sum(principal) + sum(interest) + sum(penalty) - totalPaid.
+        // Use Scheduled Repayments as the source of truth for total due
+        $totalDueMinor = (int) $this->scheduledRepayments()
+            ->selectRaw('SUM(principal_amount + interest_amount + penalty_amount) as total')
+            ->value('total');
 
-        $totalPrincipal = (float) $this->amount;
-        $totalPayable = $totalPrincipal + $totalInterest + max($totalFees, $totalPenalties);
+        if ($totalDueMinor > 0) {
+            $totalPaidMinor = (int) $this->repayments()->sum('amount');
+            $remainingMinor = max(0, $totalDueMinor - $totalPaidMinor);
 
-        // Let's use a more robust way:
-        $totalDueFromSchedules = (float) $this->scheduledRepayments()->sum(\Illuminate\Support\Facades\DB::raw('principal_amount + interest_amount + penalty_amount'));
-
-        if ($totalDueFromSchedules > 0) {
-            $totalPaid = (float) $this->repayments()->sum('amount');
-
-            return max(0, round($totalDueFromSchedules - $totalPaid, 2));
+            return new \App\ValueObjects\Money($remainingMinor, $currency);
         }
 
-        $totalPayable = (float) $this->amount + $totalInterest + $totalFees;
-        $totalPaid = (float) $this->repayments()->sum('amount');
+        // Fallback if no schedules exist (should not happen in production)
+        /** @var \App\ValueObjects\Money $totalInterest */
+        $totalInterest = $this->getTotalExpectedInterest();
 
-        return max(0, round($totalPayable - $totalPaid, 2));
+        /** @var \App\ValueObjects\Money $processingFee */
+        $processingFee = $this->processing_fee ?? new \App\ValueObjects\Money(0, $currency);
+        /** @var \App\ValueObjects\Money $insuranceFee */
+        $insuranceFee = $this->insurance_fee ?? new \App\ValueObjects\Money(0, $currency);
+
+        $totalPayable = $principal->add($totalInterest)->add($processingFee)->add($insuranceFee);
+        $totalPaidMinor = (int) $this->repayments()->sum('amount');
+
+        return new \App\ValueObjects\Money(max(0, $totalPayable->getMinorAmount() - $totalPaidMinor), $currency);
     }
 
     /**

@@ -6,7 +6,7 @@ use App\Http\Controllers\Api\LoanController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['throttle:api'])->group(function () {
+Route::middleware(['throttle:api'])->name('api.')->group(function () {
     Route::apiResource('collaterals', CollateralController::class);
     Route::apiResource('borrowers', BorrowerController::class);
     Route::apiResource('loans', LoanController::class);

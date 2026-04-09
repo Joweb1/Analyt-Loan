@@ -6,20 +6,26 @@
         <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 mb-6">
             <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Outstanding</span>
             @php
-                $repaid = $activeLoan->repayments->sum('amount');
+                $currency = $activeLoan->amount->getCurrency();
+                $repaidMinor = (int) $activeLoan->repayments->sum(fn($r) => $r->amount->getMinorAmount());
+                $repaid = new \App\ValueObjects\Money($repaidMinor, $currency);
                 $schedules = $activeLoan->scheduledRepayments;
                 
                 if ($schedules->isNotEmpty()) {
-                    $totalDue = $schedules->sum(fn($s) => $s->principal_amount + $s->interest_amount + $s->penalty_amount);
+                    $totalDueMinor = (int) $schedules->sum(fn($s) => 
+                        $s->principal_amount->getMinorAmount() + 
+                        $s->interest_amount->getMinorAmount() + 
+                        $s->penalty_amount->getMinorAmount()
+                    );
+                    $totalDue = new \App\ValueObjects\Money($totalDueMinor, $currency);
                 } else {
-                    // Fallback for loans without a generated schedule yet
-                    $totalInterest = $activeLoan->amount * (($activeLoan->interest_rate ?? 0) / 100);
-                    $totalDue = $activeLoan->amount + $totalInterest;
+                    $totalDue = $activeLoan->amount->add($activeLoan->getTotalExpectedInterest());
                 }
                 
-                $balance = max(0, $totalDue - $repaid);
+                $balance = $totalDue->subtract($repaid);
+                if ($balance->getMinorAmount() < 0) $balance = new \App\ValueObjects\Money(0, $currency);
             @endphp
-            <h2 class="text-4xl font-black text-slate-900 mt-2">₦{{ number_format($balance, 2) }}</h2>
+            <h2 class="text-4xl font-black text-slate-900 mt-2">₦{{ $balance->format() }}</h2>
             @php 
                 $nextSchedule = $activeLoan->scheduledRepayments
                     ->whereIn('status', ['pending', 'overdue', 'partial'])
@@ -90,7 +96,7 @@
             @foreach($pendingProofs as $proof)
                 <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex justify-between items-center">
                     <div>
-                        <p class="font-bold text-slate-900">₦{{ number_format($proof->amount, 2) }}</p>
+                        <p class="font-bold text-slate-900">₦{{ $proof->amount->format() }}</p>
                         <p class="text-xs text-slate-500">{{ $proof->created_at->diffForHumans() }}</p>
                     </div>
                     <span class="bg-yellow-100 text-yellow-700 text-xs font-bold px-2 py-1 rounded">Pending</span>

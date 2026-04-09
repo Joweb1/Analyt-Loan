@@ -115,7 +115,7 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 text-right">
-                                    <span class="text-sm font-bold">₦{{ number_format($asset->value, 2) }}</span>
+                                    <span class="text-sm font-bold">₦{{ $asset->value->format() }}</span>
                                 </td>
                                 <td class="px-6 py-4">
                                     @if($asset->status === 'in_vault')
@@ -229,7 +229,7 @@
                             <div class="grid grid-cols-2 gap-4">
                                 <div class="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
                                     <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Asset Value</p>
-                                    <p class="text-lg font-black text-slate-900 dark:text-white">₦{{ number_format($viewingAsset->value, 2) }}</p>
+                                    <p class="text-lg font-black text-slate-900 dark:text-white">₦{{ $viewingAsset->value?->format() ?? '0.00' }}</p>
                                 </div>
                                 <div class="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
                                     <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Condition</p>

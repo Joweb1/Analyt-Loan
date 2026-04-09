@@ -81,7 +81,7 @@ class Vault extends Component
 
         $assets = $query->latest()->paginate(10);
 
-        $totalValue = Collateral::where('organization_id', $orgId)->where('status', 'in_vault')->sum('value');
+        $totalValue = Collateral::where('organization_id', $orgId)->where('status', 'in_vault')->sum('value') / 100;
         $inVaultCount = Collateral::where('organization_id', $orgId)->where('status', 'in_vault')->count();
         $returnedCount = Collateral::where('organization_id', $orgId)->where('status', 'returned')->count();
 

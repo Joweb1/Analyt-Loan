@@ -37,7 +37,7 @@
                         </td>
                         <td class="px-6 py-5">
                             <div class="flex flex-col gap-1">
-                                <span class="text-xs font-medium text-gray-500">Balance: <b class="text-primary dark:text-white">₦{{ number_format($portfolio->portfolio_balance, 2) }}</b></span>
+                                <span class="text-xs font-medium text-gray-500">Balance: <b class="text-primary dark:text-white">₦{{ $portfolio->portfolio_balance->format() }}</b></span>
                                 <span class="text-xs font-medium text-gray-500">PAR: <b class="text-red-500">{{ $portfolio->par_percentage }}%</b></span>
                                 <span class="text-xs font-medium text-gray-500">Borrowers: <b class="dark:text-white">{{ $portfolio->borrowers->count() }}</b></span>
                             </div>
@@ -60,8 +60,8 @@
                             </div>
                         </td>
                         <td class="px-6 py-5 text-right">
-                            <span class="text-sm font-bold {{ $portfolio->profit_loss >= 0 ? 'text-green-600' : 'text-red-600' }}">
-                                ₦{{ number_format($portfolio->profit_loss, 2) }}
+                            <span class="text-sm font-bold {{ $portfolio->profit_loss->getMinorAmount() >= 0 ? 'text-green-600' : 'text-red-600' }}">
+                                ₦{{ $portfolio->profit_loss->format() }}
                             </span>
                         </td>
                         <td class="px-6 py-5 text-right">

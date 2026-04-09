@@ -46,7 +46,7 @@
                 </div>
                 <div>
                     <p class="text-[10px] font-bold text-slate-400 uppercase">Current Balance</p>
-                    <p class="text-sm font-black text-slate-950">₦{{ number_format($savingsAccount->balance, 2) }}</p>
+                    <p class="text-sm font-black text-slate-950">₦{{ $savingsAccount->balance->format() }}</p>
                 </div>
             </div>
         </div>
@@ -66,7 +66,6 @@
                 </tr>
             </thead>
             <tbody class="divide-y divide-slate-100">
-                @php $runningBalance = $savingsAccount->balance; @endphp
                 @foreach($transactions as $t)
                     <tr>
                         <td class="py-4 px-2 text-xs font-bold text-slate-900">{{ $t->transaction_date->format('d/m/Y') }}</td>
@@ -76,7 +75,7 @@
                         </td>
                         <td class="py-4 px-2 text-xs text-slate-600 italic max-w-xs">{{ $t->notes ?? '-' }}</td>
                         <td class="py-4 px-2 text-right text-xs font-black text-slate-900">
-                            {{ $t->type === 'deposit' ? '+' : '-' }}₦{{ number_format($t->amount, 2) }}
+                            {{ $t->type === 'deposit' ? '+' : '-' }}₦{{ $t->amount->format() }}
                         </td>
                     </tr>
                 @endforeach
@@ -84,7 +83,7 @@
             <tfoot>
                 <tr class="border-t-2 border-slate-900 bg-slate-50">
                     <td colspan="4" class="py-4 px-2 text-sm font-black uppercase text-right">Closing Balance</td>
-                    <td class="py-4 px-2 text-right text-lg font-black text-slate-950">₦{{ number_format($savingsAccount->balance, 2) }}</td>
+                    <td class="py-4 px-2 text-right text-lg font-black text-slate-950">₦{{ $savingsAccount->balance->format() }}</td>
                 </tr>
             </tfoot>
         </table>

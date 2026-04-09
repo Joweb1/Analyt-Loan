@@ -39,7 +39,7 @@
                             </div>
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-500 font-mono">{{ $loan->loan_number }}</td>
-                        <td class="px-6 py-4 text-sm font-bold text-gray-900 dark:text-white">₦{{ number_format($loan->amount, 2) }}</td>
+                        <td class="px-6 py-4 text-sm font-bold text-gray-900 dark:text-white">₦{{ $loan->amount->format() }}</td>
                         <td class="px-6 py-4 text-sm text-gray-500">{{ $loan->duration }} {{ $loan->duration_unit }}(s)</td>
                         <td class="px-6 py-4 text-sm text-gray-500">
                             {{ $loan->created_at->format('M d, Y') }}

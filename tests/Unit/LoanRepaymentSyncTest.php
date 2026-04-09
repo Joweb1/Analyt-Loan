@@ -58,7 +58,7 @@ class LoanRepaymentSyncTest extends TestCase
         // Observer should have triggered sync automatically
 
         $this->assertEquals('partial', $s1->fresh()->status);
-        $this->assertEquals(3000, $s1->fresh()->paid_amount);
+        $this->assertEquals(300000, $s1->fresh()->paid_amount->getMinorAmount());
 
         // Complete first payment and start second
         $loan->repayments()->create([
@@ -70,7 +70,7 @@ class LoanRepaymentSyncTest extends TestCase
 
         $this->assertEquals('paid', $s1->fresh()->status);
         $this->assertEquals('partial', $s2->fresh()->status);
-        $this->assertEquals(2000, $s2->fresh()->paid_amount);
+        $this->assertEquals(200000, $s2->fresh()->paid_amount->getMinorAmount());
     }
 
     #[\PHPUnit\Framework\Attributes\Test]
@@ -110,12 +110,12 @@ class LoanRepaymentSyncTest extends TestCase
         $repayment->update(['amount' => 2000]);
 
         $this->assertEquals('partial', $s1->fresh()->status);
-        $this->assertEquals(2000, $s1->fresh()->paid_amount);
+        $this->assertEquals(200000, $s1->fresh()->paid_amount->getMinorAmount());
 
         // Delete repayment
         $repayment->delete();
 
         $this->assertEquals('overdue', $s1->fresh()->status);
-        $this->assertEquals(0, $s1->fresh()->paid_amount);
+        $this->assertEquals(0, $s1->fresh()->paid_amount->getMinorAmount());
     }
 }

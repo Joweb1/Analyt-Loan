@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\Loan;
 use App\Models\Portfolio;
+use App\ValueObjects\Money;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -26,9 +27,10 @@ class StatusBoard extends Component
 
     public $counts = [];
 
+    /** @var Money[] */
     public $sums = [];
 
-    public $totalPipelineValue = 0;
+    public ?Money $totalPipelineValue = null;
 
     // Board specific collections
     public $pending;
@@ -150,6 +152,8 @@ class StatusBoard extends Component
 
     public function calculateMetrics()
     {
+        $currency = Auth::user()->organization->currency_code ?? config('app.currency', 'NGN');
+
         $this->counts = [
             'pending' => $this->pending->count(),
             'active' => $this->active->count(),
@@ -159,16 +163,14 @@ class StatusBoard extends Component
         ];
 
         $this->sums = [
-            'pending' => $this->pending->sum('amount'),
-            'active' => $this->active->sum('amount'),
-            'repaid' => $this->repaid->sum('amount'),
-            'overdue' => $this->overdue->sum('amount'),
-            'declined' => $this->declined->sum('amount'),
+            'pending' => new Money((int) $this->pending->sum(fn ($l) => $l->amount->getMinorAmount()), $currency),
+            'active' => new Money((int) $this->active->sum(fn ($l) => $l->amount->getMinorAmount()), $currency),
+            'repaid' => new Money((int) $this->repaid->sum(fn ($l) => $l->amount->getMinorAmount()), $currency),
+            'overdue' => new Money((int) $this->overdue->sum(fn ($l) => $l->amount->getMinorAmount()), $currency),
+            'declined' => new Money((int) $this->declined->sum(fn ($l) => $l->amount->getMinorAmount()), $currency),
         ];
 
-        $this->totalPipelineValue =
-            $this->sums['pending'] +
-            $this->sums['active'];
+        $this->totalPipelineValue = $this->sums['pending']->add($this->sums['active']);
     }
 
     public function getRiskLevel($score)

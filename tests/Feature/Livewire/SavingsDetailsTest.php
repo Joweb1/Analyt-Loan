@@ -59,11 +59,11 @@ class SavingsDetailsTest extends TestCase
 
         $this->assertDatabaseHas('savings_accounts', [
             'borrower_id' => $this->borrower->id,
-            'balance' => 5000,
+            'balance' => 500000, // Minor units
         ]);
 
         $this->assertDatabaseHas('savings_transactions', [
-            'amount' => 5000,
+            'amount' => 500000, // Minor units
             'type' => 'deposit',
         ]);
     }
@@ -73,7 +73,7 @@ class SavingsDetailsTest extends TestCase
         $account = SavingsAccount::factory()->create([
             'borrower_id' => $this->borrower->id,
             'organization_id' => $this->organization->id,
-            'balance' => 10000,
+            'balance' => 10000, // 10,000 Major = 1,000,000 Minor
         ]);
 
         Livewire::actingAs($this->admin)
@@ -83,9 +83,9 @@ class SavingsDetailsTest extends TestCase
             ->set('transactionDate', now()->format('Y-m-d'))
             ->call('submitTransaction');
 
-        $this->assertEquals(6000, $account->fresh()->balance);
+        $this->assertEquals(600000, $account->fresh()->balance->getMinorAmount());
         $this->assertDatabaseHas('savings_transactions', [
-            'amount' => 4000,
+            'amount' => 400000, // Minor units
             'type' => 'withdrawal',
         ]);
     }
@@ -95,7 +95,7 @@ class SavingsDetailsTest extends TestCase
         SavingsAccount::factory()->create([
             'borrower_id' => $this->borrower->id,
             'organization_id' => $this->organization->id,
-            'balance' => 1000,
+            'balance' => 1000, // 1,000 Major = 100,000 Minor
         ]);
 
         Livewire::actingAs($this->admin)

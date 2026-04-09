@@ -39,7 +39,7 @@
                                 {{ $borrower->savingsAccount->account_number ?? 'N/A' }}
                             </td>
                             <td class="px-4 py-4 font-medium text-slate-900 dark:text-white">
-                                ₦{{ number_format($borrower->savingsAccount->balance ?? 0, 2) }}
+                                ₦{{ $borrower->savingsAccount?->balance?->format() ?? '0.00' }}
                             </td>
                             <td class="px-4 py-4 text-right">
                                 <button wire:click="selectBorrower('{{ $borrower->id }}')" class="px-4 py-2 bg-primary text-white text-xs font-bold rounded-xl hover:bg-primary/90 transition-colors">

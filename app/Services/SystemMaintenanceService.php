@@ -80,7 +80,7 @@ class SystemMaintenanceService
 
     private static function applyPenalty(Loan $loan, ScheduledRepayment $schedule, Carbon $today): void
     {
-        if (! ($loan->penalty_value > 0)) {
+        if (! ($loan->penalty_value->isPositive())) {
             return;
         }
 
@@ -97,11 +97,13 @@ class SystemMaintenanceService
         };
 
         if ($shouldApply) {
-            $penaltyAmount = $loan->penalty_type === 'fixed'
+            $penaltyToAdd = $loan->penalty_type === 'fixed'
                 ? $loan->penalty_value
-                : ($schedule->principal_amount * ($loan->penalty_value / 100));
+                : ($schedule->principal_amount->multiply($loan->penalty_value->getMajorAmount() / 100));
 
-            $schedule->increment('penalty_amount', $penaltyAmount);
+            $currentPenalty = $schedule->penalty_amount ?? new \App\ValueObjects\Money(0, $schedule->principal_amount->getCurrency());
+            $schedule->penalty_amount = $currentPenalty->add($penaltyToAdd);
+            $schedule->save();
         }
     }
 

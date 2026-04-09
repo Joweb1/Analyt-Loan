@@ -52,6 +52,6 @@ class MidnightSyncTest extends TestCase
 
         Artisan::call('app:midnight-sync');
 
-        $this->assertEquals(50, $schedule->fresh()->penalty_amount);
+        $this->assertEquals(5000, $schedule->fresh()->penalty_amount->getMinorAmount());
     }
 }

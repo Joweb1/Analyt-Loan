@@ -37,16 +37,19 @@ class LoanExtraRepaymentToSavingsTest extends TestCase
             'organization_id' => $organization->id,
             'borrower_id' => $borrower->id,
             'status' => 'active',
-            'amount' => 10000,
+            'amount' => 10000.0,
             'interest_rate' => 10,
+            'interest_type' => 'month',
+            'duration' => 1,
+            'duration_unit' => 'month',
             'num_repayments' => 1,
         ]);
 
         // Create one schedule for the full amount
         $loan->scheduledRepayments()->create([
             'due_date' => now()->addMonth(),
-            'principal_amount' => 10000,
-            'interest_amount' => 1000,
+            'principal_amount' => 10000.0,
+            'interest_amount' => 1000.0,
             'status' => 'applied',
             'installment_number' => 1,
         ]);
@@ -55,11 +58,11 @@ class LoanExtraRepaymentToSavingsTest extends TestCase
         $this->actingAs($user);
         /** @var \App\Models\Repayment $repayment */
         $repayment = $loan->repayments()->create([
-            'amount' => 15000,
+            'amount' => 15000.0,
             'paid_at' => now(),
             'payment_method' => 'Cash',
             'collected_by' => $user->id,
-            'extra_amount' => 4000, // Normally calculated by controller/Livewire
+            'extra_amount' => 4000.0, // Normally calculated by controller/Livewire
         ]);
 
         // Trigger the logic
@@ -71,12 +74,12 @@ class LoanExtraRepaymentToSavingsTest extends TestCase
         // Assert savings account exists and has 4,000 balance
         $savingsAccount = $borrower->fresh()->savingsAccount;
         $this->assertNotNull($savingsAccount);
-        $this->assertEquals(4000, $savingsAccount->balance);
+        $this->assertEquals(400000, $savingsAccount->balance->getMinorAmount());
 
         // Assert transaction record exists
         $this->assertDatabaseHas('savings_transactions', [
             'repayment_id' => $repayment->id,
-            'amount' => 4000,
+            'amount' => 400000,
             'type' => 'deposit',
         ]);
     }
@@ -127,7 +130,7 @@ class LoanExtraRepaymentToSavingsTest extends TestCase
 
         $savingsAccount = $borrower->fresh()->savingsAccount;
         $this->assertNotNull($savingsAccount);
-        $this->assertEquals(30000, $savingsAccount->balance);
+        $this->assertEquals(3000000, $savingsAccount->balance->getMinorAmount());
     }
 
     public function test_deleting_repayment_removes_savings_transaction()
@@ -171,14 +174,14 @@ class LoanExtraRepaymentToSavingsTest extends TestCase
         $loan->refreshRepaymentStatus();
 
         $savingsAccount = $borrower->fresh()->savingsAccount;
-        $this->assertEquals(5000, $savingsAccount->balance);
+        $this->assertEquals(500000, $savingsAccount->balance->getMinorAmount());
         $this->assertEquals(1, $savingsAccount->transactions()->count());
 
         // Delete the repayment
         $repayment->delete();
 
         // Assert savings transaction is gone and balance is reverted
-        $this->assertEquals(0, $savingsAccount->fresh()->balance);
+        $this->assertEquals(0, $savingsAccount->fresh()->balance->getMinorAmount());
         $this->assertEquals(0, $savingsAccount->transactions()->count());
     }
 }

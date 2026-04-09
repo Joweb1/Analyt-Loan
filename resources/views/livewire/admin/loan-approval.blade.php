@@ -37,7 +37,7 @@
                                 <p class="text-[10px] text-slate-500">{{ $loan->borrower->phone }}</p>
                             </td>
                             <td class="px-4 py-4 font-medium text-slate-900 dark:text-white">
-                                ₦{{ number_format($loan->amount, 2) }}
+                                ₦{{ $loan->amount->format() }}
                                 <p class="text-[10px] text-slate-500">{{ $loan->duration }} {{ $loan->duration_unit }}</p>
                             </td>
                             <td class="px-4 py-4 text-xs text-slate-500">

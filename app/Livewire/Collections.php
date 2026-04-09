@@ -65,10 +65,10 @@ class Collections extends Component
             $repaymentQuery->whereHas('loan', fn ($q) => $q->where('portfolio_id', $this->portfolioId));
         }
 
-        $currentOverdue = (clone $loanQuery)->where('status', 'overdue')->sum('amount');
+        $currentOverdue = (clone $loanQuery)->where('status', 'overdue')->sum('amount') / 100;
 
-        $collectedCurrent = (clone $repaymentQuery)->whereBetween('paid_at', [$dates['start'], $dates['end']])->sum('amount');
-        $collectedPrev = (clone $repaymentQuery)->whereBetween('paid_at', [$prevDates['start'], $prevDates['end']])->sum('amount');
+        $collectedCurrent = (clone $repaymentQuery)->whereBetween('paid_at', [$dates['start'], $dates['end']])->sum('amount') / 100;
+        $collectedPrev = (clone $repaymentQuery)->whereBetween('paid_at', [$prevDates['start'], $prevDates['end']])->sum('amount') / 100;
 
         $collectedChange = $collectedPrev > 0 ? (($collectedCurrent - $collectedPrev) / $collectedPrev) * 100 : 0;
 

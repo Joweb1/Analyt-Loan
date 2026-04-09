@@ -23,7 +23,7 @@
                             @if ($collateral)
                                 <h3 class="text-xl font-bold">{{ $collateral->name }}</h3>
                                 <p class="text-gray-600">{{ $collateral->description }}</p>
-                                <p class="text-gray-800 font-bold">Value: ${{ number_format($collateral->value, 2) }}</p>
+                                <p class="text-gray-800 font-bold">Value: ${{ $collateral->value->format() }}</p>
                                 @if ($collateral->image_path)
                                     <img src="{{ $collateral->image_url }}" alt="{{ $collateral->name }}" class="mt-4 rounded-md">
                                 @endif

@@ -11,6 +11,8 @@ RUN apt-get update && apt-get install -y \
     libicu-dev \
     libonig-dev \
     libxml2-dev \
+    libpng-dev \
+    libjpeg-dev \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # 2. Install PHP extensions

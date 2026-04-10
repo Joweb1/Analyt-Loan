@@ -131,10 +131,23 @@ jobs:
       run: |
         npm install
         npm run build
+        if [ ! -d "public/build" ]; then
+          echo "ERROR: public/build directory is missing!"
+          exit 1
+        fi
+        echo "Vite build successful, content of public/build:"
+        ls -R public/build
 
     - name: Create Release Zip
       run: |
-        zip -r release.zip . -x ".git/*" ".github/*" "node_modules/*" "vendor/*" "tests/*" "phpstan.neon" "phpunit.xml" ".dockerignore" "docker-compose.yml" "Dockerfile" "*.zip" "*.rdb"
+        # Explicitly ensure we are at root
+        cd $GITHUB_WORKSPACE
+        zip -q -r release.zip . -x ".git/*" ".github/*" "node_modules/*" "vendor/*" "tests/*" "phpstan.neon" "phpunit.xml" ".dockerignore" "docker-compose.yml" "Dockerfile" "*.zip" "*.rdb"
+        if [ ! -f "release.zip" ]; then
+          echo "ERROR: release.zip was not created!"
+          exit 1
+        fi
+        echo "Release zip created successfully."
 
     - name: Push to deploy branch
       run: |

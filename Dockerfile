@@ -4,8 +4,13 @@ FROM php:8.4-apache
 # 1. Install system dependencies and unzip (crucial for unpacking the artifact)
 RUN apt-get update && apt-get install -y \
     unzip \
+    git \
+    curl \
     libzip-dev \
     libpq-dev \
+    libicu-dev \
+    libonig-dev \
+    libxml2-dev \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # 2. Install PHP extensions
@@ -16,6 +21,7 @@ RUN install-php-extensions gd mbstring xml zip pdo_mysql pdo_pgsql opcache intl 
 
 # 3. Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+ENV COMPOSER_ALLOW_SUPERUSER=1
 
 # 4. Configure Apache to allow .htaccess rewrites
 RUN a2enmod rewrite
@@ -28,22 +34,22 @@ WORKDIR /var/www
 COPY release.zip .
 
 # 7. Unzip and Setup "Shared Hosting" Structure
-RUN unzip release.zip -d laravel-app && \
+RUN unzip -q release.zip -d laravel-app && \
     rm release.zip
 
 # 8. Install PHP Dependencies
 WORKDIR /var/www/laravel-app
-RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progress
+RUN composer install --no-dev --optimize-autoloader --no-interaction --no-progress --no-scripts
 
 # 9. Move Public files to Main Directory (Apache Root)
 WORKDIR /var/www
-RUN rm -rf html/*
-RUN cp -r laravel-app/public/* html/
-RUN cp laravel-app/public/.htaccess html/
+RUN rm -rf html/* && \
+    cp -r laravel-app/public/* html/ && \
+    cp laravel-app/public/.htaccess html/ || true
 
 # 10. Verify Assets
 RUN if [ ! -d "/var/www/html/build" ]; then \
-    echo "ERROR: Vite build assets missing in /var/www/html/build. Build will fail." && exit 1; \
+    echo "ERROR: Vite build assets missing in /var/www/html/build. Check if 'npm run build' was successful." && exit 1; \
     fi
 
 # 11. Modify index.php to point to the new paths
@@ -51,13 +57,13 @@ WORKDIR /var/www/html
 RUN sed -i "s|require __DIR__.'/../vendor/autoload.php';|require __DIR__.'/../laravel-app/vendor/autoload.php';|g" index.php && \
     sed -i "s|\$app = require_once __DIR__.'/../bootstrap/app.php';|\$app = require_once __DIR__.'/../laravel-app/bootstrap/app.php';|g" index.php
 
-# 11. Create Production .env Base
+# 12. Create Production .env Base
 RUN echo "APP_ENV=production" > ../laravel-app/.env && \
     echo "APP_DEBUG=false" >> ../laravel-app/.env && \
     echo "APP_IS_PRODUCTION=true" >> ../laravel-app/.env && \
     echo "LOG_CHANNEL=stderr" >> ../laravel-app/.env
 
-# 12. Permissions and Storage Linking
+# 13. Permissions and Storage Linking
 RUN chown -R www-data:www-data /var/www/laravel-app \
     && chown -R www-data:www-data /var/www/html
 
@@ -70,12 +76,12 @@ RUN find /var/www/html -type d -exec chmod 755 {} + \
 RUN rm -rf /var/www/html/storage && \
     ln -s /var/www/laravel-app/storage/app/public /var/www/html/storage
 
-# 13. Final Apache Permissions
+# 14. Final Apache Permissions
 RUN chown -h www-data:www-data /var/www/html/storage
 RUN chown -R www-data:www-data /var/www/laravel-app/storage /var/www/laravel-app/bootstrap/cache \
     && chmod -R 777 /var/www/laravel-app/storage /var/www/laravel-app/bootstrap/cache
 
-# 14. Setup Startup Script
+# 15. Setup Startup Script
 COPY start.sh /usr/local/bin/start.sh
 RUN chmod +x /usr/local/bin/start.sh
 

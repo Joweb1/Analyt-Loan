@@ -4,7 +4,18 @@ set -e
 # Navigate to the Laravel app directory
 cd /var/www/laravel-app
 
-# Optimize performance
+# Clear old cache to prevent stale data
+echo "Cleaning old cache..."
+php artisan config:clear
+php artisan cache:clear
+php artisan view:clear
+php artisan route:clear
+
+# Run database migrations
+echo "Running database migrations..."
+php artisan migrate --force
+
+# Optimize performance for production
 echo "Caching configuration and routes..."
 php artisan config:cache
 php artisan route:cache

@@ -79,9 +79,13 @@ RUN rm -rf /var/www/html/storage && \
     ln -s /var/www/laravel-app/storage/app/public /var/www/html/storage
 
 # 14. Final Apache Permissions
-RUN chown -h www-data:www-data /var/www/html/storage
-RUN chown -R www-data:www-data /var/www/laravel-app/storage /var/www/laravel-app/bootstrap/cache \
-    && chmod -R 777 /var/www/laravel-app/storage /var/www/laravel-app/bootstrap/cache
+RUN mkdir -p /var/www/laravel-app/storage/framework/sessions \
+    && mkdir -p /var/www/laravel-app/storage/framework/views \
+    && mkdir -p /var/www/laravel-app/storage/framework/cache \
+    && chown -R www-data:www-data /var/www/laravel-app/storage \
+    && chown -R www-data:www-data /var/www/laravel-app/bootstrap/cache \
+    && chmod -R 775 /var/www/laravel-app/storage \
+    && chmod -R 775 /var/www/laravel-app/bootstrap/cache
 
 # 15. Setup Startup Script
 COPY start.sh /usr/local/bin/start.sh

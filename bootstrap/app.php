@@ -18,15 +18,9 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->trustProxies(at: '*');
 
         $middleware->encryptCookies(except: [
-            'laravel_session',
             'XSRF-TOKEN',
-            'analyt-loan-session',
         ]);
 
-        $middleware->validateCsrfTokens(except: [
-            'login',
-            'livewire/*',
-        ]);
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
@@ -37,9 +31,9 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->web(append: [
             \App\Http\Middleware\DebugSession::class,
-            // \App\Http\Middleware\EnforceTenancy::class,
-            // \App\Http\Middleware\OverrideOrganizationTime::class,
-            // \App\Http\Middleware\CheckOrganizationStatus::class,
+            \App\Http\Middleware\EnforceTenancy::class,
+            \App\Http\Middleware\OverrideOrganizationTime::class,
+            \App\Http\Middleware\CheckOrganizationStatus::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

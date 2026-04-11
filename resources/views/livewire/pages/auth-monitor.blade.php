@@ -68,7 +68,7 @@ new class extends Component {
                             {{ json_encode($log->cookies) }}
                             <div class="mt-2 p-1 bg-gray-900 rounded border border-gray-700 text-gray-500">
                                 <span class="text-[8px] font-bold uppercase">Runtime Config:</span>
-                                <pre class="text-[8px] text-gray-600">{{ json_encode($log->payload['runtime_config'], JSON_PRETTY_PRINT) }}</pre>
+                                <pre class="text-[8px] text-gray-600">{{ json_encode($log->payload['runtime_config'] ?? ['status' => 'No config captured'], JSON_PRETTY_PRINT) }}</pre>
                             </div>
                         </td>
                     </tr>

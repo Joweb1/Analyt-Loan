@@ -18,7 +18,7 @@ return [
     |
     */
 
-    'driver' => env('SESSION_DRIVER', 'database'),
+    'driver' => env('APP_ENV') === 'production' ? 'database' : env('SESSION_DRIVER', 'file'),
 
     /*
     |--------------------------------------------------------------------------

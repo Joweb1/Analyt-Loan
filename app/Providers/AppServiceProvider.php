@@ -36,10 +36,8 @@ class AppServiceProvider extends ServiceProvider
                 $_SERVER['SERVER_PORT'] = 443;
             }
 
-            // Dynamically set session domain for Render
-            if (isset($_SERVER['HTTP_HOST']) && str_contains($_SERVER['HTTP_HOST'], 'onrender.com')) {
-                config(['session.domain' => $_SERVER['HTTP_HOST']]);
-            }
+            // Explicitly set domain to null for host-only cookies
+            config(['session.domain' => null]);
         }
         // Define Rate Limiters
         \Illuminate\Support\Facades\RateLimiter::for('api', function (\Illuminate\Http\Request $request) {

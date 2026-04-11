@@ -39,8 +39,16 @@ class DebugSession
                     'csrf_token_request' => $request->header('X-CSRF-TOKEN') ?: $request->input('_token'),
                     'is_authenticated' => Auth::check(),
                     'cookies' => $request->cookies->all(),
-                    // Filter sensitive fields from payload
-                    'payload' => collect($request->all())->except(['password', 'password_confirmation', '_token'])->toArray(),
+                    // Capture config for verification
+                    'payload' => [
+                        'config' => [
+                            'secure' => config('session.secure'),
+                            'domain' => config('session.domain'),
+                            'same_site' => config('session.same_site'),
+                            'driver' => config('session.driver'),
+                        ],
+                        'request' => collect($request->all())->except(['password', 'password_confirmation', '_token'])->toArray(),
+                    ],
                 ]);
             } catch (\Exception $e) {
                 // Silently fail if DB write errors, don't break the app

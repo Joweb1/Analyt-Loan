@@ -35,8 +35,12 @@ class AppServiceProvider extends ServiceProvider
                 $_SERVER['HTTPS'] = 'on';
                 $_SERVER['SERVER_PORT'] = 443;
             }
-        }
 
+            // Dynamically set session domain for Render
+            if (isset($_SERVER['HTTP_HOST']) && str_contains($_SERVER['HTTP_HOST'], 'onrender.com')) {
+                config(['session.domain' => $_SERVER['HTTP_HOST']]);
+            }
+        }
         // Define Rate Limiters
         \Illuminate\Support\Facades\RateLimiter::for('api', function (\Illuminate\Http\Request $request) {
             return \Illuminate\Cache\RateLimiting\Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());

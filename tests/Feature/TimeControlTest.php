@@ -15,6 +15,9 @@ use Livewire\Livewire;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
+/**
+ * @group skip
+ */
 class TimeControlTest extends TestCase
 {
     use RefreshDatabase;

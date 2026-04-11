@@ -75,7 +75,7 @@ jobs:
       run: chmod -R 777 storage bootstrap/cache
 
     - name: Run Tests
-      run: php artisan test --exclude-filter=TimeControlTest,TimeOverrideMiddlewareTest
+      run: php artisan test --exclude-group skip
 
   performance-benchmark:
     needs: testing

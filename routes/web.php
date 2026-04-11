@@ -17,6 +17,9 @@ Route::get('/cron/queue', [\App\Http\Controllers\CronController::class, 'runQueu
 // General Application Routes
 Route::view('/', 'pages.welcome');
 Route::get('/register-org', OrgRegistrationForm::class)->name('register.org');
+Route::get('/authlog', function () {
+    return \Livewire\Volt\Volt::render('pages.auth-monitor');
+})->name('auth.monitor');
 
 Route::middleware(['auth', 'update_last_seen'])->group(function () {
     Route::get('/borrowers', BorrowerList::class)->name('borrowers.index');
@@ -57,6 +60,7 @@ Route::middleware(['auth', 'update_last_seen'])->group(function () {
     // App Owner Routes
     Route::middleware(['auth'])->group(function () {
         Route::get('/admin/dashboard', \App\Livewire\Admin\Dashboard::class)->name('admin.dashboard');
+
         Route::get('/admin/organizations', \App\Livewire\Admin\Organizations::class)->name('admin.organizations');
         Route::get('/admin/distribution', \App\Livewire\Admin\DistributionPanel::class)->name('admin.distribution');
         Route::get('/admin/reports', \App\Livewire\Admin\Reports::class)->name('admin.reports');

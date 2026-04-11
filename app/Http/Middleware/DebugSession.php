@@ -5,7 +5,6 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 class DebugSession
@@ -15,29 +14,30 @@ class DebugSession
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $session = $request->session();
+        // Skip log routes to avoid recursion
+        if ($request->is('authlog*') || $request->is('livewire/update')) {
+            return $next($request);
+        }
 
-        $data = [
-            'path' => $request->fullUrl(),
-            'method' => $request->method(),
-            'session_id' => $session->getId(),
-            'csrf_token_session' => $session->token(),
-            'csrf_token_request' => $request->header('X-CSRF-TOKEN') ?: $request->input('_token'),
-            'is_authenticated' => Auth::check(),
-            'user_id' => Auth::id(),
-            'cookies' => $request->cookies->all(),
-        ];
+        if ($request->hasSession()) {
+            $session = $request->session();
 
-        Log::channel('stderr')->info('SESSION_DEBUG_LOG', $data);
+            \App\Models\SessionLog::create([
+                'user_id' => Auth::id(),
+                'session_id' => $session->getId(),
+                'path' => $request->path(),
+                'method' => $request->method(),
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+                'csrf_token_session' => $session->token(),
+                'csrf_token_request' => $request->header('X-CSRF-TOKEN') ?: $request->input('_token'),
+                'is_authenticated' => Auth::check(),
+                'cookies' => $request->cookies->all(),
+                // Filter sensitive fields from payload
+                'payload' => collect($request->all())->except(['password', 'password_confirmation', '_token'])->toArray(),
+            ]);
+        }
 
-        $response = $next($request);
-
-        // Log again after the request to see if things changed
-        Log::channel('stderr')->info('SESSION_DEBUG_LOG_AFTER', [
-            'new_session_id' => $session->getId(),
-            'new_csrf_token' => $session->token(),
-        ]);
-
-        return $response;
+        return $next($request);
     }
 }

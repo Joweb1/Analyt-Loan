@@ -30,6 +30,11 @@ class AppServiceProvider extends ServiceProvider
     {
         if ($this->app->isProduction() || config('app.is_production')) {
             \Illuminate\Support\Facades\URL::forceScheme('https');
+
+            if (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https') {
+                $_SERVER['HTTPS'] = 'on';
+                $_SERVER['SERVER_PORT'] = 443;
+            }
         }
 
         // Define Rate Limiters

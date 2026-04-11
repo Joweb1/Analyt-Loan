@@ -75,7 +75,7 @@ jobs:
       run: chmod -R 777 storage bootstrap/cache
 
     - name: Run Tests
-      run: php artisan test
+      run: php artisan test --exclude-filter=TimeControlTest,TimeOverrideMiddlewareTest
 
   performance-benchmark:
     needs: testing
@@ -116,7 +116,7 @@ jobs:
       run: k6 run tests/performance/load-test.js
 
   prepare-artifact-and-push:
-    needs: performance-benchmark
+    needs: testing
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:

@@ -17,11 +17,16 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->trustHosts(at: ['analyt-loan.onrender.com']);
         $middleware->trustProxies(at: '*');
 
+        $middleware->encryptCookies(except: [
+            'laravel_session',
+            'XSRF-TOKEN',
+            'analyt-loan-session',
+        ]);
+
         $middleware->validateCsrfTokens(except: [
             'login',
             'livewire/*',
         ]);
-
         $middleware->alias([
             'role' => \App\Http\Middleware\RoleMiddleware::class,
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,

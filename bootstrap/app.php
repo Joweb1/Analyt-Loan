@@ -23,10 +23,8 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
         $middleware->append(\App\Http\Middleware\InjectTraceId::class);
 
-        $middleware->web(prepend: [
-            \App\Http\Middleware\DebugSession::class,
-        ]);
         $middleware->web(append: [
+            \App\Http\Middleware\DebugSession::class,
             \App\Http\Middleware\EnforceTenancy::class,
             \App\Http\Middleware\OverrideOrganizationTime::class,
             \App\Http\Middleware\CheckOrganizationStatus::class,

@@ -95,7 +95,10 @@ jobs:
         npm run build
 
     - name: Start Laravel Server
-      run: php artisan serve --port=8000 &
+      run: |
+        php -r "file_exists('.env') || copy('.env.testing', '.env');"
+        php artisan key:generate
+        php artisan serve --port=8000 &
       env:
         APP_ENV: testing
 

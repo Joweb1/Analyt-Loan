@@ -45,6 +45,8 @@ return [
 
     'is_development' => (bool) env('APP_IS_DEVELOPMENT', true),
 
+    'session_debug_enabled' => (bool) env('SESSION_DEBUG_ENABLED', true),
+
     /*
     |--------------------------------------------------------------------------
     | Application URL

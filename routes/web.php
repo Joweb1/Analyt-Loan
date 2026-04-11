@@ -9,17 +9,14 @@ use App\Livewire\Settings\RolesManagement;
 use App\Livewire\Settings\TeamManagement;
 use App\Livewire\UserProfile;
 use Illuminate\Support\Facades\Route;
+use Livewire\Volt\Volt;
 
 // Secure Cron & Queue Triggers (for Shared Hosting)
-Route::get('/cron/schedule', [\App\Http\Controllers\CronController::class, 'runSchedule']);
-Route::get('/cron/queue', [\App\Http\Controllers\CronController::class, 'runQueue']);
 
 // General Application Routes
 Route::view('/', 'pages.welcome');
 Route::get('/register-org', OrgRegistrationForm::class)->name('register.org');
-Route::get('/authlog', function () {
-    return \Livewire\Volt\Volt::render('pages.auth-monitor');
-})->name('auth.monitor');
+Volt::route('/authlog', 'pages.auth-monitor')->name('auth.monitor');
 
 Route::middleware(['auth', 'update_last_seen'])->group(function () {
     Route::get('/borrowers', BorrowerList::class)->name('borrowers.index');

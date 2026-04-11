@@ -14,11 +14,6 @@ class DebugSession
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Skip in testing environment or if disabled via config
-        if (app()->environment('testing') || ! config('app.session_debug_enabled', true)) {
-            return $next($request);
-        }
-
         // Skip log routes to avoid recursion
         if ($request->is('authlog*') || $request->is('livewire/update')) {
             return $next($request);
@@ -27,11 +22,11 @@ class DebugSession
         if ($request->hasSession()) {
             try {
                 $session = $request->session();
-
+                
                 \App\Models\SessionLog::create([
                     'user_id' => Auth::id(),
                     'session_id' => $session->getId(),
-                    'path' => $request->path(),
+                    'path' => $request->fullUrl(), // Full URL including scheme
                     'method' => $request->method(),
                     'ip_address' => $request->ip(),
                     'user_agent' => $request->userAgent(),
@@ -39,20 +34,23 @@ class DebugSession
                     'csrf_token_request' => $request->header('X-CSRF-TOKEN') ?: $request->input('_token'),
                     'is_authenticated' => Auth::check(),
                     'cookies' => $request->cookies->all(),
-                    // Capture config for verification
                     'payload' => [
-                        'config' => [
-                            'secure' => config('session.secure'),
-                            'domain' => config('session.domain'),
-                            'same_site' => config('session.same_site'),
-                            'driver' => config('session.driver'),
+                        'runtime_config' => [
+                            'app_url' => config('app.url'),
+                            'session_driver' => config('session.driver'),
+                            'session_secure' => config('session.secure'),
+                            'session_domain' => config('session.domain'),
+                            'session_same_site' => config('session.same_site'),
+                            'is_https' => $request->secure(),
                         ],
-                        'request' => collect($request->all())->except(['password', 'password_confirmation', '_token'])->toArray(),
+                        'headers' => [
+                            'x-forwarded-proto' => $request->header('X-Forwarded-Proto'),
+                            'x-forwarded-host' => $request->header('X-Forwarded-Host'),
+                        ]
                     ],
                 ]);
             } catch (\Exception $e) {
-                // Silently fail if DB write errors, don't break the app
-                \Illuminate\Support\Facades\Log::error('SessionLog write failure: '.$e->getMessage());
+                \Illuminate\Support\Facades\Log::error('SessionLog failure: ' . $e->getMessage());
             }
         }
 

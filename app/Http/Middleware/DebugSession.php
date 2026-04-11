@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Session;
 use Symfony\Component\HttpFoundation\Response;
 
 class DebugSession
@@ -14,8 +15,8 @@ class DebugSession
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Skip log routes to avoid recursion
-        if ($request->is('authlog*') || $request->is('livewire/update')) {
+        // Only skip the log monitor itself to avoid infinite loops
+        if ($request->is('authlog*')) {
             return $next($request);
         }
 
@@ -26,7 +27,7 @@ class DebugSession
                 \App\Models\SessionLog::create([
                     'user_id' => Auth::id(),
                     'session_id' => $session->getId(),
-                    'path' => $request->fullUrl(), // Full URL including scheme
+                    'path' => $request->fullUrl(),
                     'method' => $request->method(),
                     'ip_address' => $request->ip(),
                     'user_agent' => $request->userAgent(),
@@ -39,21 +40,24 @@ class DebugSession
                             'app_url' => config('app.url'),
                             'session_driver' => config('session.driver'),
                             'session_secure' => config('session.secure'),
-                            'session_domain' => config('session.domain'),
-                            'session_same_site' => config('session.same_site'),
                             'is_https' => $request->secure(),
+                            'app_key_set' => ! empty(config('app.key')),
                         ],
-                        'headers' => [
-                            'x-forwarded-proto' => $request->header('X-Forwarded-Proto'),
-                            'x-forwarded-host' => $request->header('X-Forwarded-Host'),
-                        ],
+                        'request_data' => collect($request->all())->except(['password', 'password_confirmation', '_token'])->toArray(),
                     ],
                 ]);
             } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::error('SessionLog failure: '.$e->getMessage());
+                // Silently continue
             }
         }
 
-        return $next($request);
+        $response = $next($request);
+
+        // Force save the session before returning
+        if ($request->hasSession()) {
+            Session::save();
+        }
+
+        return $response;
     }
 }

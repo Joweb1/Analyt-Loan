@@ -22,7 +22,7 @@ class DebugSession
         if ($request->hasSession()) {
             try {
                 $session = $request->session();
-                
+
                 \App\Models\SessionLog::create([
                     'user_id' => Auth::id(),
                     'session_id' => $session->getId(),
@@ -46,11 +46,11 @@ class DebugSession
                         'headers' => [
                             'x-forwarded-proto' => $request->header('X-Forwarded-Proto'),
                             'x-forwarded-host' => $request->header('X-Forwarded-Host'),
-                        ]
+                        ],
                     ],
                 ]);
             } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::error('SessionLog failure: ' . $e->getMessage());
+                \Illuminate\Support\Facades\Log::error('SessionLog failure: '.$e->getMessage());
             }
         }
 

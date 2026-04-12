@@ -19,7 +19,7 @@ class EnforceTenancy
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (!$request->hasSession()) {
+        if (! $request->hasSession()) {
             return $next($request);
         }
 
@@ -60,10 +60,9 @@ class EnforceTenancy
                 }
             }
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Tenancy Error: ' . $e->getMessage());
+            \Illuminate\Support\Facades\Log::error('Tenancy Error: '.$e->getMessage());
         }
 
         return $next($request);
     }
-
 }

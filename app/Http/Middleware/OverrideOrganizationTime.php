@@ -14,28 +14,37 @@ class OverrideOrganizationTime
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $tenantSession = app(\App\Services\TenantSession::class);
+        if (! $request->hasSession()) {
+            return $next($request);
+        }
 
-        if ($tenantSession->hasTenant()) {
-            $orgId = $tenantSession->getTenantId();
-            $org = \App\Models\Organization::where('id', $orgId)->first();
+        try {
+            $tenantSession = app(\App\Services\TenantSession::class);
 
-            if ($org) {
-                if ($org->use_manual_date && $org->operating_date) {
-                    // Get the simulated time from the org model directly to ensure accuracy
-                    $dt = $org->getSystemTime();
+            if ($tenantSession->hasTenant()) {
+                $orgId = $tenantSession->getTenantId();
+                $org = \App\Models\Organization::where('id', $orgId)->first();
 
-                    // Set both Carbon test time and PHP default timezone
-                    \Carbon\Carbon::setTestNow($dt);
+                if ($org) {
+                    if ($org->use_manual_date && $org->operating_date) {
+                        // Get the simulated time from the org model directly to ensure accuracy
+                        $dt = $org->getSystemTime();
 
-                    if ($org->timezone) {
-                        date_default_timezone_set($org->timezone);
-                        config(['app.timezone' => $org->timezone]);
+                        // Set both Carbon test time and PHP default timezone
+                        \Carbon\Carbon::setTestNow($dt);
+
+                        if ($org->timezone) {
+                            date_default_timezone_set($org->timezone);
+                            config(['app.timezone' => $org->timezone]);
+                        }
+                    } else {
+                        \Carbon\Carbon::setTestNow();
                     }
-                } else {
-                    \Carbon\Carbon::setTestNow();
                 }
             }
+        } catch (\Exception $e) {
+            // Log error but don't crash the request or logout the user
+            \Illuminate\Support\Facades\Log::error('TimeOverride Error: '.$e->getMessage());
         }
 
         return $next($request);

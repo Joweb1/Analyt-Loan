@@ -230,6 +230,7 @@ class Loan extends Model
 
         // Use Scheduled Repayments as the source of truth for total due
         $totalDueMinor = (int) $this->scheduledRepayments()
+            ->reorder() // Remove any default order from the relationship
             ->selectRaw('SUM(principal_amount + interest_amount + penalty_amount) as total')
             ->value('total');
 

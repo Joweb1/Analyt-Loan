@@ -42,19 +42,30 @@ class EnforceTenancy
                 if (! $user->isAppOwner() && ! $this->tenantSession->hasTenant()) {
                     $excludedRoutes = [
                         'register.org',
+                        'login',
+                        'register',
                         'logout',
+                        'password.request',
+                        'password.reset',
+                        'password.confirm',
                         'verification.notice',
                         'verification.verify',
                         'verification.send',
-                        'password.confirm',
                         'profile', // Allow profile access to see status
                     ];
 
-                    if (! $request->expectsJson() && $request->route() && ! in_array($request->route()->getName(), $excludedRoutes)) {
+                    $routeName = $request->route() ? $request->route()->getName() : null;
+
+                    // Allow Livewire internal routes
+                    if (str_starts_with($routeName ?? '', 'livewire.')) {
+                        return $next($request);
+                    }
+
+                    if (! $request->expectsJson() && $routeName && ! in_array($routeName, $excludedRoutes)) {
                         return redirect()->route('register.org')->with('error', 'You must be part of an organization to access this area.');
                     }
 
-                    if ($request->expectsJson() && ! in_array($request->route()->getName(), $excludedRoutes)) {
+                    if ($request->expectsJson() && $routeName && ! in_array($routeName, $excludedRoutes)) {
                         return response()->json(['error' => 'Tenant context missing.'], 403);
                     }
                 }

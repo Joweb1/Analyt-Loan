@@ -16,30 +16,38 @@ class CheckOrganizationStatus
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (Auth::check()) {
-            $user = Auth::user();
+        if (! $request->hasSession()) {
+            return $next($request);
+        }
 
-            // Skip check for App Owner
-            if ($user->isAppOwner()) {
-                return $next($request);
-            }
+        try {
+            if (Auth::check()) {
+                $user = Auth::user();
 
-            $organization = $user->organization;
+                // Skip check for App Owner
+                if ($user->isAppOwner()) {
+                    return $next($request);
+                }
 
-            if ($organization) {
-                if ($organization->status === 'suspended') {
-                    $excludedRoutes = [
-                        'logout',
-                        'profile',
-                    ];
+                $organization = $user->organization;
 
-                    if (! in_array($request->route()->getName(), $excludedRoutes)) {
-                        Auth::logout();
+                if ($organization) {
+                    if ($organization->status === 'suspended') {
+                        $excludedRoutes = [
+                            'logout',
+                            'profile',
+                        ];
 
-                        return redirect()->route('login')->with('error', 'Your organization account has been suspended. Please contact support.');
+                        if ($request->route() && ! in_array($request->route()->getName(), $excludedRoutes)) {
+                            Auth::logout();
+
+                            return redirect()->route('login')->with('error', 'Your organization account has been suspended. Please contact support.');
+                        }
                     }
                 }
             }
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('OrgStatus Error: '.$e->getMessage());
         }
 
         return $next($request);

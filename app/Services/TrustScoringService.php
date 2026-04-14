@@ -107,7 +107,7 @@ class TrustScoringService
         }
 
         $lastRepayment = Repayment::where('loan_id', $schedule->loan_id)
-            ->where('paid_at', '<=', now())
+            ->where('paid_at', '<=', \App\Models\Organization::systemNow())
             ->latest('paid_at')
             ->first();
 

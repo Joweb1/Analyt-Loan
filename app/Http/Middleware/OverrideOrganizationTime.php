@@ -25,21 +25,13 @@ class OverrideOrganizationTime
                 $orgId = $tenantSession->getTenantId();
                 $org = \App\Models\Organization::where('id', $orgId)->first();
 
-                if ($org) {
-                    if ($org->use_manual_date && $org->operating_date) {
-                        // Get the simulated time from the org model directly to ensure accuracy
-                        $dt = $org->getSystemTime();
-
-                        // Set both Carbon test time and PHP default timezone
-                        \Carbon\Carbon::setTestNow($dt);
-
-                        if ($org->timezone) {
-                            date_default_timezone_set($org->timezone);
-                            config(['app.timezone' => $org->timezone]);
-                        }
-                    } else {
-                        \Carbon\Carbon::setTestNow();
-                    }
+                if ($org && $org->use_manual_date && $org->operating_date) {
+                    // Set Carbon test time globally for this request
+                    // We specifically DO NOT call date_default_timezone_set here
+                    // to avoid shifting the cookie expiration headers.
+                    \Carbon\Carbon::setTestNow($org->getSystemTime());
+                } else {
+                    \Carbon\Carbon::setTestNow();
                 }
             }
         } catch (\Exception $e) {

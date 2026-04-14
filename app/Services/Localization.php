@@ -9,21 +9,16 @@ use Illuminate\Support\Facades\Config;
 class Localization
 {
     /**
-     * Set the application locale and timezone based on the organization.
+     * Set the application locale based on the organization.
      */
     public function setContext(Organization $organization): void
     {
-        // Set Timezone
-        if ($organization->timezone) {
-            Config::set('app.timezone', $organization->timezone);
-            date_default_timezone_set($organization->timezone);
-        }
-
-        // Set Locale (defaulting to organization's language if we had one, but for now we'll use app default or NGN/USD logic)
-        // In a real world, organization would have a 'language' field.
-        // For now, we'll assume 'en' but allow for expansion.
+        // Set Locale (defaulting to organization's language if we had one)
         $locale = $organization->locale ?? Config::get('app.locale');
         App::setLocale($locale);
+
+        // We specifically DO NOT call date_default_timezone_set here
+        // to avoid shifting the cookie expiration headers in the same request.
     }
 
     /**

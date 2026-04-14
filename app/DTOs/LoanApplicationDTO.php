@@ -33,6 +33,8 @@ class LoanApplicationDTO
      */
     public static function fromArray(array $data): self
     {
+        $sanitize = fn ($val) => (is_string($val) && trim($val) === '') ? null : $val;
+
         return new self(
             borrower_id: $data['borrower_id'],
             loan_product: $data['loan_product'],
@@ -43,16 +45,16 @@ class LoanApplicationDTO
             duration_unit: $data['duration_unit'],
             repayment_cycle: $data['repayment_cycle'],
             num_repayments: (int) $data['num_repayments'],
-            release_date: $data['release_date'] ?? null,
+            release_date: $sanitize($data['release_date'] ?? null),
             processing_fee: (float) ($data['processing_fee'] ?? 0),
             processing_fee_type: $data['processing_fee_type'] ?? 'fixed',
             insurance_fee: (float) ($data['insurance_fee'] ?? 0),
-            portfolio_id: $data['portfolio_id'] ?? null,
-            loan_officer_id: $data['loan_officer_id'] ?? null,
-            guarantor_id: $data['guarantor_id'] ?? null,
-            external_guarantor_id: $data['external_guarantor_id'] ?? null,
-            description: $data['description'] ?? null,
-            loan_number: $data['loan_number'] ?? null,
+            portfolio_id: $sanitize($data['portfolio_id'] ?? null),
+            loan_officer_id: $sanitize($data['loan_officer_id'] ?? null),
+            guarantor_id: $sanitize($data['guarantor_id'] ?? null),
+            external_guarantor_id: $sanitize($data['external_guarantor_id'] ?? null),
+            description: $sanitize($data['description'] ?? null),
+            loan_number: $sanitize($data['loan_number'] ?? null),
         );
     }
 

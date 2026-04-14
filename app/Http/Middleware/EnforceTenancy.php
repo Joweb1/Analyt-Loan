@@ -30,7 +30,7 @@ class EnforceTenancy
                 // Resolve and set the tenant context
                 $this->tenantSession->setTenantFromUser();
 
-                // Apply localization
+                // Apply localization context (No global side-effects here)
                 if ($this->tenantSession->hasTenant()) {
                     $organization = \App\Models\Organization::current(true);
                     if ($organization) {
@@ -56,8 +56,10 @@ class EnforceTenancy
 
                     $routeName = $request->route() ? $request->route()->getName() : null;
 
-                    // Allow Livewire internal routes
-                    if (str_starts_with($routeName ?? '', 'livewire.')) {
+                    // Detect Livewire requests (Standard or File Uploads)
+                    $isLivewire = str_starts_with($routeName ?? '', 'livewire.') || $request->hasHeader('X-Livewire');
+
+                    if ($isLivewire) {
                         return $next($request);
                     }
 

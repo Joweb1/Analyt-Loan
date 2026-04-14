@@ -18,9 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->trustProxies(at: '*');
 
         $middleware->encryptCookies(except: [
-            'laravel_session',
-            'XSRF-TOKEN',
-            'analyt-loan-session',
+            // No exceptions for standard cookies to avoid collisions
         ]);
 
         $middleware->validateCsrfTokens(except: [

@@ -360,7 +360,7 @@ class LoanDetails extends Component
             'amount' => 'required|numeric|min:'.($allowFlexible ? 1 : $minRequired),
             'payment_method' => 'required|string',
             'collected_by' => 'required|exists:users,id',
-            'paid_at' => 'required|date',
+            'paid_at' => 'nullable|date',
         ];
 
         $messages = [
@@ -370,6 +370,8 @@ class LoanDetails extends Component
         ];
 
         $this->validate($rules, $messages);
+
+        $paidAt = $this->paid_at ?: \App\Models\Organization::systemNow();
 
         $currency = $this->loan->amount->getCurrency();
         $amountMoney = Money::fromMajor($this->amount, $currency);
@@ -402,7 +404,7 @@ class LoanDetails extends Component
             'amount' => $this->amount,
             'payment_method' => $this->payment_method,
             'collected_by' => $this->collected_by,
-            'paid_at' => $this->paid_at,
+            'paid_at' => $paidAt,
             'principal_amount' => $this->principal_amount,
             'interest_amount' => $this->interest_amount,
             'extra_amount' => $this->extra_amount,
@@ -438,10 +440,12 @@ class LoanDetails extends Component
             'amount' => 'required|numeric|min:'.($allowFlexible ? 1 : $minRequired),
             'payment_method' => 'required|string',
             'collected_by' => 'required|exists:users,id',
-            'paid_at' => 'required|date',
+            'paid_at' => 'nullable|date',
         ];
 
         $this->validate($rules);
+
+        $paidAt = $this->paid_at ?: \App\Models\Organization::systemNow();
 
         $repayment = Repayment::find($this->editingRepaymentId);
         $currency = $this->loan->amount->getCurrency();
@@ -470,7 +474,7 @@ class LoanDetails extends Component
             'amount' => $this->amount,
             'payment_method' => $this->payment_method,
             'collected_by' => $this->collected_by,
-            'paid_at' => $this->paid_at,
+            'paid_at' => $paidAt,
             'principal_amount' => $this->principal_amount,
             'interest_amount' => $this->interest_amount,
             'extra_amount' => $this->extra_amount,

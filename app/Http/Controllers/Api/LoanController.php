@@ -22,25 +22,26 @@ class LoanController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request, \App\Services\LoanService $loanService)
     {
         $validated = $request->validate([
             'borrower_id' => 'required|uuid|exists:borrowers,id',
             'amount' => 'required|numeric|min:1',
             'interest_rate' => 'required|numeric|min:0',
             'loan_product' => 'required|string',
-            'interest_type' => 'required|string',
+            'interest_type' => 'required|string|in:year,month,week,day',
             'duration' => 'required|integer|min:1',
-            'duration_unit' => 'required|string',
-            'repayment_cycle' => 'required|string',
+            'duration_unit' => 'required|string|in:year,month,week,day',
+            'repayment_cycle' => 'required|string|in:daily,weekly,biweekly,monthly,yearly',
             'num_repayments' => 'required|integer|min:1',
+            'release_date' => 'nullable|date',
         ]);
 
-        $dto = LoanApplicationDTO::fromArray($validated);
-        $loan = Loan::create($dto->toArray() + [
-            'status' => 'pending',
+        $dto = LoanApplicationDTO::fromArray($validated + [
             'loan_number' => 'LN-'.strtoupper(\Illuminate\Support\Str::random(8)),
         ]);
+
+        $loan = $loanService->createLoan($dto);
 
         return new LoanResource($loan);
     }

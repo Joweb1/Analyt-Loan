@@ -106,7 +106,7 @@ class LoanForm extends Component
             'loan_officer_id' => 'nullable|exists:users,id',
             'loan_number' => 'required|unique:loans,loan_number'.($this->isEditMode ? ','.$this->loanId : ''),
             'loan_product' => 'required|string',
-            'release_date' => 'required|date',
+            'release_date' => 'nullable|date',
             'amount' => 'required|numeric|min:1',
             'interest_rate' => 'required|numeric|min:0',
             'interest_type' => 'required|in:year,month,week,day',

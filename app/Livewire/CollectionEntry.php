@@ -78,9 +78,11 @@ class CollectionEntry extends Component
         $this->validate([
             'amount' => 'required|numeric|min:0.01',
             'payment_method' => 'required|string',
-            'paid_at' => 'required|date',
+            'paid_at' => 'nullable|date',
             'collected_by' => 'required|exists:users,id',
         ]);
+
+        $paidAt = $this->paid_at ?: \App\Models\Organization::systemNow();
 
         $loan = Loan::findOrFail($this->selectedLoanId);
 
@@ -108,7 +110,7 @@ class CollectionEntry extends Component
             'interest_amount' => $interestToPay,
             'extra_amount' => $extraAmount,
             'payment_method' => $this->payment_method,
-            'paid_at' => $this->paid_at,
+            'paid_at' => $paidAt,
             'collected_by' => $this->collected_by,
             'notes' => 'Bulk collection entry',
         ]);

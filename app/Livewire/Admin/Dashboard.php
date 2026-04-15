@@ -79,7 +79,7 @@ class Dashboard extends Component
     {
         // Organization Growth (Last 6 Months)
         $this->orgGrowthData = collect(range(5, 0))->map(function ($monthsAgo) {
-            $date = now()->subMonths($monthsAgo);
+            $date = \App\Models\Organization::systemNow()->subMonths($monthsAgo);
             $count = Organization::whereYear('created_at', $date->year)
                 ->whereMonth('created_at', $date->month)
                 ->count();
@@ -92,7 +92,7 @@ class Dashboard extends Component
 
         // Platform Activity (Daily Repayments across all orgs, last 7 days)
         $this->platformActivity = collect(range(6, 0))->map(function ($daysAgo) {
-            $date = now()->subDays($daysAgo)->startOfDay();
+            $date = \App\Models\Organization::systemNow()->subDays($daysAgo)->startOfDay();
             $amount = Repayment::withoutGlobalScopes()
                 ->whereDate('paid_at', $date)
                 ->sum('amount') / 100;

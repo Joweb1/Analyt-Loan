@@ -18,26 +18,10 @@ class OverrideOrganizationTime
             return $next($request);
         }
 
-        try {
-            $tenantSession = app(\App\Services\TenantSession::class);
-
-            if ($tenantSession->hasTenant()) {
-                $orgId = $tenantSession->getTenantId();
-                $org = \App\Models\Organization::where('id', $orgId)->first();
-
-                if ($org && $org->use_manual_date && $org->operating_date) {
-                    // Set Carbon test time globally for this request
-                    // We specifically DO NOT call date_default_timezone_set here
-                    // to avoid shifting the cookie expiration headers.
-                    \Carbon\Carbon::setTestNow($org->getSystemTime());
-                } else {
-                    \Carbon\Carbon::setTestNow();
-                }
-            }
-        } catch (\Exception $e) {
-            // Log error but don't crash the request or logout the user
-            \Illuminate\Support\Facades\Log::error('TimeOverride Error: '.$e->getMessage());
-        }
+        // We no longer call Carbon::setTestNow() here.
+        // Doing so poisons Laravel's session 'last_activity' timestamp,
+        // causing immediate logouts if the organization date is in the past.
+        // All business logic has been updated to use Organization::systemNow().
 
         return $next($request);
     }

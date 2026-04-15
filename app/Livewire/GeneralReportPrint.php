@@ -41,7 +41,7 @@ class GeneralReportPrint extends Component
 
     protected function calculatePeriod()
     {
-        $now = now();
+        $now = \App\Models\Organization::systemNow();
         match ($this->type) {
             'daily' => [
                 $this->startDate = $now->copy()->startOfDay(),

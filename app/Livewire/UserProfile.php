@@ -108,7 +108,7 @@ class UserProfile extends Component
         $this->customers_managed_count = Loan::where('loan_officer_id', $user->id)->distinct('borrower_id')->count('borrower_id');
 
         // Detailed Days Active
-        $diff = $user->created_at->diff(now());
+        $diff = $user->created_at->diff(\App\Models\Organization::systemNow());
         $parts = [];
         if ($diff->y > 0) {
             $parts[] = "{$diff->y}Yr";

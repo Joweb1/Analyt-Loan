@@ -4,7 +4,6 @@ namespace App\Livewire;
 
 use App\Models\Portfolio;
 use App\Models\Repayment;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -102,11 +101,11 @@ class RepaymentRecords extends Component
 
     private function applyDateFilter($query)
     {
-        $now = Carbon::now();
+        $now = \App\Models\Organization::systemNow();
 
         match ($this->dateRange) {
-            'today' => $query->whereDate('paid_at', today()),
-            'yesterday' => $query->whereDate('paid_at', today()->subDay()),
+            'today' => $query->whereDate('paid_at', \App\Models\Organization::systemNow()),
+            'yesterday' => $query->whereDate('paid_at', \App\Models\Organization::systemNow()->subDay()),
             'this_week' => $query->whereBetween('paid_at', [$now->startOfWeek()->format('Y-m-d'), $now->endOfWeek()->format('Y-m-d')]),
             'last_week' => $query->whereBetween('paid_at', [
                 $now->copy()->subWeek()->startOfWeek()->format('Y-m-d'),
@@ -165,7 +164,7 @@ class RepaymentRecords extends Component
 
         $repayments = $query->latest('paid_at')->get();
 
-        $filename = 'repayments_'.now()->format('Y-m-d_His').'.csv';
+        $filename = 'repayments_'.\App\Models\Organization::systemNow()->format('Y-m-d_His').'.csv';
 
         $headers = [
             'Content-type' => 'text/csv',

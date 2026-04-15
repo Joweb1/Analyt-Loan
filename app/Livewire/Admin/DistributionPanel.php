@@ -57,11 +57,11 @@ class DistributionPanel extends Component
             // Monthly Activity
             $org->monthly_lent = $org->loans()
                 ->whereIn('status', ['active', 'repaid', 'overdue'])
-                ->whereMonth('created_at', now()->month)
+                ->whereMonth('created_at', \App\Models\Organization::systemNow()->month)
                 ->sum('amount') / 100;
             $org->monthly_collected = \App\Models\Repayment::whereHas('loan', function ($q) use ($org) {
                 $q->where('organization_id', $org->id);
-            })->whereMonth('paid_at', now()->month)->sum('amount') / 100;
+            })->whereMonth('paid_at', \App\Models\Organization::systemNow()->month)->sum('amount') / 100;
 
             $org->active_loans_count = $org->loans->whereIn('status', ['active', 'overdue'])->count();
         }

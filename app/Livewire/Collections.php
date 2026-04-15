@@ -5,7 +5,6 @@ namespace App\Livewire;
 use App\Models\Loan;
 use App\Models\Portfolio;
 use App\Models\Repayment;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -100,7 +99,7 @@ class Collections extends Component
 
     private function getDateRange($filter)
     {
-        $now = Carbon::now();
+        $now = \App\Models\Organization::systemNow();
 
         return match ($filter) {
             'today' => ['start' => $now->copy()->startOfDay(), 'end' => $now->copy()->endOfDay()],

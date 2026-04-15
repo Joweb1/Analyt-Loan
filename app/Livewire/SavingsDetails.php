@@ -56,7 +56,7 @@ class SavingsDetails extends Component
             ]
         );
 
-        $this->transactionDate = now()->format('Y-m-d');
+        $this->transactionDate = \App\Models\Organization::systemNow()->format('Y-m-d');
     }
 
     public function openTransactionModal($type)

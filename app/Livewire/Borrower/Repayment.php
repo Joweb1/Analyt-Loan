@@ -75,7 +75,7 @@ class Repayment extends Component
             'reference_code' => $this->referenceCode,
             'receipt_path' => $path,
             'status' => 'applied',
-            'paid_at' => now(),
+            'paid_at' => \App\Models\Organization::systemNow(),
         ]);
 
         $this->showUploadModal = false;

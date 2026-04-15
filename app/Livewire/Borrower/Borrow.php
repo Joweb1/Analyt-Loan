@@ -50,7 +50,7 @@ class Borrow extends Component
         // Check for active loan
         $hasActiveLoan = Loan::where('borrower_id', $user->borrower->id)
             ->whereIn('status', ['active', 'overdue', 'applied', 'approved', 'applied', 'declined']) // Adding declined to block if needed? No, user can re-apply if declined.
-            ->where('created_at', '>', now()->subHours(24)) // Block for 24h if declined? Or just check active.
+            ->where('created_at', '>', \App\Models\Organization::systemNow()->subHours(24)) // Block for 24h if declined? Or just check active.
             ->whereIn('status', ['active', 'overdue', 'applied', 'approved', 'applied'])
             ->exists();
 
@@ -139,7 +139,7 @@ class Borrow extends Component
         $installmentAmount = $totalPayable / $this->num_repayments;
 
         $schedule = [];
-        $startDate = now();
+        $startDate = \App\Models\Organization::systemNow();
         for ($i = 1; $i <= $this->num_repayments; $i++) {
             $dueDate = $startDate->copy();
             match ($this->repayment_cycle) {

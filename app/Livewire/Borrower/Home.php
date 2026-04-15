@@ -60,7 +60,7 @@ class Home extends Component
 
     private function setGreeting()
     {
-        $hour = now()->hour;
+        $hour = \App\Models\Organization::systemNow()->hour;
         if ($hour < 12) {
             $this->greeting = 'Good Morning';
         } elseif ($hour < 18) {

@@ -63,13 +63,12 @@ class ActionCenter extends Component
         }
 
         $notif = $query->find($id);
-
         if ($notif) {
-            $notif->read_at = now();
+            $notif->read_at = \App\Models\Organization::systemNow();
             $notif->save();
-            $this->loadTasks();
-            $this->dispatch('custom-alert', ['type' => 'success', 'message' => 'Action marked as resolved.']);
         }
+        $this->loadTasks();
+        $this->dispatch('custom-alert', ['type' => 'success', 'message' => 'Action marked as resolved.']);
     }
 
     public function render()

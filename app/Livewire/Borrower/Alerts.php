@@ -18,7 +18,7 @@ class Alerts extends Component
             ->first();
 
         if ($notification) {
-            $notification->update(['read_at' => now()]);
+            $notification->update(['read_at' => \App\Models\Organization::systemNow()]);
         }
     }
 
@@ -26,7 +26,7 @@ class Alerts extends Component
     {
         SystemNotification::where('recipient_id', Auth::id())
             ->whereNull('read_at')
-            ->update(['read_at' => now()]);
+            ->update(['read_at' => \App\Models\Organization::systemNow()]);
 
         $this->dispatch('custom-alert', ['type' => 'success', 'message' => 'All alerts marked as read.']);
     }

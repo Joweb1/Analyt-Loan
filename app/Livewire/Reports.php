@@ -187,7 +187,7 @@ class Reports extends Component
             \Illuminate\Support\Facades\Cache::forget($cacheKey);
         }
 
-        $data = \Illuminate\Support\Facades\Cache::remember($cacheKey, now()->addHour(), function () use ($orgId) {
+        $data = \Illuminate\Support\Facades\Cache::remember($cacheKey, \App\Models\Organization::systemNow()->addHour(), function () use ($orgId) {
             $startDate = \App\Models\Organization::systemNow();
             $endDate = \App\Models\Organization::systemNow();
 

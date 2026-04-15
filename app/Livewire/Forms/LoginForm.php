@@ -41,7 +41,7 @@ class LoginForm extends Form
         }
 
         $user = Auth::user();
-        $user->last_login_at = now();
+        $user->last_login_at = \App\Models\Organization::systemNow();
         $user->save();
 
         RateLimiter::clear($this->throttleKey());

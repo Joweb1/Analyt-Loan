@@ -132,6 +132,7 @@ class LoanForm extends Component
         $this->portfolios = \App\Models\Portfolio::orderBy('name')->get();
 
         if ($loan && $loan->exists) {
+            // ... (existing edit mode logic)
             $this->isEditMode = true;
             $this->loanId = $loan->id;
             $this->borrowerId = $loan->borrower_id;

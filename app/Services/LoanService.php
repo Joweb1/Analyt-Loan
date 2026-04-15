@@ -39,6 +39,9 @@ class LoanService
                 $data['status'] ??= 'applied';
             }
 
+            // Ensure release_date defaults to organization's business date
+            $data['release_date'] ??= \App\Models\Organization::systemNow();
+
             $loan = Loan::create($data);
 
             if ($collateralId) {
@@ -79,7 +82,7 @@ class LoanService
         $processingFee = $loan->processing_fee ?? new \App\ValueObjects\Money(0, $currency);
         $insuranceFee = $loan->insurance_fee ?? new \App\ValueObjects\Money(0, $currency);
 
-        $startDate = \Carbon\Carbon::parse($loan->release_date ?? $loan->created_at);
+        $startDate = \Carbon\Carbon::parse($loan->release_date ?? \App\Models\Organization::systemNow());
         $cycle = $loan->repayment_cycle ?? 'monthly';
 
         // Delete existing schedules if any (to allow regeneration)

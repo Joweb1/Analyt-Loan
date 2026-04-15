@@ -95,7 +95,7 @@ class GeneralSettings extends Component
             $this->use_manual_date = $this->organization->use_manual_date;
             $this->operating_date = $this->organization->operating_date
                 ? \Carbon\Carbon::parse($this->organization->operating_date)->format('Y-m-d')
-                : now($this->timezone)->format('Y-m-d');
+                : \Illuminate\Support\Carbon::now($this->timezone)->format('Y-m-d');
         }
     }
 
@@ -180,7 +180,7 @@ class GeneralSettings extends Component
         // Immediate Sync Trigger for Skipped Days
         if ($this->use_manual_date) {
             // Case 1: Switching from real-time to manual, or manual date changed forward
-            $startDate = $oldOperatingDate ?? now()->startOfDay();
+            $startDate = $oldOperatingDate ?? \Illuminate\Support\Carbon::now($this->timezone)->startOfDay();
 
             if ($newOperatingDate->isAfter($startDate)) {
                 $days = (int) $startDate->diffInDays($newOperatingDate);

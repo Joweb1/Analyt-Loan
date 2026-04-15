@@ -24,7 +24,7 @@ class UpdateUserLastSeen
             if (! $lastSeen) {
                 $needsUpdate = true;
             } else {
-                if ($lastSeen->diffInMinutes(now()) >= 1) {
+                if ($lastSeen->diffInMinutes(\App\Models\Organization::systemNow()) >= 1) {
                     $needsUpdate = true;
                 }
             }
@@ -32,7 +32,7 @@ class UpdateUserLastSeen
             if ($needsUpdate) {
                 \Illuminate\Support\Facades\DB::table('users')
                     ->where('id', $user->id)
-                    ->update(['last_seen_at' => now()]);
+                    ->update(['last_seen_at' => \App\Models\Organization::systemNow()]);
             }
         }
 

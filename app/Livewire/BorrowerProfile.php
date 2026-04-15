@@ -134,7 +134,7 @@ class BorrowerProfile extends Component
             ->where('subject_type', Borrower::class)
             ->where('category', 'kyc')
             ->whereNull('read_at')
-            ->update(['read_at' => now()]);
+            ->update(['read_at' => \App\Models\Organization::systemNow()]);
     }
 
     public function toggleEdit()

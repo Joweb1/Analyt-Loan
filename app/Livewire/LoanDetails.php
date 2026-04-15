@@ -145,7 +145,7 @@ class LoanDetails extends Component
             'amount' => $amount,
             'payment_method' => $proof->payment_method ?? 'Bank Transfer',
             'collected_by' => Auth::id(),
-            'paid_at' => $proof->paid_at ?? now(),
+            'paid_at' => $proof->paid_at ?? \App\Models\Organization::systemNow(),
             'principal_amount' => $principalPart,
             'interest_amount' => $interestPart,
             'extra_amount' => $extraPart,

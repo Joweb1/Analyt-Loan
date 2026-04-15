@@ -160,6 +160,9 @@ class LoanService
             if ($collateralId) {
                 $this->linkCollateral($loan, $collateralId);
             }
+
+            // Regenerate schedule upon update
+            $this->generateRepaymentSchedule($loan);
         });
 
         if ($attachment) {

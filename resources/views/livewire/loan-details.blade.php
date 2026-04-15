@@ -201,11 +201,17 @@
 
                     <div>
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Release Date</p>
-                        <p class="text-sm font-bold text-slate-700 dark:text-slate-300">{{ $loan->created_at->format('M d, Y') }}</p>
+                        <p class="text-sm font-bold text-slate-700 dark:text-slate-300">{{ ($loan->release_date ?? $loan->created_at)->format('M d, Y') }}</p>
                     </div>
                     <div>
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Maturity Date</p>
-                        <p class="text-sm font-bold text-slate-700 dark:text-slate-300">{{ $loan->created_at->addMonths($loan->duration ?? 1)->format('M d, Y') }}</p>
+                        @php
+                            $lastInstallment = $loan->scheduledRepayments->last();
+                            $maturityDate = $lastInstallment ? $lastInstallment->due_date : null;
+                        @endphp
+                        <p class="text-sm font-bold text-slate-700 dark:text-slate-300">
+                            {{ $maturityDate ? $maturityDate->format('M d, Y') : 'N/A' }}
+                        </p>
                     </div>
                      <div>
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Repayment Cycle</p>

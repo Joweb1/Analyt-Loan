@@ -242,7 +242,8 @@ class LoanForm extends Component
     public function generateLoanNumber()
     {
         // Example: LN-2026-X8Y9Z
-        $this->loan_number = 'LN-'.date('Y').'-'.strtoupper(Str::random(5));
+        $year = \App\Models\Organization::systemNow()->year;
+        $this->loan_number = 'LN-'.$year.'-'.strtoupper(Str::random(5));
     }
 
     public function updatedLoanProduct($value)

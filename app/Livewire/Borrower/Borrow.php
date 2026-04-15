@@ -178,6 +178,7 @@ class Borrow extends Component
     {
         $user = Auth::user();
 
+        $year = \App\Models\Organization::systemNow()->year;
         $data = [
             'borrower_id' => $user->borrower->id,
             'loan_product' => $this->selectedProduct->name,
@@ -189,7 +190,7 @@ class Borrow extends Component
             'repayment_cycle' => $this->repayment_cycle,
             'num_repayments' => (int) $this->num_repayments,
             'description' => 'Applied via Borrower App',
-            'loan_number' => 'LN-'.date('Y').'-'.strtoupper(Str::random(5)),
+            'loan_number' => 'LN-'.$year.'-'.strtoupper(Str::random(5)),
         ];
 
         $dto = \App\DTOs\LoanApplicationDTO::fromArray($data);

@@ -40,7 +40,11 @@ class LoanService
             }
 
             // Ensure release_date defaults to organization's business date
-            $data['release_date'] ??= \App\Models\Organization::systemNow();
+            $systemNow = \App\Models\Organization::systemNow();
+            \Illuminate\Support\Facades\Log::info('Loan Creation - System Now resolved to: '.$systemNow->toDateTimeString());
+
+            $data['release_date'] ??= $systemNow;
+            \Illuminate\Support\Facades\Log::info('Loan Creation - Release Date set to: '.($data['release_date'] instanceof \Carbon\Carbon ? $data['release_date']->toDateTimeString() : $data['release_date']));
 
             $loan = Loan::create($data);
 

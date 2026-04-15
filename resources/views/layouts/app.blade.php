@@ -97,7 +97,7 @@
 <!-- Sidebar -->
 <aside id="sidebar" wire:ignore.self data-expanded="false" class="bg-white dark:bg-[#1a1f2b] h-full flex flex-col border-slate-100 dark:border-slate-800 shadow-soft overflow-hidden">
     @php
-        $org = Auth::user()->organization;
+        $org = \App\Models\Organization::current();
     @endphp
     <div class="h-20 flex items-center justify-start px-8 border-b border-transparent shrink-0">
         <div class="flex items-center gap-3">

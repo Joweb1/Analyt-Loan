@@ -206,6 +206,8 @@ class GeneralSettings extends Component
         }
 
         $this->dispatch('custom-alert', ['type' => 'success', 'message' => 'Settings updated successfully. Time override active.']);
+
+        return $this->redirect(route('settings'), navigate: true);
     }
 
     public function render()

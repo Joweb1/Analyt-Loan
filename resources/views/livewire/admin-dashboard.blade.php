@@ -1,6 +1,6 @@
 <div class="flex flex-col gap-4">
     @php
-        $org = Auth::user()->organization;
+        $org = \App\Models\Organization::current();
     @endphp
 
     @if($org && $org->use_manual_date)

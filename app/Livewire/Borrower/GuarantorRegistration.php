@@ -51,7 +51,7 @@ class GuarantorRegistration extends Component
             ->get();
 
         if ($rawConfigs->isEmpty()) {
-            \App\Livewire\Settings\GuarantorFormBuilder::seedDefaults($orgId);
+            \App\Livewire\Settings\FormBuilder::seedDefaults($orgId, 'guarantor');
             $rawConfigs = FormFieldConfig::where('organization_id', $orgId)
                 ->where('form_type', 'guarantor')
                 ->where('is_active', true)
@@ -144,7 +144,7 @@ class GuarantorRegistration extends Component
             $guarantor->income = $this->income;
 
             // Handle file uploads in custom data
-            $disk = config('filesystems.disks.supabase.is_configured') ? 'supabase' : config('filesystems.default');
+            $disk = (config('filesystems.disks.supabase.is_configured') && ! app()->environment('testing')) ? 'supabase' : config('filesystems.default');
             foreach ($this->customData as $key => $value) {
                 if ($value instanceof \Illuminate\Http\UploadedFile) {
                     $filename = Str::random(40).'.'.$value->getClientOriginalExtension();

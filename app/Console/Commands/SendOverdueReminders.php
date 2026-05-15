@@ -34,8 +34,8 @@ class SendOverdueReminders extends Command
         Organization::where('status', 'active')->chunk(50, function ($organizations) {
             foreach ($organizations as $org) {
                 // Set test time if manual date is enabled
-                if ($org->use_manual_date && $org->operating_date) {
-                    Carbon::setTestNow($org->operating_date);
+                if ($org->system_date) {
+                    \Carbon\Carbon::setTestNow($org->getSystemTime());
                 } else {
                     Carbon::setTestNow();
                 }

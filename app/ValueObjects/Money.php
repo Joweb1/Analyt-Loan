@@ -96,6 +96,16 @@ class Money implements JsonSerializable, Wireable
         return $this->amount < 0;
     }
 
+    public function absolute(): self
+    {
+        return new self(abs($this->amount), $this->currency);
+    }
+
+    public function equals(self $other): bool
+    {
+        return $this->amount === $other->amount && $this->currency === $other->currency;
+    }
+
     protected function ensureSameCurrency(self $other): void
     {
         if ($this->currency !== $other->currency) {

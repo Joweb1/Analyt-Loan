@@ -17,6 +17,8 @@ class RolesManagement extends Component
     public $systemRoles = [
         'Admin',
         'Borrower',
+        'Saver',
+        'Guarantor',
         'Loan Analyst',
         'Vault Manager',
         'Credit Analyst',

@@ -20,7 +20,7 @@ class CollectionEntry extends Component
 
     public $portfolios = [];
 
-    public $showAllActive = false;
+    public $showAllActive = true;
 
     // Repayment Modal Fields
     public $showRepaymentModal = false;
@@ -45,7 +45,7 @@ class CollectionEntry extends Component
         } else {
             $this->portfolios = $user->portfolios;
         }
-        $this->paid_at = \App\Models\Organization::systemNow()->format('Y-m-d');
+        $this->paid_at = now()->format('Y-m-d');
         $this->collected_by = Auth::id();
     }
 
@@ -69,7 +69,16 @@ class CollectionEntry extends Component
     {
         $this->selectedLoanId = $id;
         $loan = Loan::findOrFail($id);
-        $this->amount = $loan->balance->getMajorAmount(); // Default to full balance
+
+        // Calculate Due Amount (Overdue + Today's Installment)
+        $today = now()->toDateString();
+        $dueAmountMinor = (int) $loan->scheduledRepayments()
+            ->where('status', '!=', 'paid')
+            ->where('due_date', '<=', $today)
+            ->get()
+            ->sum(fn (\App\Models\ScheduledRepayment $s) => $s->principal_amount->getMinorAmount() + $s->interest_amount->getMinorAmount() + $s->penalty_amount->getMinorAmount() - $s->paid_amount->getMinorAmount());
+
+        $this->amount = $dueAmountMinor / 100;
         $this->showRepaymentModal = true;
     }
 
@@ -82,33 +91,73 @@ class CollectionEntry extends Component
             'collected_by' => 'required|exists:users,id',
         ]);
 
-        $paidAt = $this->paid_at ?: \App\Models\Organization::systemNow();
+        $paidAt = $this->paid_at ?: now();
 
         $loan = Loan::findOrFail($this->selectedLoanId);
 
         // Simple Split Logic (Priority: Interest -> Principal -> Extra)
-        $totalInterest = $loan->amount->getMajorAmount() * (($loan->interest_rate ?? 0) / 100);
-        $interestPaid = (float) $loan->repayments()->sum('interest_amount') / 100;
-        $interestDue = max(0, $totalInterest - $interestPaid);
+        $currency = $loan->organization->currency_code ?? 'NGN';
+        $amountMinor = (int) ($this->amount * 100);
+        $remainingMinor = $amountMinor;
 
-        $principalPaid = (float) $loan->repayments()->sum('principal_amount') / 100;
-        $principalDue = max(0, $loan->amount->getMajorAmount() - $principalPaid);
+        $schedules = $loan->scheduledRepayments()->where('status', '!=', 'paid')->orderBy('due_date')->get();
 
-        $remainingAmount = (float) $this->amount;
-        $interestToPay = min($remainingAmount, $interestDue);
-        $remainingAmount -= $interestToPay;
+        $interestPaidMinor = 0;
+        $feePaidMinor = 0;
+        $principalPaidMinor = 0;
+        $extraPaidMinor = 0;
 
-        $principalToPay = min($remainingAmount, $principalDue);
-        $remainingAmount -= $principalToPay;
+        foreach ($schedules as $s) {
+            if ($remainingMinor <= 0) {
+                break;
+            }
 
-        $extraAmount = $remainingAmount;
+            $sTotalDue = $s->principal_amount->getMinorAmount() + $s->interest_amount->getMinorAmount() + $s->penalty_amount->getMinorAmount();
+            $sPaid = $s->paid_amount->getMinorAmount();
+            $sRemaining = max(0, $sTotalDue - $sPaid);
+
+            if ($sRemaining <= 0) {
+                continue;
+            }
+
+            // 1. Interest
+            $sInterestDue = max(0, $s->interest_amount->getMinorAmount() - min($sPaid, $s->interest_amount->getMinorAmount()));
+            $toInterest = min($remainingMinor, $sInterestDue);
+            $interestPaidMinor += $toInterest;
+            $remainingMinor -= $toInterest;
+
+            if ($remainingMinor <= 0) {
+                break;
+            }
+
+            // 2. Fee (Penalty)
+            $sFeeDue = max(0, $s->penalty_amount->getMinorAmount() - min(max(0, $sPaid - $s->interest_amount->getMinorAmount()), $s->penalty_amount->getMinorAmount()));
+            $toFee = min($remainingMinor, $sFeeDue);
+            $feePaidMinor += $toFee;
+            $remainingMinor -= $toFee;
+
+            if ($remainingMinor <= 0) {
+                break;
+            }
+
+            // 3. Principal
+            $sPrincipalDue = max(0, $s->principal_amount->getMinorAmount() - min(max(0, $sPaid - $s->interest_amount->getMinorAmount() - $s->penalty_amount->getMinorAmount()), $s->principal_amount->getMinorAmount()));
+            $toPrincipal = min($remainingMinor, $sPrincipalDue);
+            $principalPaidMinor += $toPrincipal;
+            $remainingMinor -= $toPrincipal;
+        }
+
+        if ($remainingMinor > 0) {
+            $extraPaidMinor = $remainingMinor;
+        }
 
         $repayment = $loan->repayments()->create([
             'organization_id' => $loan->organization_id,
-            'amount' => $this->amount,
-            'principal_amount' => $principalToPay,
-            'interest_amount' => $interestToPay,
-            'extra_amount' => $extraAmount,
+            'amount' => $this->amount, // Cast will handle float to Money
+            'principal_amount' => new \App\ValueObjects\Money($principalPaidMinor, $currency),
+            'interest_amount' => new \App\ValueObjects\Money($interestPaidMinor, $currency),
+            'fee_amount' => new \App\ValueObjects\Money($feePaidMinor, $currency),
+            'extra_amount' => new \App\ValueObjects\Money($extraPaidMinor, $currency),
             'payment_method' => $this->payment_method,
             'paid_at' => $paidAt,
             'collected_by' => $this->collected_by,
@@ -142,7 +191,7 @@ class CollectionEntry extends Component
             // Default: Show those with installments due today or overdue
             $query->whereHas('scheduledRepayments', function ($q) {
                 $q->whereIn('status', ['pending', 'partial', 'overdue'])
-                    ->whereDate('due_date', '<=', \App\Models\Organization::systemNow());
+                    ->whereDate('due_date', '<=', now());
             });
         }
 
@@ -170,9 +219,8 @@ class CollectionEntry extends Component
         $loans = $query->latest()->paginate(15);
 
         $staffs = User::where('organization_id', $orgId)
-            ->whereHas('roles', function ($q) {
-                $q->whereNotIn('name', ['Borrower']);
-            })->get();
+            ->whereIn('type', ['admin', 'staff'])
+            ->get();
 
         return view('livewire.collection-entry', [
             'loans' => $loans,

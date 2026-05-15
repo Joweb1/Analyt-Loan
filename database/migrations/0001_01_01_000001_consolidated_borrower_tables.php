@@ -11,6 +11,7 @@ return new class extends Migration
         Schema::create('guarantors', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('organization_id')->constrained()->cascadeOnDelete();
+            $table->foreignUuid('user_id')->nullable()->constrained()->cascadeOnDelete();
             $table->string('custom_id')->nullable()->unique();
             $table->string('name');
             $table->string('phone')->nullable();
@@ -58,10 +59,20 @@ return new class extends Migration
             $table->timestamps();
         });
 
+        Schema::create('savers', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->foreignUuid('user_id')->constrained()->cascadeOnDelete();
+            $table->foreignUuid('organization_id')->constrained()->cascadeOnDelete();
+            $table->string('phone')->nullable();
+            $table->string('kyc_status')->default('pending');
+            $table->json('custom_data')->nullable();
+            $table->timestamps();
+        });
+
         Schema::create('savings_accounts', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->foreignUuid('organization_id')->constrained()->cascadeOnDelete();
-            $table->foreignUuid('borrower_id')->constrained()->cascadeOnDelete();
+            $table->foreignUuid('user_id')->constrained()->cascadeOnDelete();
             $table->string('account_number')->unique();
             $table->decimal('balance', 15, 2)->default(0);
             $table->decimal('interest_rate', 5, 2)->default(0);
@@ -86,6 +97,7 @@ return new class extends Migration
     {
         Schema::dropIfExists('savings_transactions');
         Schema::dropIfExists('savings_accounts');
+        Schema::dropIfExists('savers');
         Schema::dropIfExists('borrowers');
         Schema::dropIfExists('guarantors');
     }

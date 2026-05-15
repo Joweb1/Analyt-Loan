@@ -57,20 +57,24 @@ class MasterSeeder extends Seeder
             LoanProductSeeder::class,
         ]);
 
-        $demoOrg = Organization::where('slug', 'analyt-org-demo')->first();
+        $demoOrg = Organization::where('slug', 'analyt-demo-org')->first();
 
         // 2. Add some Demo Loans/Data linked to Demo Org
         // We ensure the observers catch these and create actionable tasks
+        // NOTE: We temporarily skip complex seeders that might have Money math issues
+        // until they are fully audited.
         $this->call([
             LoanSeeder::class,
-            PortfolioSeeder::class,
-            CollateralSeeder::class,
-            StatusBoardSeeder::class,
-            ActionTaskSeeder::class,
+            // PortfolioSeeder::class,
+            // CollateralSeeder::class,
+            // StatusBoardSeeder::class,
+            // ActionTaskSeeder::class,
         ]);
 
         // Fix missing organization_ids for everything created by standard seeders
-        User::whereNull('organization_id')->where('email', '!=', 'nahjonah00@gmail.com')->update(['organization_id' => $demoOrg->id]);
+        User::whereNull('organization_id')
+            ->where('email', '!=', 'owner@analytloan.com')
+            ->update(['organization_id' => $demoOrg->id]);
         Borrower::whereNull('organization_id')->update(['organization_id' => $demoOrg->id]);
         Loan::whereNull('organization_id')->update(['organization_id' => $demoOrg->id]);
 

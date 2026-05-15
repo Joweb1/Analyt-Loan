@@ -85,7 +85,7 @@ class LoanFormTest extends TestCase
 
         Livewire::actingAs($this->user)
             ->test(LoanForm::class)
-            ->call('selectBorrower', $borrower->id)
+            ->call('selectBorrower', $borrower->user_id)
             ->assertSet('borrowerUserId', $borrower->user_id);
     }
 

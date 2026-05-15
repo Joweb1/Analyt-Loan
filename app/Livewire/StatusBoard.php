@@ -104,9 +104,9 @@ class StatusBoard extends Component
 
         if ($this->dateFilter) {
             match ($this->dateFilter) {
-                'today' => $query->whereDate('created_at', \App\Models\Organization::systemNow()),
-                'week' => $query->whereBetween('created_at', [\App\Models\Organization::systemNow()->startOfWeek(), \App\Models\Organization::systemNow()->endOfWeek()]),
-                'month' => $query->whereMonth('created_at', \App\Models\Organization::systemNow()->month)->whereYear('created_at', \App\Models\Organization::systemNow()->year),
+                'today' => $query->whereDate('created_at', now()),
+                'week' => $query->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()]),
+                'month' => $query->whereMonth('created_at', now()->month)->whereYear('created_at', now()->year),
                 default => null
             };
         }

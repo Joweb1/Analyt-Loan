@@ -64,7 +64,7 @@ class ActionCenter extends Component
 
         $notif = $query->find($id);
         if ($notif) {
-            $notif->read_at = \App\Models\Organization::systemNow();
+            $notif->read_at = now();
             $notif->save();
         }
         $this->loadTasks();

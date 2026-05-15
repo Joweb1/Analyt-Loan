@@ -35,6 +35,12 @@ class BorrowerProfile extends Component
 
     public $address;
 
+    public $collection_group;
+
+    public $is_daily_saver;
+
+    public $daily_target_amount;
+
     public $employment_information;
 
     public $income_proof_path;
@@ -68,6 +74,9 @@ class BorrowerProfile extends Component
         $this->date_of_birth = $this->borrower->date_of_birth;
         $this->marital_status = $this->borrower->marital_status;
         $this->address = $this->borrower->address;
+        $this->collection_group = $this->borrower->collection_group;
+        $this->is_daily_saver = $this->borrower->is_daily_saver;
+        $this->daily_target_amount = $this->borrower->daily_target_amount ? $this->borrower->daily_target_amount->getMajorAmount() : 0;
         $this->employment_information = $this->borrower->employment_information;
         $this->photo_url = $this->borrower->photo_url;
         $this->kyc_status = $this->borrower->kyc_status;
@@ -134,7 +143,7 @@ class BorrowerProfile extends Component
             ->where('subject_type', Borrower::class)
             ->where('category', 'kyc')
             ->whereNull('read_at')
-            ->update(['read_at' => \App\Models\Organization::systemNow()]);
+            ->update(['read_at' => now()]);
     }
 
     public function toggleEdit()
@@ -176,6 +185,9 @@ class BorrowerProfile extends Component
             'date_of_birth' => $this->date_of_birth,
             'marital_status' => $this->marital_status,
             'address' => $this->address,
+            'collection_group' => $this->collection_group,
+            'is_daily_saver' => $this->is_daily_saver,
+            'daily_target_amount' => $this->daily_target_amount,
             'employment_information' => $this->employment_information,
         ];
 

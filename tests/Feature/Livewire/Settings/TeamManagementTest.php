@@ -107,7 +107,7 @@ class TeamManagementTest extends TestCase
             ->call('removeStaffAccess', $staff->id)
             ->assertHasNoErrors();
 
-        $this->assertTrue($staff->fresh()->hasRole('Borrower'));
+        $this->assertTrue($staff->fresh()->hasRole('Saver'));
         $this->assertFalse($staff->fresh()->hasRole('Loan Analyst'));
     }
 

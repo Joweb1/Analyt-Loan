@@ -23,8 +23,8 @@ class SystemMaintenanceService
             self::generateDailyTasks($organizationId, $date);
             self::updateTrustScores($organizationId);
         } finally {
-            // Reset is handled by the caller or middleware, but for safety:
-            // Carbon::setTestNow();
+            // Reset to real-world time to avoid affecting other organizations in a loop
+            Carbon::setTestNow();
         }
     }
 

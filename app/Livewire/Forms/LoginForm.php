@@ -30,9 +30,19 @@ class LoginForm extends Form
     {
         $this->ensureIsNotRateLimited();
 
-        $fieldType = filter_var($this->login, FILTER_VALIDATE_EMAIL) ? 'email' : 'phone';
+        // Sterilization: Trim and lowercase email, or strip non-numeric from phone
+        $loginValue = trim($this->login);
 
-        if (! Auth::attempt([$fieldType => $this->login, 'password' => $this->password], $this->remember)) {
+        if (filter_var($loginValue, FILTER_VALIDATE_EMAIL)) {
+            $loginValue = strtolower($loginValue);
+            $fieldType = 'email';
+        } else {
+            // Strip everything except numbers for phone login
+            $loginValue = preg_replace('/[^0-9]/', '', $loginValue);
+            $fieldType = 'phone';
+        }
+
+        if (! Auth::attempt([$fieldType => $loginValue, 'password' => $this->password], $this->remember)) {
             RateLimiter::hit($this->throttleKey());
 
             throw ValidationException::withMessages([
@@ -40,8 +50,9 @@ class LoginForm extends Form
             ]);
         }
 
+        // Simple last_login update using standard PHP time to avoid dependency issues
         $user = Auth::user();
-        $user->last_login_at = \App\Models\Organization::systemNow();
+        $user->last_login_at = now();
         $user->save();
 
         RateLimiter::clear($this->throttleKey());

@@ -88,10 +88,10 @@ class LoanDetails extends Component
 
         $orgId = Auth::user()->organization_id;
         $this->staffs = User::where('organization_id', $orgId)
-            ->role(['Admin', 'Loan Analyst', 'Vault Manager', 'Credit Analyst', 'Collection Specialist'])
+            ->whereIn('type', ['admin', 'staff'])
             ->get();
 
-        $this->paid_at = \App\Models\Organization::systemNow()->format('Y-m-d');
+        $this->paid_at = now()->format('Y-m-d');
 
         $this->calculateSuggestions();
         $this->loadPendingProofs();
@@ -134,10 +134,15 @@ class LoanDetails extends Component
             /** @var \App\Models\ScheduledRepayment $nextSchedule */
             $interestPart = new \App\ValueObjects\Money(min($amount->getMinorAmount(), $nextSchedule->interest_amount->getMinorAmount()), $currency);
             $remaining = $amount->subtract($interestPart);
+
+            $feePart = new \App\ValueObjects\Money(min($remaining->getMinorAmount(), $nextSchedule->penalty_amount->getMinorAmount()), $currency);
+            $remaining = $remaining->subtract($feePart);
+
             $principalPart = new \App\ValueObjects\Money(min($remaining->getMinorAmount(), $nextSchedule->principal_amount->getMinorAmount()), $currency);
             $extraPart = $remaining->subtract($principalPart);
         } else {
             $principalPart = $amount;
+            $feePart = new \App\ValueObjects\Money(0, $currency);
         }
 
         // Create Repayment
@@ -145,9 +150,10 @@ class LoanDetails extends Component
             'amount' => $amount,
             'payment_method' => $proof->payment_method ?? 'Bank Transfer',
             'collected_by' => Auth::id(),
-            'paid_at' => $proof->paid_at ?? \App\Models\Organization::systemNow(),
+            'paid_at' => $proof->paid_at ?? now(),
             'principal_amount' => $principalPart,
             'interest_amount' => $interestPart,
+            'fee_amount' => $feePart,
             'extra_amount' => $extraPart,
         ]);
 
@@ -371,7 +377,7 @@ class LoanDetails extends Component
 
         $this->validate($rules, $messages);
 
-        $paidAt = $this->paid_at ?: \App\Models\Organization::systemNow();
+        $paidAt = $this->paid_at ?: now();
 
         $currency = $this->loan->amount->getCurrency();
         $amountMoney = Money::fromMajor($this->amount, $currency);
@@ -445,7 +451,7 @@ class LoanDetails extends Component
 
         $this->validate($rules);
 
-        $paidAt = $this->paid_at ?: \App\Models\Organization::systemNow();
+        $paidAt = $this->paid_at ?: now();
 
         $repayment = Repayment::find($this->editingRepaymentId);
         $currency = $this->loan->amount->getCurrency();
@@ -501,7 +507,7 @@ class LoanDetails extends Component
         $this->amount = $this->suggestedPrincipal + $this->suggestedInterest;
         $this->payment_method = 'Cash';
         $this->collected_by = null;
-        $this->paid_at = \App\Models\Organization::systemNow()->format('Y-m-d');
+        $this->paid_at = now()->format('Y-m-d');
         $this->principal_amount = $this->suggestedPrincipal;
         $this->interest_amount = $this->suggestedInterest;
         $this->extra_amount = 0;

@@ -1,7 +1,6 @@
 <?php
 
 use App\Livewire\ActionCenter;
-use App\Livewire\BorrowerList;
 use App\Livewire\OrgRegistrationForm;
 use App\Livewire\Settings\FormBuilder;
 use App\Livewire\Settings\GeneralSettings;
@@ -19,7 +18,6 @@ Route::get('/register-org', OrgRegistrationForm::class)->name('register.org');
 Volt::route('/authlog', 'pages.auth-monitor')->name('auth.monitor');
 
 Route::middleware(['auth', 'update_last_seen'])->group(function () {
-    Route::get('/borrowers', BorrowerList::class)->name('borrowers.index');
     Route::get('profile', UserProfile::class)->name('profile');
 
     Route::get('dashboard', function () {
@@ -67,6 +65,8 @@ Route::middleware(['auth', 'update_last_seen'])->group(function () {
     Route::middleware(['role:Admin,Loan Analyst,Vault Manager,Credit Analyst,Collection Specialist,Collection Officer'])->group(function () {
         Route::get('status-board', \App\Livewire\StatusBoard::class)->middleware('permission:manage_loans')->name('status-board');
         Route::get('loan', \App\Livewire\LoanDashboard::class)->middleware('permission:manage_loans')->name('loan');
+        Route::get('records', \App\Livewire\Records::class)->middleware('permission:manage_loans')->name('records');
+        Route::get('loan/disbursement-register', \App\Livewire\DisbursementRegister::class)->middleware('permission:manage_loans')->name('loan.disbursement-register');
         Route::get('loan/pending', \App\Livewire\PendingLoans::class)->middleware('permission:approve_loans')->name('loans.pending');
         Route::view('loan/create', 'pages.loan-application')->middleware('permission:manage_loans')->name('loan.create');
         Route::get('loan/{loan}/edit', function (\App\Models\Loan $loan) {
@@ -78,8 +78,11 @@ Route::middleware(['auth', 'update_last_seen'])->group(function () {
         Route::get('loan/{loan}/schedule/print', \App\Livewire\SchedulePrint::class)->middleware('permission:manage_loans')->name('schedule.print');
         Route::get('borrower/{borrower}/loans', \App\Livewire\UserLoans::class)->middleware('permission:manage_loans|access_minimal_staff_routes')->name('borrower.loans');
         Route::get('borrower/{borrower}/profile', \App\Livewire\BorrowerProfile::class)->middleware('permission:manage_borrowers')->name('borrower.profile');
-        Route::get('savings/{borrower}', \App\Livewire\SavingsDetails::class)->middleware('permission:manage_borrowers|access_minimal_staff_routes')->name('savings.show');
-        Route::get('savings/{borrower}/print', \App\Livewire\Borrower\SavingsStatementPrint::class)->middleware('permission:export_and_print')->name('savings.print');
+        Route::get('saver/{saver}/profile', \App\Livewire\SaverProfile::class)->middleware('permission:manage_borrowers')->name('saver.profile');
+        Route::get('guarantor/{guarantor}/profile', \App\Livewire\GuarantorProfile::class)->middleware('permission:manage_borrowers')->name('guarantor.profile');
+        Route::get('savings/withdrawal-ledger', \App\Livewire\SavingsWithdrawalRegister::class)->middleware('permission:manage_borrowers')->name('savings.withdrawals');
+        Route::get('savings/{user}', \App\Livewire\SavingsDetails::class)->middleware('permission:manage_borrowers|access_minimal_staff_routes')->name('savings.show');
+        Route::get('savings/{user}/print', \App\Livewire\Borrower\SavingsStatementPrint::class)->middleware('permission:export_and_print')->name('savings.print');
         Route::get('actions', ActionCenter::class)->middleware('permission:view_dashboard')->name('actions');
         Route::get('reports', \App\Livewire\Reports::class)->middleware('permission:view_reports')->name('reports');
         Route::get('reports/print/{type}', \App\Livewire\GeneralReportPrint::class)->middleware('permission:export_and_print')->name('report.print');
@@ -89,21 +92,28 @@ Route::middleware(['auth', 'update_last_seen'])->group(function () {
         Route::get('kyc-approval', \App\Livewire\Admin\KycApproval::class)->middleware('permission:approve_kyc')->name('kyc.approval');
         Route::get('loan-approval', \App\Livewire\Admin\LoanApproval::class)->middleware('permission:approve_loans')->name('loan.approval');
         Route::get('repayments', \App\Livewire\RepaymentRecords::class)->middleware('permission:manage_collections')->name('repayments.records');
+        Route::get('ledger', \App\Livewire\Ledger\Dashboard::class)->middleware('permission:manage_collections')->name('ledger.dashboard');
+        Route::get('ledger/group/{group}', \App\Livewire\Ledger\GroupLedger::class)->middleware('permission:manage_collections')->name('ledger.group');
+        Route::get('daily-savings', \App\Livewire\DailySavings\Record::class)->middleware('permission:manage_collections')->name('daily-savings.record');
         Route::get('verifications', \App\Livewire\Admin\PaymentVerifications::class)->middleware('permission:manage_collections')->name('admin.verifications');
         Route::get('notifications', \App\Livewire\Notifications::class)->name('notifications');
         Route::get('settings', GeneralSettings::class)->middleware('permission:manage_settings')->name('settings');
         Route::get('settings/security', \App\Livewire\Settings\SecuritySettings::class)->name('settings.security');
         Route::get('settings/notifications', \App\Livewire\Settings\NotificationSettings::class)->middleware('permission:manage_settings')->name('settings.notifications');
         Route::get('settings/form-builder', FormBuilder::class)->middleware('permission:manage_settings')->name('settings.form-builder');
-        Route::get('settings/guarantor-form', \App\Livewire\Settings\GuarantorFormBuilder::class)->middleware('permission:manage_settings')->name('settings.guarantor-form');
         Route::get('settings/roles', RolesManagement::class)->middleware('permission:manage_settings')->name('settings.roles');
         Route::get('settings/team-members', TeamManagement::class)->middleware('permission:manage_settings')->name('settings.team-members');
         Route::get('settings/loan-products', \App\Livewire\Settings\LoanProducts::class)->middleware('permission:manage_settings')->name('settings.loan-products');
         Route::get('settings/portfolios', \App\Livewire\Settings\Portfolios::class)->middleware('permission:manage_settings')->name('settings.portfolios');
-        Route::view('customer', 'pages.customer')->middleware('permission:manage_borrowers')->name('customer');
-        Route::view('customer/create', 'pages.customer-registration')->middleware('permission:manage_borrowers')->name('customer.create');
+        Route::get('customers', \App\Livewire\CustomerList::class)->middleware('permission:manage_borrowers')->name('customer');
+        Route::get('customer/create/{type?}', function ($type = 'borrower') {
+            return view('pages.customer-registration', ['type' => $type]);
+        })->middleware('permission:manage_borrowers')->name('customer.create');
         Route::get('customer/guarantor/create', \App\Livewire\Borrower\GuarantorRegistration::class)->middleware('permission:manage_guarantors')->name('guarantor.create');
         Route::get('vault', \App\Livewire\Vault::class)->middleware('permission:manage_vault')->name('vault');
+        Route::get('cashbook', \App\Livewire\Cashbook\Dashboard::class)->middleware('permission:manage_vault')->name('cashbook');
+        Route::get('cashbook/month-record', \App\Livewire\Cashbook\MonthRecord::class)->middleware('permission:manage_vault')->name('cashbook.month-record');
+        Route::get('cashbook/budget', \App\Livewire\Cashbook\BudgetManager::class)->middleware('permission:manage_settings')->name('cashbook.budget');
         Route::view('collateral/create', 'pages.add-collateral')->middleware('permission:manage_vault')->name('collateral.create');
     });
 

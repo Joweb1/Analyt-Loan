@@ -1,9 +1,15 @@
-<div class="w-full mx-auto space-y-8 p-0">
+<div class="w-full mx-auto space-y-8 p-0 relative">
+    {{-- Fixed Back Button --}}
+    <button onclick="window.history.back()" class="fixed top-24 right-4 z-40 pl-3 pr-5 py-2 bg-white/30 backdrop-blur-md border border-slate-200 dark:border-white/20 rounded-full text-slate-900 dark:text-white hover:bg-white/50 transition-all duration-200 shadow-xl group flex items-center gap-2">
+        <svg class="w-4 h-4 group-hover:-translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        <span class="text-[10px] font-black uppercase tracking-widest">Go Back</span>
+    </button>
+
     <!-- Breadcrumb & Header -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-1 lg:px-2 pt-6">
         <div>
             <div class="flex items-center gap-2 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
-                <a href="{{ route('borrowers.index') }}" class="hover:text-primary transition-colors">Customers</a>
+                <a href="{{ route('customer') }}" class="hover:text-primary transition-colors">Customers</a>
                 <span>/</span>
                 <span class="text-slate-800 dark:text-white">User Loans</span>
             </div>

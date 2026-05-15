@@ -24,7 +24,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read \App\Models\Borrower $borrower
  * @property-read \App\Models\Loan $loan
  * @property-read \App\Models\Organization $organization
- *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentProof newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentProof newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentProof query()
@@ -41,7 +40,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentProof whereReferenceCode($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentProof whereStatus($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentProof whereUpdatedAt($value)
- *
+ * @property-read string|null $receipt_url
  * @mixin \Eloquent
  */
 class PaymentProof extends Model

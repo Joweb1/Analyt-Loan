@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin;
 
 use App\Models\PaymentProof;
+use App\Models\Repayment;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -21,22 +22,17 @@ class PaymentVerifications extends Component
 
         $loan = $proof->loan;
         $amount = $proof->amount;
+        $currency = $amount->getCurrency();
 
-        // Distribution Logic (Simplified)
-        // 1. Calculate what is due on the next pending schedule
         $nextSchedule = $loan->scheduledRepayments()
             ->whereIn('status', ['applied', 'overdue', 'partial'])
             ->orderBy('due_date')
             ->first();
 
-        $interestPart = 0;
-        $principalPart = 0;
-        $extraPart = 0;
-
         if ($nextSchedule) {
             /** @var \App\Models\ScheduledRepayment $nextSchedule */
-            // Rough estimate based on schedule structure
             $sugInterest = $nextSchedule->interest_amount;
+            $sugFee = $nextSchedule->penalty_amount;
             $sugPrincipal = $nextSchedule->principal_amount;
 
             $remaining = $amount;
@@ -44,6 +40,10 @@ class PaymentVerifications extends Component
             // Prioritize Interest
             $interestPart = new \App\ValueObjects\Money(min($remaining->getMinorAmount(), $sugInterest->getMinorAmount()), $amount->getCurrency());
             $remaining = $remaining->subtract($interestPart);
+
+            // Then Fee
+            $feePart = new \App\ValueObjects\Money(min($remaining->getMinorAmount(), $sugFee->getMinorAmount()), $amount->getCurrency());
+            $remaining = $remaining->subtract($feePart);
 
             // Then Principal
             $principalPart = new \App\ValueObjects\Money(min($remaining->getMinorAmount(), $sugPrincipal->getMinorAmount()), $amount->getCurrency());
@@ -54,8 +54,9 @@ class PaymentVerifications extends Component
         } else {
             // No schedule? Just treat as principal
             $principalPart = $amount;
-            $interestPart = new \App\ValueObjects\Money(0, $amount->getCurrency());
-            $extraPart = new \App\ValueObjects\Money(0, $amount->getCurrency());
+            $interestPart = new \App\ValueObjects\Money(0, $currency);
+            $feePart = new \App\ValueObjects\Money(0, $currency);
+            $extraPart = new \App\ValueObjects\Money(0, $currency);
         }
 
         // Create Repayment
@@ -63,9 +64,10 @@ class PaymentVerifications extends Component
             'amount' => $amount,
             'payment_method' => 'Bank Transfer',
             'collected_by' => Auth::id(),
-            'paid_at' => $proof->paid_at ?? \App\Models\Organization::systemNow(),
+            'paid_at' => $proof->paid_at ?? now(),
             'principal_amount' => $principalPart,
             'interest_amount' => $interestPart,
+            'fee_amount' => $feePart,
             'extra_amount' => $extraPart,
         ]);
 
@@ -74,6 +76,7 @@ class PaymentVerifications extends Component
             'admin_notes' => 'Approved by '.Auth::user()->name,
         ]);
 
+        $loan->refreshRepaymentStatus();
         $this->dispatch('custom-alert', ['type' => 'success', 'message' => 'Payment approved and recorded.']);
     }
 

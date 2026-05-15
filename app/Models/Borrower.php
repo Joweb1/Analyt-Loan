@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /**
  * @property string $id
  * @property string $phone
+ * @property string|null $collection_group
  * @property int $trust_score
  * @property \App\ValueObjects\Money $total_debt
  * @property int $active_loans_count
@@ -38,6 +39,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string $user_id
  * @property string|null $bvn
  * @property string|null $address
+ * @property bool $is_daily_saver
+ * @property \App\ValueObjects\Money $daily_target_amount
  * @property string|null $guarantor_id
  * @property string|null $organization_id
  * @property array<array-key, mixed>|null $custom_data
@@ -46,11 +49,11 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property int $onboarding_step
  * @property-read \App\Models\User|null $guarantor
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Loan> $loans
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Repayment> $repayments
  * @property-read int|null $loans_count
  * @property-read \App\Models\Organization|null $organization
  * @property-read \App\Models\SavingsAccount|null $savingsAccount
  * @property-read \App\Models\User $user
- *
  * @method static \Database\Factories\BorrowerFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Borrower newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Borrower newQuery()
@@ -85,7 +88,24 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Borrower whereTrustScore($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Borrower whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Borrower whereUserId($value)
- *
+ * @property string|null $custom_id
+ * @property string|null $external_guarantor_id
+ * @property string|null $portfolio_id
+ * @property-read \App\Models\Guarantor|null $externalGuarantor
+ * @property-read string|null $bank_statement_url
+ * @property-read string|null $identity_document_url
+ * @property-read string|null $income_proof_url
+ * @property-read string|null $passport_photograph_url
+ * @property-read \App\Models\Portfolio|null $portfolio
+ * @property-read int|null $repayments_count
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Borrower whereActiveLoansCount($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Borrower whereCollectionGroup($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Borrower whereCustomId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Borrower whereDailyTargetAmount($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Borrower whereExternalGuarantorId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Borrower whereIsDailySaver($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Borrower wherePortfolioId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Borrower whereTotalDebt($value)
  * @mixin \Eloquent
  */
 class Borrower extends Model
@@ -106,6 +126,9 @@ class Borrower extends Model
         'portfolio_id',
         'user_id',
         'custom_id',
+        'collection_group',
+        'is_daily_saver',
+        'daily_target_amount',
         'guarantor_id',
         'external_guarantor_id',
         'phone',
@@ -156,6 +179,8 @@ class Borrower extends Model
         'next_of_kin_details' => 'array',
         'custom_data' => 'array',
         'active_loans_count' => 'integer',
+        'is_daily_saver' => 'boolean',
+        'daily_target_amount' => \App\Casts\MoneyCast::class,
     ];
 
     public function user(): BelongsTo
@@ -178,22 +203,36 @@ class Borrower extends Model
         return $this->belongsTo(Guarantor::class, 'external_guarantor_id');
     }
 
+    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Loan, $this> */
     public function loans(): HasMany
     {
         return $this->hasMany(Loan::class);
     }
 
+    /** @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\Repayment, $this> */
+    public function repayments(): HasMany
+    {
+        return $this->hasMany(Repayment::class);
+    }
+
+    /** @return \Illuminate\Database\Eloquent\Relations\HasOne<\App\Models\SavingsAccount, $this> */
     public function savingsAccount(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
-        return $this->hasOne(SavingsAccount::class);
+        return $this->hasOne(SavingsAccount::class, 'user_id', 'user_id');
     }
 
     public function getTotalDebtAttribute(): \App\ValueObjects\Money
     {
         $currency = $this->organization->currency_code ?? config('app.currency', 'NGN');
-        $minorAmount = (int) $this->loans()->whereIn('status', ['active', 'defaulted', 'overdue'])->sum('amount');
+        $loans = $this->loans()->whereIn('status', ['active', 'defaulted', 'overdue'])->get();
 
-        return new \App\ValueObjects\Money($minorAmount, $currency);
+        $totalOwedMinor = 0;
+        foreach ($loans as $loan) {
+            /** @var \App\Models\Loan $loan */
+            $totalOwedMinor += $loan->balance->getMinorAmount();
+        }
+
+        return new \App\ValueObjects\Money($totalOwedMinor, $currency);
     }
 
     public function getActiveLoansCountAttribute(): int

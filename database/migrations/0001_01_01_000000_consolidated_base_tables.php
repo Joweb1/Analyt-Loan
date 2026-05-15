@@ -47,8 +47,9 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->foreignUuid('organization_id')->nullable()->constrained()->nullOnDelete();
             $table->string('name');
-            $table->string('email')->unique();
-            $table->string('phone')->unique();
+            $table->string('email');
+            $table->string('type')->default('customer'); // owner, admin, staff, customer
+            $table->string('phone');
             $table->string('password');
             $table->uuid('branch_id')->nullable();
             $table->timestamp('email_verified_at')->nullable();
@@ -57,6 +58,9 @@ return new class extends Migration
             $table->json('settings')->nullable();
             $table->rememberToken();
             $table->timestamps();
+
+            $table->unique(['email', 'organization_id']);
+            $table->unique(['phone', 'organization_id']);
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {

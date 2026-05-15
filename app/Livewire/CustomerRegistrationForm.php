@@ -14,9 +14,8 @@ use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithFileUploads;
-use Spatie\Permission\Models\Role;
 
-class BorrowerRegistrationForm extends Component
+class CustomerRegistrationForm extends Component
 {
     use SterilizesPhone, WithFileUploads;
 
@@ -37,6 +36,12 @@ class BorrowerRegistrationForm extends Component
     public $gender;
 
     public $address;
+
+    public $collection_group;
+
+    public $is_daily_saver = false;
+
+    public $daily_target_amount = 0;
 
     public $bvn;
 
@@ -89,6 +94,8 @@ class BorrowerRegistrationForm extends Component
 
     public $guarantor_type; // 'internal' or 'external'
 
+    public $registration_type = 'borrower';
+
     #[On('guarantorSelected')]
     public function updateGuarantor($guarantor)
     {
@@ -107,14 +114,22 @@ class BorrowerRegistrationForm extends Component
     // Dynamic Configs
     public $configs = [];
 
-    public function mount()
+    public function mount($type = 'borrower')
     {
+        $this->registration_type = in_array($type, ['borrower', 'saver', 'guarantor']) ? $type : 'borrower';
+
         if (Auth::check() && Auth::user()->organization_id) {
             $this->organization_id = Auth::user()->organization_id;
         }
 
         $this->is_employed = 'Yes';
         $this->loadConfigs();
+    }
+
+    public function updatedRegistrationType()
+    {
+        $this->loadConfigs();
+        $this->resetValidation();
     }
 
     public function updatedOrganizationId()
@@ -130,21 +145,17 @@ class BorrowerRegistrationForm extends Component
             return;
         }
 
-        // Check if config exists, if not maybe seed defaults (though FormBuilder logic usually handles seeding on visit,
-        // here we might just get empty array if org hasn't set up forms yet.
-        // Ideally, we should seed on org creation or first access)
-
         $rawConfigs = FormFieldConfig::where('organization_id', $this->organization_id)
-            ->where('form_type', 'borrower')
+            ->where('form_type', $this->registration_type)
             ->where('is_active', true)
             ->orderBy('sort_order')
             ->get();
 
-        // If no configs found, rely on default behavior (hardcoded fields) OR seed defaults on the fly?
+        // If no configs found, seed defaults for the current type
         if ($rawConfigs->isEmpty()) {
-            \App\Livewire\Settings\FormBuilder::seedDefaults($this->organization_id);
+            \App\Livewire\Settings\FormBuilder::seedDefaults($this->organization_id, $this->registration_type);
             $rawConfigs = FormFieldConfig::where('organization_id', $this->organization_id)
-                ->where('form_type', 'borrower')
+                ->where('form_type', $this->registration_type)
                 ->where('is_active', true)
                 ->orderBy('sort_order')
                 ->get();
@@ -156,109 +167,78 @@ class BorrowerRegistrationForm extends Component
     protected function getDynamicRules()
     {
         $rules = [
+            'registration_type' => 'required|in:borrower,saver,guarantor',
             'organization_id' => 'required|exists:organizations,id',
-            'password' => 'required|string|confirmed|min:8',
         ];
+
+        // Password is only compulsory for borrowers or if provided
+        if ($this->registration_type === 'borrower') {
+            $rules['password'] = 'required|string|confirmed|min:8';
+        } else {
+            $rules['password'] = 'nullable|string|confirmed|min:4';
+        }
+
+        // Shared minimal fields
+        $sharedRules = [
+            'name' => 'required|string|max:255',
+            'email' => 'nullable|string|email|max:255',
+            'phone' => 'required|string|max:255',
+        ];
+
+        if ($this->registration_type === 'saver' || $this->registration_type === 'guarantor') {
+            return array_merge($rules, $sharedRules);
+        }
 
         if (empty($this->configs)) {
             // Fallback to hardcoded rules if no config
-            return array_merge($rules, [
-                'name' => 'required|string|max:255',
-                'email' => 'nullable|string|email|max:255|unique:users,email',
-                'phone' => 'required|string|max:255|unique:users,phone',
+            return array_merge($rules, $sharedRules, [
                 'dob' => 'required|date',
                 'gender' => 'required|string',
                 'address' => 'required|string',
                 'bvn' => 'required|string|size:11',
                 'nin' => 'required|string|size:11',
-                'passport_photo' => ($this->passport_photo instanceof \Illuminate\Http\UploadedFile) ? ['required', 'image', 'max:5120'] : ['nullable'],
-                'biometric_data' => ($this->biometric_data instanceof \Illuminate\Http\UploadedFile) ? ['nullable', 'file', 'max:10240'] : ['nullable'],
-                'identity_document' => ($this->identity_document instanceof \Illuminate\Http\UploadedFile) ? ['required', 'file', 'max:10240'] : ['nullable'],
-                'bank_statement' => ($this->bank_statement instanceof \Illuminate\Http\UploadedFile) ? ['nullable', 'file', 'max:10240'] : ['nullable'],
-                'income_proof' => ($this->income_proof instanceof \Illuminate\Http\UploadedFile) ? ['nullable', 'file', 'max:10240'] : ['nullable'],
-                'credit_score' => 'nullable|string',
-                'marital_status' => 'required|string',
-                'dependents' => 'required|integer',
                 'bank_name' => 'required|string',
                 'account_number' => 'required|string',
                 'bank_account_name' => 'required|string',
-                'employer_name' => 'nullable|string',
-                'job_title' => 'nullable|string',
-                'salary' => 'nullable|numeric',
-                'employer_address' => 'nullable|string',
                 'next_of_kin_name' => 'required|string',
                 'next_of_kin_relationship' => 'required|string',
                 'next_of_kin_phone' => 'required|string',
-                'guarantor_id' => 'nullable|string',
-                'guarantor_type' => 'nullable|in:internal,external',
             ]);
         }
 
+        // Build from dynamic config
         foreach ($this->configs as $section => $fields) {
             foreach ($fields as $field) {
                 $fieldName = $field['name'];
-                $isSystem = $field['is_system'];
-                $isRequired = $field['is_required'];
-                $type = $field['type'];
+                $rule = $field['is_required'] ? ['required'] : ['nullable'];
 
-                // Determine validation string
-                $rule = [];
-                if ($isRequired) {
-                    $rule[] = 'required';
-                } else {
-                    $rule[] = 'nullable';
-                }
+                $rule[] = match ($field['type']) {
+                    'number' => 'numeric',
+                    'email' => 'email',
+                    'date' => 'date',
+                    'file' => null,
+                    default => 'string',
+                };
+                $rule = array_filter($rule);
 
-                if ($type === 'email') {
-                    $rule[] = 'email';
-                    if ($fieldName === 'email' && $isSystem) {
-                        $rule[] = 'unique:users,email';
-                    }
-                }
-                if ($fieldName === 'phone' && $isSystem) {
-                    $rule[] = 'unique:users,phone';
-                }
-                if ($type === 'number') {
-                    $rule[] = 'numeric';
-                }
-                if ($type === 'date') {
-                    $rule[] = 'date';
-                }
-                if ($type === 'file') {
-                    // If we already have a path (string) and it's required, we don't need 'required' rule again
-                    // because the file has been uploaded to the temp storage or final storage.
-                    // However, Livewire properties for files usually hold the UploadedFile object until saved.
-                    // The issue is likely that when the form re-validates, it doesn't see the file object anymore or it's not a 'file' type.
-                    $currentValue = $isSystem ? $this->{$fieldName} : ($this->customData[$fieldName] ?? null);
-
-                    if ($isRequired && ! $currentValue) {
-                        $rule[] = 'required';
-                    } else {
-                        $rule[] = 'nullable';
-                    }
-
-                    if ($currentValue instanceof \Illuminate\Http\UploadedFile) {
-                        $rule[] = 'file';
-                        if ($fieldName === 'passport_photo') {
-                            $rule[] = 'image';
-                        }
-                        $rule[] = 'max:10240';
-                    }
-                }
-                // Generic max
-
-                // Specific rules for identification
-                if (in_array($fieldName, ['bvn', 'nin'])) {
-                    $rule[] = 'string';
+                // Specific system field rules
+                if ($fieldName === 'bvn' || $fieldName === 'nin') {
                     $rule[] = 'size:11';
                 }
-
-                // Map to property
-                if ($isSystem) {
-                    $rules[$fieldName] = $rule;
-                } else {
-                    $rules['customData.'.$fieldName] = $rule;
+                if ($fieldName === 'account_number') {
+                    $rule[] = 'size:10';
                 }
+
+                // File validation
+                $currentValue = $this->$fieldName;
+                if ($currentValue instanceof \Illuminate\Http\UploadedFile) {
+                    $rule[] = 'file';
+                    if ($fieldName === 'passport_photo') {
+                        $rule[] = 'image';
+                    }
+                }
+
+                $rules[$fieldName] = $rule;
             }
         }
 
@@ -267,8 +247,14 @@ class BorrowerRegistrationForm extends Component
 
     public function save()
     {
-        $this->phone = $this->sterilize($this->phone);
-        $this->next_of_kin_phone = $this->sterilize($this->next_of_kin_phone);
+        // 1. Sterilization
+        $this->name = trim($this->name);
+        $this->email = $this->email ? strtolower(trim($this->email)) : null;
+        $this->phone = preg_replace('/[^0-9]/', '', $this->phone);
+
+        if ($this->next_of_kin_phone) {
+            $this->next_of_kin_phone = preg_replace('/[^0-9]/', '', $this->next_of_kin_phone);
+        }
 
         // Check Org KYC Status
         $org = Organization::find($this->organization_id);
@@ -279,55 +265,79 @@ class BorrowerRegistrationForm extends Component
         }
 
         try {
-            // Update fallback rules for phone
             $rules = $this->getDynamicRules();
-            if (isset($rules['phone'])) {
-                $rules['phone'] = 'required|string|size:13|unique:users,phone';
-            }
-            if (isset($rules['email'])) {
-                $rules['email'] = 'nullable|string|email|max:255|unique:users,email';
-            }
-            if (isset($rules['next_of_kin_phone'])) {
-                $rules['next_of_kin_phone'] = 'required|string|size:13';
-            }
+            $this->validate($rules);
 
-            $validatedData = $this->validate($rules);
-
-            // User Creation/Update - Check by both phone and email
-            $user = User::where('phone', $this->phone)
-                ->orWhere('email', $this->email)
-                ->first();
+            // User Creation/Update - Check by both phone and email WITHIN the organization
+            $user = User::where('organization_id', $this->organization_id)
+                ->where(function ($q) {
+                    $q->where('phone', $this->phone);
+                    if ($this->email) {
+                        $q->orWhere('email', $this->email);
+                    }
+                })->first();
 
             if ($user) {
-                if ($user->organization_id !== $this->organization_id) {
-                    $errorMessage = $user->phone === $this->phone
-                        ? 'User with this phone exists in another organization.'
-                        : 'User with this email exists in another organization.';
-
-                    $this->addError($user->phone === $this->phone ? 'phone' : 'email', $errorMessage);
-
-                    return;
-                }
-
-                // If user exists with same phone/email, we update them
+                // If user exists in same organization, we update them
                 $user->update([
                     'name' => $this->name,
                     'email' => $this->email,
                     'phone' => $this->phone,
                 ]);
             } else {
+                // Determine password
+                $finalPassword = $this->password ?: $org->default_customer_password ?: 'password';
+
                 $user = User::create([
                     'organization_id' => $this->organization_id,
+                    'type' => 'customer',
                     'name' => $this->name,
                     'email' => $this->email,
                     'phone' => $this->phone,
-                    'password' => Hash::make($this->password),
+                    'password' => Hash::make($finalPassword),
                 ]);
             }
 
-            $borrowerRole = Role::findByName('Borrower');
-            if (! $user->hasRole('Borrower')) {
-                $user->assignRole($borrowerRole);
+            $roleName = ucfirst($this->registration_type);
+            if (! $user->hasRole($roleName)) {
+                $user->assignRole($roleName);
+            }
+
+            if ($this->registration_type === 'saver') {
+                \App\Models\Saver::firstOrCreate(
+                    ['user_id' => $user->id],
+                    [
+                        'organization_id' => $this->organization_id,
+                        'portfolio_id' => $this->portfolio_id,
+                        'phone' => $this->phone,
+                        'is_daily_saver' => $this->is_daily_saver,
+                        'daily_target_amount' => $this->daily_target_amount,
+                        'kyc_status' => 'approved',
+                    ]
+                );
+
+                $this->dispatch('custom-alert', ['type' => 'success', 'message' => 'Saver registered successfully.']);
+                $this->reset(['name', 'email', 'phone', 'password', 'password_confirmation']);
+
+                return;
+            }
+
+            if ($this->registration_type === 'guarantor') {
+                \App\Models\Guarantor::firstOrCreate(
+                    ['email' => $this->email, 'organization_id' => $this->organization_id],
+                    [
+                        'user_id' => $user->id,
+                        'portfolio_id' => $this->portfolio_id,
+                        'name' => $this->name,
+                        'phone' => $this->phone,
+                        'address' => $this->address,
+                    ]
+                );
+
+                $this->dispatch('custom-alert', ['type' => 'success', 'message' => 'Guarantor registered successfully.']);
+                $this->reset(['name', 'email', 'phone', 'password', 'password_confirmation', 'address']);
+
+                return;
             }
 
             $borrower = Borrower::where('user_id', $user->id)->first() ?? new Borrower;
@@ -335,73 +345,56 @@ class BorrowerRegistrationForm extends Component
             $borrower->portfolio_id = $this->portfolio_id;
             $borrower->user_id = $user->id;
             $borrower->kyc_status = 'approved';
-
             $borrower->phone = $this->phone;
             $borrower->date_of_birth = $this->dob;
-            $borrower->gender = strtolower((string) $this->gender);
+            $borrower->gender = $this->gender;
             $borrower->address = $this->address;
+            $borrower->collection_group = $this->collection_group;
+            $borrower->is_daily_saver = $this->is_daily_saver;
+            $borrower->daily_target_amount = $this->daily_target_amount;
             $borrower->bvn = $this->bvn;
             $borrower->national_identity_number = $this->nin;
             $borrower->credit_score = $this->credit_score;
             $borrower->marital_status = $this->marital_status;
             $borrower->dependents = $this->dependents;
-
-            if ($this->guarantor_type === 'external') {
-                $borrower->external_guarantor_id = $this->guarantor_id;
-                $borrower->guarantor_id = null;
-            } else {
-                $borrower->guarantor_id = $this->guarantor_id;
-                $borrower->external_guarantor_id = null;
-            }
-
-            // Computed Fields
             $borrower->bank_account_details = [
                 'bank_name' => $this->bank_name,
                 'account_number' => $this->account_number,
                 'account_name' => $this->bank_account_name,
             ];
-
-            if ($this->is_employed === 'Yes' || $this->is_employed === true || $this->is_employed === 1 || $this->is_employed === '1') {
-                $borrower->employment_information = [
-                    'employer_name' => $this->employer_name,
-                    'job_title' => $this->job_title,
-                    'monthly_income' => $this->salary,
-                    'employer_address' => $this->employer_address,
-                    'employment_status' => 'Employed',
-                ];
-            } else {
-                $borrower->employment_information = [
-                    'employment_status' => 'Self-employed',
-                ];
-            }
-
+            $borrower->employment_information = [
+                'is_employed' => $this->is_employed,
+                'employer_name' => $this->employer_name,
+                'job_title' => $this->job_title,
+                'salary' => $this->salary,
+                'employer_address' => $this->employer_address,
+            ];
             $borrower->next_of_kin_details = [
                 'name' => $this->next_of_kin_name,
                 'relationship' => $this->next_of_kin_relationship,
                 'phone' => $this->next_of_kin_phone,
             ];
 
-            // File Uploads
-            $disk = config('filesystems.disks.supabase.is_configured') ? 'supabase' : config('filesystems.default');
+            if ($this->guarantor_id) {
+                if ($this->guarantor_type === 'internal') {
+                    $borrower->guarantor_id = $this->guarantor_id;
+                } else {
+                    $borrower->external_guarantor_id = $this->guarantor_id;
+                }
+            }
+
+            // Handle standard file uploads
+            $disk = (config('filesystems.disks.supabase.is_configured') && ! app()->environment('testing')) ? 'supabase' : config('filesystems.default');
+
             if ($this->passport_photo) {
                 $filename = \Illuminate\Support\Str::random(40).'.'.$this->passport_photo->getClientOriginalExtension();
-                $path = 'passport-photos/'.$filename;
+                $path = 'passports/'.$filename;
                 $stream = fopen($this->passport_photo->getRealPath(), 'r');
                 \Illuminate\Support\Facades\Storage::disk($disk)->put($path, $stream);
                 if (is_resource($stream)) {
                     fclose($stream);
                 }
                 $borrower->passport_photograph = $path;
-            }
-            if ($this->biometric_data) {
-                $filename = \Illuminate\Support\Str::random(40).'.'.$this->biometric_data->getClientOriginalExtension();
-                $path = 'biometrics/'.$filename;
-                $stream = fopen($this->biometric_data->getRealPath(), 'r');
-                \Illuminate\Support\Facades\Storage::disk($disk)->put($path, $stream);
-                if (is_resource($stream)) {
-                    fclose($stream);
-                }
-                $borrower->biometric_data = $path;
             }
             if ($this->bank_statement) {
                 $filename = \Illuminate\Support\Str::random(40).'.'.$this->bank_statement->getClientOriginalExtension();
@@ -435,7 +428,6 @@ class BorrowerRegistrationForm extends Component
             }
 
             // Save Custom Data
-            // Handle file uploads in custom data
             foreach ($this->customData as $key => $value) {
                 if ($value instanceof \Illuminate\Http\UploadedFile) {
                     $filename = \Illuminate\Support\Str::random(40).'.'.$value->getClientOriginalExtension();
@@ -452,24 +444,14 @@ class BorrowerRegistrationForm extends Component
 
             $borrower->save();
 
-            $this->dispatch('custom-alert', [
-                'type' => 'success',
-                'message' => 'Borrower registered successfully.',
-            ]);
-
+            $this->dispatch('custom-alert', ['type' => 'success', 'message' => 'Borrower registered successfully.']);
             $this->reset(['name', 'email', 'phone', 'dob', 'gender', 'address', 'bvn', 'nin', 'passport_photo', 'biometric_data', 'identity_document', 'bank_statement', 'income_proof', 'credit_score', 'marital_status', 'dependents', 'password', 'password_confirmation', 'bank_name', 'account_number', 'bank_account_name', 'employer_name', 'job_title', 'salary', 'employer_address', 'next_of_kin_name', 'next_of_kin_relationship', 'next_of_kin_phone', 'guarantor_id', 'customData']);
 
         } catch (ValidationException $e) {
-            $this->dispatch('custom-alert', [
-                'type' => 'error',
-                'message' => 'Please fill all required fields correctly.',
-            ]);
+            $this->dispatch('custom-alert', ['type' => 'error', 'message' => 'Please fill all required fields correctly.']);
             throw $e;
         } catch (\Throwable $e) {
-            $this->dispatch('custom-alert', [
-                'type' => 'error',
-                'message' => 'An error occurred. '.$e->getMessage(),
-            ]);
+            $this->dispatch('custom-alert', ['type' => 'error', 'message' => 'An error occurred. '.$e->getMessage()]);
         }
     }
 
@@ -485,7 +467,7 @@ class BorrowerRegistrationForm extends Component
             ? User::where('organization_id', $this->organization_id)->get()
             : collect();
 
-        return view('livewire.borrower-registration-form', [
+        return view('livewire.customer-registration-form', [
             'users' => $users,
             'organizations' => $organizations,
             'portfolios' => $portfolios,

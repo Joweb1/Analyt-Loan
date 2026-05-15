@@ -36,14 +36,14 @@ class SavingsEntryTest extends TestCase
         Livewire::actingAs($user)
             ->test(SavingsEntry::class)
             ->assertSee($borrowerUser->name)
-            ->call('selectBorrower', $borrower->id)
+            ->call('selectCustomer', $borrowerUser->id)
             ->assertSet('showSavingsModal', true)
             ->set('amount', 5000)
             ->call('addSavings')
             ->assertSet('showSavingsModal', false);
 
         $this->assertDatabaseHas('savings_accounts', [
-            'borrower_id' => $borrower->id,
+            'user_id' => $borrowerUser->id,
             'balance' => 500000,
         ]);
 

@@ -2,7 +2,6 @@
 
 namespace App\Livewire;
 
-use App\Models\Borrower;
 use App\Models\SavingsAccount;
 use App\Models\SavingsTransaction;
 use App\Models\SystemNotification;
@@ -17,7 +16,7 @@ class SavingsDetails extends Component
 {
     use WithPagination;
 
-    public Borrower $borrower;
+    public User $user;
 
     public $savingsAccount;
 
@@ -36,9 +35,13 @@ class SavingsDetails extends Component
 
     public $transactionDate;
 
-    public function mount(Borrower $borrower)
+    public $paymentMethod = 'cash';
+
+    public $sourceAccount = 'regular'; // regular or daily_thrift
+
+    public function mount(User $user)
     {
-        $this->borrower = $borrower->load(['user', 'organization']);
+        $this->user = $user->load(['organization']);
 
         $orgId = Auth::user()->organization_id;
         $this->staffs = User::where('organization_id', $orgId)
@@ -46,25 +49,28 @@ class SavingsDetails extends Component
             ->get();
 
         $this->savingsAccount = SavingsAccount::firstOrCreate(
-            ['borrower_id' => $this->borrower->id],
+            ['user_id' => $this->user->id],
             [
-                'organization_id' => $this->borrower->organization_id,
+                'organization_id' => $this->user->organization_id,
                 'account_number' => 'SAV-'.strtoupper(Str::random(8)),
                 'balance' => 0,
+                'daily_savings_balance' => 0,
                 'interest_rate' => 0,
                 'status' => 'active',
             ]
         );
 
-        $this->transactionDate = \App\Models\Organization::systemNow()->format('Y-m-d');
+        $this->transactionDate = now()->format('Y-m-d');
     }
 
     public function openTransactionModal($type)
     {
         $this->transactionType = $type;
+        $this->sourceAccount = 'regular';
         $this->resetValidation();
         $this->amount = null;
         $this->notes = null;
+        $this->paymentMethod = 'cash';
         $this->reference = 'REF-'.strtoupper(Str::random(10));
         $this->showTransactionModal = true;
     }
@@ -76,57 +82,103 @@ class SavingsDetails extends Component
             'transactionDate' => 'required|date',
             'notes' => 'nullable|string|max:500',
             'reference' => 'nullable|string|max:50',
+            'paymentMethod' => 'required|in:cash,bank_transfer',
+            'sourceAccount' => 'required|in:regular,daily_thrift',
         ]);
 
-        $amountMoney = \App\ValueObjects\Money::fromMajor($this->amount, $this->borrower->organization->currency_code ?? 'NGN');
+        $amountMoney = \App\ValueObjects\Money::fromMajor($this->amount, $this->user->organization->currency_code ?? 'NGN');
 
-        if ($this->transactionType === 'withdrawal' && $this->savingsAccount->balance->getMinorAmount() < $amountMoney->getMinorAmount()) {
-            $this->addError('amount', 'Insufficient balance for this withdrawal.');
+        // Check balance based on source
+        if ($this->transactionType === 'withdrawal') {
+            $currentBalance = $this->sourceAccount === 'regular'
+                ? $this->savingsAccount->balance
+                : $this->savingsAccount->daily_savings_balance;
 
-            return;
+            if ($currentBalance->getMinorAmount() < $amountMoney->getMinorAmount()) {
+                $this->addError('amount', 'Insufficient balance in '.($this->sourceAccount === 'regular' ? 'Regular' : 'Daily Savings').' for this withdrawal.');
+
+                return;
+            }
         }
 
         DB::transaction(function () use ($amountMoney) {
+            // Determine transaction type for database
+            // Withdrawals are always 'withdrawal' for cashbook consistency
+            // Deposits are 'daily_thrift' or 'deposit'
+            $dbType = $this->transactionType === 'withdrawal' ? 'withdrawal' :
+                     ($this->sourceAccount === 'daily_thrift' ? 'daily_thrift' : 'deposit');
+
             // Create transaction record
-            SavingsTransaction::create([
+            $transaction = SavingsTransaction::create([
                 'savings_account_id' => $this->savingsAccount->id,
                 'amount' => $amountMoney,
-                'type' => $this->transactionType,
+                'type' => $dbType,
                 'reference' => $this->reference,
-                'notes' => $this->notes,
+                'notes' => ($this->notes ? $this->notes.' ' : '').($this->sourceAccount === 'daily_thrift' ? '[Daily Savings]' : ''),
                 'staff_id' => Auth::id(),
                 'transaction_date' => $this->transactionDate,
+                'payment_method' => $this->paymentMethod,
             ]);
 
-            // Update account balance
-            if ($this->transactionType === 'deposit') {
-                $this->savingsAccount->balance = $this->savingsAccount->balance->add($amountMoney);
-            } else {
-                $this->savingsAccount->balance = $this->savingsAccount->balance->subtract($amountMoney);
-            }
-            $this->savingsAccount->save();
-
-            // Create notification for the borrower (if they have a user account)
-            if ($this->borrower->user_id) {
-                SystemNotification::create([
-                    'organization_id' => $this->borrower->organization_id,
-                    'user_id' => Auth::id(),
-                    'recipient_id' => $this->borrower->user_id,
-                    'title' => ucfirst($this->transactionType).' Successful',
-                    'message' => 'A '.$this->transactionType.' of ₦'.number_format($amountMoney->getMajorAmount(), 2).' has been recorded in your savings account.',
-                    'type' => 'info',
-                    'category' => 'savings',
-                    'is_actionable' => false,
-                    'priority' => 'medium',
+            // If it's a withdrawal, also create a record in the formal Withdrawal Ledger
+            if ($this->transactionType === 'withdrawal') {
+                \App\Models\SavingsWithdrawal::create([
+                    'organization_id' => $this->user->organization_id,
+                    'reference' => $this->reference,
+                    'savings_account_id' => $this->savingsAccount->id,
+                    'transaction_date' => $this->transactionDate,
+                    'snapshot_balance' => $this->sourceAccount === 'daily_thrift'
+                        ? $this->savingsAccount->daily_savings_balance
+                        : $this->savingsAccount->balance,
+                    'amount_withdrawn' => $amountMoney,
+                    'status' => 'approved', // Auto-approved as it's recorded directly by staff
+                    'staff_id' => Auth::id(),
+                    'approved_by' => Auth::id(),
+                    'approved_at' => now(),
+                    'notes' => $transaction->notes,
                 ]);
             }
 
+            // Update account balance
+            if ($this->transactionType === 'deposit') {
+                if ($this->sourceAccount === 'daily_thrift') {
+                    $this->savingsAccount->daily_savings_balance = $this->savingsAccount->daily_savings_balance->add($amountMoney);
+                } else {
+                    $this->savingsAccount->balance = $this->savingsAccount->balance->add($amountMoney);
+                }
+            } else {
+                if ($this->sourceAccount === 'daily_thrift') {
+                    $this->savingsAccount->daily_savings_balance = $this->savingsAccount->daily_savings_balance->subtract($amountMoney);
+                } else {
+                    $this->savingsAccount->balance = $this->savingsAccount->balance->subtract($amountMoney);
+                }
+            }
+            $this->savingsAccount->save();
+
+            // Refresh Cashbook for this date
+            $cashbookService = app(\App\Services\CashbookService::class);
+            $entry = $cashbookService->getEntryForDate(\Illuminate\Support\Carbon::parse($this->transactionDate), $this->user->organization);
+            $cashbookService->fetchSystemData($entry);
+
+            // Create notification for the user
+            SystemNotification::create([
+                'organization_id' => $this->user->organization_id,
+                'user_id' => Auth::id(),
+                'recipient_id' => $this->user->id,
+                'title' => ucfirst($this->transactionType).' Successful',
+                'message' => 'A '.$this->transactionType.' of ₦'.number_format($amountMoney->getMajorAmount(), 2).' has been recorded in your savings account.',
+                'type' => 'info',
+                'category' => 'savings',
+                'is_actionable' => false,
+                'priority' => 'medium',
+            ]);
+
             // Create notification for Admin/Staff
             SystemNotification::create([
-                'organization_id' => $this->borrower->organization_id,
+                'organization_id' => $this->user->organization_id,
                 'user_id' => Auth::id(),
                 'title' => 'Savings Transaction Recorded',
-                'message' => ucfirst($this->transactionType).' of ₦'.number_format($amountMoney->getMajorAmount(), 2).' for '.$this->borrower->user->name.' has been recorded.',
+                'message' => ucfirst($this->transactionType).' of ₦'.number_format($amountMoney->getMajorAmount(), 2).' for '.$this->user->name.' has been recorded.',
                 'type' => 'success',
                 'category' => 'savings',
                 'is_actionable' => false,
@@ -134,20 +186,17 @@ class SavingsDetails extends Component
             ]);
         });
 
-        \App\Events\DashboardUpdated::dispatch($this->borrower->organization_id);
-        \App\Livewire\Reports::clearCache($this->borrower->organization_id);
+        \App\Events\DashboardUpdated::dispatch($this->user->organization_id);
+        \App\Livewire\Reports::clearCache($this->user->organization_id);
 
         $this->savingsAccount->refresh();
+        $this->showTransactionModal = false; // Close the modal
         $this->dispatch('custom-alert', ['type' => 'success', 'message' => ucfirst($this->transactionType).' recorded successfully.']);
     }
 
     public function deleteTransaction($transactionId)
     {
-        if (! Auth::user()->can('delete_savings')) {
-            $this->dispatch('custom-alert', ['type' => 'error', 'message' => 'You do not have permission to delete savings records.']);
-
-            return;
-        }
+        $this->authorize('delete_savings');
 
         $transaction = SavingsTransaction::findOrFail($transactionId);
 
@@ -168,18 +217,28 @@ class SavingsDetails extends Component
 
         DB::transaction(function () use ($transaction) {
             // Revert balance
-            if ($transaction->type === 'deposit') {
+            if ($transaction->type === 'daily_thrift') {
+                $this->savingsAccount->daily_savings_balance = $this->savingsAccount->daily_savings_balance->subtract($transaction->amount);
+            } elseif ($transaction->type === 'deposit') {
                 $this->savingsAccount->balance = $this->savingsAccount->balance->subtract($transaction->amount);
             } else {
-                $this->savingsAccount->balance = $this->savingsAccount->balance->add($transaction->amount);
+                // It's a withdrawal. Check notes tag to see if it was from Daily Thrift.
+                if (str_contains($transaction->notes ?? '', '[Daily Savings]')) {
+                    $this->savingsAccount->daily_savings_balance = $this->savingsAccount->daily_savings_balance->add($transaction->amount);
+                } else {
+                    $this->savingsAccount->balance = $this->savingsAccount->balance->add($transaction->amount);
+                }
             }
             $this->savingsAccount->save();
+
+            // Delete associated SavingsWithdrawal record if it exists
+            \App\Models\SavingsWithdrawal::where('reference', $transaction->reference)->delete();
 
             $transaction->delete();
         });
 
-        \App\Events\DashboardUpdated::dispatch($this->borrower->organization_id);
-        \App\Livewire\Reports::clearCache($this->borrower->organization_id);
+        \App\Events\DashboardUpdated::dispatch($this->user->organization_id);
+        \App\Livewire\Reports::clearCache($this->user->organization_id);
 
         $this->savingsAccount->refresh();
         $this->dispatch('custom-alert', ['type' => 'warning', 'message' => 'Transaction deleted and balance adjusted.']);

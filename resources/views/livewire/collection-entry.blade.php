@@ -67,7 +67,7 @@
                     @empty
                         <tr>
                             <td colspan="5" class="px-4 py-8 text-center text-slate-500">
-                                No loans found. (Default shows overdue loans)
+                                No loans found matching your criteria.
                             </td>
                         </tr>
                     @endforelse
@@ -103,8 +103,6 @@
                             <select wire:model="payment_method" class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-sm focus:ring-2 focus:ring-primary/40" required>
                                 <option value="Cash">Cash</option>
                                 <option value="Bank Transfer">Bank Transfer</option>
-                                <option value="POS">POS</option>
-                                <option value="Cheque">Cheque</option>
                             </select>
                             @error('payment_method') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
                         </div>

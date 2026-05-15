@@ -1,4 +1,10 @@
 <div class="w-full mx-auto px-2 pt-6 pb-2 shrink-0 h-full flex flex-col" x-data="{ view: 'board' }">
+    {{-- Fixed Back Button --}}
+    <button onclick="window.history.back()" class="fixed top-24 right-4 z-40 pl-3 pr-5 py-2 bg-white/30 backdrop-blur-md border border-slate-200 dark:border-white/20 rounded-full text-slate-900 dark:text-white hover:bg-white/50 transition-all duration-200 shadow-xl group flex items-center gap-2">
+        <svg class="w-4 h-4 group-hover:-translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        <span class="text-[10px] font-black uppercase tracking-widest">Go Back</span>
+    </button>
+
     <div class="flex sm:flex-row sm:items-center gap-2 text-xs font-semibold text-[#606e8a] uppercase tracking-wider mb-2 whitespace-nowrap">
         <a class="hover:text-primary transition-colors" href="{{ route('loan') }}">Loan Management</a><span>/</span><span class="text-[#111318] dark:text-white">Status Board</span>
     </div>

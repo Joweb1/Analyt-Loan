@@ -2,7 +2,6 @@
 
 namespace App\Livewire;
 
-use App\Models\Borrower;
 use App\Models\Loan;
 use App\Models\Repayment;
 use App\Models\SystemNotification;
@@ -89,42 +88,42 @@ class LoanDashboard extends Component
 
         // With real-time invalidation, we can cache for much longer (e.g., 1 hour)
         $stats = \Illuminate\Support\Facades\Cache::remember($cacheKey, now()->addHour(), function () use ($isOwner, $orgId) {
-            $startDate = \App\Models\Organization::systemNow()->startOfDay();
-            $endDate = \App\Models\Organization::systemNow()->endOfDay();
+            $startDate = now()->startOfDay();
+            $endDate = now()->endOfDay();
 
             switch ($this->filter) {
                 case 'week':
-                    $startDate = \App\Models\Organization::systemNow()->startOfWeek();
-                    $endDate = \App\Models\Organization::systemNow()->endOfWeek();
+                    $startDate = now()->startOfWeek();
+                    $endDate = now()->endOfWeek();
                     break;
                 case 'month':
-                    $startDate = \App\Models\Organization::systemNow()->startOfMonth();
-                    $endDate = \App\Models\Organization::systemNow()->endOfMonth();
+                    $startDate = now()->startOfMonth();
+                    $endDate = now()->endOfMonth();
                     break;
                 case 'year':
-                    $startDate = \App\Models\Organization::systemNow()->startOfYear();
-                    $endDate = \App\Models\Organization::systemNow()->endOfYear();
+                    $startDate = now()->startOfYear();
+                    $endDate = now()->endOfYear();
                     break;
                 case 'today':
                 default:
-                    $startDate = \App\Models\Organization::systemNow()->startOfDay();
-                    $endDate = \App\Models\Organization::systemNow()->endOfDay();
+                    $startDate = now()->startOfDay();
+                    $endDate = now()->endOfDay();
                     break;
             }
 
             // Base queries
             $loanQuery = Loan::query();
             $repaymentQuery = Repayment::query();
-            $borrowerQuery = Borrower::query();
+            $customerQuery = \App\Models\User::where('type', 'customer');
 
             if ($isOwner) {
                 $loanQuery->withoutGlobalScopes();
                 $repaymentQuery->withoutGlobalScopes();
-                $borrowerQuery->withoutGlobalScopes();
+                $customerQuery->withoutGlobalScopes();
             } else {
                 $loanQuery->where('organization_id', $orgId);
                 $repaymentQuery->whereHas('loan', fn ($q) => $q->where('organization_id', $orgId));
-                $borrowerQuery->where('organization_id', $orgId);
+                $customerQuery->where('organization_id', $orgId);
             }
 
             $res = [];
@@ -158,7 +157,7 @@ class LoanDashboard extends Component
             $res['totalLent'] = new Money($totalLentMinor, $currency);
 
             // Active Customers
-            $res['activeCustomers'] = (clone $borrowerQuery)
+            $res['activeCustomers'] = (clone $customerQuery)
                 ->whereBetween('created_at', [$startDate, $endDate])
                 ->count();
 
@@ -176,7 +175,7 @@ class LoanDashboard extends Component
                 ->count();
 
             // Fetch Last 7 Days Pulse
-            $pulseStartDate = \App\Models\Organization::systemNow()->subDays(6)->startOfDay();
+            $pulseStartDate = now()->subDays(6)->startOfDay();
             $pulseRepayments = (clone $repaymentQuery)
                 ->where('paid_at', '>=', $pulseStartDate)
                 ->selectRaw('DATE(paid_at) as paid_date, SUM(amount) as total')
@@ -185,7 +184,7 @@ class LoanDashboard extends Component
                 ->pluck('total', 'paid_date');
 
             $res['pulseData'] = collect(range(6, 0))->map(function ($daysAgo) use ($pulseRepayments, $currency) {
-                $date = \App\Models\Organization::systemNow()->subDays($daysAgo);
+                $date = now()->subDays($daysAgo);
                 $dateKey = $date->format('Y-m-d');
                 $amountMinor = (int) $pulseRepayments->get($dateKey, 0);
                 $money = new Money($amountMinor, $currency);
@@ -218,7 +217,7 @@ class LoanDashboard extends Component
 
         // Action Box Items & Tasks
         if (! $isOwner) {
-            $currentDateStr = \App\Models\Organization::systemNow()->toDateString();
+            $currentDateStr = now()->toDateString();
             \Illuminate\Support\Facades\Cache::remember("daily_tasks_run_{$orgId}_{$currentDateStr}", now()->addHour(), function () use ($orgId) {
                 \App\Services\ActionTaskService::generateDailyTasks($orgId);
 

@@ -146,10 +146,35 @@
                 <span class="sidebar-nav-text text-sm font-medium">Platform Settings</span>
             </a>
         @else
+            @can('manage_loans')
+                @unless(Auth::user()->hasRole('Collection Officer'))
+                    <a class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all group {{ request()->routeIs('records') || request()->routeIs('loan.disbursement-register') ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400' }}" href="{{ route('records') }}">
+                        <span class="material-symbols-outlined group-hover:scale-110 transition-transform {{ request()->routeIs('records') || request()->routeIs('loan.disbursement-register') ? 'icon-fill' : '' }}">menu_book</span>
+                        <span class="sidebar-nav-text text-sm font-medium">Records</span>
+                    </a>
+                @endunless
+            @endcan
+
             @can('view_dashboard')
                 <a class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all group {{ request()->routeIs('dashboard') ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400' }}" href="{{ route('dashboard') }}">
                     <span class="material-symbols-outlined group-hover:scale-110 transition-transform {{ request()->routeIs('dashboard') ? 'icon-fill' : '' }}">dashboard</span>
                     <span class="sidebar-nav-text text-sm font-medium">Dashboard</span>
+                </a>
+            @endcan
+
+            @can('manage_borrowers')
+                @unless(Auth::user()->hasRole('Collection Officer'))
+                    <a class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all group {{ request()->routeIs('customer') || request()->routeIs('customer.create') ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400' }}" href="{{ route('customer') }}">
+                        <span class="material-symbols-outlined group-hover:scale-110 transition-transform {{ request()->routeIs('customer') || request()->routeIs('customer.create') ? 'icon-fill' : '' }}">group</span>
+                        <span class="sidebar-nav-text text-sm font-medium">Customers</span>
+                    </a>
+                @endunless
+            @endcan
+
+            @can('manage_collections')
+                <a class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all group {{ request()->routeIs('collections') ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400' }}" href="{{ route('collections') }}">
+                    <span class="material-symbols-outlined group-hover:scale-110 transition-transform {{ request()->routeIs('collections') ? 'icon-fill' : '' }}">trending_up</span>
+                    <span class="sidebar-nav-text text-sm font-medium">Collection</span>
                 </a>
             @endcan
 
@@ -162,36 +187,20 @@
                 @endunless
             @endcan
 
-            @can('manage_collections')
-                <a class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all group {{ request()->routeIs('collections') ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400' }}" href="{{ route('collections') }}">
-                    <span class="material-symbols-outlined group-hover:scale-110 transition-transform {{ request()->routeIs('collections') ? 'icon-fill' : '' }}">trending_up</span>
-                    <span class="sidebar-nav-text text-sm font-medium">Collections</span>
-                </a>
+            @can('manage_vault')
+                @unless(Auth::user()->hasRole('Collection Officer'))
+                    <a class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all group {{ request()->routeIs('vault') || request()->routeIs('collateral.create') ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400' }}" href="{{ route('vault') }}">
+                        <span class="material-symbols-outlined group-hover:scale-110 transition-transform {{ request()->routeIs('vault') || request()->routeIs('collateral.create') ? 'icon-fill' : '' }}">shield</span>
+                        <span class="sidebar-nav-text text-sm font-medium">Vault</span>
+                    </a>
+                @endunless
             @endcan
 
             @can('view_reports')
                 @unless(Auth::user()->hasRole('Collection Officer'))
                     <a class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all group {{ request()->routeIs('reports') ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400' }}" href="{{ route('reports') }}">
                         <span class="material-symbols-outlined group-hover:scale-110 transition-transform {{ request()->routeIs('reports') ? 'icon-fill' : '' }}">bar_chart</span>
-                        <span class="sidebar-nav-text text-sm font-medium">Reports</span>
-                    </a>
-                @endunless
-            @endcan
-
-            @can('manage_borrowers')
-                @unless(Auth::user()->hasRole('Collection Officer'))
-                    <a class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all group {{ request()->routeIs('customer') || request()->routeIs('customer.create') ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400' }}" href="{{ route('customer') }}">
-                        <span class="material-symbols-outlined group-hover:scale-110 transition-transform {{ request()->routeIs('customer') || request()->routeIs('customer.create') ? 'icon-fill' : '' }}">group</span>
-                        <span class="sidebar-nav-text text-sm font-medium">Customers</span>
-                    </a>
-                @endunless
-            @endcan
-
-            @can('manage_vault')
-                @unless(Auth::user()->hasRole('Collection Officer'))
-                    <a class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all group {{ request()->routeIs('vault') || request()->routeIs('collateral.create') ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400' }}" href="{{ route('vault') }}">
-                        <span class="material-symbols-outlined group-hover:scale-110 transition-transform {{ request()->routeIs('vault') || request()->routeIs('collateral.create') ? 'icon-fill' : '' }}">shield</span>
-                        <span class="sidebar-nav-text text-sm font-medium">Vault</span>
+                        <span class="sidebar-nav-text text-sm font-medium">Report</span>
                     </a>
                 @endunless
             @endcan
@@ -212,14 +221,17 @@
     </nav>
     
     <div class="px-4 pb-6 shrink-0">
-        @if($org && $org->use_manual_date)
+        @php
+            $realDate = (new \DateTime())->format('Y-m-d');
+        @endphp
+        @if($org && $org->system_date && $org->system_date->toDateString() !== $realDate)
             <div class="mb-4 px-4 py-3 bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-900/30 rounded-2xl sidebar-nav-text">
                 <div class="flex items-center gap-2 text-orange-700 dark:text-orange-400 mb-1">
-                    <span class="material-symbols-outlined text-sm font-black">simulation</span>
-                    <span class="text-[10px] font-black uppercase tracking-widest">Simulated Time</span>
+                    <span class="material-symbols-outlined text-sm font-black">calendar_today</span>
+                    <span class="text-[10px] font-black uppercase tracking-widest">System Date</span>
                 </div>
                 <p class="text-xs font-bold text-orange-800 dark:text-orange-300">
-                    {{ \App\Models\Organization::systemNow()->format('M d, Y') }}
+                    {{ now()->format('M d, Y') }}
                 </p>
             </div>
         @endif

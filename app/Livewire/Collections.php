@@ -99,7 +99,7 @@ class Collections extends Component
 
     private function getDateRange($filter)
     {
-        $now = \App\Models\Organization::systemNow();
+        $now = now();
 
         return match ($filter) {
             'today' => ['start' => $now->copy()->startOfDay(), 'end' => $now->copy()->endOfDay()],

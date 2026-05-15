@@ -20,7 +20,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \App\Models\SavingsAccount $savingsAccount
  * @property-read \App\Models\User $staff
- *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SavingsTransaction newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SavingsTransaction newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SavingsTransaction query()
@@ -34,7 +33,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SavingsTransaction whereTransactionDate($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SavingsTransaction whereType($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SavingsTransaction whereUpdatedAt($value)
- *
+ * @property string|null $repayment_id
+ * @property string|null $payment_method
+ * @property-read \App\Models\Repayment|null $repayment
+ * @method static \Database\Factories\SavingsTransactionFactory factory($count = null, $state = [])
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SavingsTransaction wherePaymentMethod($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|SavingsTransaction whereRepaymentId($value)
  * @mixin \Eloquent
  */
 class SavingsTransaction extends Model
@@ -49,6 +53,7 @@ class SavingsTransaction extends Model
         'reference',
         'notes',
         'staff_id',
+        'payment_method',
         'transaction_date',
     ];
 

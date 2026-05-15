@@ -9,6 +9,36 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property string $id
+ * @property string $organization_id
+ * @property string $name
+ * @property string|null $description
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Borrower> $borrowers
+ * @property-read int|null $borrowers_count
+ * @property-read float $par_percentage
+ * @property-read \App\ValueObjects\Money $portfolio_at_risk
+ * @property-read \App\ValueObjects\Money $portfolio_balance
+ * @property-read \App\ValueObjects\Money $profit_loss
+ * @property-read \App\ValueObjects\Money $savings_balance
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Loan> $loans
+ * @property-read int|null $loans_count
+ * @property-read \App\Models\Organization $organization
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $staff
+ * @property-read int|null $staff_count
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Portfolio newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Portfolio newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Portfolio query()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Portfolio whereCreatedAt($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Portfolio whereDescription($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Portfolio whereId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Portfolio whereName($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Portfolio whereOrganizationId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Portfolio whereUpdatedAt($value)
+ * @mixin \Eloquent
+ */
 class Portfolio extends Model
 {
     use BelongsToOrganization, HasFactory, HasUuids;
@@ -35,7 +65,7 @@ class Portfolio extends Model
     }
 
     /**
-     * Total Portfolio Balance (Lending): total loaned + interest - repayments
+     * Total Portfolio Balance (Lending): total loaned + interest + fees - repayments
      */
     public function getPortfolioBalanceAttribute(): \App\ValueObjects\Money
     {
@@ -43,22 +73,15 @@ class Portfolio extends Model
         $loans = $this->loans()->whereNotIn('status', ['draft', 'rejected', 'applied'])->get();
         $currency = $this->organization->currency_code ?? config('app.currency', 'NGN');
 
-        $totalLoaned = new \App\ValueObjects\Money(0, $currency);
+        $totalValueMinor = 0;
         foreach ($loans as $loan) {
             /** @var \App\Models\Loan $loan */
-            $totalLoaned = $totalLoaned->add($loan->amount ?? new \App\ValueObjects\Money(0, $currency));
-        }
-
-        $totalInterest = new \App\ValueObjects\Money(0, $currency);
-        foreach ($loans as $loan) {
-            /** @var \App\Models\Loan $loan */
-            $totalInterest = $totalInterest->add($loan->getTotalExpectedInterest());
+            $totalValueMinor += $loan->getTotalCost()->getMinorAmount();
         }
 
         $totalCollectedMinor = (int) Repayment::whereIn('loan_id', $loans->pluck('id'))->sum('amount');
-        $totalCollected = new \App\ValueObjects\Money($totalCollectedMinor, $currency);
 
-        return $totalLoaned->add($totalInterest)->subtract($totalCollected);
+        return new \App\ValueObjects\Money($totalValueMinor - $totalCollectedMinor, $currency);
     }
 
     /**
@@ -67,7 +90,9 @@ class Portfolio extends Model
     public function getSavingsBalanceAttribute(): \App\ValueObjects\Money
     {
         $currency = $this->organization->currency_code ?? config('app.currency', 'NGN');
-        $totalMinor = (int) SavingsAccount::whereIn('borrower_id', $this->borrowers()->pluck('id'))->sum('balance');
+        // Corrected to use user_id from the linked borrowers
+        $userIds = $this->borrowers()->pluck('user_id');
+        $totalMinor = (int) SavingsAccount::whereIn('user_id', $userIds)->sum('balance');
 
         return new \App\ValueObjects\Money($totalMinor, $currency);
     }
@@ -123,7 +148,7 @@ class Portfolio extends Model
         // Loss = Principal of Loans Overdue > 7 days
         $defaultedLoanIds = ScheduledRepayment::whereIn('loan_id', $this->loans()->pluck('id'))
             ->where('status', 'overdue')
-            ->where('due_date', '<=', \App\Models\Organization::systemNow()->subDays(7))
+            ->where('due_date', '<=', now()->subDays(7))
             ->pluck('loan_id')
             ->unique();
 

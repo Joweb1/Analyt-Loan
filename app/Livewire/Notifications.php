@@ -31,7 +31,7 @@ class Notifications extends Component
                 });
         }
 
-        $query->update(['read_at' => \App\Models\Organization::systemNow()]);
+        $query->update(['read_at' => now()]);
 
         $this->dispatch('custom-alert', ['type' => 'success', 'message' => 'All activities marked as read.']);
     }

@@ -17,17 +17,35 @@ class RoleSeeder extends Seeder
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
         $permissions = [
+            // App Management
+            'manage_organizations',
+
+            // Core Dashboard
             'view_dashboard',
+
+            // Borrower & Saver Management
             'manage_borrowers',
             'edit_borrowers',
+            'manage_savers',
+            'edit_savers',
+            'approve_kyc',
+
+            // Loan Management
             'manage_loans',
             'approve_loans',
+            'apply_for_loans',
+
+            // Collections & Savings
             'manage_collections',
             'enter_collections',
             'enter_savings',
+            'view_savings',
             'delete_savings',
-            'approve_kyc',
+
+            // Guarantors
             'manage_guarantors',
+
+            // System & Settings
             'view_reports',
             'manage_vault',
             'manage_settings',
@@ -42,20 +60,53 @@ class RoleSeeder extends Seeder
             Permission::firstOrCreate(['name' => $p, 'guard_name' => 'web']);
         }
 
+        // 1. App Owner (Super Admin)
+        $appOwner = Role::firstOrCreate(['name' => 'App Owner', 'guard_name' => 'web']);
+        $appOwner->syncPermissions(Permission::all());
+
+        // 2. Admin (Org Level)
         $admin = Role::firstOrCreate(['name' => 'Admin', 'guard_name' => 'web']);
-        $admin->syncPermissions($permissions);
+        $admin->syncPermissions(array_diff($permissions, ['manage_organizations']));
 
-        $borrower = Role::firstOrCreate(['name' => 'Borrower', 'guard_name' => 'web']);
-        $borrower->syncPermissions(['view_dashboard']);
+        // 3. General Staff (Base)
+        $staff = Role::firstOrCreate(['name' => 'Staff', 'guard_name' => 'web']);
+        $staff->syncPermissions([
+            'view_dashboard',
+            'manage_borrowers',
+            'manage_savers',
+            'manage_loans',
+            'manage_collections',
+            'enter_collections',
+            'enter_savings',
+            'access_minimal_staff_routes',
+        ]);
 
-        $analyst = Role::firstOrCreate(['name' => 'Loan Analyst', 'guard_name' => 'web']);
-        $analyst->syncPermissions(['view_dashboard', 'manage_loans']);
+        // 4. Granular Staff Roles (Required by routes)
 
-        Role::firstOrCreate(['name' => 'Vault Manager', 'guard_name' => 'web'])->syncPermissions(['view_dashboard', 'manage_vault']);
-        Role::firstOrCreate(['name' => 'Credit Analyst', 'guard_name' => 'web'])->syncPermissions(['view_dashboard', 'approve_loans']);
-        Role::firstOrCreate(['name' => 'Collection Specialist', 'guard_name' => 'web'])->syncPermissions(['view_dashboard', 'manage_collections']);
+        $loanAnalyst = Role::firstOrCreate(['name' => 'Loan Analyst', 'guard_name' => 'web']);
+        $loanAnalyst->syncPermissions(['view_dashboard', 'manage_loans', 'approve_loans', 'view_reports', 'access_minimal_staff_routes']);
+
+        $vaultManager = Role::firstOrCreate(['name' => 'Vault Manager', 'guard_name' => 'web']);
+        $vaultManager->syncPermissions(['view_dashboard', 'manage_vault', 'view_reports', 'access_minimal_staff_routes']);
+
+        $creditAnalyst = Role::firstOrCreate(['name' => 'Credit Analyst', 'guard_name' => 'web']);
+        $creditAnalyst->syncPermissions(['view_dashboard', 'manage_loans', 'approve_kyc', 'access_minimal_staff_routes']);
+
+        $collectionSpecialist = Role::firstOrCreate(['name' => 'Collection Specialist', 'guard_name' => 'web']);
+        $collectionSpecialist->syncPermissions(['view_dashboard', 'manage_collections', 'enter_collections', 'view_reports', 'access_minimal_staff_routes']);
 
         $collectionOfficer = Role::firstOrCreate(['name' => 'Collection Officer', 'guard_name' => 'web']);
-        $collectionOfficer->syncPermissions(['view_dashboard', 'manage_collections', 'access_minimal_staff_routes']);
+        $collectionOfficer->syncPermissions(['view_dashboard', 'enter_collections', 'access_minimal_staff_routes']);
+
+        // 5. Customer Roles
+
+        $borrower = Role::firstOrCreate(['name' => 'Borrower', 'guard_name' => 'web']);
+        $borrower->syncPermissions(['view_dashboard', 'apply_for_loans', 'view_savings']);
+
+        $saver = Role::firstOrCreate(['name' => 'Saver', 'guard_name' => 'web']);
+        $saver->syncPermissions(['view_dashboard', 'view_savings']);
+
+        $guarantor = Role::firstOrCreate(['name' => 'Guarantor', 'guard_name' => 'web']);
+        $guarantor->syncPermissions(['view_dashboard']);
     }
 }

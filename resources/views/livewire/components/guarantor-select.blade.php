@@ -3,11 +3,11 @@
         <div class="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-xl">
             <div class="flex items-center gap-3">
                 <div class="size-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-700">
-                    <span class="material-symbols-outlined text-xl">{{ $selectedGuarantor['type'] === 'internal' ? 'person' : 'shield_person' }}</span>
+                    <span class="material-symbols-outlined text-xl">person</span>
                 </div>
                 <div>
                     <p class="text-sm font-bold text-gray-900">{{ $selectedGuarantor['name'] }}</p>
-                    <p class="text-[10px] text-blue-700 uppercase font-bold tracking-wider">{{ $selectedGuarantor['type'] === 'internal' ? 'Customer' : 'External Guarantor' }}</p>
+                    <p class="text-[10px] text-blue-700 uppercase font-bold tracking-wider">Assigned Guarantor</p>
                 </div>
             </div>
             <button type="button" wire:click="clearSelection" class="p-1 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors">
@@ -30,12 +30,12 @@
         </div>
 
         @if(count($results) > 0)
-            <div x-show="open" class="absolute z-[100] mt-1 w-full bg-white shadow-lg max-h-60 rounded-xl py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
+            <div x-show="open" class="absolute z-[9999] mt-1 w-full bg-white shadow-lg max-h-72 rounded-xl py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
                 @foreach($results as $res)
                     <div wire:click="selectGuarantor('{{ $res['id'] }}', '{{ $res['type'] }}', '{{ $res['name'] }}')" @click="open = false" class="cursor-pointer select-none relative py-3 pl-4 pr-9 hover:bg-blue-50 transition-colors border-b border-gray-50 last:border-0">
                         <div class="flex items-center gap-3">
                             <div class="size-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500">
-                                <span class="material-symbols-outlined text-sm">{{ $res['type'] === 'internal' ? 'person' : 'shield_person' }}</span>
+                                <span class="material-symbols-outlined text-sm">person</span>
                             </div>
                             <div>
                                 <p class="text-sm font-medium text-gray-900">{{ $res['name'] }}</p>
@@ -51,11 +51,8 @@
                 @endforeach
             </div>
         @elseif(strlen($search) >= 2)
-            <div x-show="open" class="absolute z-[100] mt-1 w-full bg-white shadow-lg rounded-xl py-4 text-center text-sm text-gray-500 border border-gray-100">
-                <p>No customers or guarantors found.</p>
-                <a href="{{ route('guarantor.create') }}" target="_blank" class="mt-2 inline-block text-[10px] font-bold text-blue-700 hover:underline">
-                    + Register New Guarantor
-                </a>
+            <div x-show="open" class="absolute z-[9999] mt-1 w-full bg-white shadow-lg rounded-xl py-4 text-center text-sm text-gray-500 border border-gray-100">
+                <p>No customers found to assign as guarantor.</p>
             </div>
         @endif
     @endif

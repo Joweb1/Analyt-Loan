@@ -26,23 +26,23 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($borrowers as $borrower)
+                    @forelse($customers as $customer)
                         <tr class="border-b border-slate-50 dark:border-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                             <td class="px-4 py-4">
-                                <p class="font-bold text-slate-900 dark:text-white">{{ $borrower->user->name }}</p>
-                                <p class="text-xs text-slate-500">{{ $borrower->custom_id ?? 'No ID' }}</p>
+                                <p class="font-bold text-slate-900 dark:text-white">{{ $customer->name }}</p>
+                                <p class="text-xs text-slate-500">{{ $customer->borrower->custom_id ?? 'No ID' }}</p>
                             </td>
                             <td class="px-4 py-4">
-                                {{ $borrower->phone }}
+                                {{ $customer->phone }}
                             </td>
                             <td class="px-4 py-4 text-slate-500">
-                                {{ $borrower->savingsAccount->account_number ?? 'N/A' }}
+                                {{ $customer->savingsAccount->account_number ?? 'N/A' }}
                             </td>
                             <td class="px-4 py-4 font-medium text-slate-900 dark:text-white">
-                                ₦{{ $borrower->savingsAccount?->balance?->format() ?? '0.00' }}
+                                ₦{{ $customer->savingsAccount?->balance?->format() ?? '0.00' }}
                             </td>
                             <td class="px-4 py-4 text-right">
-                                <button wire:click="selectBorrower('{{ $borrower->id }}')" class="px-4 py-2 bg-primary text-white text-xs font-bold rounded-xl hover:bg-primary/90 transition-colors">
+                                <button wire:click="selectCustomer('{{ $customer->id }}')" class="px-4 py-2 bg-primary text-white text-xs font-bold rounded-xl hover:bg-primary/90 transition-colors">
                                     Add Deposit
                                 </button>
                             </td>
@@ -58,7 +58,7 @@
             </table>
         </div>
         <div class="mt-4">
-            {{ $borrowers->links() }}
+            {{ $customers->links() }}
         </div>
     </div>
 
@@ -86,8 +86,6 @@
                             <select wire:model="payment_method" class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-sm focus:ring-2 focus:ring-primary/40" required>
                                 <option value="Cash">Cash</option>
                                 <option value="Bank Transfer">Bank Transfer</option>
-                                <option value="POS">POS</option>
-                                <option value="Cheque">Cheque</option>
                             </select>
                             @error('payment_method') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
                         </div>

@@ -12,12 +12,11 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
-/**
- * @group skip
- */
+#[Group('skip')]
 class TimeControlTest extends TestCase
 {
     use RefreshDatabase;
@@ -29,7 +28,7 @@ class TimeControlTest extends TestCase
     }
 
     #[Test]
-    public function setting_manual_date_overrides_global_time()
+    public function setting_system_date_overrides_global_time()
     {
         $org = Organization::factory()->create();
         $admin = User::factory()->create(['organization_id' => $org->id]);
@@ -39,26 +38,25 @@ class TimeControlTest extends TestCase
 
         Livewire::actingAs($admin)
             ->test(GeneralSettings::class)
-            ->set('use_manual_date', true)
-            ->set('operating_date', $manualDate)
+            ->set('system_date', $manualDate)
             ->call('save')
             ->assertHasNoErrors();
 
-        $this->assertTrue($org->fresh()->use_manual_date);
-        $this->assertEquals($manualDate, \Carbon\Carbon::parse($org->fresh()->operating_date)->format('Y-m-d'));
+        $this->assertEquals($manualDate, $org->fresh()->system_date->format('Y-m-d'));
 
-        // Verify global time override
-        Carbon::setTestNow($org->fresh()->operating_date);
-        $this->assertEquals($manualDate, now()->format('Y-m-d'));
-        Carbon::setTestNow();
+        // Verify global time override within a request
+        $response = $this->actingAs($admin)->get(route('dashboard'));
+        $response->assertSee(Carbon::parse($manualDate)->format('M d, Y'));
+
+        // Outside the request, time should be reset
+        $this->assertNotEquals($manualDate, now()->format('Y-m-d'));
     }
 
     #[Test]
     public function simulation_date_is_maintained_across_multiple_requests()
     {
         $org = Organization::factory()->create([
-            'use_manual_date' => true,
-            'operating_date' => '2028-10-10',
+            'system_date' => '2028-10-10',
         ]);
         $admin = User::factory()->create(['organization_id' => $org->id]);
         $admin->assignRole('Admin');
@@ -68,20 +66,18 @@ class TimeControlTest extends TestCase
         // First request to dashboard
         $response1 = $this->get(route('dashboard'));
         $response1->assertStatus(200);
-        $this->assertEquals('2028-10-10', now()->format('Y-m-d'));
+        $response1->assertSee(Carbon::parse('2028-10-10')->format('M d, Y'));
 
         // Second request to reports
         $response2 = $this->get(route('reports'));
         $response2->assertStatus(200);
-        $this->assertEquals('2028-10-10', now()->format('Y-m-d'));
-
-        Carbon::setTestNow(); // Clean up
+        $response2->assertSee(Carbon::parse('2028-10-10')->format('M d, Y'));
     }
 
     #[Test]
     public function advancing_time_triggers_overdue_sync_and_penalties()
     {
-        $org = Organization::factory()->create();
+        $org = Organization::factory()->create(['system_date' => '2026-01-01']);
         $admin = User::factory()->create(['organization_id' => $org->id]);
         $admin->assignRole('Admin');
 
@@ -116,8 +112,7 @@ class TimeControlTest extends TestCase
 
         Livewire::actingAs($admin)
             ->test(GeneralSettings::class)
-            ->set('use_manual_date', true)
-            ->set('operating_date', $futureDate)
+            ->set('system_date', $futureDate)
             ->call('save');
 
         $this->assertEquals('overdue', $loan->fresh()->status);
@@ -130,7 +125,7 @@ class TimeControlTest extends TestCase
     #[Test]
     public function backdating_time_reverts_overdue_status()
     {
-        $org = Organization::factory()->create();
+        $org = Organization::factory()->create(['system_date' => '2026-01-10']);
         $admin = User::factory()->create(['organization_id' => $org->id]);
         $admin->assignRole('Admin');
 
@@ -158,8 +153,7 @@ class TimeControlTest extends TestCase
 
         Livewire::actingAs($admin)
             ->test(GeneralSettings::class)
-            ->set('use_manual_date', true)
-            ->set('operating_date', $pastDate)
+            ->set('system_date', $pastDate)
             ->call('save');
 
         $this->assertEquals('active', $loan->fresh()->status);
@@ -168,14 +162,14 @@ class TimeControlTest extends TestCase
     }
 
     #[Test]
-    public function new_records_use_operating_date_as_timestamp()
+    public function new_records_use_system_date_as_timestamp()
     {
         $org = Organization::factory()->create();
         $admin = User::factory()->create(['organization_id' => $org->id]);
         $admin->assignRole('Admin');
 
         $manualDate = Carbon::parse('2027-05-20');
-        $org->update(['use_manual_date' => true, 'operating_date' => $manualDate]);
+        $org->update(['system_date' => $manualDate->toDateString()]);
 
         $this->actingAs($admin);
         Carbon::setTestNow($manualDate);
@@ -195,7 +189,7 @@ class TimeControlTest extends TestCase
     }
 
     #[Test]
-    public function switching_to_manual_for_today_triggers_maintenance()
+    public function setting_today_triggers_maintenance()
     {
         $org = Organization::factory()->create();
         $admin = User::factory()->create(['organization_id' => $org->id]);
@@ -221,11 +215,10 @@ class TimeControlTest extends TestCase
             'status' => 'applied',
         ]);
 
-        // Just switching to manual for the same day should trigger maintenance and catch the overdue
+        // Saving today's date should trigger maintenance and catch the overdue
         Livewire::actingAs($admin)
             ->test(GeneralSettings::class)
-            ->set('use_manual_date', true)
-            ->set('operating_date', $today->format('Y-m-d'))
+            ->set('system_date', $today->format('Y-m-d'))
             ->call('save');
 
         $this->assertEquals('overdue', $loan->fresh()->status);

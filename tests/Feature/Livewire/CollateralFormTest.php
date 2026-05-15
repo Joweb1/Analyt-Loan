@@ -26,7 +26,7 @@ class CollateralFormTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-
+        Storage::fake('supabase');
         $this->organization = Organization::factory()->create();
         $this->admin = User::factory()->create(['organization_id' => $this->organization->id]);
 

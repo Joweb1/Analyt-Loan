@@ -67,6 +67,7 @@ class LoanDashboardTest extends TestCase
 
         Repayment::factory()->create([
             'loan_id' => $loan->id,
+            'organization_id' => $this->organization->id,
             'amount' => 1000,
             'paid_at' => today(),
         ]);

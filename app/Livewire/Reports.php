@@ -38,7 +38,7 @@ class Reports extends Component
     {
         $orgId = Auth::user()->organization_id;
         $loans = Loan::where('organization_id', $orgId)->with('borrower.user')->latest()->get();
-        $filename = 'loans_export_'.\App\Models\Organization::systemNow()->format('Y-m-d').'.csv';
+        $filename = 'loans_export_'.now()->format('Y-m-d').'.csv';
 
         $callback = function () use ($loans) {
             $file = fopen('php://output', 'w');
@@ -66,22 +66,28 @@ class Reports extends Component
     public function exportCustomers()
     {
         $orgId = Auth::user()->organization_id;
-        $borrowers = \App\Models\Borrower::where('organization_id', $orgId)->with('user')->latest()->get();
-        $filename = 'customers_export_'.\App\Models\Organization::systemNow()->format('Y-m-d').'.csv';
+        $customers = \App\Models\User::where('organization_id', $orgId)
+            ->where('type', 'customer')
+            ->with(['borrower', 'saver', 'guarantor'])
+            ->latest()
+            ->get();
+        $filename = 'customers_export_'.now()->format('Y-m-d').'.csv';
 
-        $callback = function () use ($borrowers) {
+        $callback = function () use ($customers) {
             $file = fopen('php://output', 'w');
-            fputcsv($file, ['Name', 'Email', 'Phone', 'BVN', 'NIN', 'Credit Score', 'Repayment Score', 'Gender']);
-            foreach ($borrowers as $b) {
+            fputcsv($file, ['Name', 'Email', 'Phone', 'BVN', 'NIN', 'Credit Score', 'Repayment Score', 'Gender', 'Roles']);
+            foreach ($customers as $c) {
+                $roles = $c->getRoleNames()->implode(', ');
                 fputcsv($file, [
-                    $b->user->name,
-                    $b->user->email,
-                    $b->phone,
-                    $b->bvn,
-                    $b->national_identity_number,
-                    $b->credit_score,
-                    $b->trust_score.'%',
-                    $b->gender,
+                    $c->name,
+                    $c->email,
+                    $c->phone,
+                    $c->borrower->bvn ?? $c->guarantor->bvn ?? '',
+                    $c->borrower->national_identity_number ?? $c->guarantor->national_identity_number ?? '',
+                    $c->borrower->credit_score ?? '',
+                    ($c->borrower->trust_score ?? 0).'%',
+                    $c->borrower->gender ?? '',
+                    $roles,
                 ]);
             }
             fclose($file);
@@ -97,7 +103,7 @@ class Reports extends Component
     {
         $orgId = Auth::user()->organization_id;
         $assets = \App\Models\Collateral::where('organization_id', $orgId)->with('loan.borrower.user')->latest()->get();
-        $filename = 'collateral_export_'.\App\Models\Organization::systemNow()->format('Y-m-d').'.csv';
+        $filename = 'collateral_export_'.now()->format('Y-m-d').'.csv';
 
         $callback = function () use ($assets) {
             $file = fopen('php://output', 'w');
@@ -125,11 +131,9 @@ class Reports extends Component
     {
         $orgId = Auth::user()->organization_id;
         $staff = \App\Models\User::where('organization_id', $orgId)
-            ->whereHas('roles', function ($q) {
-                $q->whereNotIn('name', ['Borrower']);
-            })
+            ->whereIn('type', ['admin', 'staff'])
             ->get();
-        $filename = 'staff_export_'.\App\Models\Organization::systemNow()->format('Y-m-d').'.csv';
+        $filename = 'staff_export_'.now()->format('Y-m-d').'.csv';
 
         $callback = function () use ($staff) {
             $file = fopen('php://output', 'w');
@@ -187,22 +191,22 @@ class Reports extends Component
             \Illuminate\Support\Facades\Cache::forget($cacheKey);
         }
 
-        $data = \Illuminate\Support\Facades\Cache::remember($cacheKey, \App\Models\Organization::systemNow()->addHour(), function () use ($orgId) {
-            $startDate = \App\Models\Organization::systemNow();
-            $endDate = \App\Models\Organization::systemNow();
+        $data = \Illuminate\Support\Facades\Cache::remember($cacheKey, now()->addHour(), function () use ($orgId) {
+            $startDate = now();
+            $endDate = now();
 
             if ($this->reportType === 'daily') {
-                $startDate = \App\Models\Organization::systemNow()->startOfDay();
-                $endDate = \App\Models\Organization::systemNow()->endOfDay();
+                $startDate = now()->startOfDay();
+                $endDate = now()->endOfDay();
             } elseif ($this->reportType === 'weekly') {
-                $startDate = \App\Models\Organization::systemNow()->startOfWeek();
-                $endDate = \App\Models\Organization::systemNow()->endOfWeek();
+                $startDate = now()->startOfWeek();
+                $endDate = now()->endOfWeek();
             } elseif ($this->reportType === 'monthly') {
-                $startDate = \App\Models\Organization::systemNow()->startOfMonth();
-                $endDate = \App\Models\Organization::systemNow()->endOfMonth();
+                $startDate = now()->startOfMonth();
+                $endDate = now()->endOfMonth();
             } elseif ($this->reportType === 'yearly') {
-                $startDate = \App\Models\Organization::systemNow()->startOfYear();
-                $endDate = \App\Models\Organization::systemNow()->endOfYear();
+                $startDate = now()->startOfYear();
+                $endDate = now()->endOfYear();
             } elseif ($this->reportType === 'custom' && $this->customStartDate && $this->customEndDate) {
                 $startDate = \Carbon\Carbon::parse($this->customStartDate)->startOfDay();
                 $endDate = \Carbon\Carbon::parse($this->customEndDate)->endOfDay();
@@ -240,7 +244,8 @@ class Reports extends Component
                 ->sum('amount') / 100;
 
             // 4. New Customers in Period
-            $newCustomers = \App\Models\Borrower::where('organization_id', $orgId)
+            $newCustomers = \App\Models\User::where('organization_id', $orgId)
+                ->where('type', 'customer')
                 ->whereBetween('created_at', [$startDate, $endDate])
                 ->count();
 
@@ -379,22 +384,22 @@ class Reports extends Component
             $label = '';
 
             if ($interval === 'day') {
-                $date = \App\Models\Organization::systemNow()->subDays($i);
+                $date = now()->subDays($i);
                 $currentStart = $date->copy()->startOfDay();
                 $currentEnd = $date->copy()->endOfDay();
                 $label = $date->format('D, d M');
             } elseif ($interval === 'week') {
-                $date = \App\Models\Organization::systemNow()->subWeeks($i);
+                $date = now()->subWeeks($i);
                 $currentStart = $date->copy()->startOfWeek();
                 $currentEnd = $date->copy()->endOfWeek();
                 $label = 'Wk '.$date->format('W');
             } elseif ($interval === 'month') {
-                $date = \App\Models\Organization::systemNow()->subMonths($i);
+                $date = now()->subMonths($i);
                 $currentStart = $date->copy()->startOfMonth();
                 $currentEnd = $date->copy()->endOfMonth();
                 $label = $date->format('M Y');
             } elseif ($interval === 'year') {
-                $year = \App\Models\Organization::systemNow()->subYears($i)->year;
+                $year = now()->subYears($i)->year;
                 $currentStart = \Carbon\Carbon::create($year, 1, 1)->startOfDay();
                 $currentEnd = \Carbon\Carbon::create($year, 12, 31)->endOfDay();
                 $label = (string) $year;
@@ -440,7 +445,8 @@ class Reports extends Component
                 ->whereBetween('paid_at', [$currentStart, $currentEnd])
                 ->sum('interest_amount') / 100;
 
-            $customerData[] = \App\Models\Borrower::where('organization_id', $orgId)
+            $customerData[] = \App\Models\User::where('organization_id', $orgId)
+                ->where('type', 'customer')
                 ->whereBetween('created_at', [$currentStart, $currentEnd])
                 ->count();
 

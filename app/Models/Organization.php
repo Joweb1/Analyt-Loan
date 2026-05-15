@@ -38,6 +38,7 @@ use Illuminate\Support\Facades\Cache;
  * @property bool $overdue_notifications_enabled
  * @property bool $new_borrower_notifications_enabled
  * @property bool $allow_flexible_repayments
+ * @property int $thrift_cycle_days
  * @property string|null $tagline
  * @property string $brand_color
  * @property string|null $repayment_bank_name
@@ -61,7 +62,6 @@ use Illuminate\Support\Facades\Cache;
  * @property-read int|null $staff_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $users
  * @property-read int|null $users_count
- *
  * @method static \Database\Factories\OrganizationFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organization newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organization newQuery()
@@ -99,7 +99,17 @@ use Illuminate\Support\Facades\Cache;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organization whereTimezone($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organization whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organization whereWebsite($value)
- *
+ * @property \Illuminate\Support\Carbon|null $system_date
+ * @property string $default_customer_password
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $customers
+ * @property-read int|null $customers_count
+ * @property-read string|null $kyc_document_url
+ * @property-read string|null $logo_url
+ * @property-read \App\ValueObjects\Money $organization_balance
+ * @property-read string|null $signature_url
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Organization whereDefaultCustomerPassword($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Organization whereSystemDate($value)
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|Organization whereThriftCycleDays($value)
  * @mixin \Eloquent
  */
 class Organization extends Model
@@ -108,6 +118,12 @@ class Organization extends Model
 
     protected static function booted()
     {
+        static::creating(function ($organization) {
+            if (empty($organization->system_date)) {
+                $organization->system_date = now()->toDateString();
+            }
+        });
+
         static::updated(function ($organization) {
             Cache::forget("organization_{$organization->id}");
         });
@@ -134,13 +150,13 @@ class Organization extends Model
         'overdue_notifications_enabled',
         'new_borrower_notifications_enabled',
         'allow_flexible_repayments',
+        'thrift_cycle_days',
         'tagline',
         'brand_color',
         'repayment_bank_name',
         'repayment_account_number',
         'repayment_account_name',
-        'use_manual_date',
-        'operating_date',
+        'system_date',
         'timezone',
     ];
 
@@ -152,33 +168,20 @@ class Organization extends Model
 
     /**
      * Get the current system time for this organization.
-     * Bypasses Carbon::setTestNow() and uses the DB stored value if manual date is enabled.
+     * Combines the pinned system_date with the exact real-world time.
      */
     public function getSystemTime(): \Illuminate\Support\Carbon
     {
         $tz = $this->timezone ?: config('app.timezone', 'UTC');
+        $realNow = \Illuminate\Support\Carbon::createFromTimestamp(time(), $tz);
 
-        if ($this->use_manual_date && $this->operating_date) {
-            // We return the operating date at the start of day in the org's timezone
-            return \Illuminate\Support\Carbon::parse($this->operating_date)
-                ->setTimezone($tz)
-                ->startOfDay();
+        if ($this->system_date) {
+            // Return the system date but with the real hours/mins/secs
+            return \Illuminate\Support\Carbon::parse($this->system_date, $tz)
+                ->setTimeFrom($realNow);
         }
 
-        return \Illuminate\Support\Carbon::now($tz);
-    }
-
-    /**
-     * Static helper to get current org's system time.
-     */
-    public static function systemNow(): \Illuminate\Support\Carbon
-    {
-        $current = self::current();
-        if ($current) {
-            return $current->getSystemTime();
-        }
-
-        return \Illuminate\Support\Carbon::now();
+        return $realNow;
     }
 
     /**
@@ -196,8 +199,8 @@ class Organization extends Model
             'overdue_notifications_enabled' => 'boolean',
             'new_borrower_notifications_enabled' => 'boolean',
             'allow_flexible_repayments' => 'boolean',
-            'use_manual_date' => 'boolean',
-            'operating_date' => 'datetime',
+            'thrift_cycle_days' => 'integer',
+            'system_date' => 'date',
             'default_interest_rate' => 'decimal:2',
             'grace_period_days' => 'integer',
         ];
@@ -233,9 +236,12 @@ class Organization extends Model
 
     public function staff(): HasMany
     {
-        return $this->hasMany(User::class)->whereHas('roles', function ($q) {
-            $q->where('name', '!=', 'Borrower');
-        });
+        return $this->hasMany(User::class)->whereIn('type', ['admin', 'staff']);
+    }
+
+    public function customers(): HasMany
+    {
+        return $this->hasMany(User::class)->where('type', 'customer');
     }
 
     public function borrowers(): HasMany
@@ -266,22 +272,16 @@ class Organization extends Model
         $loans = $this->loans()->whereNotIn('status', ['draft', 'rejected', 'applied'])->get();
         $currency = $this->currency_code ?: config('app.currency', 'NGN');
 
-        $totalLoaned = new \App\ValueObjects\Money(0, $currency);
-        foreach ($loans as $loan) {
-            $totalLoaned = $totalLoaned->add($loan->amount ?? new \App\ValueObjects\Money(0, $currency));
-        }
-
-        $totalInterest = new \App\ValueObjects\Money(0, $currency);
+        $totalValueMinor = 0;
         foreach ($loans as $loan) {
             /** @var \App\Models\Loan $loan */
-            $totalInterest = $totalInterest->add($loan->getTotalExpectedInterest());
+            $totalValueMinor += $loan->getTotalCost()->getMinorAmount();
         }
 
         $totalCollectedMinor = (int) Repayment::whereIn('loan_id', $loans->pluck('id'))
             ->sum('amount');
-        $totalCollected = new \App\ValueObjects\Money($totalCollectedMinor, $currency);
 
-        return $totalLoaned->add($totalInterest)->subtract($totalCollected);
+        return new \App\ValueObjects\Money($totalValueMinor - $totalCollectedMinor, $currency);
     }
 
     public function getLogoUrlAttribute(): ?string

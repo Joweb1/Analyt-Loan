@@ -41,14 +41,14 @@ class SavingsDetailsTest extends TestCase
     public function test_it_renders_successfully()
     {
         Livewire::actingAs($this->admin)
-            ->test(SavingsDetails::class, ['borrower' => $this->borrower])
+            ->test(SavingsDetails::class, ['user' => $this->borrower->user])
             ->assertStatus(200);
     }
 
     public function test_it_records_a_deposit()
     {
         Livewire::actingAs($this->admin)
-            ->test(SavingsDetails::class, ['borrower' => $this->borrower])
+            ->test(SavingsDetails::class, ['user' => $this->borrower->user])
             ->call('openTransactionModal', 'deposit')
             ->set('amount', 5000)
             ->set('transactionDate', now()->format('Y-m-d'))
@@ -58,7 +58,7 @@ class SavingsDetailsTest extends TestCase
             });
 
         $this->assertDatabaseHas('savings_accounts', [
-            'borrower_id' => $this->borrower->id,
+            'user_id' => $this->borrower->user_id,
             'balance' => 500000, // Minor units
         ]);
 
@@ -71,13 +71,14 @@ class SavingsDetailsTest extends TestCase
     public function test_it_records_a_withdrawal()
     {
         $account = SavingsAccount::factory()->create([
-            'borrower_id' => $this->borrower->id,
+            'user_id' => $this->borrower->user_id,
             'organization_id' => $this->organization->id,
             'balance' => 10000, // 10,000 Major = 1,000,000 Minor
+            'daily_savings_balance' => 0,
         ]);
 
         Livewire::actingAs($this->admin)
-            ->test(SavingsDetails::class, ['borrower' => $this->borrower])
+            ->test(SavingsDetails::class, ['user' => $this->borrower->user])
             ->call('openTransactionModal', 'withdrawal')
             ->set('amount', 4000)
             ->set('transactionDate', now()->format('Y-m-d'))
@@ -93,13 +94,14 @@ class SavingsDetailsTest extends TestCase
     public function test_it_prevents_withdrawal_if_insufficient_balance()
     {
         SavingsAccount::factory()->create([
-            'borrower_id' => $this->borrower->id,
+            'user_id' => $this->borrower->user_id,
             'organization_id' => $this->organization->id,
             'balance' => 1000, // 1,000 Major = 100,000 Minor
+            'daily_savings_balance' => 0,
         ]);
 
         Livewire::actingAs($this->admin)
-            ->test(SavingsDetails::class, ['borrower' => $this->borrower])
+            ->test(SavingsDetails::class, ['user' => $this->borrower->user])
             ->call('openTransactionModal', 'withdrawal')
             ->set('amount', 2000)
             ->call('submitTransaction')

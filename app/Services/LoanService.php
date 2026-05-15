@@ -40,7 +40,7 @@ class LoanService
             }
 
             // Ensure release_date defaults to organization's business date
-            $systemNow = \App\Models\Organization::systemNow();
+            $systemNow = now();
             \Illuminate\Support\Facades\Log::info('Loan Creation - System Now resolved to: '.$systemNow->toDateTimeString());
 
             $data['release_date'] ??= $systemNow;
@@ -83,10 +83,10 @@ class LoanService
 
         // Fees added to first installment during creation
         $currency = $principal->getCurrency();
-        $processingFee = $loan->processing_fee ?? new \App\ValueObjects\Money(0, $currency);
+        $processingFee = $loan->getCalculatedProcessingFee();
         $insuranceFee = $loan->insurance_fee ?? new \App\ValueObjects\Money(0, $currency);
 
-        $startDate = \Carbon\Carbon::parse($loan->release_date ?? \App\Models\Organization::systemNow());
+        $startDate = \Carbon\Carbon::parse($loan->release_date ?? now());
         $cycle = $loan->repayment_cycle ?? 'monthly';
 
         // Delete existing schedules if any (to allow regeneration)

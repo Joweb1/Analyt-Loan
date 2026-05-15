@@ -7,7 +7,6 @@ use App\Models\Organization;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
-use Spatie\Permission\Models\Role;
 
 class OrganizationSeeder extends Seeder
 {
@@ -18,115 +17,123 @@ class OrganizationSeeder extends Seeder
     {
         $password = Hash::make('password');
 
-        // 1. Create App Owner (nahjonah00)
-        $appOwnerEmail = 'nahjonah00@gmail.com';
+        // 1. Create App Owner (owner@analytloan.com)
         $appOwner = User::firstOrCreate(
-            ['email' => $appOwnerEmail],
+            ['email' => 'owner@analytloan.com'],
             [
                 'name' => 'App Owner',
+                'type' => 'owner',
                 'phone' => '2348000000000',
                 'password' => $password,
                 'organization_id' => null,
             ]
         );
+        $appOwner->assignRole('App Owner');
 
-        $adminRole = Role::findByName('Admin');
-        $staffRole = Role::findByName('Loan Analyst');
-        $borrowerRole = Role::findByName('Borrower');
-
-        if ($adminRole) {
-            $appOwner->assignRole($adminRole);
-        }
-
-        // 2. Create "Analyt Org Demo"
+        // 2. Create "Analyt Demo Org"
         $demoOrg = Organization::firstOrCreate(
-            ['slug' => 'analyt-org-demo'],
+            ['slug' => 'analyt-demo-org'],
             [
-                'name' => 'Analyt Org Demo',
-                'email' => 'demo@analyt.com',
+                'name' => 'Analyt Demo Org',
+                'email' => 'demo@analytloan.com',
                 'status' => 'active',
                 'kyc_status' => 'approved',
                 'owner_id' => $appOwner->id,
             ]
         );
 
-        // Update App Owner to belong to this org for context
-        $appOwner->update(['organization_id' => $demoOrg->id]);
-
-        // 3. Create "Analyt admin" (admin@analyt.com)
-        $orgAdmin = User::firstOrCreate(
-            ['email' => 'admin@analyt.com'],
+        // 3. Create Admin
+        $admin = User::firstOrCreate(
+            ['email' => 'admin@analytloan.com'],
             [
-                'name' => 'Analyt admin',
+                'name' => 'Demo Admin',
+                'type' => 'admin',
                 'phone' => '2348011111111',
                 'password' => $password,
                 'organization_id' => $demoOrg->id,
             ]
         );
-        if ($adminRole) {
-            $orgAdmin->assignRole($adminRole);
-        }
+        $admin->assignRole('Admin');
 
-        // 4. Create "nahjonah@gmail.com"
-        $extraUser = User::firstOrCreate(
-            ['email' => 'nahjonah@gmail.com'],
+        // 4. Create Staff
+        $staff = User::firstOrCreate(
+            ['email' => 'staff@analytloan.com'],
             [
-                'name' => 'Jonah Extra',
+                'name' => 'Demo Staff',
+                'type' => 'staff',
+                'phone' => '2348022222222',
+                'password' => $password,
+                'organization_id' => $demoOrg->id,
+            ]
+        );
+        $staff->assignRole('Staff');
+
+        // 5. Create Borrower
+        $borrower = User::firstOrCreate(
+            ['email' => 'borrower@analytloan.com'],
+            [
+                'name' => 'Demo Borrower',
+                'type' => 'customer',
+                'phone' => '2348033333333',
+                'password' => $password,
+                'organization_id' => $demoOrg->id,
+            ]
+        );
+        $borrower->assignRole('Borrower');
+
+        // Ensure Borrower Profile exists
+        Borrower::firstOrCreate(
+            ['user_id' => $borrower->id],
+            [
+                'organization_id' => $demoOrg->id,
+                'phone' => $borrower->phone,
+                'credit_score' => 500,
+            ]
+        );
+
+        // 6. Create Saver
+        $saver = User::firstOrCreate(
+            ['email' => 'saver@analytloan.com'],
+            [
+                'name' => 'Demo Saver',
+                'type' => 'customer',
                 'phone' => '2348044444444',
                 'password' => $password,
                 'organization_id' => $demoOrg->id,
             ]
         );
-        if ($adminRole) {
-            $extraUser->assignRole($adminRole);
-        }
+        $saver->assignRole('Saver');
 
-        // 5. Create "Test user"
-        $testUser = User::firstOrCreate(
-            ['name' => 'Test user'],
+        \App\Models\Saver::firstOrCreate(
+            ['user_id' => $saver->id],
             [
-                'email' => 'testuser@analyt.com',
+                'organization_id' => $demoOrg->id,
+                'phone' => $saver->phone,
+                'kyc_status' => 'approved',
+            ]
+        );
+
+        // 7. Create Guarantor
+        $guarantor = User::firstOrCreate(
+            ['email' => 'guarantor@analytloan.com'],
+            [
+                'name' => 'Demo Guarantor',
+                'type' => 'customer',
                 'phone' => '2348055555555',
                 'password' => $password,
                 'organization_id' => $demoOrg->id,
             ]
         );
-        if ($staffRole) {
-            $testUser->assignRole($staffRole);
-        }
+        $guarantor->assignRole('Guarantor');
 
-        // 6. Create Staff Members
-        $staffData = [
-            ['name' => 'Test Staff A', 'email' => 'testa@analyt.com', 'phone' => '2348022222222'],
-            ['name' => 'Test Staff B', 'email' => 'testb@analyt.com', 'phone' => '2348033333333'],
-        ];
-
-        foreach ($staffData as $data) {
-            $staff = User::firstOrCreate(
-                ['email' => $data['email']],
-                [
-                    'name' => $data['name'],
-                    'phone' => $data['phone'],
-                    'password' => $password,
-                    'organization_id' => $demoOrg->id,
-                ]
-            );
-            if ($staffRole) {
-                $staff->assignRole($staffRole);
-            }
-        }
-
-        // 7. Create 4 Random Customers (Borrowers)
-        User::factory(4)->create([
-            'organization_id' => $demoOrg->id,
-            'password' => $password,
-        ])->each(function ($user) use ($demoOrg, $borrowerRole) {
-            $user->assignRole($borrowerRole);
-            Borrower::factory()->create([
-                'user_id' => $user->id,
+        \App\Models\Guarantor::firstOrCreate(
+            ['user_id' => $guarantor->id],
+            [
                 'organization_id' => $demoOrg->id,
-                'phone' => $user->phone,
-            ]);
-        });
+                'name' => $guarantor->name,
+                'phone' => $guarantor->phone,
+                'email' => $guarantor->email,
+            ]
+        );
     }
 }

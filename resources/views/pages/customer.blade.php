@@ -1,3 +1,3 @@
-<x-app-layout title="Borrowers">
-    <livewire:borrower-list />
+<x-app-layout title="Customers">
+    <livewire:customer-list />
 </x-app-layout>

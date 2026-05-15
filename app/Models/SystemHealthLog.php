@@ -17,7 +17,6 @@ use Illuminate\Database\Eloquent\Model;
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property string|null $organization_id
  * @property-read \App\Models\Organization|null $organization
- *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SystemHealthLog newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SystemHealthLog newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SystemHealthLog query()
@@ -29,7 +28,6 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SystemHealthLog whereOrganizationId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SystemHealthLog wherePayload($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SystemHealthLog whereUpdatedAt($value)
- *
  * @mixin \Eloquent
  */
 class SystemHealthLog extends Model

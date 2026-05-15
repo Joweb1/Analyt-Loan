@@ -184,6 +184,15 @@
                             <label class="text-sm font-bold text-gray-700 dark:text-gray-300">Grace Period (Days)</label>
                             <input wire:model="grace_period" type="number" class="rounded-xl border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white focus:ring-primary focus:border-primary text-sm">
                         </div>
+
+                        <div class="flex flex-col gap-2">
+                            <label class="text-sm font-bold text-gray-700 dark:text-gray-300">Daily Thrift Cycle</label>
+                            <select wire:model="thrift_cycle_days" class="w-full rounded-xl border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white focus:ring-primary focus:border-primary text-sm">
+                                <option value="5">5-Day Cycle (Monday - Friday)</option>
+                                <option value="6">6-Day Cycle (Monday - Saturday)</option>
+                            </select>
+                            <p class="text-[10px] text-gray-500 font-medium">* Defines the grid structure for the Daily Savings Ledger.</p>
+                        </div>
                         
                         <!-- Flexible Repayment Toggle -->
                         <div class="md:col-span-2 flex items-center justify-between p-4 bg-gray-50 dark:bg-zinc-800/50 rounded-xl border border-gray-100 dark:border-zinc-800">
@@ -199,41 +208,40 @@
                                 <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {{ $allow_flexible_repayments ? 'translate-x-5' : 'translate-x-0' }}"></span>
                             </button>
                         </div>
+
+                        <!-- Default Password Field -->
+                        <div class="md:col-span-2 flex flex-col gap-2 pt-4 border-t border-gray-100 dark:border-zinc-800">
+                            <label class="text-sm font-bold text-gray-700 dark:text-gray-300">Default Customer Password</label>
+                            <input wire:model="default_customer_password" type="text" class="rounded-xl border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white focus:ring-primary focus:border-primary text-sm max-w-md">
+                            <p class="text-[10px] text-gray-500 font-medium">This password will be assigned to Savers and Guarantors created by staff if no password is provided during registration.</p>
+                            @error('default_customer_password') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                        </div>
                     </div>
                 </div>
 
-                <!-- Time Control Configuration -->
+                <!-- System Date Configuration -->
                 <div class="bg-white dark:bg-zinc-900 rounded-xl p-6 shadow-sm border border-brand-orange/20 dark:border-zinc-800">
                     <div class="flex items-center gap-2 mb-6">
-                        <span class="material-symbols-outlined text-brand-orange">schedule</span>
-                        <h2 class="text-lg font-bold text-primary dark:text-white">Time Control (Simulation)</h2>
+                        <span class="material-symbols-outlined text-brand-orange">calendar_today</span>
+                        <h2 class="text-lg font-bold text-primary dark:text-white">System Date</h2>
                     </div>
                     
                     <div class="space-y-6">
-                        <div class="flex items-center justify-between p-4 bg-orange-50 dark:bg-orange-900/10 rounded-xl border border-orange-100 dark:border-orange-900/20">
-                            <div class="flex flex-col gap-1">
-                                <span class="text-sm font-bold text-orange-800 dark:text-orange-400">Enable Manual Operating Date</span>
-                                <span class="text-xs text-orange-700/70 dark:text-orange-500/70">When enabled, the entire system will operate at the date specified below. This affects overdue calculations, reports, and timestamps.</span>
-                            </div>
-                            <button 
-                                type="button" 
-                                @click="$wire.set('use_manual_date', !@js($use_manual_date))"
-                                class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none {{ $use_manual_date ? 'bg-brand-orange' : 'bg-gray-200 dark:bg-zinc-700' }}"
-                            >
-                                <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {{ $use_manual_date ? 'translate-x-5' : 'translate-x-0' }}"></span>
-                            </button>
+                        <div class="bg-orange-50 dark:bg-orange-900/10 p-4 rounded-xl border border-orange-100 dark:border-orange-900/20">
+                            <p class="text-xs text-orange-700/70 dark:text-orange-500/70 leading-relaxed">
+                                The system is currently pinned to the date specified below. All loan calculations, reporting periods, and transaction dates will reflect this day. 
+                                <b>The time of day will continue to flow according to the real world.</b>
+                            </p>
                         </div>
 
-                        @if($use_manual_date)
-                            <div class="flex flex-col gap-2 animate-in fade-in slide-in-from-top-2">
-                                <label class="text-sm font-bold text-gray-700 dark:text-gray-300">Set Operating Date</label>
-                                <input wire:model="operating_date" type="date" class="rounded-xl border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white focus:ring-brand-orange focus:border-brand-orange text-sm max-w-xs">
-                                <p class="text-[10px] text-gray-500 italic mt-1 font-medium">
-                                    * Advancing the date will automatically trigger daily sync tasks (penalties, status updates) for skipped days.
-                                </p>
-                                @error('operating_date') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
-                            </div>
-                        @endif
+                        <div class="flex flex-col gap-2">
+                            <label class="text-sm font-bold text-gray-700 dark:text-gray-300">Active System Date</label>
+                            <input wire:model="system_date" type="date" class="rounded-xl border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white focus:ring-brand-orange focus:border-brand-orange text-sm max-w-xs">
+                            <p class="text-[10px] text-gray-500 italic mt-1 font-medium">
+                                * Advancing the system date will automatically trigger maintenance tasks (penalties, status sync) for the intervening days.
+                            </p>
+                            @error('system_date') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
+                        </div>
                     </div>
                 </div>
 

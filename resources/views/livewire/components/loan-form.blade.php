@@ -1,4 +1,4 @@
-<div id="loan-form-container" data-component-id="{{ $this->getId() }}" class="w-full bg-white border-t border-gray-200 pb-40">
+<div id="loan-form-container" data-component-id="{{ $this->getId() }}" class="w-full bg-white border-t border-gray-200 pb-64">
     <form wire:submit.prevent="saveLoan" class="space-y-0">
         
         <!-- State Keepers for JS Calculation -->
@@ -66,21 +66,21 @@
                                 
                                 <!-- Dropdown Results -->
                                 @if(strlen($search) > 1 && count($searchResults) > 0)
-                                    <div class="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-xl py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
+                                    <div class="absolute z-[9999] mt-1 w-full bg-white shadow-lg max-h-72 rounded-xl py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
                                         @foreach($searchResults as $result)
                                             <div wire:click="selectBorrower('{{ $result->id }}')" class="cursor-pointer select-none relative py-3 pl-3 pr-9 hover:bg-blue-50 transition-colors">
                                                 <div class="flex items-center">
                                                     <div class="ml-3">
-                                                        <p class="text-sm font-medium text-gray-900">{{ $result->user->name ?? 'Unknown' }}</p>
-                                                        <p class="text-xs text-gray-500">{{ $result->phone }} • {{ $result->bvn }}</p>
+                                                        <p class="text-sm font-medium text-gray-900">{{ $result->name }}</p>
+                                                        <p class="text-xs text-gray-500">{{ $result->phone }} • {{ $result->borrower->bvn ?? 'No BVN' }}</p>
                                                     </div>
                                                 </div>
                                             </div>
                                         @endforeach
                                     </div>
                                 @elseif(strlen($search) > 1)
-                                    <div class="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-xl py-4 text-center text-sm text-gray-500 border border-gray-100">
-                                        No borrowers found.
+                                    <div class="absolute z-[9999] mt-1 w-full bg-white shadow-lg rounded-xl py-4 text-center text-sm text-gray-500 border border-gray-100">
+                                        No customers found.
                                     </div>
                                 @endif
                             </div>
@@ -101,7 +101,7 @@
                                 <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                             </span>
                         </button>
-                        <div wire:ignore class="hidden absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-xl py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm dd-menu">
+                        <div wire:ignore class="hidden absolute z-[9999] mt-1 w-full bg-white shadow-lg max-h-72 rounded-xl py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm dd-menu">
                             @forelse($loanProducts as $product)
                                 <div onclick="selectOption('loan_product', '{{ $product->name }}')" class="cursor-pointer select-none relative py-3 pl-4 pr-9 hover:bg-blue-50 text-gray-900 hover:text-blue-900">
                                     <span class="block truncate font-normal">{{ $product->name }}</span>
@@ -135,7 +135,7 @@
                                 <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                             </span>
                         </button>
-                        <div wire:ignore class="hidden absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-xl py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm dd-menu">
+                        <div wire:ignore class="hidden absolute z-[9999] mt-1 w-full bg-white shadow-lg max-h-72 rounded-xl py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm dd-menu">
                             @foreach($staffMembers as $staff)
                                 <div onclick="selectOption('loan_officer_id', '{{ $staff->id }}')" class="cursor-pointer select-none relative py-3 pl-4 pr-9 hover:bg-blue-50 text-gray-900 hover:text-blue-900">
                                     <span class="block truncate font-normal">{{ $staff->name }}</span>
@@ -167,7 +167,7 @@
                                 <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                             </span>
                         </button>
-                        <div wire:ignore class="hidden absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-xl py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm dd-menu">
+                        <div wire:ignore class="hidden absolute z-[9999] mt-1 w-full bg-white shadow-lg max-h-72 rounded-xl py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm dd-menu">
                             <div onclick="selectOption('portfolio_id', '')" class="cursor-pointer select-none relative py-3 pl-4 pr-9 hover:bg-blue-50 text-gray-500 italic hover:text-blue-900">
                                 <span class="block truncate font-normal">None (Unassigned)</span>
                             </div>
@@ -203,7 +203,7 @@
                                 <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                             </span>
                         </button>
-                         <div wire:ignore class="hidden absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-xl py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm dd-menu">
+                         <div wire:ignore class="hidden absolute z-[9999] mt-1 w-full bg-white shadow-lg max-h-72 rounded-xl py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm dd-menu">
                             @foreach ($collaterals as $collateral)
                                 <div onclick="selectOption('collateralId', '{{ $collateral->id }}')" class="cursor-pointer select-none relative py-3 pl-4 pr-9 hover:bg-blue-50 text-gray-900 hover:text-blue-900">
                                     <span class="block truncate font-normal">{{ $collateral->name }} - <span class="text-gray-500">₦{{ $collateral->value->format() }}</span></span>
@@ -253,7 +253,7 @@
                                         {{ $interest_type == 'year' ? '% / Yr' : ($interest_type == 'month' ? '% / Mo' : ($interest_type == 'week' ? '% / Wk' : '% / Dy')) }}
                                         <svg class="ml-2 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                                     </button>
-                                    <div wire:ignore class="hidden absolute right-0 z-10 mt-1 w-32 bg-white shadow-lg rounded-xl py-1 text-base ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm dd-menu">
+                                    <div wire:ignore class="hidden absolute right-0 z-[9999] mt-1 w-32 bg-white shadow-lg rounded-xl py-1 text-base ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm dd-menu">
                                         <div onclick="selectOption('interest_type', 'year')" class="cursor-pointer px-4 py-2 hover:bg-gray-100">Yearly</div>
                                         <div onclick="selectOption('interest_type', 'month')" class="cursor-pointer px-4 py-2 hover:bg-gray-100">Monthly</div>
                                         <div onclick="selectOption('interest_type', 'week')" class="cursor-pointer px-4 py-2 hover:bg-gray-100">Weekly</div>
@@ -275,7 +275,7 @@
                                         {{ ucfirst($duration_unit) }}s
                                         <svg class="ml-2 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                                     </button>
-                                     <div wire:ignore class="hidden absolute right-0 z-10 mt-1 w-32 bg-white shadow-lg rounded-xl py-1 text-base ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm dd-menu">
+                                     <div wire:ignore class="hidden absolute right-0 z-[9999] mt-1 w-32 bg-white shadow-lg rounded-xl py-1 text-base ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm dd-menu">
                                         <div onclick="selectOption('duration_unit', 'year')" class="cursor-pointer px-4 py-2 hover:bg-gray-100">Years</div>
                                         <div onclick="selectOption('duration_unit', 'month')" class="cursor-pointer px-4 py-2 hover:bg-gray-100">Months</div>
                                         <div onclick="selectOption('duration_unit', 'week')" class="cursor-pointer px-4 py-2 hover:bg-gray-100">Weeks</div>
@@ -299,7 +299,7 @@
                                             <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                                         </span>
                                     </button>
-                                    <div wire:ignore class="hidden absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-xl py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm dd-menu">
+                                    <div wire:ignore class="hidden absolute z-[9999] mt-1 w-full bg-white shadow-lg max-h-72 rounded-xl py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm dd-menu">
                                         @foreach(['daily', 'weekly', 'biweekly', 'monthly', 'yearly'] as $cycle)
                                             <div onclick="selectOption('repayment_cycle', '{{ $cycle }}')" class="cursor-pointer select-none relative py-3 pl-4 pr-9 hover:bg-blue-50 text-gray-900">
                                                 <span class="block truncate font-normal">{{ ucfirst($cycle) }}</span>
@@ -345,7 +345,7 @@
                                         {{ $processing_fee_type == 'fixed' ? 'Fixed' : '%' }}
                                         <svg class="ml-2 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                                     </button>
-                                     <div wire:ignore class="hidden absolute right-0 z-10 mt-1 w-24 bg-white shadow-lg rounded-xl py-1 text-base ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm dd-menu">
+                                     <div wire:ignore class="hidden absolute right-0 z-[9999] mt-1 w-24 bg-white shadow-lg rounded-xl py-1 text-base ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm dd-menu">
                                         <div onclick="selectOption('processing_fee_type', 'fixed')" class="cursor-pointer px-4 py-2 hover:bg-gray-100">Fixed</div>
                                         <div onclick="selectOption('processing_fee_type', 'percentage')" class="cursor-pointer px-4 py-2 hover:bg-gray-100">%</div>
                                     </div>
@@ -479,7 +479,7 @@
             </div>
         </div>
     </form>
-    <div class="h-48 md:h-56"></div> <!-- Large spacer to allow scrolling past floating footer -->
+    <div class="h-64 md:h-80"></div> <!-- Extra large spacer to allow scrolling past floating footer -->
 </div>
 
 @push('scripts')

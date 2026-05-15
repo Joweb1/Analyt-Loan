@@ -19,7 +19,6 @@ use Illuminate\Database\Eloquent\Model;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \App\Models\Organization $organization
- *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanProduct newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanProduct newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanProduct query()
@@ -33,7 +32,6 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanProduct whereOrganizationId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanProduct whereRepaymentCycle($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanProduct whereUpdatedAt($value)
- *
  * @mixin \Eloquent
  */
 class LoanProduct extends Model

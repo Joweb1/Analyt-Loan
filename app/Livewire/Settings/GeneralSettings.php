@@ -60,10 +60,12 @@ class GeneralSettings extends Component
 
     public $allow_flexible_repayments = false;
 
-    // Time Control (NEW)
-    public $use_manual_date = false;
+    public $thrift_cycle_days = 6;
 
-    public $operating_date;
+    public $default_customer_password;
+
+    // Time Control (Simplified)
+    public $system_date;
 
     public function mount()
     {
@@ -91,10 +93,11 @@ class GeneralSettings extends Component
             $this->currency = $this->organization->currency_code ?? 'NGN';
             $this->timezone = $this->organization->timezone ?? 'UTC';
             $this->allow_flexible_repayments = $this->organization->allow_flexible_repayments;
+            $this->thrift_cycle_days = $this->organization->thrift_cycle_days ?? 6;
+            $this->default_customer_password = $this->organization->default_customer_password;
 
-            $this->use_manual_date = $this->organization->use_manual_date;
-            $this->operating_date = $this->organization->operating_date
-                ? \Carbon\Carbon::parse($this->organization->operating_date)->format('Y-m-d')
+            $this->system_date = $this->organization->system_date
+                ? \Carbon\Carbon::parse($this->organization->system_date)->format('Y-m-d')
                 : \Illuminate\Support\Carbon::now($this->timezone)->format('Y-m-d');
         }
     }
@@ -109,13 +112,14 @@ class GeneralSettings extends Component
             'repayment_account_number' => 'nullable|string|max:20',
             'repayment_account_name' => 'nullable|string|max:100',
             'interest_rate' => 'required|numeric|min:0',
-            'operating_date' => 'required_if:use_manual_date,true|date',
+            'thrift_cycle_days' => 'required|integer|in:5,6',
+            'system_date' => 'required|date',
             'timezone' => 'required|string',
+            'default_customer_password' => 'required|string|min:4',
         ]);
 
-        $oldManualDate = $this->organization->use_manual_date;
-        $oldOperatingDate = $this->organization->operating_date ? $this->organization->operating_date->startOfDay() : null;
-        $newOperatingDate = Carbon::parse($this->operating_date, $this->timezone)->startOfDay();
+        $oldSystemDate = $this->organization->system_date ? $this->organization->system_date->startOfDay() : null;
+        $newSystemDate = Carbon::parse($this->system_date, $this->timezone)->startOfDay();
 
         $data = [
             'name' => $this->name,
@@ -131,9 +135,10 @@ class GeneralSettings extends Component
             'repayment_account_name' => $this->repayment_account_name,
             'default_interest_rate' => $this->interest_rate,
             'grace_period_days' => $this->grace_period,
+            'thrift_cycle_days' => $this->thrift_cycle_days,
             'allow_flexible_repayments' => $this->allow_flexible_repayments,
-            'use_manual_date' => $this->use_manual_date,
-            'operating_date' => $this->use_manual_date ? $newOperatingDate : null,
+            'default_customer_password' => $this->default_customer_password,
+            'system_date' => $newSystemDate,
             'timezone' => $this->timezone,
         ];
 
@@ -178,34 +183,25 @@ class GeneralSettings extends Component
         $this->organization->update($data);
 
         // Immediate Sync Trigger for Skipped Days
-        if ($this->use_manual_date) {
-            // Case 1: Switching from real-time to manual, or manual date changed forward
-            $startDate = $oldOperatingDate ?? \Illuminate\Support\Carbon::now($this->timezone)->startOfDay();
+        if ($oldSystemDate && $newSystemDate->isAfter($oldSystemDate)) {
+            $days = (int) $oldSystemDate->diffInDays($newSystemDate);
 
-            if ($newOperatingDate->isAfter($startDate)) {
-                $days = (int) $startDate->diffInDays($newOperatingDate);
-
-                for ($i = 1; $i <= $days; $i++) {
-                    $runDate = $startDate->copy()->addDays($i);
-                    SystemMaintenanceService::runMaintenanceForDate($this->organization->id, $runDate);
-                }
-            } elseif ($newOperatingDate->isBefore($startDate)) {
-                // Backdating: Just run once for the target date to fix statuses
-                SystemMaintenanceService::runMaintenanceForDate($this->organization->id, $newOperatingDate);
-            } else {
-                // Same day: Run once to ensure today's maintenance is current
-                SystemMaintenanceService::runMaintenanceForDate($this->organization->id, $newOperatingDate);
+            for ($i = 1; $i <= $days; $i++) {
+                $runDate = $oldSystemDate->copy()->addDays($i);
+                SystemMaintenanceService::runMaintenanceForDate($this->organization->id, $runDate);
             }
-        }
-
-        // Reset Carbon for the remainder of this request to the actual operating date
-        if ($this->use_manual_date && $this->organization->operating_date) {
-            \Carbon\Carbon::setTestNow($this->organization->operating_date);
+        } elseif ($newSystemDate->isBefore($oldSystemDate)) {
+            // Backdating: Just run once for the target date to fix statuses
+            SystemMaintenanceService::runMaintenanceForDate($this->organization->id, $newSystemDate);
         } else {
-            \Carbon\Carbon::setTestNow();
+            // Same day or first initialization: Run once to ensure today's maintenance is current
+            SystemMaintenanceService::runMaintenanceForDate($this->organization->id, $newSystemDate);
         }
 
-        $this->dispatch('custom-alert', ['type' => 'success', 'message' => 'Settings updated successfully. Time override active.']);
+        // Apply simulation to current request
+        \Carbon\Carbon::setTestNow($this->organization->getSystemTime());
+
+        $this->dispatch('custom-alert', ['type' => 'success', 'message' => 'Settings updated successfully. System date changed to '.$newSystemDate->format('M d, Y')]);
 
         return $this->redirect(route('settings'), navigate: true);
     }

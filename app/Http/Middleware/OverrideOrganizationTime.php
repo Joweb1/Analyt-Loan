@@ -2,7 +2,6 @@
 
 namespace App\Http\Middleware;
 
-use Carbon\Carbon;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,10 +17,31 @@ class OverrideOrganizationTime
             return $next($request);
         }
 
-        // We no longer call Carbon::setTestNow() here.
-        // Doing so poisons Laravel's session 'last_activity' timestamp,
-        // causing immediate logouts if the organization date is in the past.
-        // All business logic has been updated to use Organization::systemNow().
+        $org = \App\Models\Organization::current();
+
+        if ($org && $org->system_date) {
+            // Save the original last_activity to prevent poisoning by setTestNow()
+            $originalLastActivity = $request->session()->get('last_activity');
+
+            \Carbon\Carbon::setTestNow($org->getSystemTime());
+
+            try {
+                $response = $next($request);
+            } finally {
+                // CRITICAL: Reset the simulated time BEFORE the response is sent back
+                // up the middleware stack. This ensures Laravel's session handler
+                // uses REAL-WORLD time to set cookie expiration and session timeouts.
+                \Carbon\Carbon::setTestNow();
+            }
+
+            // Restore last_activity if it was changed by Laravel's session handler
+            // during the request under the simulated time.
+            if ($originalLastActivity) {
+                $request->session()->put('last_activity', $originalLastActivity);
+            }
+
+            return $response;
+        }
 
         return $next($request);
     }

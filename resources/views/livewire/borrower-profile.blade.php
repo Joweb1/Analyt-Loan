@@ -1,9 +1,15 @@
-<div class="w-full mx-auto space-y-8 p-0">
+<div class="w-full mx-auto space-y-8 p-0 relative">
+    {{-- Fixed Back Button --}}
+    <button onclick="window.history.back()" class="fixed top-24 right-4 z-40 pl-3 pr-5 py-2 bg-white/30 backdrop-blur-md border border-slate-200 dark:border-white/20 rounded-full text-slate-900 dark:text-white hover:bg-white/50 transition-all duration-200 shadow-xl group flex items-center gap-2">
+        <svg class="w-4 h-4 group-hover:-translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        <span class="text-[10px] font-black uppercase tracking-widest">Go Back</span>
+    </button>
+
     <!-- Breadcrumb & Header -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-1 lg:px-2 pt-6">
         <div>
             <div class="flex items-center gap-2 text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
-                <a href="{{ route('borrowers.index') }}" class="hover:text-primary transition-colors">Customers</a>
+                <a href="{{ route('customer') }}" class="hover:text-primary transition-colors">Customers</a>
                 <span>/</span>
                 <span class="text-slate-800 dark:text-white">Borrower Profile</span>
             </div>
@@ -253,6 +259,51 @@
                             @error('address') <span class="text-[10px] font-bold text-red-500 mt-1 block">{{ $message }}</span> @enderror
                         @else
                             <p class="text-sm font-medium text-slate-700 dark:text-slate-300">{{ $address ?? 'NO ADDRESS ON FILE' }}</p>
+                        @endif
+                    </div>
+
+                    <div>
+                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Collection Group</label>
+                        @if($isEditing)
+                            <select wire:model="collection_group" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-sm font-black focus:ring-2 focus:ring-primary/20">
+                                <option value="">None</option>
+                                <option value="Monday Group">Monday Group</option>
+                                <option value="Tuesday Group">Tuesday Group</option>
+                                <option value="Wednesday Group">Wednesday Group</option>
+                                <option value="Thursday Group">Thursday Group</option>
+                                <option value="Friday Group">Friday Group</option>
+                                <option value="Saturday Group">Saturday Group</option>
+                            </select>
+                        @else
+                            <p class="text-sm font-black text-slate-900 dark:text-white uppercase">{{ $collection_group ?? 'NOT ASSIGNED' }}</p>
+                        @endif
+                    </div>
+
+                    {{-- Daily Savings Config --}}
+                    <div class="p-4 bg-indigo-50/50 dark:bg-indigo-900/10 rounded-2xl border border-indigo-100 dark:border-indigo-900/30">
+                        <label class="block text-[10px] font-black text-indigo-600 uppercase tracking-widest mb-3">Daily Savings Status</label>
+                        @if($isEditing)
+                            <div class="space-y-4">
+                                <label class="flex items-center gap-3 cursor-pointer">
+                                    <input type="checkbox" wire:model.live="is_daily_saver" class="w-5 h-5 rounded border-indigo-300 text-indigo-600 focus:ring-indigo-500">
+                                    <span class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-widest">Active Daily Saver</span>
+                                </label>
+                                @if($is_daily_saver)
+                                    <div>
+                                        <label class="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1.5">Daily Target (₦)</label>
+                                        <input wire:model="daily_target_amount" type="number" class="w-full px-3 py-2 bg-white dark:bg-slate-800 border-none rounded-lg text-sm font-black focus:ring-2 focus:ring-indigo-500/20">
+                                    </div>
+                                @endif
+                            </div>
+                        @else
+                            <div class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-sm {{ $is_daily_saver ? 'text-emerald-500' : 'text-slate-300' }}">
+                                    {{ $is_daily_saver ? 'check_circle' : 'cancel' }}
+                                </span>
+                                <span class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-widest">
+                                    {{ $is_daily_saver ? 'Enrolled - ₦' . number_format($daily_target_amount, 2) : 'Not Enrolled' }}
+                                </span>
+                            </div>
                         @endif
                     </div>
                 </div>

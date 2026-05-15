@@ -41,10 +41,18 @@ class RepaymentRecordsTest extends TestCase
     public function test_it_filters_repayments_by_search()
     {
         $loan = Loan::factory()->create(['organization_id' => $this->organization->id, 'loan_number' => 'LN-123']);
-        Repayment::factory()->create(['loan_id' => $loan->id, 'amount' => 5000]);
+        Repayment::factory()->create([
+            'loan_id' => $loan->id,
+            'organization_id' => $this->organization->id,
+            'amount' => 5000,
+        ]);
 
         $loan2 = Loan::factory()->create(['organization_id' => $this->organization->id, 'loan_number' => 'LN-456']);
-        Repayment::factory()->create(['loan_id' => $loan2->id, 'amount' => 10000]);
+        Repayment::factory()->create([
+            'loan_id' => $loan2->id,
+            'organization_id' => $this->organization->id,
+            'amount' => 10000,
+        ]);
 
         Livewire::actingAs($this->admin)
             ->test(RepaymentRecords::class)
@@ -58,10 +66,20 @@ class RepaymentRecordsTest extends TestCase
         $loan = Loan::factory()->create(['organization_id' => $this->organization->id]);
 
         // Today
-        Repayment::factory()->create(['loan_id' => $loan->id, 'paid_at' => now(), 'amount' => 1000]);
+        Repayment::factory()->create([
+            'loan_id' => $loan->id,
+            'organization_id' => $this->organization->id,
+            'paid_at' => now(),
+            'amount' => 1000,
+        ]);
 
         // Last week
-        Repayment::factory()->create(['loan_id' => $loan->id, 'paid_at' => now()->subWeek(), 'amount' => 2000]);
+        Repayment::factory()->create([
+            'loan_id' => $loan->id,
+            'organization_id' => $this->organization->id,
+            'paid_at' => now()->subWeek(),
+            'amount' => 2000,
+        ]);
 
         Livewire::actingAs($this->admin)
             ->test(RepaymentRecords::class)
@@ -73,7 +91,10 @@ class RepaymentRecordsTest extends TestCase
     public function test_it_can_export_repayments()
     {
         $loan = Loan::factory()->create(['organization_id' => $this->organization->id]);
-        Repayment::factory()->create(['loan_id' => $loan->id]);
+        Repayment::factory()->create([
+            'loan_id' => $loan->id,
+            'organization_id' => $this->organization->id,
+        ]);
 
         $response = Livewire::actingAs($this->admin)
             ->test(RepaymentRecords::class)

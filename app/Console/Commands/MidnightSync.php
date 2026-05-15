@@ -39,9 +39,8 @@ class MidnightSync extends Command
                 // If using manual date, we increment it by 1 day at midnight real-time
                 // or should we only run if real-time midnight matches?
                 // Requirements say: "this will also affect the cron jobs".
-                // If manual date is ON, the job should run for the operating_date.
-
-                $dateToRun = $org->use_manual_date ? $org->operating_date : now();
+                // Use system_date if set, otherwise real now
+                $dateToRun = $org->system_date ? $org->system_date : now();
 
                 SystemMaintenanceService::runMaintenanceForDate($org->id, $dateToRun);
 

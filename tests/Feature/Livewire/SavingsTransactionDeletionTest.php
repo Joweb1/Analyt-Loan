@@ -33,7 +33,7 @@ class SavingsTransactionDeletionTest extends TestCase
         $borrower = Borrower::factory()->create(['organization_id' => $org->id]);
         $account = SavingsAccount::create([
             'organization_id' => $org->id,
-            'borrower_id' => $borrower->id,
+            'user_id' => $borrower->user_id,
             'account_number' => 'TEST-123',
             'balance' => 5000, // 5,000 Major = 500,000 Minor
             'status' => 'active',
@@ -48,7 +48,7 @@ class SavingsTransactionDeletionTest extends TestCase
         ]);
 
         Livewire::actingAs($admin)
-            ->test(SavingsDetails::class, ['borrower' => $borrower])
+            ->test(SavingsDetails::class, ['user' => $borrower->user])
             ->call('deleteTransaction', $transaction->id)
             ->assertDispatched('custom-alert');
 
@@ -65,7 +65,7 @@ class SavingsTransactionDeletionTest extends TestCase
         $borrower = Borrower::factory()->create(['organization_id' => $org->id]);
         $account = SavingsAccount::create([
             'organization_id' => $org->id,
-            'borrower_id' => $borrower->id,
+            'user_id' => $borrower->user_id,
             'account_number' => 'TEST-456',
             'balance' => 2000, // 2,000 Major = 200,000 Minor
             'status' => 'active',
@@ -74,6 +74,7 @@ class SavingsTransactionDeletionTest extends TestCase
         // Create a fake repayment to link to
         $loan = \App\Models\Loan::factory()->create(['organization_id' => $org->id, 'borrower_id' => $borrower->id]);
         $repayment = Repayment::create([
+            'organization_id' => $org->id,
             'loan_id' => $loan->id,
             'amount' => 10000, // 10k major
             'extra_amount' => 2000, // 2k major
@@ -90,7 +91,7 @@ class SavingsTransactionDeletionTest extends TestCase
         ]);
 
         Livewire::actingAs($admin)
-            ->test(SavingsDetails::class, ['borrower' => $borrower])
+            ->test(SavingsDetails::class, ['user' => $borrower->user])
             ->call('deleteTransaction', $transaction->id)
             ->assertDispatched('custom-alert');
 
@@ -102,29 +103,30 @@ class SavingsTransactionDeletionTest extends TestCase
     {
         $org = Organization::factory()->create();
         $staff = User::factory()->create(['organization_id' => $org->id]);
+        $staff->assignRole('Staff');
         // No delete permission
 
         $borrower = Borrower::factory()->create(['organization_id' => $org->id]);
         $account = SavingsAccount::create([
             'organization_id' => $org->id,
-            'borrower_id' => $borrower->id,
+            'user_id' => $borrower->user_id,
             'account_number' => 'TEST-789',
-            'balance' => 1000, // 1k major
+            'balance' => 1000, // 1,000 Major = 100,000 Minor
             'status' => 'active',
         ]);
 
         $transaction = SavingsTransaction::create([
             'savings_account_id' => $account->id,
-            'amount' => 1000, // 1k major
+            'amount' => 1000, // 1,000 Major = 100,000 Minor
             'type' => 'deposit',
             'staff_id' => $staff->id,
             'transaction_date' => now(),
         ]);
 
         Livewire::actingAs($staff)
-            ->test(SavingsDetails::class, ['borrower' => $borrower])
+            ->test(SavingsDetails::class, ['user' => $borrower->user])
             ->call('deleteTransaction', $transaction->id)
-            ->assertDispatched('custom-alert');
+            ->assertStatus(302);
 
         $this->assertDatabaseHas('savings_transactions', ['id' => $transaction->id]);
     }

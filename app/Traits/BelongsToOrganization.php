@@ -72,6 +72,7 @@ trait BelongsToOrganization
 
     /**
      * Relationship to the Organization.
+     * @return BelongsTo<Organization, $this>
      */
     public function organization(): BelongsTo
     {

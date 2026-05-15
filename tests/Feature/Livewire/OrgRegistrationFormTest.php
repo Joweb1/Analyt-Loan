@@ -19,6 +19,7 @@ class OrgRegistrationFormTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        Storage::fake('supabase');
         Role::create(['name' => 'Admin']);
     }
 

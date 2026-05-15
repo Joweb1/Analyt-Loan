@@ -41,9 +41,9 @@ class TeamManagement extends Component
 
         $orgId = Auth::user()->organization_id;
 
-        // Find users in the same organization who are currently just borrowers or have no administrative role
-        // The user specifically asked for "users/borrowers in the current organization"
+        // Find users in the same organization who are currently just customers (borrowers/savers)
         $this->userResults = User::where('organization_id', $orgId)
+            ->where('type', 'customer')
             ->where(function ($q) {
                 $q->where('name', 'like', '%'.$this->searchUser.'%')
                     ->orWhere('phone', 'like', '%'.$this->searchUser.'%')
@@ -67,17 +67,18 @@ class TeamManagement extends Component
 
         $user = User::findOrFail($this->selectedUserId);
 
-        // Ensure user belongs to the same organization (security check)
+        // Ensure user belongs to the same organization
         if ($user->organization_id !== Auth::user()->organization_id) {
             $this->dispatch('custom-alert', ['type' => 'error', 'message' => 'Unauthorized operation.']);
 
             return;
         }
 
-        // Sync roles - this promotes them to the selected staff role
+        // Promote to Staff
+        $user->update(['type' => 'staff']);
         $user->syncRoles([$this->role]);
 
-        $this->dispatch('custom-alert', ['type' => 'success', 'message' => "{$user->name} has been added to the team as {$this->role}."]);
+        $this->dispatch('custom-alert', ['type' => 'success', 'message' => "{$user->name} has been promoted to the team as {$this->role}."]);
 
         $this->reset(['showInviteModal', 'selectedUserId', 'selectedUserName', 'role', 'searchUser', 'userResults']);
     }
@@ -103,9 +104,11 @@ class TeamManagement extends Component
             return;
         }
 
-        // Strip administrative roles and revert to Borrower
-        $user->syncRoles(['Borrower']);
-        $this->dispatch('custom-alert', ['type' => 'warning', 'message' => "Administrative access revoked for {$user->name}."]);
+        // Revert to Customer and default role Saver
+        $user->update(['type' => 'customer']);
+        $user->syncRoles(['Saver']);
+
+        $this->dispatch('custom-alert', ['type' => 'warning', 'message' => "Administrative access revoked for {$user->name}. They are now a regular customer (Saver)."]);
     }
 
     public function togglePush($userId)
@@ -128,15 +131,14 @@ class TeamManagement extends Component
     {
         $orgId = Auth::user()->organization_id;
 
-        // Members are those with roles other than 'Borrower'
+        // Members are those of type 'staff' or 'admin'
         $members = User::where('organization_id', $orgId)
-            ->whereHas('roles', function ($q) {
-                $q->whereNotIn('name', ['Borrower']);
-            })
+            ->whereIn('type', ['staff', 'admin'])
             ->withCount(['assignedLoans as assigned_loans_count'])
             ->paginate(10);
 
-        $roles = Role::whereNotIn('name', ['Borrower'])->get();
+        // Roles available for staff (excluding customer roles)
+        $roles = Role::whereNotIn('name', ['Borrower', 'Saver', 'Guarantor', 'App Owner'])->get();
 
         return view('livewire.settings.team-management', [
             'members' => $members,

@@ -20,13 +20,13 @@ class Reports extends Component
             abort(403);
         }
 
-        $this->startDate = \App\Models\Organization::systemNow()->startOfMonth()->format('Y-m-d');
-        $this->endDate = \App\Models\Organization::systemNow()->format('Y-m-d');
+        $this->startDate = now()->startOfMonth()->format('Y-m-d');
+        $this->endDate = now()->format('Y-m-d');
     }
 
     public function render()
     {
-        $orgStats = Organization::withCount(['loans', 'borrowers', 'staff'])
+        $orgStats = Organization::withCount(['loans', 'customers as borrowers_count', 'staff'])
             ->withSum(['loans as total_lent' => function ($query) {
                 $query->whereIn('status', ['active', 'repaid', 'overdue']);
             }], 'amount')
@@ -48,7 +48,7 @@ class Reports extends Component
                 ->sum('amount') / 100,
             'collected' => Repayment::withoutGlobalScopes()->sum('amount') / 100,
             'organizations' => Organization::count(),
-            'borrowers' => \App\Models\Borrower::count(),
+            'borrowers' => \App\Models\User::where('type', 'customer')->count(),
         ];
 
         return view('livewire.admin.reports', [

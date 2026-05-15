@@ -47,7 +47,7 @@ class CollateralForm extends Component
     public function mount()
     {
         $this->loan_id = request()->query('loan_id');
-        $this->registered_date = \App\Models\Organization::systemNow()->format('Y-m-d');
+        $this->registered_date = now()->format('Y-m-d');
 
         if ($this->loan_id) {
             $this->selectLoan($this->loan_id);
@@ -153,7 +153,7 @@ class CollateralForm extends Component
             $filename = \Illuminate\Support\Str::random(40).'.'.$this->image->getClientOriginalExtension();
             $path = 'collaterals/'.$filename;
             $stream = fopen($this->image->getRealPath(), 'r');
-            $disk = config('filesystems.disks.supabase.is_configured') ? 'supabase' : config('filesystems.default');
+            $disk = (config('filesystems.disks.supabase.is_configured') && ! app()->environment('testing')) ? 'supabase' : config('filesystems.default');
             \Illuminate\Support\Facades\Storage::disk($disk)->put($path, $stream);
             if (is_resource($stream)) {
                 fclose($stream);

@@ -28,6 +28,9 @@ class SynchronizeLoanState
         $totalPaidMinor = (int) $repayments->sum(fn (\App\Models\Repayment $r) => $r->amount->getMinorAmount());
         $remaining = new Money($totalPaidMinor, $currency);
 
+        $org = $loan->organization;
+        $today = $org->getSystemTime()->startOfDay();
+
         foreach ($schedules as $s) {
             /** @var \App\Models\ScheduledRepayment $s */
             /** @var \App\ValueObjects\Money $principal */
@@ -49,7 +52,8 @@ class SynchronizeLoanState
                 $remaining = new Money(0, $currency);
             } else {
                 $s->paid_amount = new Money(0, $currency);
-                $s->status = $s->due_date->isPast() ? 'overdue' : 'applied';
+                // Overdue if due_date is strictly before today
+                $s->status = $s->due_date->lt($today) ? 'overdue' : 'applied';
             }
             $s->save();
         }
@@ -61,13 +65,28 @@ class SynchronizeLoanState
         $totalPaid = new Money($totalPaidMinor, $currency);
 
         if ($totalPaid->getMinorAmount() >= $totalPayable->getMinorAmount() && $totalPayable->getMinorAmount() > 0) {
-            if ($loan->status !== 'repaid') {
+            if ($loan->status !== 'repaid' && ! in_array($loan->status, ['closed', 'written_off'])) {
                 $loan->update(['status' => 'repaid']);
             }
 
             $this->processExtraRepaymentsToSavings($loan, $repayments);
-        } elseif ($loan->status === 'repaid') {
-            $loan->update(['status' => 'active']);
+        } else {
+            // Check if any schedule is still overdue (due before today and not fully paid)
+            $hasOverdue = $loan->scheduledRepayments()
+                ->where('status', 'overdue')
+                ->exists();
+
+            $newStatus = $hasOverdue ? 'overdue' : 'active';
+
+            // Only toggle status between 'active' and 'overdue'
+            if (in_array($loan->status, ['active', 'overdue']) && $loan->status !== $newStatus) {
+                $loan->update(['status' => $newStatus]);
+            }
+
+            // If it was 'repaid' but now is not (e.g. repayment deleted), move back to active/overdue
+            if ($loan->status === 'repaid' && $totalPaid->getMinorAmount() < $totalPayable->getMinorAmount()) {
+                $loan->update(['status' => $newStatus]);
+            }
         }
 
         if ($span) {
@@ -80,10 +99,10 @@ class SynchronizeLoanState
      */
     protected function processExtraRepaymentsToSavings(Loan $loan, $repayments): void
     {
-        $borrower = $loan->borrower;
+        $user = $loan->borrower->user;
         /** @var SavingsAccount $account */
-        $account = $borrower->savingsAccount()->firstOrCreate([
-            'organization_id' => $borrower->organization_id,
+        $account = $user->savingsAccount()->firstOrCreate([
+            'organization_id' => $user->organization_id,
         ], [
             'account_number' => 'SAV-'.strtoupper(Str::random(8)),
             'balance' => 0,
@@ -102,7 +121,7 @@ class SynchronizeLoanState
                     'reference' => 'EXTRA-'.strtoupper(Str::random(8)),
                     'notes' => "Extra balance from Loan #{$loan->loan_number} (Repayment ID: {$repayment->id})",
                     'staff_id' => $repayment->collected_by ?? Auth::id() ?? $loan->loan_officer_id ?? $loan->organization->owner_id,
-                    'transaction_date' => \App\Models\Organization::systemNow(),
+                    'transaction_date' => now(),
                 ]);
 
                 /** @var \App\ValueObjects\Money $balance */
@@ -113,7 +132,7 @@ class SynchronizeLoanState
                     'Extra Balance to Savings',
                     '₦'.$repayment->extra_amount->format()." from Loan #{$loan->loan_number} has been moved to savings.",
                     'savings',
-                    $borrower
+                    $loan->borrower
                 );
             }
         }

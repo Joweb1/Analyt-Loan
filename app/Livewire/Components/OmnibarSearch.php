@@ -2,7 +2,6 @@
 
 namespace App\Livewire\Components;
 
-use App\Models\Borrower;
 use App\Models\Collateral;
 use App\Models\Loan;
 use Illuminate\Support\Facades\Auth;
@@ -27,8 +26,8 @@ class OmnibarSearch extends Component
         ['title' => 'Savings Entry', 'keywords' => 'savings, entry, deposit, add', 'route' => 'savings.entry', 'permission' => 'enter_savings', 'icon' => 'account_balance_wallet'],
         ['title' => 'KYC Approval', 'keywords' => 'kyc, approval, review, identity', 'route' => 'kyc.approval', 'permission' => 'approve_kyc', 'icon' => 'verified_user'],
         ['title' => 'Loan Approval', 'keywords' => 'loan, approval, review, pending', 'route' => 'loan.approval', 'permission' => 'approve_loans', 'icon' => 'fact_check'],
-        ['title' => 'Guarantor Form Builder', 'keywords' => 'guarantor, form, builder, fields', 'route' => 'settings.guarantor-form', 'permission' => 'manage_settings', 'icon' => 'dynamic_form'],
-        ['title' => 'Borrower Form Builder', 'keywords' => 'borrower, fields, registration, form', 'route' => 'settings.form-builder', 'permission' => 'manage_settings', 'icon' => 'settings_input_component'],
+        ['title' => 'Manage Customers', 'keywords' => 'customers, borrowers, savers, guarantors, directory', 'route' => 'customer', 'permission' => 'manage_borrowers', 'icon' => 'group'],
+        ['title' => 'Forms Hub', 'keywords' => 'forms, builder, custom, fields, borrower, saver, guarantor', 'route' => 'settings.form-builder', 'permission' => 'manage_settings', 'icon' => 'dynamic_form'],
         ['title' => 'Team Management', 'keywords' => 'staff, users, management, permissions', 'route' => 'settings.team', 'permission' => 'manage_settings', 'icon' => 'group'],
         ['title' => 'General Settings', 'keywords' => 'organization, settings, logo, config', 'route' => 'settings', 'permission' => 'manage_settings', 'icon' => 'settings'],
         ['title' => 'Notification Settings', 'keywords' => 'notifications, alert, push, email', 'route' => 'settings.notifications', 'permission' => 'manage_settings', 'icon' => 'notifications'],
@@ -78,39 +77,43 @@ class OmnibarSearch extends Component
             $allResults = $allResults->concat($pageResults);
         }
 
-        // 2. Search Borrowers
-        if (! $prefix || in_array($prefix, ['customer', 'borrower', 'staff'])) {
-            $borrowers = Borrower::with(['user', 'loans.loanOfficer'])
-                ->where('organization_id', $orgId)
+        // 2. Search Customers
+        if (! $prefix || in_array($prefix, ['customer', 'borrower', 'saver', 'guarantor', 'staff'])) {
+            $customers = \App\Models\User::where('organization_id', $orgId)
+                ->where('type', 'customer')
                 ->where(function ($q) use ($search, $prefix) {
                     if ($prefix === 'staff') {
-                        $q->whereHas('loans.loanOfficer', function ($lq) use ($search) {
+                        $q->whereHas('assignedLoans.loanOfficer', function ($lq) use ($search) {
                             $lq->where('name', 'like', '%'.$search.'%');
                         });
                     } else {
-                        $q->whereHas('user', function ($uq) use ($search) {
-                            $uq->where('name', 'like', '%'.$search.'%')
-                                ->orWhere('email', 'like', '%'.$search.'%');
-                        })
+                        $q->where('name', 'like', '%'.$search.'%')
+                            ->orWhere('email', 'like', '%'.$search.'%')
                             ->orWhere('phone', 'like', '%'.$search.'%')
-                            ->orWhere('custom_id', 'like', '%'.$search.'%')
-                            ->orWhere('bvn', 'like', '%'.$search.'%')
-                            ->orWhere('national_identity_number', 'like', '%'.$search.'%');
+                            ->orWhereHas('borrower', function ($bq) use ($search) {
+                                $bq->where('custom_id', 'like', '%'.$search.'%')
+                                    ->orWhere('bvn', 'like', '%'.$search.'%')
+                                    ->orWhere('national_identity_number', 'like', '%'.$search.'%');
+                            });
                     }
                 })
-                ->take(5)
+                ->with(['borrower', 'saver', 'guarantor'])
+                ->take(10)
                 ->get()
-                ->map(function ($b) {
+                ->map(function ($u) {
+                    $roles = $u->getRoleNames()->implode(', ') ?: 'Customer';
+                    $link = $u->borrower ? route('borrower.loans', $u->borrower->id) : ($u->saver ? route('saver.profile', $u->saver->id) : route('customer'));
+
                     return [
-                        'type' => 'borrower',
-                        'title' => $b->user->name,
-                        'subtitle' => 'Customer | '.$b->phone,
-                        'link' => route('borrower.loans', $b->id),
+                        'type' => 'customer',
+                        'title' => $u->name,
+                        'subtitle' => $roles.' | '.$u->phone,
+                        'link' => $link,
                         'permission' => 'manage_borrowers',
                         'icon' => 'person',
                     ];
                 });
-            $allResults = $allResults->concat($borrowers);
+            $allResults = $allResults->concat($customers);
         }
 
         // 3. Search Loans (including prefix statuses)
@@ -193,6 +196,29 @@ class OmnibarSearch extends Component
                     ];
                 });
             $allResults = $allResults->concat($collateral);
+        }
+
+        // 6. Search Staff
+        if (! $prefix || $prefix === 'staff' || $prefix === 'admin') {
+            $staff = \App\Models\User::where('organization_id', $orgId)
+                ->whereIn('type', ['admin', 'staff'])
+                ->where(function ($q) use ($search) {
+                    $q->where('name', 'like', '%'.$search.'%')
+                        ->orWhere('email', 'like', '%'.$search.'%');
+                })
+                ->take(5)
+                ->get()
+                ->map(function ($s) {
+                    return [
+                        'type' => 'staff',
+                        'title' => $s->name,
+                        'subtitle' => ucfirst($s->type).' | '.($s->getRoleNames()->first() ?? 'No Role'),
+                        'link' => route('settings.team-members'),
+                        'permission' => 'manage_settings',
+                        'icon' => 'badge',
+                    ];
+                });
+            $allResults = $allResults->concat($staff);
         }
 
         $this->results = $allResults->toArray();

@@ -70,8 +70,7 @@ class PortfolioTimeSeeder extends Seeder
         // 2. Seed Time Management Settings
         // We'll set the organization to operate 2 days in the future to demonstrate the feature
         $org->update([
-            'use_manual_date' => true,
-            'operating_date' => Carbon::now()->addDays(2)->startOfDay(),
+            'system_date' => Carbon::now()->addDays(2)->toDateString(),
         ]);
     }
 }

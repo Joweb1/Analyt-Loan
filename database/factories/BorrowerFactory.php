@@ -30,6 +30,8 @@ class BorrowerFactory extends Factory
             'trust_score' => $this->faker->numberBetween(0, 100),
             'portal_access' => $this->faker->boolean,
             'photo_url' => $this->faker->imageUrl(),
+            'is_daily_saver' => false,
+            'daily_target_amount' => 0,
         ];
     }
 }

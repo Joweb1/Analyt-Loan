@@ -41,7 +41,7 @@ class GeneralReportPrint extends Component
 
     protected function calculatePeriod()
     {
-        $now = \App\Models\Organization::systemNow();
+        $now = now();
         match ($this->type) {
             'daily' => [
                 $this->startDate = $now->copy()->startOfDay(),
@@ -250,22 +250,22 @@ class GeneralReportPrint extends Component
             $label = '';
 
             if ($interval === 'day') {
-                $date = \App\Models\Organization::systemNow()->subDays($i);
+                $date = now()->subDays($i);
                 $currentStart = $date->copy()->startOfDay();
                 $currentEnd = $date->copy()->endOfDay();
                 $label = $date->format('D, d M');
             } elseif ($interval === 'week') {
-                $date = \App\Models\Organization::systemNow()->subWeeks($i);
+                $date = now()->subWeeks($i);
                 $currentStart = $date->copy()->startOfWeek();
                 $currentEnd = $date->copy()->endOfWeek();
                 $label = 'Wk '.$date->format('W');
             } elseif ($interval === 'month') {
-                $date = \App\Models\Organization::systemNow()->subMonths($i);
+                $date = now()->subMonths($i);
                 $currentStart = $date->copy()->startOfMonth();
                 $currentEnd = $date->copy()->endOfMonth();
                 $label = $date->format('M Y');
             } elseif ($interval === 'year') {
-                $year = \App\Models\Organization::systemNow()->subYears($i)->year;
+                $year = now()->subYears($i)->year;
                 $currentStart = \Carbon\Carbon::create($year, 1, 1)->startOfDay();
                 $currentEnd = \Carbon\Carbon::create($year, 12, 31)->endOfDay();
                 $label = (string) $year;
@@ -310,7 +310,8 @@ class GeneralReportPrint extends Component
                 ->whereBetween('paid_at', [$currentStart, $currentEnd])
                 ->sum('interest_amount') / 100;
 
-            $customerData[] = Borrower::where('organization_id', $orgId)
+            $customerData[] = User::where('organization_id', $orgId)
+                ->where('type', 'customer')
                 ->whereBetween('created_at', [$currentStart, $currentEnd])
                 ->count();
 

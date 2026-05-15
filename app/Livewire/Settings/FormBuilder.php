@@ -13,7 +13,7 @@ class FormBuilder extends Component
         'documents' => 'Identification Documents',
         'financial' => 'Financial & Employment',
         'family' => 'Family & Social',
-        'guarantor' => 'Guarantor',
+        'guarantor' => 'Guarantor Selection',
     ];
 
     public $fieldTypes = [
@@ -25,6 +25,15 @@ class FormBuilder extends Component
         'file' => 'File Upload',
         'textarea' => 'Text Area',
     ];
+
+    public $formTypes = [
+        'borrower' => 'Borrower Form',
+        'saver' => 'Saver Form',
+        'guarantor' => 'Guarantor Form',
+    ];
+
+    // Form Selection
+    public $currentFormType = 'borrower';
 
     // New Field State
     public $newFieldSection = 'identity';
@@ -40,24 +49,29 @@ class FormBuilder extends Component
         $this->ensureDefaultConfig();
     }
 
+    public function updatedCurrentFormType()
+    {
+        $this->ensureDefaultConfig();
+    }
+
     public function ensureDefaultConfig()
     {
         $orgId = Auth::user()->organization_id;
-        self::seedDefaults($orgId);
+        self::seedDefaults($orgId, $this->currentFormType);
     }
 
-    public static function seedDefaults($orgId)
+    public static function seedDefaults($orgId, $type = 'borrower')
     {
         if (! $orgId) {
             return;
         }
 
-        if (FormFieldConfig::where('organization_id', $orgId)->where('form_type', 'borrower')->exists()) {
+        if (FormFieldConfig::where('organization_id', $orgId)->where('form_type', $type)->exists()) {
             return;
         }
 
         // Default Schema
-        $defaults = [
+        $borrowerDefaults = [
             'identity' => [
                 ['name' => 'name', 'label' => 'Full Name', 'type' => 'text', 'required' => true],
                 ['name' => 'phone', 'label' => 'Phone Number', 'type' => 'text', 'required' => true],
@@ -65,6 +79,7 @@ class FormBuilder extends Component
                 ['name' => 'dob', 'label' => 'Date of Birth', 'type' => 'date', 'required' => true],
                 ['name' => 'gender', 'label' => 'Gender', 'type' => 'select', 'options' => ['Male', 'Female', 'Other'], 'required' => true],
                 ['name' => 'marital_status', 'label' => 'Marital Status', 'type' => 'select', 'options' => ['Single', 'Married', 'Divorced', 'Widowed'], 'required' => true],
+                ['name' => 'collection_group', 'label' => 'Collection Group', 'type' => 'select', 'options' => ['Monday Group', 'Tuesday Group', 'Wednesday Group', 'Thursday Group', 'Friday Group', 'Saturday Group'], 'required' => false],
                 ['name' => 'dependents', 'label' => 'Number of Dependents', 'type' => 'number', 'required' => true],
                 ['name' => 'address', 'label' => 'Residential Address', 'type' => 'textarea', 'required' => true],
             ],
@@ -97,12 +112,46 @@ class FormBuilder extends Component
             ],
         ];
 
+        $saverDefaults = [
+            'identity' => [
+                ['name' => 'name', 'label' => 'Full Name', 'type' => 'text', 'required' => true],
+                ['name' => 'phone', 'label' => 'Phone Number', 'type' => 'text', 'required' => true],
+                ['name' => 'email', 'label' => 'Email Address', 'type' => 'email', 'required' => false],
+                ['name' => 'address', 'label' => 'Residential Address', 'type' => 'textarea', 'required' => false],
+            ],
+            'financial' => [
+                ['name' => 'bank_name', 'label' => 'Bank Name', 'type' => 'text', 'required' => true],
+                ['name' => 'account_number', 'label' => 'Account Number', 'type' => 'text', 'required' => true],
+                ['name' => 'bank_account_name', 'label' => 'Account Name', 'type' => 'text', 'required' => true],
+            ],
+        ];
+
+        $guarantorDefaults = [
+            'identity' => [
+                ['name' => 'name', 'label' => 'Full Name', 'type' => 'text', 'required' => true],
+                ['name' => 'phone', 'label' => 'Phone Number', 'type' => 'text', 'required' => true],
+                ['name' => 'email', 'label' => 'Email Address', 'type' => 'email', 'required' => false],
+                ['name' => 'address', 'label' => 'Residential Address', 'type' => 'textarea', 'required' => false],
+            ],
+            'documents' => [
+                ['name' => 'bvn', 'label' => 'BVN', 'type' => 'text', 'required' => false],
+                ['name' => 'nin', 'label' => 'NIN', 'type' => 'text', 'required' => false],
+            ],
+        ];
+
+        $defaults = $borrowerDefaults;
+        if ($type === 'saver') {
+            $defaults = $saverDefaults;
+        } elseif ($type === 'guarantor') {
+            $defaults = $guarantorDefaults;
+        }
+
         $order = 0;
         foreach ($defaults as $section => $fields) {
             foreach ($fields as $field) {
                 FormFieldConfig::create([
                     'organization_id' => $orgId,
-                    'form_type' => 'borrower',
+                    'form_type' => $type,
                     'section' => $section,
                     'name' => $field['name'],
                     'label' => $field['label'],
@@ -135,10 +184,6 @@ class FormBuilder extends Component
             return;
         }
 
-        // Ensure system fields that are critical cannot be disabled if logic prevents it
-        // For now allow toggling, but in render we might hide core logic if disabled which is tricky.
-        // Better to allow toggling only optional system fields or custom fields.
-
         $field->is_active = ! $field->is_active;
         $field->save();
     }
@@ -158,8 +203,8 @@ class FormBuilder extends Component
         $name = \Illuminate\Support\Str::slug($this->newFieldLabel, '_');
         $orgId = Auth::user()->organization_id;
 
-        // Check unique name in section
-        if (FormFieldConfig::where('organization_id', $orgId)->where('name', $name)->exists()) {
+        // Check unique name in section for current form type
+        if (FormFieldConfig::where('organization_id', $orgId)->where('form_type', $this->currentFormType)->where('name', $name)->exists()) {
             $this->addError('newFieldLabel', 'A field with this name already exists.');
 
             return;
@@ -172,7 +217,7 @@ class FormBuilder extends Component
 
         FormFieldConfig::create([
             'organization_id' => $orgId,
-            'form_type' => 'borrower',
+            'form_type' => $this->currentFormType,
             'section' => $this->newFieldSection,
             'name' => $name,
             'label' => $this->newFieldLabel,
@@ -207,7 +252,7 @@ class FormBuilder extends Component
     public function render()
     {
         $configs = FormFieldConfig::where('organization_id', Auth::user()->organization_id)
-            ->where('form_type', 'borrower')
+            ->where('form_type', $this->currentFormType)
             ->orderBy('sort_order')
             ->get()
             ->groupBy('section');

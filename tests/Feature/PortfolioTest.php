@@ -3,8 +3,8 @@
 namespace Tests\Feature;
 
 use App\Livewire\AdminDashboard;
-use App\Livewire\BorrowerList;
 use App\Livewire\Components\OmnibarSearch;
+use App\Livewire\CustomerList;
 use App\Livewire\Reports;
 use App\Livewire\Settings\Portfolios;
 use App\Models\Borrower;
@@ -93,7 +93,7 @@ class PortfolioTest extends TestCase
         // 2. Savings Balance
         $account = SavingsAccount::create([
             'organization_id' => $org->id,
-            'borrower_id' => $borrower->id,
+            'user_id' => $borrower->user_id,
             'account_number' => 'SAV-TEST',
             'balance' => 5000, // 5,000 Major = 500,000 Minor
         ]);
@@ -170,14 +170,17 @@ class PortfolioTest extends TestCase
         $admin = User::factory()->create(['organization_id' => $org->id]);
         $admin->assignRole('Admin');
 
-        Borrower::factory()->create(['organization_id' => $org->id, 'portfolio_id' => $portfolio->id]);
-        Borrower::factory()->create(['organization_id' => $org->id, 'portfolio_id' => null]);
+        $user1 = User::factory()->create(['organization_id' => $org->id, 'type' => 'customer']);
+        Borrower::factory()->create(['organization_id' => $org->id, 'user_id' => $user1->id, 'portfolio_id' => $portfolio->id]);
+
+        $user2 = User::factory()->create(['organization_id' => $org->id, 'type' => 'customer']);
+        Borrower::factory()->create(['organization_id' => $org->id, 'user_id' => $user2->id, 'portfolio_id' => null]);
 
         Livewire::actingAs($admin)
-            ->test(BorrowerList::class)
+            ->test(CustomerList::class)
             ->set('portfolioId', $portfolio->id)
-            ->assertViewHas('borrowers', function ($borrowers) use ($portfolio) {
-                return $borrowers->count() === 1 && $borrowers->first()->portfolio_id === $portfolio->id;
+            ->assertViewHas('customers', function ($customers) use ($portfolio) {
+                return $customers->count() === 1 && $customers->first()->borrower->portfolio_id === $portfolio->id;
             });
     }
 
@@ -191,9 +194,9 @@ class PortfolioTest extends TestCase
         $admin->assignRole('Admin');
 
         $borrower = Borrower::factory()->create(['organization_id' => $org->id]);
-        $account = \App\Models\SavingsAccount::create([
+        $account = SavingsAccount::create([
             'organization_id' => $org->id,
-            'borrower_id' => $borrower->id,
+            'user_id' => $borrower->user_id,
             'account_number' => 'SAV-1',
             'balance' => 0,
         ]);

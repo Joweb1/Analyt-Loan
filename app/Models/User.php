@@ -39,7 +39,6 @@ use Spatie\Permission\Traits\HasRoles;
  * @property-read int|null $push_subscriptions_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Role> $roles
  * @property-read int|null $roles_count
- *
  * @method static \Database\Factories\UserFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User newQuery()
@@ -63,7 +62,13 @@ use Spatie\Permission\Traits\HasRoles;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutPermission($permissions)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutRole($roles, $guard = null)
- *
+ * @property string $type
+ * @property-read \App\Models\Guarantor|null $guarantor
+ * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Portfolio> $portfolios
+ * @property-read int|null $portfolios_count
+ * @property-read \App\Models\Saver|null $saver
+ * @property-read \App\Models\SavingsAccount|null $savingsAccount
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereType($value)
  * @mixin \Eloquent
  */
 class User extends Authenticatable
@@ -88,6 +93,7 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'organization_id',
+        'type',
         'name',
         'email',
         'phone',
@@ -143,9 +149,24 @@ class User extends Authenticatable
         return $this->belongsTo(Organization::class);
     }
 
-    public function borrower()
+    public function borrower(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
         return $this->hasOne(Borrower::class);
+    }
+
+    public function saver(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(Saver::class);
+    }
+
+    public function guarantor(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(Guarantor::class);
+    }
+
+    public function savingsAccount(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(SavingsAccount::class);
     }
 
     public function assignedLoans(): \Illuminate\Database\Eloquent\Relations\HasMany
@@ -160,11 +181,45 @@ class User extends Authenticatable
 
     public function isAppOwner(): bool
     {
-        return $this->email === config('app.owner');
+        return $this->type === 'owner' || $this->email === config('app.owner');
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->type === 'admin';
+    }
+
+    public function isStaff(): bool
+    {
+        return $this->type === 'staff';
+    }
+
+    public function isCustomer(): bool
+    {
+        return $this->type === 'customer';
+    }
+
+    public function isBorrower(): bool
+    {
+        return $this->hasRole('Borrower');
+    }
+
+    public function isSaver(): bool
+    {
+        return $this->hasRole('Saver');
     }
 
     public function isOrgOwner(): bool
     {
         return $this->organization && $this->organization->owner_id === $this->id;
+    }
+
+    /**
+     * Override freshTimestamp to ensure User timestamps (created_at, updated_at)
+     * always use real-world time, ignoring the simulated System Date.
+     */
+    public function freshTimestamp()
+    {
+        return new \Illuminate\Support\Carbon(new \DateTime);
     }
 }

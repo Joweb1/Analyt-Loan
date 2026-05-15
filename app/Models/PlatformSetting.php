@@ -13,7 +13,6 @@ use Illuminate\Database\Eloquent\Model;
  * @property string|null $description
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
- *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PlatformSetting newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PlatformSetting newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PlatformSetting query()
@@ -24,7 +23,6 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PlatformSetting whereType($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PlatformSetting whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PlatformSetting whereValue($value)
- *
  * @mixin \Eloquent
  */
 class PlatformSetting extends Model

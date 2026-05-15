@@ -2,7 +2,6 @@
 
 namespace App\Livewire;
 
-use App\Models\Borrower;
 use App\Models\Loan;
 use App\Models\Portfolio;
 use App\Models\Repayment;
@@ -19,6 +18,12 @@ class AdminDashboard extends Component
     public ?Money $totalCollected = null;
 
     public $totalCustomers = 0;
+
+    public $borrowersCount = 0;
+
+    public $saversCount = 0;
+
+    public $guarantorsCount = 0;
 
     public $activeLoansCount = 0;
 
@@ -45,6 +50,8 @@ class AdminDashboard extends Component
     public ?Money $repaidAmount = null;
 
     public ?Money $overdueAmount = null;
+
+    public ?Money $accountBalance = null;
 
     // Pulse Trend Data
     public $pulseData = [];
@@ -86,7 +93,11 @@ class AdminDashboard extends Component
 
         // Load portfolios for the selector
         if ($user->hasRole('Admin') || $user->isOrgOwner() || $user->isAppOwner()) {
-            $this->portfolios = Portfolio::all();
+            if ($user->isAppOwner()) {
+                $this->portfolios = Portfolio::withoutGlobalScopes()->get();
+            } else {
+                $this->portfolios = Portfolio::where('organization_id', $orgId)->get();
+            }
         } else {
             $this->portfolios = $user->portfolios;
         }
@@ -112,38 +123,49 @@ class AdminDashboard extends Component
         }
 
         $stats = \Illuminate\Support\Facades\Cache::remember($cacheKey, now()->addHour(), function () use ($orgId, $isOwner) {
-            $org = \App\Models\Organization::current();
+            // Robustly get organization context
+            $org = $orgId ? \App\Models\Organization::find($orgId) : \App\Models\Organization::current();
+
             // Base queries
             $loanQuery = Loan::query();
             $repaymentQuery = Repayment::query();
-            $borrowerQuery = Borrower::query();
+            $customerQuery = \App\Models\User::where('type', 'customer');
 
             if ($isOwner) {
                 $loanQuery->withoutGlobalScopes();
                 $repaymentQuery->withoutGlobalScopes();
-                $borrowerQuery->withoutGlobalScopes();
+                $customerQuery->withoutGlobalScopes();
             } else {
-                $loanQuery->where('organization_id', $orgId);
-                $repaymentQuery->whereHas('loan', fn ($q) => $q->where('organization_id', $orgId));
-                $borrowerQuery->where('organization_id', $orgId);
+                if ($orgId) {
+                    $loanQuery->where('organization_id', $orgId);
+                    $repaymentQuery->whereHas('loan', fn ($q) => $q->where('organization_id', $orgId));
+                    $customerQuery->where('organization_id', $orgId);
+                }
             }
 
             // Apply Portfolio Filter if selected
             $portfolioData = [
-                'portfolioBalance' => 0,
-                'savingsBalance' => 0,
-                'portfolioAtRisk' => 0,
+                'portfolioBalance' => new \App\ValueObjects\Money(0, $org->currency_code ?? 'NGN'),
+                'savingsBalance' => new \App\ValueObjects\Money(0, $org->currency_code ?? 'NGN'),
+                'portfolioAtRisk' => new \App\ValueObjects\Money(0, $org->currency_code ?? 'NGN'),
                 'parPercentage' => 0,
-                'profitLoss' => 0,
+                'profitLoss' => new \App\ValueObjects\Money(0, $org->currency_code ?? 'NGN'),
             ];
 
             if ($this->selectedPortfolioId) {
                 $loanQuery->where('portfolio_id', $this->selectedPortfolioId);
                 $repaymentQuery->whereHas('loan', fn ($q) => $q->where('portfolio_id', $this->selectedPortfolioId));
-                $borrowerQuery->where('portfolio_id', $this->selectedPortfolioId);
+                $customerQuery->where(function ($q) {
+                    $q->whereHas('borrower', fn ($bq) => $bq->where('portfolio_id', $this->selectedPortfolioId))
+                        ->orWhereHas('saver', fn ($sq) => $sq->where('portfolio_id', $this->selectedPortfolioId))
+                        ->orWhereHas('guarantor', fn ($gq) => $gq->where('portfolio_id', $this->selectedPortfolioId));
+                });
 
                 // Fetch specific portfolio metrics from model
-                $portfolio = Portfolio::find($this->selectedPortfolioId);
+                $portfolio = $isOwner
+                    ? Portfolio::withoutGlobalScopes()->find($this->selectedPortfolioId)
+                    : Portfolio::find($this->selectedPortfolioId);
+
                 if ($portfolio) {
                     $portfolioData = [
                         'portfolioBalance' => $portfolio->portfolio_balance,
@@ -157,7 +179,7 @@ class AdminDashboard extends Component
                 // Organization-wide metrics
                 if ($org) {
                     $currency = $org->currency_code ?: config('app.currency', 'NGN');
-                    $portfolios = Portfolio::where('organization_id', $orgId)->get();
+                    $portfolios = Portfolio::where('organization_id', $org->id)->get();
 
                     $totalPARMinor = (int) $portfolios->sum(function ($p) {
                         return $p->portfolio_at_risk->getMinorAmount();
@@ -168,7 +190,7 @@ class AdminDashboard extends Component
 
                     $portfolioData = [
                         'portfolioBalance' => $org->organization_balance,
-                        'savingsBalance' => new \App\ValueObjects\Money((int) SavingsAccount::where('organization_id', $orgId)->sum('balance'), $currency),
+                        'savingsBalance' => new \App\ValueObjects\Money((int) SavingsAccount::where('organization_id', $org->id)->sum('balance'), $currency),
                         'portfolioAtRisk' => new \App\ValueObjects\Money($totalPARMinor, $currency),
                         'parPercentage' => 0, // Calculated below
                         'profitLoss' => new \App\ValueObjects\Money($totalPnLMinor, $currency),
@@ -180,7 +202,7 @@ class AdminDashboard extends Component
             }
 
             // Fetch Last 7 Days Pulse
-            $startDate = \App\Models\Organization::systemNow()->subDays(6)->startOfDay();
+            $startDate = now()->subDays(6)->startOfDay();
             $pulseRepayments = (clone $repaymentQuery)
                 ->where('paid_at', '>=', $startDate)
                 ->selectRaw('DATE(paid_at) as paid_date, SUM(amount) as total')
@@ -188,9 +210,9 @@ class AdminDashboard extends Component
                 ->get()
                 ->pluck('total', 'paid_date');
 
-            $currency = $org->currency_code ?: config('app.currency', 'NGN');
+            $currency = $org->currency_code ?? config('app.currency', 'NGN');
             $pulseData = collect(range(6, 0))->map(function ($daysAgo) use ($pulseRepayments, $currency) {
-                $date = \App\Models\Organization::systemNow()->subDays($daysAgo);
+                $date = now()->subDays($daysAgo);
                 $dateKey = $date->format('Y-m-d');
                 $amountMinor = (int) $pulseRepayments->get($dateKey, 0);
                 $money = new \App\ValueObjects\Money($amountMinor, $currency);
@@ -215,10 +237,33 @@ class AdminDashboard extends Component
             $overdueAmountMinor = (int) (clone $loanQuery)->where('status', 'overdue')->sum('amount');
             $overdueAmount = new \App\ValueObjects\Money($overdueAmountMinor, $currency);
 
+            // Detailed Customer Counts by Role
+            $borrowerQuery = \App\Models\User::where('type', 'customer')->role('Borrower');
+            $saverQuery = \App\Models\User::where('type', 'customer')->role('Saver');
+            $guarantorQuery = \App\Models\User::where('type', 'customer')->role('Guarantor');
+
+            if ($isOwner) {
+                $borrowerQuery->withoutGlobalScopes();
+                $saverQuery->withoutGlobalScopes();
+                $guarantorQuery->withoutGlobalScopes();
+            } elseif ($orgId) {
+                $borrowerQuery->where('organization_id', $orgId);
+                $saverQuery->where('organization_id', $orgId);
+                $guarantorQuery->where('organization_id', $orgId);
+            }
+
+            $accountBalance = null;
+            if ($org) {
+                $accountBalance = app(\App\Services\CashbookService::class)->getLiveAccountBalance($org->getSystemTime(), $org);
+            }
+
             $res = array_merge([
                 'totalLoaned' => $totalLoaned,
                 'totalCollected' => $totalCollected,
-                'totalCustomers' => (clone $borrowerQuery)->count(),
+                'totalCustomers' => (clone $customerQuery)->count(),
+                'borrowersCount' => $borrowerQuery->count(),
+                'saversCount' => $saverQuery->count(),
+                'guarantorsCount' => $guarantorQuery->count(),
                 'activeLoansCount' => (clone $loanQuery)->whereIn('status', ['approved', 'active'])->count(),
                 'pendingApplicationsCount' => (clone $loanQuery)->whereIn('status', ['applied', 'verification_pending'])->count(),
                 'paidLoansCount' => (clone $loanQuery)->where('status', 'repaid')->count(),
@@ -226,6 +271,7 @@ class AdminDashboard extends Component
                 'activeAmount' => $activeAmount,
                 'repaidAmount' => $repaidAmount,
                 'overdueAmount' => $overdueAmount,
+                'accountBalance' => $accountBalance,
                 'pulseData' => $pulseData,
             ], $portfolioData);
 
@@ -240,7 +286,7 @@ class AdminDashboard extends Component
 
         // Action Box Items & Task Generation
         if (! $isOwner) {
-            $currentDateStr = \App\Models\Organization::systemNow()->toDateString();
+            $currentDateStr = now()->toDateString();
             \Illuminate\Support\Facades\Cache::remember("daily_tasks_run_{$orgId}_{$currentDateStr}", now()->addHour(), function () use ($orgId) {
                 \App\Services\ActionTaskService::generateDailyTasks($orgId);
 

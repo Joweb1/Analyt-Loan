@@ -6,9 +6,9 @@
                 <span class="text-gray-400 text-sm">/</span>
                 <span class="text-gray-900 text-sm font-bold">{{ isset($loan) ? 'Edit Application' : 'New Application' }}</span>
             </div>
-            <a href="{{ isset($loan) ? route('loan.show', $loan->id) : route('loan') }}" class="p-2 rounded-full hover:bg-gray-100 text-gray-500 transition-colors" title="Cancel">
+            <button onclick="window.history.back()" class="p-2 rounded-full hover:bg-gray-100 text-gray-500 transition-colors" title="Cancel">
                 <span class="material-symbols-outlined">close</span>
-            </a>
+            </button>
         </div>
         <div class="mb-10 px-4 md:px-6">
             <h1 class="text-gray-900 text-4xl font-extrabold leading-tight tracking-tight">{{ isset($loan) ? 'Edit Loan Application' : 'New Loan Application' }}</h1>

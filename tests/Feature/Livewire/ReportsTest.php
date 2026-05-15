@@ -59,7 +59,7 @@ class ReportsTest extends TestCase
 
     public function test_it_calculates_correct_summary_stats()
     {
-        $now = Organization::systemNow();
+        $now = now();
         Reports::clearCache($this->organization->id);
 
         // Create loan disbursed today

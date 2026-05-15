@@ -13,7 +13,9 @@ class LoanSeeder extends Seeder
     {
         // Ensure we have borrowers
         if (Borrower::count() < 5) {
-            Borrower::factory(10)->create();
+            Borrower::factory(10)->create()->each(function ($b) {
+                $b->user->assignRole('Borrower');
+            });
         }
         $borrowers = Borrower::all();
 
@@ -51,7 +53,7 @@ class LoanSeeder extends Seeder
             // Create a Repayment for this loan (Today)
             Repayment::create([
                 'loan_id' => $loan->id,
-                'amount' => $loan->amount * 0.1, // 10% paid
+                'amount' => $loan->amount->multiply(0.1), // 10% paid
                 'paid_at' => now(),
             ]);
         }

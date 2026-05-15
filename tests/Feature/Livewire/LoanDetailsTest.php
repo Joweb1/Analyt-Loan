@@ -140,6 +140,7 @@ class LoanDetailsTest extends TestCase
         // Pay full amount first
         /** @var \App\Models\Repayment $repayment */
         $repayment = $this->loan->repayments()->create([
+            'organization_id' => $this->organization->id,
             'amount' => 110000,
             'payment_method' => 'Cash',
             'collected_by' => $this->admin->id,

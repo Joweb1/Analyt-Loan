@@ -142,7 +142,7 @@ class LoanForm extends Component
             $this->borrowerUserId = $borrower?->user_id;
             $this->loan_number = $loan->loan_number;
             $this->loan_product = $loan->loan_product;
-            $this->release_date = $loan->release_date ? $loan->release_date->format('Y-m-d') : \App\Models\Organization::systemNow()->format('Y-m-d');
+            $this->release_date = $loan->release_date ? $loan->release_date->format('Y-m-d') : now()->format('Y-m-d');
             $this->amount = $loan->amount->getMajorAmount();
             $this->interest_rate = $loan->interest_rate;
             $this->interest_type = $loan->interest_type;
@@ -166,11 +166,17 @@ class LoanForm extends Component
                 $this->guarantor_type = 'internal';
             }
         } else {
-            $this->release_date = \App\Models\Organization::systemNow()->format('Y-m-d');
+            $this->release_date = now()->format('Y-m-d');
 
             // Check for borrower_id in query string
             if ($borrowerId = request()->query('borrower_id')) {
-                $this->selectBorrower($borrowerId);
+                $borrower = \App\Models\Borrower::find($borrowerId);
+                if ($borrower) {
+                    $this->selectBorrower($borrower->user_id);
+                } else {
+                    // Fallback to searching by User ID if Borrower ID not found
+                    $this->selectBorrower($borrowerId);
+                }
             }
         }
 
@@ -182,9 +188,7 @@ class LoanForm extends Component
 
         $orgId = Auth::user()->organization_id;
         $this->staffMembers = \App\Models\User::where('organization_id', $orgId)
-            ->whereHas('roles', function ($q) {
-                $q->whereNotIn('name', ['Borrower']);
-            })
+            ->whereIn('type', ['admin', 'staff'])
             ->get();
     }
 
@@ -197,28 +201,43 @@ class LoanForm extends Component
             return;
         }
 
-        $this->searchResults = Borrower::with('user')
+        $orgId = Auth::user()->organization_id;
+
+        $this->searchResults = \App\Models\User::role('Borrower')
+            ->where('organization_id', $orgId)
             ->where(function ($query) {
-                $query->where('phone', 'like', '%'.$this->search.'%')
-                    ->orWhere('bvn', 'like', '%'.$this->search.'%')
-                    ->orWhere('national_identity_number', 'like', '%'.$this->search.'%');
-            })
-            ->orWhereHas('user', function ($query) {
                 $query->where('name', 'like', '%'.$this->search.'%')
-                    ->orWhere('email', 'like', '%'.$this->search.'%');
+                    ->orWhere('email', 'like', '%'.$this->search.'%')
+                    ->orWhere('phone', 'like', '%'.$this->search.'%');
             })
+            ->with(['borrower', 'saver', 'guarantor'])
             ->take(10)
             ->get();
     }
 
-    public function selectBorrower($id)
+    public function selectBorrower($userId)
     {
-        $this->borrowerId = $id;
-        /** @var \App\Models\Borrower|null $borrower */
-        $borrower = Borrower::with('user')->find($id);
-        $this->selectedBorrower = $borrower;
-        $this->borrowerUserId = $borrower?->user_id;
-        $this->portfolio_id = $borrower?->portfolio_id;
+        $user = \App\Models\User::with(['borrower'])->find($userId);
+        if (! $user) {
+            return;
+        }
+
+        if (! $user->borrower) {
+            // Ensure borrower profile exists
+            $borrower = \App\Models\Borrower::create([
+                'organization_id' => $user->organization_id,
+                'user_id' => $user->id,
+                'phone' => $user->phone,
+                'kyc_status' => 'approved',
+                'onboarding_step' => 4,
+            ]);
+            $user->load('borrower');
+        }
+
+        $this->borrowerId = $user->borrower->id;
+        $this->selectedBorrower = $user->borrower;
+        $this->borrowerUserId = $user->id;
+        $this->portfolio_id = $user->borrower->portfolio_id;
         if (! $this->isEditMode) {
             $this->generateLoanNumber();
         }
@@ -242,7 +261,7 @@ class LoanForm extends Component
     public function generateLoanNumber()
     {
         // Example: LN-2026-X8Y9Z
-        $year = \App\Models\Organization::systemNow()->year;
+        $year = now()->year;
         $this->loan_number = 'LN-'.$year.'-'.strtoupper(Str::random(5));
     }
 

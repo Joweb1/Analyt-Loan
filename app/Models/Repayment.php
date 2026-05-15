@@ -27,6 +27,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property \App\ValueObjects\Money $extra_amount
  * @property-read \App\Models\User|null $collector
  * @property-read \App\Models\Loan $loan
+ *
  * @method static \Database\Factories\RepaymentFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Repayment newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Repayment newQuery()
@@ -42,6 +43,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Repayment wherePaymentMethod($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Repayment wherePrincipalAmount($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Repayment whereUpdatedAt($value)
+ *
  * @property \App\ValueObjects\Money $fee_amount
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\AuditTrail> $auditTrails
  * @property-read int|null $audit_trails_count
@@ -49,11 +51,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read \App\Models\Organization|null $organization
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\SavingsTransaction> $savingsTransactions
  * @property-read int|null $savings_transactions_count
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Repayment whereBorrowerId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Repayment whereFeeAmount($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Repayment whereNotes($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Repayment whereOrganizationId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Repayment whereRecordedBy($value)
+ *
  * @mixin \Eloquent
  */
 class Repayment extends Model

@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read mixed $remaining
  * @property-read \App\Models\Organization $organization
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ExpenseBudget newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ExpenseBudget newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ExpenseBudget query()
@@ -30,6 +31,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ExpenseBudget whereTotalBudgetAmount($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ExpenseBudget whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ExpenseBudget whereYear($value)
+ *
  * @mixin \Eloquent
  */
 class ExpenseBudget extends Model

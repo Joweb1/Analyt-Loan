@@ -19,6 +19,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property array<array-key, mixed>|null $payload
  * @property string $created_at
  * @property-read \App\Models\User|null $user
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SessionLog newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SessionLog newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SessionLog query()
@@ -35,6 +36,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SessionLog whereSessionId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SessionLog whereUserAgent($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SessionLog whereUserId($value)
+ *
  * @mixin \Eloquent
  */
 class SessionLog extends Model

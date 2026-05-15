@@ -47,6 +47,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property-read int|null $repayments_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ScheduledRepayment> $scheduledRepayments
  * @property-read int|null $scheduled_repayments_count
+ *
  * @method static \Database\Factories\LoanFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Loan newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Loan newQuery()
@@ -77,6 +78,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Loan whereRepaymentCycle($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Loan whereStatus($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Loan whereUpdatedAt($value)
+ *
  * @property string|null $guarantor_id
  * @property string|null $external_guarantor_id
  * @property string|null $portfolio_id
@@ -89,11 +91,13 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property-read \App\ValueObjects\Money $balance
  * @property-read \App\Models\User|null $guarantor
  * @property-read \App\Models\Portfolio|null $portfolio
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Loan whereExternalGuarantorId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Loan whereGuarantorId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Loan whereInstallmentDate($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Loan wherePortfolioId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Loan whereRegisterNotes($value)
+ *
  * @mixin \Eloquent
  */
 class Loan extends Model

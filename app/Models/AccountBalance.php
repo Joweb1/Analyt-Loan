@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property-read \App\Models\Organization $organization
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AccountBalance newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AccountBalance newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AccountBalance query()
@@ -25,6 +26,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AccountBalance whereOrganizationId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AccountBalance whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AccountBalance whereYear($value)
+ *
  * @mixin \Eloquent
  */
 class AccountBalance extends Model

@@ -23,6 +23,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property-read Model|\Eloquent $auditable
  * @property-read \App\Models\Organization|null $organization
  * @property-read \App\Models\User|null $user
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AuditTrail newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AuditTrail newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AuditTrail query()
@@ -38,6 +39,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AuditTrail whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AuditTrail whereUserAgent($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AuditTrail whereUserId($value)
+ *
  * @mixin \Eloquent
  */
 class AuditTrail extends Model

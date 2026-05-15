@@ -28,6 +28,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read \App\Models\Organization $organization
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $staff
  * @property-read int|null $staff_count
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Portfolio newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Portfolio newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Portfolio query()
@@ -37,6 +38,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Portfolio whereName($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Portfolio whereOrganizationId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Portfolio whereUpdatedAt($value)
+ *
  * @mixin \Eloquent
  */
 class Portfolio extends Model

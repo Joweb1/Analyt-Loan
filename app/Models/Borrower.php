@@ -54,6 +54,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read \App\Models\Organization|null $organization
  * @property-read \App\Models\SavingsAccount|null $savingsAccount
  * @property-read \App\Models\User $user
+ *
  * @method static \Database\Factories\BorrowerFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Borrower newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Borrower newQuery()
@@ -88,6 +89,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Borrower whereTrustScore($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Borrower whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Borrower whereUserId($value)
+ *
  * @property string|null $custom_id
  * @property string|null $external_guarantor_id
  * @property string|null $portfolio_id
@@ -98,6 +100,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property-read string|null $passport_photograph_url
  * @property-read \App\Models\Portfolio|null $portfolio
  * @property-read int|null $repayments_count
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Borrower whereActiveLoansCount($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Borrower whereCollectionGroup($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Borrower whereCustomId($value)
@@ -106,6 +109,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Borrower whereIsDailySaver($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Borrower wherePortfolioId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Borrower whereTotalDebt($value)
+ *
  * @mixin \Eloquent
  */
 class Borrower extends Model

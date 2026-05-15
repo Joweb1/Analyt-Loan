@@ -28,6 +28,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read \App\Models\Organization $organization
  * @property-read \App\Models\Portfolio|null $portfolio
  * @property-read \App\Models\User|null $user
+ *
  * @method static \Database\Factories\GuarantorFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Guarantor newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Guarantor newQuery()
@@ -48,6 +49,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Guarantor wherePortfolioId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Guarantor whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Guarantor whereUserId($value)
+ *
  * @mixin \Eloquent
  */
 class Guarantor extends Model

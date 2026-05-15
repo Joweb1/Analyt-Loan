@@ -62,6 +62,7 @@ use Illuminate\Support\Facades\Cache;
  * @property-read int|null $staff_count
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $users
  * @property-read int|null $users_count
+ *
  * @method static \Database\Factories\OrganizationFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organization newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organization newQuery()
@@ -99,6 +100,7 @@ use Illuminate\Support\Facades\Cache;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organization whereTimezone($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organization whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organization whereWebsite($value)
+ *
  * @property \Illuminate\Support\Carbon|null $system_date
  * @property string $default_customer_password
  * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $customers
@@ -107,9 +109,11 @@ use Illuminate\Support\Facades\Cache;
  * @property-read string|null $logo_url
  * @property-read \App\ValueObjects\Money $organization_balance
  * @property-read string|null $signature_url
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organization whereDefaultCustomerPassword($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organization whereSystemDate($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organization whereThriftCycleDays($value)
+ *
  * @mixin \Eloquent
  */
 class Organization extends Model

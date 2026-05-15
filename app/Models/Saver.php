@@ -23,6 +23,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read \App\Models\Organization $organization
  * @property-read \App\Models\Portfolio|null $portfolio
  * @property-read \App\Models\User $user
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Saver newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Saver newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Saver query()
@@ -38,6 +39,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Saver wherePortfolioId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Saver whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Saver whereUserId($value)
+ *
  * @mixin \Eloquent
  */
 class Saver extends Model

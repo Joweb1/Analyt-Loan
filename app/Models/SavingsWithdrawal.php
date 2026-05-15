@@ -30,6 +30,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read \App\Models\Organization $organization
  * @property-read \App\Models\SavingsAccount $savingsAccount
  * @property-read \App\Models\User $staff
+ *
  * @method static \Database\Factories\SavingsWithdrawalFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SavingsWithdrawal newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SavingsWithdrawal newQuery()
@@ -50,6 +51,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SavingsWithdrawal whereStatus($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SavingsWithdrawal whereTransactionDate($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SavingsWithdrawal whereUpdatedAt($value)
+ *
  * @mixin \Eloquent
  */
 class SavingsWithdrawal extends Model

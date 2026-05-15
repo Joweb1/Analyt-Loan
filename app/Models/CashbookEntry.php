@@ -44,6 +44,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property-read mixed $total_inflow
  * @property-read mixed $total_outflow
  * @property-read \App\Models\Organization $organization
+ *
  * @method static \Database\Factories\CashbookEntryFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CashbookEntry newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CashbookEntry newQuery()
@@ -79,6 +80,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CashbookEntry whereStatus($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CashbookEntry whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CashbookEntry whereVerifiedAt($value)
+ *
  * @mixin \Eloquent
  */
 class CashbookEntry extends Model
@@ -175,7 +177,7 @@ class CashbookEntry extends Model
      */
     public function getTotalInflowAttribute()
     {
-        $currency = $this->organization?->currency_code ?? config('app.currency', 'NGN');
+        $currency = $this->organization->currency_code ?? config('app.currency', 'NGN');
         $zero = new \App\ValueObjects\Money(0, $currency);
 
         return ($this->loan_repayments ?? $zero)
@@ -195,7 +197,7 @@ class CashbookEntry extends Model
      */
     public function getTotalOutflowAttribute()
     {
-        $currency = $this->organization?->currency_code ?? config('app.currency', 'NGN');
+        $currency = $this->organization->currency_code ?? config('app.currency', 'NGN');
         $zero = new \App\ValueObjects\Money(0, $currency);
 
         return ($this->loan_disbursements ?? $zero)
@@ -219,7 +221,7 @@ class CashbookEntry extends Model
      */
     public function getDailyNetAttribute()
     {
-        $currency = $this->organization?->currency_code ?? config('app.currency', 'NGN');
+        $currency = $this->organization->currency_code ?? config('app.currency', 'NGN');
         $zero = new \App\ValueObjects\Money(0, $currency);
 
         return ($this->bank_deposit_amount ?? $zero)->subtract($this->expected_deposit ?? $zero);

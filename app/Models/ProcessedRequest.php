@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property array<array-key, mixed> $response_body
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ProcessedRequest newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ProcessedRequest newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ProcessedRequest query()
@@ -23,6 +24,7 @@ use Illuminate\Database\Eloquent\Model;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ProcessedRequest whereStatusCode($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ProcessedRequest whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ProcessedRequest whereUserId($value)
+ *
  * @mixin \Eloquent
  */
 class ProcessedRequest extends Model

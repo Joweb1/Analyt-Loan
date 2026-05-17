@@ -29,13 +29,14 @@ export default function () {
     // Test a common API endpoint or a heavy read route
     // Since we seeded the DB, these should return data
     const endpoints = [
-      '/api/up', // Health check
+      '/up',         // Health check (Laravel 11 default)
+      '/api/loans',  // Publicly accessible loan list (if no auth middleware)
     ];
 
     endpoints.forEach(path => {
       const res = http.get(`${BASE_URL}${path}`);
       check(res, {
-        [`${path} status is 200`]: (r) => r.status === 200 || r.status === 401, // 401 is acceptable if auth is required, but we check availability
+        [`${path} status is acceptable`]: (r) => r.status === 200 || r.status === 401,
       });
     });
   });

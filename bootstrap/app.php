@@ -14,7 +14,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->trustHosts(at: ['analyt-loan.onrender.com']);
+        $middleware->trustHosts(at: [
+            'analyt-loan.onrender.com',
+            'analytloan.com',
+            $middleware->trustHostsPattern('^(.+\.)?analyt-loan\.onrender\.com$'),
+            $middleware->trustHostsPattern('^(.+\.)?analytloan\.com$'),
+        ]);
         $middleware->trustProxies(at: '*');
 
         $middleware->encryptCookies(except: [

@@ -24,7 +24,7 @@ class PerformanceDataSeeder extends Seeder
             [
                 'name' => 'Performance Test Org',
                 'tagline' => 'Organization for high-volume performance testing',
-                'status' => 'active'
+                'status' => 'active',
             ]
         );
 

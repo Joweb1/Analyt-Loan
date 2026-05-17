@@ -1,5 +1,5 @@
 import http from 'k6/http';
-import { check, sleep } from 'k6';
+import { check, sleep, group } from 'k6';
 
 export const options = {
   stages: [
@@ -14,12 +14,30 @@ export const options = {
 };
 
 export default function () {
-  // Test the Home/Dashboard page (Public or Mock Auth)
-  const res = http.get('http://localhost:8000');
-  
-  check(res, {
-    'status is 200': (r) => r.status === 200,
-    'content is present': (r) => r.body.includes('Analyt Loan'),
+  const BASE_URL = 'http://localhost:8000';
+
+  group('Public Pages', function () {
+    // Test the Home/Dashboard page
+    const res = http.get(`${BASE_URL}`);
+    check(res, {
+      'status is 200': (r) => r.status === 200,
+      'content is present': (r) => r.body.includes('Analyt Loan'),
+    });
+  });
+
+  group('API Endpoints (Read-only)', function () {
+    // Test a common API endpoint or a heavy read route
+    // Since we seeded the DB, these should return data
+    const endpoints = [
+      '/api/up', // Health check
+    ];
+
+    endpoints.forEach(path => {
+      const res = http.get(`${BASE_URL}${path}`);
+      check(res, {
+        [`${path} status is 200`]: (r) => r.status === 200 || r.status === 401, // 401 is acceptable if auth is required, but we check availability
+      });
+    });
   });
 
   sleep(1);

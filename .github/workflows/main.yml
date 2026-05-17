@@ -29,6 +29,16 @@ jobs:
         npm install
         npm run build
 
+    - name: Upload Build Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-deps
+        path: |
+          vendor
+          node_modules
+          public/build
+        retention-days: 1
+
     - name: "Security: Dependency Audit (SCA)"
       run: |
         composer audit
@@ -59,11 +69,10 @@ jobs:
         extensions: mbstring, xml, ctype, iconv, intl, pdo_pgsql, pdo_mysql, redis, bcmath, zip
         coverage: none
 
-    - name: Install Dependencies
-      run: |
-        composer install --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
-        npm install
-        npm run build
+    - name: Download Build Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: build-deps
 
     - name: Copy .env
       run: php -r "file_exists('.env') || copy('.env.testing', '.env');"
@@ -88,19 +97,24 @@ jobs:
       with:
         php-version: '8.4'
 
-    - name: Install Dependencies & Build
-      run: |
-        composer install --no-dev --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
-        npm install
-        npm run build
+    - name: Download Build Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: build-deps
 
     - name: Start Laravel Server
       run: |
         php -r "file_exists('.env') || copy('.env.testing', '.env');"
         php artisan key:generate
-        php artisan serve --port=8000 &
+        touch database/database.sqlite
+        php artisan migrate --force
+        php artisan db:seed --force
+        # Use multi-threaded server for better concurrency in load tests
+        PHP_CLI_SERVER_WORKERS=4 php artisan serve --port=8000 &
       env:
         APP_ENV: testing
+        DB_CONNECTION: sqlite
+        DB_DATABASE: database/database.sqlite
 
     - name: Wait for Server to be Ready
       run: |
@@ -116,7 +130,7 @@ jobs:
       run: k6 run tests/performance/load-test.js
 
   prepare-artifact-and-push:
-    needs: testing
+    needs: [testing, performance-benchmark]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
@@ -127,19 +141,13 @@ jobs:
       with:
         php-version: '8.4'
 
+    - name: Download Build Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: build-deps
+
     - name: Prune Dev Dependencies
       run: composer install --no-dev --optimize-autoloader --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist
-
-    - name: Install NPM Dependencies & Build Assets
-      run: |
-        npm install
-        npm run build
-        if [ ! -d "public/build" ]; then
-          echo "ERROR: public/build directory is missing!"
-          exit 1
-        fi
-        echo "Vite build successful, content of public/build:"
-        ls -R public/build
 
     - name: Create Release Zip
       run: |

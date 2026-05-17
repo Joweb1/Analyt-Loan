@@ -10,7 +10,6 @@ use App\Models\Repayment;
 use App\Models\ScheduledRepayment;
 use App\Models\User;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\Schema;
 
 class PerformanceDataSeeder extends Seeder
 {
@@ -25,27 +24,27 @@ class PerformanceDataSeeder extends Seeder
             [
                 'name' => 'Performance Test Org',
                 'description' => 'Organization for high-volume performance testing',
-                'active' => true
+                'active' => true,
             ]
         );
 
         // 2. Create Users for the Org
         User::factory()->count(10)->create([
-            'organization_id' => $org->id
+            'organization_id' => $org->id,
         ]);
 
         // 3. Create Borrowers
         $this->command->info('Creating 500 Borrowers...');
         $borrowers = Borrower::factory()->count(500)->create([
-            'organization_id' => $org->id
+            'organization_id' => $org->id,
         ]);
 
         // 4. Create Loans
         $this->command->info('Creating 2000 Loans...');
         $loans = Loan::factory()->count(2000)->create([
             'organization_id' => $org->id,
-            'borrower_id' => fn() => $borrowers->random()->id,
-            'status' => 'disbursed'
+            'borrower_id' => fn () => $borrowers->random()->id,
+            'status' => 'disbursed',
         ]);
 
         // 5. Create Scheduled Repayments for each Loan
@@ -53,22 +52,22 @@ class PerformanceDataSeeder extends Seeder
         $loans->each(function ($loan) {
             ScheduledRepayment::factory()->count(12)->create([
                 'loan_id' => $loan->id,
-                'organization_id' => $loan->organization_id
+                'organization_id' => $loan->organization_id,
             ]);
         });
 
         // 6. Create actual Repayments for some loans
         $this->command->info('Creating 5000 Repayments...');
         Repayment::factory()->count(5000)->create([
-            'loan_id' => fn() => $loans->random()->id,
-            'organization_id' => $org->id
+            'loan_id' => fn () => $loans->random()->id,
+            'organization_id' => $org->id,
         ]);
 
         // 7. Create Collateral
         $this->command->info('Creating 1000 Collateral records...');
         Collateral::factory()->count(1000)->create([
-            'loan_id' => fn() => $loans->random()->id,
-            'organization_id' => $org->id
+            'loan_id' => fn () => $loans->random()->id,
+            'organization_id' => $org->id,
         ]);
     }
 }

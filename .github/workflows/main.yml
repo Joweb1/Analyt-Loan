@@ -108,7 +108,7 @@ jobs:
         php artisan key:generate
         touch database/database.sqlite
         php artisan migrate --force
-        php artisan db:seed --force
+        php artisan db:seed --class=PerformanceDataSeeder --force
         # Use multi-threaded server for better concurrency in load tests
         PHP_CLI_SERVER_WORKERS=4 php artisan serve --port=8000 &
       env:

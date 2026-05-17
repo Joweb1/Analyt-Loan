@@ -23,8 +23,8 @@ class PerformanceDataSeeder extends Seeder
             ['slug' => 'perf-test-org'],
             [
                 'name' => 'Performance Test Org',
-                'description' => 'Organization for high-volume performance testing',
-                'active' => true,
+                'tagline' => 'Organization for high-volume performance testing',
+                'status' => 'active'
             ]
         );
 

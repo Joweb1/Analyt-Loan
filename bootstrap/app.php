@@ -17,8 +17,6 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->trustHosts(at: [
             'analyt-loan.onrender.com',
             'analytloan.com',
-            $middleware->trustHostsPattern('^(.+\.)?analyt-loan\.onrender\.com$'),
-            $middleware->trustHostsPattern('^(.+\.)?analytloan\.com$'),
         ]);
         $middleware->trustProxies(at: '*');
 

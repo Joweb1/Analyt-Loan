@@ -25,6 +25,7 @@ class PerformanceDataSeeder extends Seeder
                 'name' => 'Performance Test Org',
                 'tagline' => 'Organization for high-volume performance testing',
                 'status' => 'active',
+                'system_date' => now()->toDateString(),
             ]
         );
 
@@ -48,15 +49,16 @@ class PerformanceDataSeeder extends Seeder
         ]);
 
         // 5. Create Scheduled Repayments for each Loan
+        // NOTE: scheduled_repayments table DOES NOT have organization_id
         $this->command->info('Creating 24000 Scheduled Repayments (12 per loan)...');
         $loans->each(function ($loan) {
             ScheduledRepayment::factory()->count(12)->create([
                 'loan_id' => $loan->id,
-                'organization_id' => $loan->organization_id,
             ]);
         });
 
         // 6. Create actual Repayments for some loans
+        // NOTE: repayments table HAS organization_id
         $this->command->info('Creating 5000 Repayments...');
         Repayment::factory()->count(5000)->create([
             'loan_id' => fn () => $loans->random()->id,
@@ -64,6 +66,7 @@ class PerformanceDataSeeder extends Seeder
         ]);
 
         // 7. Create Collateral
+        // NOTE: collaterals table HAS organization_id
         $this->command->info('Creating 1000 Collateral records...');
         Collateral::factory()->count(1000)->create([
             'loan_id' => fn () => $loans->random()->id,

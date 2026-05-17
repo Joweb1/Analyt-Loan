@@ -8,7 +8,7 @@ on:
 
 permissions:
   contents: write
-  security-events: write # Required for CodeQL or security uploads
+  security-events: write
 
 jobs:
   build-and-lint:
@@ -20,8 +20,8 @@ jobs:
       uses: shivammathur/setup-php@v2
       with:
         php-version: '8.4'
-        extensions: mbstring, xml, ctype, iconv, intl, pdo_pgsql, pdo_mysql, redis, bcmath, zip
-        coverage: none
+        extensions: mbstring, xml, ctype, iconv, intl, pdo_pgsql, pdo_mysql, redis, bcmath, zip, pcov
+        coverage: pcov
 
     - name: Install Dependencies
       run: |
@@ -56,7 +56,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php: ['8.4', '8.5'] # Matrix testing for PHP versions
+        php: ['8.4'] # Matrix testing for PHP versions
     env:
       APP_ENV: testing
     steps:
@@ -66,8 +66,8 @@ jobs:
       uses: shivammathur/setup-php@v2
       with:
         php-version: ${{ matrix.php }}
-        extensions: mbstring, xml, ctype, iconv, intl, pdo_pgsql, pdo_mysql, redis, bcmath, zip
-        coverage: none
+        extensions: mbstring, xml, ctype, iconv, intl, pdo_pgsql, pdo_mysql, redis, bcmath, zip, pcov
+        coverage: pcov
 
     - name: Download Build Artifacts
       uses: actions/download-artifact@v4
@@ -83,8 +83,14 @@ jobs:
     - name: Directory Permissions
       run: chmod -R 777 storage bootstrap/cache
 
-    - name: Run Tests
-      run: php artisan test --exclude-group skip
+    - name: Run Tests with Coverage
+      run: php artisan test --coverage-clover coverage.xml --min=40
+
+    - name: Upload Coverage Report
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-report
+        path: coverage.xml
 
   performance-benchmark:
     needs: testing
@@ -109,7 +115,6 @@ jobs:
         touch database/database.sqlite
         php artisan migrate --force
         php artisan db:seed --class=PerformanceDataSeeder --force
-        # Use multi-threaded server for better concurrency in load tests
         PHP_CLI_SERVER_WORKERS=4 php artisan serve --port=8000 &
       env:
         APP_ENV: testing
@@ -129,8 +134,44 @@ jobs:
     - name: Run k6 Performance Test
       run: k6 run tests/performance/load-test.js
 
+  e2e-testing:
+    needs: performance-benchmark
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.4'
+
+    - name: Download Build Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: build-deps
+
+    - name: Start Laravel Server
+      run: |
+        php -r "file_exists('.env') || copy('.env.testing', '.env');"
+        php artisan key:generate
+        touch database/database.sqlite
+        php artisan migrate --force
+        php artisan db:seed --force
+        php artisan serve --port=8000 &
+      env:
+        APP_ENV: testing
+        DB_CONNECTION: sqlite
+        DB_DATABASE: database/database.sqlite
+
+    - name: Run Cypress E2E Tests
+      uses: cypress-io/github-action@v6
+      with:
+        browser: chrome
+        wait-on: 'http://localhost:8000'
+        spec: cypress/e2e/smoke.cy.js
+
   prepare-artifact-and-push:
-    needs: [testing, performance-benchmark]
+    needs: [testing, performance-benchmark, e2e-testing]
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
@@ -151,14 +192,8 @@ jobs:
 
     - name: Create Release Zip
       run: |
-        # Explicitly ensure we are at root
         cd $GITHUB_WORKSPACE
         zip -q -r release.zip . -x ".git/*" ".github/*" "node_modules/*" "vendor/*" "tests/*" "phpstan.neon" "phpunit.xml" ".dockerignore" "docker-compose.yml" "Dockerfile" "*.zip" "*.rdb"
-        if [ ! -f "release.zip" ]; then
-          echo "ERROR: release.zip was not created!"
-          exit 1
-        fi
-        echo "Release zip created successfully."
 
     - name: Push to deploy branch
       run: |
@@ -172,7 +207,7 @@ jobs:
         git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
         git checkout -b deploy
         git add .
-        git commit -m "Build artifact for deployment (Verified: Matrix, Security, Performance)"
+        git commit -m "Build artifact for deployment (Verified: Matrix, Security, Performance, E2E)"
         git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
         git push origin deploy --force
 

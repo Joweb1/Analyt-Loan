@@ -148,7 +148,7 @@
                     
                     $initials = collect(explode(' ', $customer->name))->map(fn($n) => substr($n, 0, 1))->take(2)->join('');
                     
-                    $kycStatus = $profile->kyc_status ?? 'approved';
+                    $kycStatus = $profile?->kyc_status ?? 'approved';
                     $kycColor = match($kycStatus) {
                         'approved' => 'green',
                         'pending' => 'amber',
@@ -184,8 +184,8 @@
                         </div>
                         
                         <div class="flex flex-col gap-1.5">
-                            @if($isBorrower)
-                                <a href="{{ route('borrower.loans', $profile->id) }}" class="px-2.5 py-1 rounded-lg bg-primary text-white text-[10px] font-black uppercase tracking-tight shadow-sm hover:bg-blue-700 transition-colors text-center">
+                            @if($customer->borrower)
+                                <a href="{{ route('borrower.loans', $customer->borrower->id) }}" class="px-2.5 py-1 rounded-lg bg-primary text-white text-[10px] font-black uppercase tracking-tight shadow-sm hover:bg-blue-700 transition-colors text-center">
                                     Loan
                                 </a>
                             @endif
@@ -199,10 +199,10 @@
 
                     <div class="space-y-4">
                         <div class="flex justify-between items-end">
-                            @if($isBorrower)
+                            @if($customer->borrower)
                                 <div>
                                     <p class="text-[#606b8a] text-[11px] uppercase tracking-wider font-semibold">Total Debt</p>
-                                    <p class="text-[#111318] dark:text-white text-lg font-bold">₦{{ $profile->total_debt->format() }}</p>
+                                    <p class="text-[#111318] dark:text-white text-lg font-bold">₦{{ $customer->borrower->total_debt->format() }}</p>
                                 </div>
                             @elseif($isSaver)
                                 <div>
@@ -277,7 +277,7 @@
                                 
                                 $profile = $customer->borrower ?? $customer->saver ?? $customer->guarantor;
                                 $initials = collect(explode(' ', $customer->name))->map(fn($n) => substr($n, 0, 1))->take(2)->join('');
-                                $kycStatus = $profile->kyc_status ?? 'approved';
+                                $kycStatus = $profile?->kyc_status ?? 'approved';
                                 $kycColor = match($kycStatus) {
                                     'approved' => 'green',
                                     'pending' => 'amber',
@@ -307,8 +307,8 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4">
-                                    @if($isBorrower)
-                                        ₦{{ $profile->total_debt->format() }}
+                                    @if($customer->borrower)
+                                        ₦{{ $customer->borrower->total_debt->format() }}
                                     @else
                                         <span class="text-slate-300">—</span>
                                     @endif
@@ -325,8 +325,8 @@
                                 </td>
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex gap-2 justify-end">
-                                        @if($isBorrower)
-                                            <a href="{{ route('borrower.loans', $profile->id) }}" class="px-3 py-1 rounded-lg bg-primary text-white text-[10px] font-black uppercase tracking-tight">Loan</a>
+                                        @if($customer->borrower)
+                                            <a href="{{ route('borrower.loans', $customer->borrower->id) }}" class="px-3 py-1 rounded-lg bg-primary text-white text-[10px] font-black uppercase tracking-tight">Loan</a>
                                         @endif
                                         @if(!$isGuarantor)
                                             <a href="{{ route('savings.show', $customer->id) }}" class="px-3 py-1 rounded-lg bg-green-600 text-white text-[10px] font-black uppercase tracking-tight">Savings</a>

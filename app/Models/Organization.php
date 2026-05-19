@@ -210,6 +210,16 @@ class Organization extends Model
         ];
     }
 
+    public function setStatusAttribute($value)
+    {
+        $this->attributes['status'] = $value ? strtolower($value) : 'active';
+    }
+
+    public function setKycStatusAttribute($value)
+    {
+        $this->attributes['kyc_status'] = $value ? strtolower($value) : 'pending';
+    }
+
     public static function current(bool $fresh = false): ?self
     {
         $tenantSession = app(\App\Services\TenantSession::class);

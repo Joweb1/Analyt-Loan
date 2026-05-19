@@ -151,6 +151,21 @@ class Loan extends Model
         'insurance_fee' => \App\Casts\MoneyCast::class,
     ];
 
+    public function setInterestTypeAttribute($value)
+    {
+        $this->attributes['interest_type'] = $value ? strtolower($value) : 'year';
+    }
+
+    public function setDurationUnitAttribute($value)
+    {
+        $this->attributes['duration_unit'] = $value ? strtolower($value) : 'month';
+    }
+
+    public function setStatusAttribute($value)
+    {
+        $this->attributes['status'] = $value ? strtolower($value) : 'applied';
+    }
+
     public function repayments(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
         return $this->hasMany(Repayment::class);

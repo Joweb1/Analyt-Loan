@@ -187,6 +187,16 @@ class Borrower extends Model
         'daily_target_amount' => \App\Casts\MoneyCast::class,
     ];
 
+    public function setGenderAttribute($value)
+    {
+        $this->attributes['gender'] = $value ? strtolower($value) : null;
+    }
+
+    public function setKycStatusAttribute($value)
+    {
+        $this->attributes['kyc_status'] = $value ? strtolower($value) : 'pending';
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

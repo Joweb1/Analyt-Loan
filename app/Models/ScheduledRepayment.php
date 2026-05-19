@@ -62,6 +62,11 @@ class ScheduledRepayment extends Model
         'paid_amount' => \App\Casts\MoneyCast::class,
     ];
 
+    public function setStatusAttribute($value)
+    {
+        $this->attributes['status'] = $value ? strtolower($value) : 'applied';
+    }
+
     public function loan(): BelongsTo
     {
         return $this->belongsTo(Loan::class);

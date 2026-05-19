@@ -134,6 +134,11 @@ class User extends Authenticatable
         ];
     }
 
+    public function setTypeAttribute($value)
+    {
+        $this->attributes['type'] = $value ? strtolower($value) : 'customer';
+    }
+
     public function isOnline(): bool
     {
         if (! $this->last_seen_at) {

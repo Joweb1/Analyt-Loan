@@ -7,7 +7,13 @@
     $currentLabel = $typeLabels[$registration_type] ?? 'Borrower';
 @endphp
 
-<div>
+<div class="relative">
+    {{-- Fixed Back Button --}}
+    <button onclick="window.history.back()" class="fixed top-24 right-4 z-40 pl-3 pr-5 py-2 bg-white/30 backdrop-blur-md border border-slate-200 dark:border-white/20 rounded-full text-slate-900 dark:text-white hover:bg-white/50 transition-all duration-200 shadow-xl group flex items-center gap-2">
+        <svg class="w-4 h-4 group-hover:-translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        <span class="text-[10px] font-black uppercase tracking-widest">Go Back</span>
+    </button>
+
     <!-- Dynamic Breadcrumbs -->
     <div class="flex items-center gap-2 mb-6">
         <a class="text-sm font-semibold text-zinc-400 hover:text-primary transition-colors" href="{{ route('dashboard') }}">Dashboard</a>

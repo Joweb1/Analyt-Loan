@@ -240,7 +240,12 @@
                         <p class="text-sm font-bold text-slate-700 dark:text-slate-300">{{ $loan->num_repayments ?? '1' }} Installments</p>
                     </div>
                     <div>
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Fees & Charges</p>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
+                            Fees & Charges
+                            @if($loan->insurance_fee_type === 'percentage' && $loan->insurance_fee && !$loan->insurance_fee->isZero())
+                                <span class="text-[9px] lowercase font-medium ml-1">({{ $loan->insurance_fee->getMajorAmount() }}% ins.)</span>
+                            @endif
+                        </p>
                         @php
                             $totalFees = $loan->getCalculatedProcessingFee()
                                 ->add($loan->getCalculatedInsuranceFee());
@@ -288,7 +293,12 @@
                                 <td class="px-6 py-4 font-bold text-blue-600 text-right">₦{{ $loan->getTotalExpectedInterest() }}</td>
                             </tr>
                             <tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/50">
-                                <td class="px-6 py-4 font-medium text-slate-500">Fees & Charges</td>
+                                <td class="px-6 py-4 font-medium text-slate-500">
+                                    Fees & Charges
+                                    @if($loan->insurance_fee_type === 'percentage' && $loan->insurance_fee && !$loan->insurance_fee->isZero())
+                                        <span class="text-[10px] text-slate-400 font-medium ml-1">({{ $loan->insurance_fee->getMajorAmount() }}% ins.)</span>
+                                    @endif
+                                </td>
                                 <td class="px-6 py-4 font-bold text-slate-700 dark:text-slate-300 text-right">₦{{ $loan->getCalculatedProcessingFee()->add($loan->getCalculatedInsuranceFee()) }}</td>
                             </tr>                        </tbody>
                     </table>

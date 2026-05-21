@@ -90,7 +90,7 @@ class Dashboard extends Component
 
         // Authorization: Check for manage_vault OR record_cashbook
         if (! auth()->user()->can('manage_vault') && ! auth()->user()->can('record_cashbook')) {
-            $this->dispatch('notify', ['type' => 'error', 'message' => 'Unauthorized to record cashbook entries.']);
+            $this->dispatch('notify', type: 'error', message: 'Unauthorized to record cashbook entries.');
 
             return;
         }
@@ -131,17 +131,17 @@ class Dashboard extends Component
 
         // 2. Staff Authorization
         if (! $user->can('record_cashbook') && ! $user->can('manage_vault')) {
-            return $this->dispatch('notify', ['type' => 'error', 'message' => 'Unauthorized.']);
+            return $this->dispatch('notify', type: 'error', message: 'Unauthorized.');
         }
 
         // 3. Staff Trial Check
         if (! ($org->allow_staff_cashbook_unlock ?? true)) {
-            return $this->dispatch('notify', ['type' => 'error', 'message' => 'Staff unlocking is disabled by Administrator.']);
+            return $this->dispatch('notify', type: 'error', message: 'Staff unlocking is disabled by Administrator.');
         }
 
         $limit = $org->cashbook_unlock_limit ?? 3;
         if ($this->entry->staff_unlock_count >= $limit) {
-            return $this->dispatch('notify', ['type' => 'error', 'message' => "Unlock failed. All {$limit} staff trials for this date have been exhausted. Please contact Admin."]);
+            return $this->dispatch('notify', type: 'error', message: "Unlock failed. All {$limit} staff trials for this date have been exhausted. Please contact Admin.");
         }
 
         // 4. Perform Staff Unlock (Increment Trial)
@@ -157,10 +157,7 @@ class Dashboard extends Component
         $this->entry->audit_hash = null;
         $this->entry->save();
 
-        $this->dispatch('notify', [
-            'type' => 'success',
-            'message' => $message,
-        ]);
+        $this->dispatch('notify', type: 'success', message: $message);
     }
 
     public function verify()
@@ -204,15 +201,9 @@ class Dashboard extends Component
         }
 
         if ($service->verifyEntry($this->entry)) {
-            $this->dispatch('notify', [
-                'type' => 'success',
-                'message' => 'Cashbook verified and locked successfully.',
-            ]);
+            $this->dispatch('notify', type: 'success', message: 'Cashbook verified and locked successfully.');
         } else {
-            $this->dispatch('notify', [
-                'type' => 'error',
-                'message' => 'Discrepancy detected! Please reconcile the cash at hand.',
-            ]);
+            $this->dispatch('notify', type: 'error', message: 'Discrepancy detected! Please reconcile the cash at hand.');
         }
     }
 

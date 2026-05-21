@@ -81,7 +81,7 @@ class MonthRecord extends Component
     public function openBudgetModal()
     {
         if (! auth()->user()->isAdmin()) {
-            $this->dispatch('notify', ['type' => 'error', 'message' => 'Unauthorized: Only admins can set budgets.']);
+            $this->dispatch('notify', type: 'error', message: 'Unauthorized: Only admins can set budgets.');
 
             return;
         }
@@ -91,7 +91,7 @@ class MonthRecord extends Component
     public function openBalanceModal()
     {
         if (! auth()->user()->isAdmin()) {
-            $this->dispatch('notify', ['type' => 'error', 'message' => 'Unauthorized: Only admins can set initial balance.']);
+            $this->dispatch('notify', type: 'error', message: 'Unauthorized: Only admins can set initial balance.');
 
             return;
         }
@@ -117,10 +117,7 @@ class MonthRecord extends Component
         $this->showBalanceModal = false;
         $this->loadBalanceData();
 
-        $this->dispatch('notify', [
-            'type' => 'success',
-            'message' => 'Monthly initial balance updated successfully.',
-        ]);
+        $this->dispatch('notify', type: 'success', message: 'Monthly initial balance updated successfully.');
     }
 
     public function saveBudget()
@@ -142,10 +139,7 @@ class MonthRecord extends Component
         $this->showBudgetModal = false;
         $this->loadBudgetData();
 
-        $this->dispatch('notify', [
-            'type' => 'success',
-            'message' => 'Monthly expense budget updated successfully.',
-        ]);
+        $this->dispatch('notify', type: 'success', message: 'Monthly expense budget updated successfully.');
     }
 
     public function render()

@@ -67,7 +67,7 @@ class Money implements JsonSerializable, Wireable
     {
         // Ensure the multiplier is a well-formed decimal string (prevents scientific notation issues with BCMath)
         $multiplierStr = is_numeric($multiplier) ? number_format((float) $multiplier, 10, '.', '') : (string) $multiplier;
-        
+
         // When multiplying (e.g., for interest), we use bcmath for precision
         $result = bcmul((string) $this->amount, $multiplierStr, 0);
 

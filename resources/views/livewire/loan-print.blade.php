@@ -115,20 +115,20 @@
 
             <div>
                 <p class="text-[9px] font-black text-slate-400 uppercase tracking-wider">Processing Fee</p>
-                <p class="text-sm font-bold text-slate-900">₦{{ number_format($loan->processing_fee ?? 0, 2) }}</p>
+                <p class="text-sm font-bold text-slate-900">₦{{ $loan->getCalculatedProcessingFee()->format() }}</p>
             </div>
             <div>
                 <p class="text-[9px] font-black text-slate-400 uppercase tracking-wider">Insurance Fee</p>
-                <p class="text-sm font-bold text-slate-900">₦{{ number_format($loan->insurance_fee ?? 0, 2) }}</p>
+                <p class="text-sm font-bold text-slate-900">₦{{ $loan->getCalculatedInsuranceFee()->format() }}</p>
             </div>
             <div>
                 <p class="text-[9px] font-black text-slate-400 uppercase tracking-wider">Total Interest</p>
                 @php $totalInterest = $loan->getTotalExpectedInterest(); @endphp
-                <p class="text-sm font-bold text-slate-900">₦{{ number_format($totalInterest, 2) }}</p>
+                <p class="text-sm font-bold text-slate-900">₦{{ $totalInterest->format() }}</p>
             </div>
             <div>
                 <p class="text-[9px] font-black text-slate-400 uppercase tracking-wider">Total Payable</p>
-                <p class="text-sm font-black text-primary">₦{{ number_format($loan->amount + $totalInterest + ($loan->processing_fee ?? 0) + ($loan->insurance_fee ?? 0), 2) }}</p>
+                <p class="text-sm font-black text-primary">₦{{ $loan->getTotalCost()->format() }}</p>
             </div>
         </div>
     </section>

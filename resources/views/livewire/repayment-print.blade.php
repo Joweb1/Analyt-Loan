@@ -56,11 +56,7 @@
                     $totalPaidMinor = (int) $loan->repayments->sum(fn($r) => $r->amount->getMinorAmount());
                     $totalPaid = new \App\ValueObjects\Money($totalPaidMinor, $currency);
                     
-                    $totalInterest = $loan->getTotalExpectedInterest();
-                    $totalPayable = $loan->amount->add($totalInterest)
-                        ->add($loan->processing_fee ?? new \App\ValueObjects\Money(0, $currency))
-                        ->add($loan->insurance_fee ?? new \App\ValueObjects\Money(0, $currency));
-                    
+                    $totalPayable = $loan->getTotalCost();
                     $balance = $totalPayable->subtract($totalPaid);
                 @endphp
                 <p class="text-xs text-slate-600 font-bold">Balance: <span class="text-primary">₦{{ $balance->format() }}</span></p>

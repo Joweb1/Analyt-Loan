@@ -226,10 +226,8 @@
                     
                     <div>
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Interest Rate</p>
-                        @php $interestNaira = $loan->amount->multiply(($loan->interest_rate ?? 0) / 100); @endphp
                         <p class="text-sm font-bold text-slate-700 dark:text-slate-300">
-                            {{ $loan->interest_rate ?? '0' }}% every {{ $loan->interest_type ?? 'month' }}
-                            <span class="text-[10px] text-slate-400 font-medium">(₦{{ $interestNaira }} per {{ $loan->interest_type ?? 'month' }})</span>
+                            {{ $loan->interest_rate ?? '0' }}{{ $loan->interest_calculation_type === 'percentage' ? '%' : ' (Fixed)' }}
                         </p>
                     </div>
                     <div>
@@ -244,9 +242,8 @@
                     <div>
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Fees & Charges</p>
                         @php
-                            $currency = $loan->amount->getCurrency();
-                            $totalFees = ($loan->processing_fee ?? new \App\ValueObjects\Money(0, $currency))
-                                ->add($loan->insurance_fee ?? new \App\ValueObjects\Money(0, $currency));
+                            $totalFees = $loan->getCalculatedProcessingFee()
+                                ->add($loan->getCalculatedInsuranceFee());
                         @endphp
                         <p class="text-sm font-bold text-slate-700 dark:text-slate-300">₦{{ $totalFees }}</p>
                     </div>
@@ -283,13 +280,16 @@
                             <tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/50">
                                 <td class="px-6 py-4 font-medium text-slate-500">Interest Rate</td>
                                 <td class="px-6 py-4 font-bold text-slate-700 dark:text-slate-300 text-right">
-                                    {{ $loan->interest_rate ?? '0' }}% every {{ $loan->interest_type ?? 'month' }}
-                                    <span class="text-[10px] text-slate-400 font-medium">(₦{{ $loan->amount->multiply(($loan->interest_rate ?? 0) / 100) }} per {{ $loan->interest_type ?? 'month' }})</span>
+                                    {{ $loan->interest_rate ?? '0' }}{{ $loan->interest_calculation_type === 'percentage' ? '%' : ' (Fixed)' }}
                                 </td>
                             </tr>
                             <tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/50">
                                 <td class="px-6 py-4 font-medium text-slate-500">Total Expected Interest</td>
                                 <td class="px-6 py-4 font-bold text-blue-600 text-right">₦{{ $loan->getTotalExpectedInterest() }}</td>
+                            </tr>
+                            <tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/50">
+                                <td class="px-6 py-4 font-medium text-slate-500">Fees & Charges</td>
+                                <td class="px-6 py-4 font-bold text-slate-700 dark:text-slate-300 text-right">₦{{ $loan->getCalculatedProcessingFee()->add($loan->getCalculatedInsuranceFee()) }}</td>
                             </tr>                        </tbody>
                     </table>
                 </div>
@@ -422,8 +422,8 @@
                 @php
                     $currency = $loan->amount->getCurrency();
                     $totalInterest = $loan->getTotalExpectedInterest();
-                    $processingFee = $loan->processing_fee ?? new \App\ValueObjects\Money(0, $currency);
-                    $insuranceFee = $loan->insurance_fee ?? new \App\ValueObjects\Money(0, $currency);
+                    $processingFee = $loan->getCalculatedProcessingFee();
+                    $insuranceFee = $loan->getCalculatedInsuranceFee();
                     $totalFees = $processingFee->add($insuranceFee);
                     $totalPayable = $loan->amount->add($totalInterest)->add($totalFees);
                     $totalPaid = new \App\ValueObjects\Money($loan->repayments()->sum('amount'), $currency);

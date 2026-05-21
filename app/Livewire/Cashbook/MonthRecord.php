@@ -53,24 +53,17 @@ class MonthRecord extends Component
     public function loadBudgetData()
     {
         $org = Organization::current();
-        $date = Carbon::create($this->year, $this->month, 1);
         $service = app(CashbookService::class);
+        $date = Carbon::create($this->year, $this->month, 1);
 
+        $this->totalBudget = $service->getTotalBudget($date, $org);
         $this->remainingBudget = $service->getRemainingBudget($date, $org);
-
-        $budget = \App\Models\ExpenseBudget::where('organization_id', $org->id)
-            ->where('month', $this->month)
-            ->where('year', $this->year)
-            ->first();
-
-        $this->totalBudget = $budget ? $budget->total_budget_amount : new \App\ValueObjects\Money(0, $org->currency_code);
         $this->newBudgetAmount = $this->totalBudget->getMajorAmount();
     }
 
     public function loadBalanceData()
     {
         $org = Organization::current();
-        $date = Carbon::create($this->year, $this->month, 1);
         $service = app(CashbookService::class);
 
         $balance = \App\Models\AccountBalance::where('organization_id', $org->id)
@@ -87,6 +80,11 @@ class MonthRecord extends Component
 
     public function openBudgetModal()
     {
+        if (! auth()->user()->isAdmin()) {
+            $this->dispatch('notify', ['type' => 'error', 'message' => 'Unauthorized: Only admins can set budgets.']);
+
+            return;
+        }
         $this->showBudgetModal = true;
     }
 
@@ -102,6 +100,10 @@ class MonthRecord extends Component
 
     public function saveBalance()
     {
+        if (! auth()->user()->isAdmin()) {
+            return;
+        }
+
         $org = Organization::current();
 
         \App\Models\AccountBalance::updateOrCreate([
@@ -123,6 +125,10 @@ class MonthRecord extends Component
 
     public function saveBudget()
     {
+        if (! auth()->user()->isAdmin()) {
+            return;
+        }
+
         $org = Organization::current();
 
         $budget = \App\Models\ExpenseBudget::updateOrCreate([
@@ -151,24 +157,17 @@ class MonthRecord extends Component
             ->orderBy('entry_date', 'desc')
             ->get();
 
-        // Group by week
-        $groupedEntries = $entries->groupBy(function ($entry) {
-            return 'Week '.ceil($entry->entry_date->day / 7);
-        });
-
-        // Calculate Month Stats
         $stats = [
-            'total_inflow' => new Money($entries->sum(fn ($e) => $e->total_inflow->getMinorAmount()), $org->currency_code),
-            'total_outflow' => new Money($entries->sum(fn ($e) => $e->total_outflow->getMinorAmount()), $org->currency_code),
-            'total_expenses' => new Money($entries->sum(fn ($e) => $e->daily_expense_amount->getMinorAmount()), $org->currency_code),
             'days_count' => $entries->count(),
             'verified_count' => $entries->where('status', 'verified')->count(),
+            'total_inflow' => $entries->reduce(fn ($carry, $e) => $carry->add($e->total_inflow), new Money(0, $org->currency_code)),
+            'total_outflow' => $entries->reduce(fn ($carry, $e) => $carry->add($e->total_outflow), new Money(0, $org->currency_code)),
         ];
 
         return view('livewire.cashbook.month-record', [
-            'groupedEntries' => $groupedEntries,
+            'groupedEntries' => $entries->groupBy(fn ($e) => 'Week '.($e->entry_date->weekOfMonth)),
             'stats' => $stats,
             'currentMonthName' => Carbon::create($this->year, $this->month, 1)->format('F Y'),
-        ])->layout('layouts.app', ['title' => 'Monthly Audit Ledger']);
+        ])->layout('layouts.app', ['title' => 'Monthly Vault Record']);
     }
 }

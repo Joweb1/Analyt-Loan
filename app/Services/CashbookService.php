@@ -227,6 +227,19 @@ class CashbookService
     }
 
     /**
+     * Get the total budget for a specific month.
+     */
+    public function getTotalBudget(Carbon $date, Organization $organization): Money
+    {
+        $budget = \App\Models\ExpenseBudget::where('organization_id', $organization->id)
+            ->where('month', $date->month)
+            ->where('year', $date->year)
+            ->first();
+
+        return $budget ? $budget->total_budget_amount : new Money(0, $organization->currency_code);
+    }
+
+    /**
      * Verify and lock a cashbook entry.
      */
     public function verifyEntry(CashbookEntry $entry): bool

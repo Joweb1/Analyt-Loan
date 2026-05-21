@@ -46,12 +46,22 @@
                             class="block w-full pl-4 pr-3 py-2 border border-gray-200 rounded-sm leading-5 bg-white font-bold text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm shadow-sm">
                     </div>
 
-                    {{-- Unlock Button (Admin Only) --}}
-                    @if($entry->status === 'verified' && auth()->user()->isAdmin())
+                    {{-- Unlock Button (Limited for Staff, Unlimited for Admin) --}}
+                    @php
+                        $canUnlock = auth()->user()->isAdmin() || 
+                                     ($entry->status === 'verified' && 
+                                      auth()->user()->organization->allow_staff_cashbook_unlock && 
+                                      $entry->staff_unlock_count < auth()->user()->organization->cashbook_unlock_limit);
+                    @endphp
+
+                    @if($entry->status === 'verified' && $canUnlock)
                         <div class="w-auto">
                             <button wire:click="unlock" wire:confirm="Are you sure you want to unlock this record? This will allow changes to the ledger."
                                 class="flex items-center justify-center px-3 py-2 border border-rose-200 text-rose-600 bg-white hover:bg-rose-50 rounded-sm shadow-sm transition-all">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg>
+                                @if(!auth()->user()->isAdmin())
+                                    <span class="ml-2 text-[9px] font-black uppercase">Trial {{ $entry->staff_unlock_count }}/{{ auth()->user()->organization->cashbook_unlock_limit }}</span>
+                                @endif
                             </button>
                         </div>
                     @endif
@@ -236,12 +246,12 @@
                                 <input type="number" step="0.01" wire:model.blur="manualFields.bank_withdrawals" @if($entry->status === 'verified') disabled @endif
                                     class="block w-full rounded-sm border-gray-200 bg-white p-2.5 shadow-sm focus:ring-rose-500 focus:border-rose-500 text-sm font-black text-rose-600">
                             </div>
-                            <div>
+                            <div class="{{ !auth()->user()->isAdmin() ? 'opacity-40 pointer-events-none' : '' }}">
                                 <label class="block text-[9px] font-bold text-gray-400 uppercase mb-2 tracking-tighter">Charges</label>
                                 <input type="number" step="0.01" wire:model.blur="manualFields.charges" @if($entry->status === 'verified' || !auth()->user()->isAdmin()) disabled @endif
                                     class="block w-full rounded-sm border-gray-200 bg-white p-2.5 text-xs font-black text-rose-600">
                             </div>
-                            <div>
+                            <div class="{{ !auth()->user()->isAdmin() ? 'opacity-40 pointer-events-none' : '' }}">
                                 <label class="block text-[9px] font-bold text-gray-400 uppercase mb-2 tracking-tighter">Bonuses</label>
                                 <input type="number" step="0.01" wire:model.blur="manualFields.bonuses" @if($entry->status === 'verified' || !auth()->user()->isAdmin()) disabled @endif
                                     class="block w-full rounded-sm border-gray-200 bg-white p-2.5 text-xs font-black text-rose-600">

@@ -225,6 +225,24 @@
                     </div>
                 </div>
 
+                <!-- Cashbook & Reconciliation -->
+                <div class="bg-white dark:bg-zinc-900 rounded-xl p-6 shadow-sm border border-gray-100 dark:border-zinc-800">
+                    <h2 class="text-lg font-bold text-primary dark:text-white mb-6">Cashbook & Reconciliation</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="flex flex-col gap-2">
+                            <label class="text-sm font-bold text-gray-700 dark:text-gray-300">Staff Cashbook Unlocks</label>
+                            <div class="flex gap-2">
+                                <select wire:model="allow_staff_cashbook_unlock" class="flex-1 rounded-xl border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white focus:ring-primary focus:border-primary text-sm">
+                                    <option value="1">Enabled</option>
+                                    <option value="0">Disabled</option>
+                                </select>
+                                <input wire:model="cashbook_unlock_limit" type="number" min="0" class="w-24 rounded-xl border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white focus:ring-primary focus:border-primary text-sm" placeholder="Trials">
+                            </div>
+                            <p class="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">Max trials per record for non-admins</p>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- System Date Configuration -->
                 <div class="bg-white dark:bg-zinc-900 rounded-xl p-6 shadow-sm border border-brand-orange/20 dark:border-zinc-800">
                     <div class="flex items-center gap-2 mb-6">

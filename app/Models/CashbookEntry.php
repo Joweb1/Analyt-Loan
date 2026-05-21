@@ -116,6 +116,7 @@ class CashbookEntry extends Model
         'verified_at',
         'audit_hash',
         'shortfall_report',
+        'staff_unlock_count',
     ];
 
     protected $attributes = [

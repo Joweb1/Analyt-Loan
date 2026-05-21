@@ -121,15 +121,37 @@ class Dashboard extends Component
 
     public function unlock()
     {
-        if (! auth()->user()->isAdmin()) {
-            $this->dispatch('notify', [
-                'type' => 'error',
-                'message' => 'Unauthorized: Only Admins can unlock records.',
-            ]);
+        $user = auth()->user();
+        $org = Organization::current();
 
-            return;
+        // 1. Admin Bypass
+        if ($user->isAdmin()) {
+            return $this->performUnlock('Record unlocked by Administrator.');
         }
 
+        // 2. Staff Authorization
+        if (! $user->can('record_cashbook') && ! $user->can('manage_vault')) {
+            return $this->dispatch('notify', ['type' => 'error', 'message' => 'Unauthorized.']);
+        }
+
+        // 3. Staff Trial Check
+        if (! ($org->allow_staff_cashbook_unlock ?? true)) {
+            return $this->dispatch('notify', ['type' => 'error', 'message' => 'Staff unlocking is disabled by Administrator.']);
+        }
+
+        $limit = $org->cashbook_unlock_limit ?? 3;
+        if ($this->entry->staff_unlock_count >= $limit) {
+            return $this->dispatch('notify', ['type' => 'error', 'message' => "Unlock failed. All {$limit} staff trials for this date have been exhausted. Please contact Admin."]);
+        }
+
+        // 4. Perform Staff Unlock (Increment Trial)
+        $this->entry->increment('staff_unlock_count');
+
+        return $this->performUnlock('Record unlocked. Trials used: '.$this->entry->staff_unlock_count.'/'.$limit);
+    }
+
+    protected function performUnlock(string $message)
+    {
         $this->entry->status = 'pending';
         $this->entry->verified_at = null;
         $this->entry->audit_hash = null;
@@ -137,7 +159,7 @@ class Dashboard extends Component
 
         $this->dispatch('notify', [
             'type' => 'success',
-            'message' => 'Record unlocked. You can now edit today\'s ledger.',
+            'message' => $message,
         ]);
     }
 

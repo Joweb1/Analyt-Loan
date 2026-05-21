@@ -62,6 +62,10 @@ class GeneralSettings extends Component
 
     public $allow_flexible_repayments = false;
 
+    public $cashbook_unlock_limit = 3;
+
+    public $allow_staff_cashbook_unlock = true;
+
     public $thrift_cycle_days = 6;
 
     public $default_customer_password;
@@ -96,6 +100,8 @@ class GeneralSettings extends Component
             $this->currency = $this->organization->currency_code ?? 'NGN';
             $this->timezone = $this->organization->timezone ?? 'UTC';
             $this->allow_flexible_repayments = $this->organization->allow_flexible_repayments;
+            $this->cashbook_unlock_limit = $this->organization->cashbook_unlock_limit ?? 3;
+            $this->allow_staff_cashbook_unlock = $this->organization->allow_staff_cashbook_unlock ?? true;
             $this->thrift_cycle_days = $this->organization->thrift_cycle_days ?? 6;
             $this->default_customer_password = $this->organization->default_customer_password;
 
@@ -116,6 +122,8 @@ class GeneralSettings extends Component
             'repayment_account_name' => 'nullable|string|max:100',
             'interest_rate' => 'required|numeric|min:0',
             'interest_calculation_type' => 'required|in:fixed,percentage',
+            'cashbook_unlock_limit' => 'required|integer|min:0',
+            'allow_staff_cashbook_unlock' => 'required|boolean',
             'thrift_cycle_days' => 'required|integer|in:5,6',
             'system_date' => 'required|date',
             'timezone' => 'required|string',
@@ -142,6 +150,8 @@ class GeneralSettings extends Component
             'grace_period_days' => $this->grace_period,
             'thrift_cycle_days' => $this->thrift_cycle_days,
             'allow_flexible_repayments' => $this->allow_flexible_repayments,
+            'cashbook_unlock_limit' => $this->cashbook_unlock_limit,
+            'allow_staff_cashbook_unlock' => $this->allow_staff_cashbook_unlock,
             'default_customer_password' => $this->default_customer_password,
             'system_date' => $newSystemDate,
             'timezone' => $this->timezone,

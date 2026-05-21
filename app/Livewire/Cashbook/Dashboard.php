@@ -88,6 +88,13 @@ class Dashboard extends Component
             return;
         }
 
+        // Authorization: Check for manage_vault OR record_cashbook
+        if (! auth()->user()->can('manage_vault') && ! auth()->user()->can('record_cashbook')) {
+            $this->dispatch('notify', ['type' => 'error', 'message' => 'Unauthorized to record cashbook entries.']);
+
+            return;
+        }
+
         foreach ($this->manualFields as $field => $value) {
             // Restriction: Only Admin can edit Charges and Bonuses
             if (in_array($field, ['charges', 'bonuses']) && ! auth()->user()->isAdmin()) {

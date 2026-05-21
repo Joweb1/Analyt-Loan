@@ -65,7 +65,7 @@ Route::middleware(['auth', 'update_last_seen'])->group(function () {
     Route::middleware(['role:Admin,Loan Analyst,Vault Manager,Credit Analyst,Collection Specialist,Collection Officer'])->group(function () {
         Route::get('status-board', \App\Livewire\StatusBoard::class)->middleware('permission:manage_loans')->name('status-board');
         Route::get('loan', \App\Livewire\LoanDashboard::class)->middleware('permission:manage_loans')->name('loan');
-        Route::get('records', \App\Livewire\Records::class)->middleware('permission:manage_loans')->name('records');
+        Route::get('records', \App\Livewire\Records::class)->middleware('permission:manage_loans|record_cashbook')->name('records');
         Route::get('loan/disbursement-register', \App\Livewire\DisbursementRegister::class)->middleware('permission:manage_loans')->name('loan.disbursement-register');
         Route::get('loan/pending', \App\Livewire\PendingLoans::class)->middleware('permission:approve_loans')->name('loans.pending');
         Route::view('loan/create', 'pages.loan-application')->middleware('permission:manage_loans')->name('loan.create');
@@ -111,8 +111,8 @@ Route::middleware(['auth', 'update_last_seen'])->group(function () {
         })->middleware('permission:manage_borrowers')->name('customer.create');
         Route::get('customer/guarantor/create', \App\Livewire\Borrower\GuarantorRegistration::class)->middleware('permission:manage_guarantors')->name('guarantor.create');
         Route::get('vault', \App\Livewire\Vault::class)->middleware('permission:manage_vault')->name('vault');
-        Route::get('cashbook', \App\Livewire\Cashbook\Dashboard::class)->middleware('permission:manage_vault')->name('cashbook');
-        Route::get('cashbook/month-record', \App\Livewire\Cashbook\MonthRecord::class)->middleware('permission:manage_vault')->name('cashbook.month-record');
+        Route::get('cashbook', \App\Livewire\Cashbook\Dashboard::class)->middleware('permission:manage_vault|record_cashbook')->name('cashbook');
+        Route::get('cashbook/month-record', \App\Livewire\Cashbook\MonthRecord::class)->middleware('permission:manage_vault|record_cashbook')->name('cashbook.month-record');
         Route::get('cashbook/budget', \App\Livewire\Cashbook\BudgetManager::class)->middleware('permission:manage_settings')->name('cashbook.budget');
         Route::view('collateral/create', 'pages.add-collateral')->middleware('permission:manage_vault')->name('collateral.create');
     });

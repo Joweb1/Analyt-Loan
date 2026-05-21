@@ -40,6 +40,7 @@ class RolesManagement extends Component
         'view_reports',
         'manage_vault',
         'manage_settings',
+        'record_cashbook',
         'send_customer_messages',
         'access_org_notifications',
         'communicate_with_customers',

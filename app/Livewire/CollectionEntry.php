@@ -158,7 +158,7 @@ class CollectionEntry extends Component
             'interest_amount' => new \App\ValueObjects\Money($interestPaidMinor, $currency),
             'fee_amount' => new \App\ValueObjects\Money($feePaidMinor, $currency),
             'extra_amount' => new \App\ValueObjects\Money($extraPaidMinor, $currency),
-            'payment_method' => $this->payment_method,
+            'payment_method' => $this->normalizePaymentMethod($this->payment_method),
             'paid_at' => $paidAt,
             'collected_by' => $this->collected_by,
             'notes' => 'Bulk collection entry',
@@ -175,6 +175,14 @@ class CollectionEntry extends Component
         $this->showRepaymentModal = false;
         $this->reset(['amount', 'selectedLoanId']);
         $this->dispatch('custom-alert', ['type' => 'success', 'message' => 'Repayment recorded successfully.']);
+    }
+
+    private function normalizePaymentMethod($method): string
+    {
+        return match (strtolower(trim($method))) {
+            'bank transfer', 'transfer' => 'bank_transfer',
+            default => 'cash',
+        };
     }
 
     public function render()

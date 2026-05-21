@@ -114,8 +114,9 @@ class CashbookService
         $entry->insurance_fees = new Money($insuranceFeesMinor, $currency);
 
         // 7. Calculate Expected Bank Transfers
-        $bankRepayments = (int) (clone $repaymentsQuery)->where('payment_method', 'bank_transfer')->sum('amount');
-        $bankSavings = (int) (clone $savingsQuery)->whereIn('type', ['deposit', 'daily_thrift'])->where('payment_method', 'bank_transfer')->sum('amount');
+        $bankMethods = ['bank_transfer', 'transfer', 'Bank Transfer', 'Bank transfer', 'Transfer'];
+        $bankRepayments = (int) (clone $repaymentsQuery)->whereIn('payment_method', $bankMethods)->sum('amount');
+        $bankSavings = (int) (clone $savingsQuery)->whereIn('type', ['deposit', 'daily_thrift'])->whereIn('payment_method', $bankMethods)->sum('amount');
 
         $entry->expected_bank_transfers = new Money($bankRepayments + $bankSavings, $currency);
 

@@ -148,7 +148,7 @@ class LoanDetails extends Component
         // Create Repayment
         $this->loan->repayments()->create([
             'amount' => $amount,
-            'payment_method' => $proof->payment_method ?? 'Bank Transfer',
+            'payment_method' => $this->normalizePaymentMethod($proof->payment_method ?? 'Bank Transfer'),
             'collected_by' => Auth::id(),
             'paid_at' => $proof->paid_at ?? now(),
             'principal_amount' => $principalPart,
@@ -408,7 +408,7 @@ class LoanDetails extends Component
 
         $this->loan->repayments()->create([
             'amount' => $this->amount,
-            'payment_method' => $this->payment_method,
+            'payment_method' => $this->normalizePaymentMethod($this->payment_method),
             'collected_by' => $this->collected_by,
             'paid_at' => $paidAt,
             'principal_amount' => $this->principal_amount,
@@ -478,7 +478,7 @@ class LoanDetails extends Component
 
         $repayment->update([
             'amount' => $this->amount,
-            'payment_method' => $this->payment_method,
+            'payment_method' => $this->normalizePaymentMethod($this->payment_method),
             'collected_by' => $this->collected_by,
             'paid_at' => $paidAt,
             'principal_amount' => $this->principal_amount,
@@ -500,6 +500,14 @@ class LoanDetails extends Component
         $this->loan->load(['repayments.collector', 'scheduledRepayments']);
         $this->calculateSuggestions();
         $this->dispatch('custom-alert', ['type' => 'warning', 'message' => 'Repayment deleted.']);
+    }
+
+    private function normalizePaymentMethod($method): string
+    {
+        return match (strtolower(trim($method))) {
+            'bank transfer', 'transfer' => 'bank_transfer',
+            default => 'cash',
+        };
     }
 
     private function resetRepaymentForm()

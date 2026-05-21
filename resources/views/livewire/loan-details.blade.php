@@ -491,8 +491,6 @@
                                     <select wire:model="payment_method" class="w-full px-4 py-3 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary/20 transition-all font-bold text-slate-900 dark:text-white">
                                         <option value="Cash">Cash</option>
                                         <option value="Bank Transfer">Bank Transfer</option>
-                                        <option value="Cheque">Check</option>
-                                        <option value="Online">Online Payment</option>
                                     </select>
                                 </div>
 

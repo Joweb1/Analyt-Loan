@@ -364,7 +364,7 @@ class LoanDetails extends Component
 
         $rules = [
             'amount' => 'required|numeric|min:'.($allowFlexible ? 1 : $minRequired),
-            'payment_method' => 'required|string',
+            'payment_method' => 'required|in:Cash,Bank Transfer',
             'collected_by' => 'required|exists:users,id',
             'paid_at' => 'nullable|date',
         ];
@@ -444,7 +444,7 @@ class LoanDetails extends Component
 
         $rules = [
             'amount' => 'required|numeric|min:'.($allowFlexible ? 1 : $minRequired),
-            'payment_method' => 'required|string',
+            'payment_method' => 'required|in:Cash,Bank Transfer',
             'collected_by' => 'required|exists:users,id',
             'paid_at' => 'nullable|date',
         ];

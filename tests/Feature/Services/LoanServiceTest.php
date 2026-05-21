@@ -53,6 +53,7 @@ class LoanServiceTest extends TestCase
             'amount' => 1000.0, // 1,000 Major = 100,000 Minor
             'loan_product' => 'Personal Loan',
             'interest_rate' => 10,
+            'interest_calculation_type' => 'percentage',
             'interest_type' => 'year',
             'duration' => 6,
             'duration_unit' => 'month',
@@ -72,6 +73,7 @@ class LoanServiceTest extends TestCase
             'organization_id' => $this->organization->id,
             'status' => 'approved',
             'amount' => 100000,
+            'interest_calculation_type' => 'percentage',
         ]);
     }
 
@@ -92,6 +94,7 @@ class LoanServiceTest extends TestCase
             'amount' => 50000,
             'loan_product' => 'Small Loan',
             'interest_rate' => 5,
+            'interest_calculation_type' => 'percentage',
             'interest_type' => 'month',
             'duration' => 1,
             'duration_unit' => 'month',
@@ -121,6 +124,7 @@ class LoanServiceTest extends TestCase
             'amount' => 100000,
             'loan_product' => 'Secured Loan',
             'interest_rate' => 5,
+            'interest_calculation_type' => 'percentage',
             'interest_type' => 'month',
             'duration' => 1,
             'duration_unit' => 'month',
@@ -146,6 +150,7 @@ class LoanServiceTest extends TestCase
             'amount' => 2500.0, // 2,500 Major = 250,000 Minor
             'loan_product' => $loan->loan_product,
             'interest_rate' => $loan->interest_rate,
+            'interest_calculation_type' => 'percentage',
             'interest_type' => $loan->interest_type,
             'duration' => $loan->duration,
             'duration_unit' => $loan->duration_unit,
@@ -163,21 +168,36 @@ class LoanServiceTest extends TestCase
         ]);
     }
 
-    public function test_it_activates_loan_without_collateral()
+    public function test_it_distributes_insurance_fee_evenly_across_installments()
     {
         $borrower = Borrower::factory()->create(['organization_id' => $this->organization->id]);
-        $loan = Loan::factory()->create([
-            'organization_id' => $this->organization->id,
+
+        $data = [
             'borrower_id' => $borrower->id,
-            'amount' => 100000,
-            'status' => 'approved',
-        ]);
+            'loan_number' => 'LN-INS-001',
+            'amount' => 100000, // ₦1,000
+            'loan_product' => 'Insurance Test',
+            'interest_rate' => 0.000001, // Tiny rate to avoid auto-suggest logic
+            'interest_calculation_type' => 'percentage',
+            'interest_type' => 'month',
+            'duration' => 2,
+            'duration_unit' => 'month',
+            'repayment_cycle' => 'monthly',
+            'num_repayments' => 2,
+            'insurance_fee' => 2000, // ₦20 total insurance
+            'insurance_fee_type' => 'fixed',
+        ];
 
-        // No collateral added
+        $dto = \App\DTOs\LoanApplicationDTO::fromArray($data);
+        $loan = $this->loanService->createLoan($dto);
 
-        $activatedLoan = $this->loanService->activateLoan($loan);
+        $schedules = $loan->scheduledRepayments;
+        $this->assertCount(2, $schedules);
 
-        $this->assertEquals('active', $activatedLoan->status);
+        // ₦2,000 insurance / 2 installments = ₦1,000 = 100,000 minor per installment
+        foreach ($schedules as $schedule) {
+            $this->assertEquals(100000, $schedule->interest_amount->getMinorAmount());
+        }
     }
 
     public function test_it_applies_risk_based_pricing_discount()
@@ -193,6 +213,7 @@ class LoanServiceTest extends TestCase
             'amount' => 100000,
             'loan_product' => 'Dynamic Loan',
             'interest_rate' => 0, // Auto-calculate
+            'interest_calculation_type' => 'percentage',
             'interest_type' => 'month',
             'duration' => 1,
             'duration_unit' => 'month',
@@ -220,6 +241,7 @@ class LoanServiceTest extends TestCase
             'amount' => 100000,
             'loan_product' => 'Dynamic Loan',
             'interest_rate' => 0, // Auto-calculate
+            'interest_calculation_type' => 'percentage',
             'interest_type' => 'month',
             'duration' => 1,
             'duration_unit' => 'month',

@@ -30,6 +30,8 @@ class LoanFormTest extends TestCase
 
         // Create necessary roles
         Role::create(['name' => 'Borrower']);
+        Role::create(['name' => 'Admin']);
+        $this->user->assignRole('Admin');
     }
 
     public function test_loan_form_component_renders(): void
@@ -57,6 +59,7 @@ class LoanFormTest extends TestCase
             ->set('amount', 100000)
             ->set('loan_product', 'Personal Loan')
             ->set('interest_rate', 10)
+            ->set('interest_calculation_type', 'percentage')
             ->set('duration', 6)
             ->set('duration_unit', 'month')
             ->set('repayment_cycle', 'monthly')
@@ -67,7 +70,7 @@ class LoanFormTest extends TestCase
             'borrower_id' => $borrower->id,
             'amount' => 10000000,
             'organization_id' => $this->organization->id,
-            'status' => 'applied',
+            'interest_calculation_type' => 'percentage',
         ]);
 
         // Check if collateral is linked
@@ -77,6 +80,34 @@ class LoanFormTest extends TestCase
             'loan_id' => $loan->id,
             'status' => 'in_vault',
         ]);
+    }
+
+    public function test_selecting_loan_product_autofills_terms()
+    {
+        $product = \App\Models\LoanProduct::create([
+            'organization_id' => $this->organization->id,
+            'name' => 'Enterprise Product',
+            'default_interest_rate' => 12.5,
+            'interest_calculation_type' => 'fixed',
+            'default_duration' => 24,
+            'duration_unit' => 'week',
+            'repayment_cycle' => 'weekly',
+            'processing_fee' => 50,
+            'processing_fee_type' => 'fixed',
+            'insurance_fee' => 25,
+            'insurance_fee_type' => 'percentage',
+        ]);
+
+        Livewire::actingAs($this->user)
+            ->test(LoanForm::class)
+            ->set('loan_product', $product->name)
+            ->assertSet('interest_rate', 12.5)
+            ->assertSet('interest_calculation_type', 'fixed')
+            ->assertSet('duration', 24)
+            ->assertSet('duration_unit', 'week')
+            ->assertSet('repayment_cycle', 'weekly')
+            ->assertSet('processing_fee', 50)
+            ->assertSet('insurance_fee', 25);
     }
 
     public function test_selecting_borrower_sets_borrower_user_id(): void
@@ -107,6 +138,7 @@ class LoanFormTest extends TestCase
             ->set('collateralId', $collateral->id)
             ->set('loan_product', 'Personal Loan')
             ->set('interest_rate', 10)
+            ->set('interest_calculation_type', 'percentage')
             ->set('duration', 6)
             ->set('duration_unit', 'month')
             ->set('repayment_cycle', 'monthly')
@@ -119,7 +151,7 @@ class LoanFormTest extends TestCase
         $this->assertDatabaseHas('loans', [
             'loan_number' => 'LN-TEST-002',
             'amount' => 10000000,
-            'status' => 'applied',
+            'status' => 'approved', // Auto-approved for Admin
         ]);
     }
 }

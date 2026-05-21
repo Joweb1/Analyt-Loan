@@ -2,7 +2,9 @@
     <form wire:submit.prevent="saveLoan" class="space-y-0">
         
         <!-- State Keepers for JS Calculation -->
-        <input type="hidden" id="h_interest_type" value="{{ $interest_type }}">
+        <input type="hidden" id="h_interest_calc_type" value="{{ $interest_calculation_type }}">
+        <input type="hidden" id="h_insurance_fee" value="{{ $insurance_fee }}">
+        <input type="hidden" id="h_insurance_fee_type" value="{{ $insurance_fee_type }}">
         <input type="hidden" id="h_duration_unit" value="{{ $duration_unit }}">
         <input type="hidden" id="h_repayment_cycle" value="{{ $repayment_cycle }}">
 
@@ -234,7 +236,7 @@
                                 <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                                     <span class="text-gray-500 sm:text-sm font-bold">₦</span>
                                 </div>
-                                <input type="number" id="amount" wire:model="amount" class="block w-full pl-10 pr-12 py-3 border-gray-200 rounded-xl focus:ring-blue-700 focus:border-blue-700 sm:text-sm font-semibold text-gray-900 bg-gray-50" placeholder="0.00">
+                                <input type="number" id="amount" wire:model="amount" @disabled(!auth()->user()->hasRole('Admin')) class="block w-full pl-10 pr-12 py-3 border-gray-200 rounded-xl focus:ring-blue-700 focus:border-blue-700 sm:text-sm font-semibold text-gray-900 bg-gray-50 disabled:opacity-75 disabled:cursor-not-allowed" placeholder="0.00">
                                 <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none">
                                     <span class="text-gray-400 sm:text-xs">NGN</span>
                                 </div>
@@ -242,22 +244,20 @@
                             @error('amount') <span class="text-red-500 text-xs mt-1">{{ $message }}</span> @enderror
                         </div>
 
-                        <!-- Interest Rate (Split Input with Custom Mini Dropdown) -->
+                        <!-- Interest Rate (With Flat/Percent Dropdown) -->
                         <div>
                             <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Interest Rate</label>
                             <div class="flex rounded-xl shadow-sm relative">
-                                <input type="number" id="interest_rate" wire:model="interest_rate" step="0.01" class="flex-1 min-w-0 block w-full px-4 py-3 rounded-l-xl border-gray-200 bg-gray-50 focus:ring-blue-700 focus:border-blue-700 sm:text-sm font-semibold" placeholder="Rate">
+                                <input type="number" id="interest_rate" wire:model="interest_rate" step="0.01" @disabled(!auth()->user()->hasRole('Admin')) class="flex-1 min-w-0 block w-full px-4 py-3 rounded-l-xl border-gray-200 bg-gray-50 focus:ring-blue-700 focus:border-blue-700 sm:text-sm font-semibold disabled:opacity-75 disabled:cursor-not-allowed" placeholder="Rate">
                                 
                                 <div class="relative custom-dropdown" id="dd-interest">
-                                    <button type="button" onclick="toggleDropdown('dd-interest')" class="inline-flex items-center px-4 py-3 border border-l-0 border-gray-200 rounded-r-xl bg-white text-gray-600 font-medium sm:text-sm hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-blue-700">
-                                        {{ $interest_type == 'year' ? '% / Yr' : ($interest_type == 'month' ? '% / Mo' : ($interest_type == 'week' ? '% / Wk' : '% / Dy')) }}
+                                    <button type="button" @disabled(!auth()->user()->hasRole('Admin')) onclick="toggleDropdown('dd-interest')" class="inline-flex items-center px-4 py-3 border border-l-0 border-gray-200 rounded-r-xl bg-white text-gray-600 font-medium sm:text-sm hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-blue-700 disabled:opacity-75 disabled:cursor-not-allowed">
+                                        {{ $interest_calculation_type == 'percentage' ? '%' : '₦ (Flat)' }}
                                         <svg class="ml-2 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                                     </button>
                                     <div wire:ignore class="hidden absolute right-0 z-[9999] mt-1 w-32 bg-white shadow-lg rounded-xl py-1 text-base ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm dd-menu">
-                                        <div onclick="selectOption('interest_type', 'year')" class="cursor-pointer px-4 py-2 hover:bg-gray-100">Yearly</div>
-                                        <div onclick="selectOption('interest_type', 'month')" class="cursor-pointer px-4 py-2 hover:bg-gray-100">Monthly</div>
-                                        <div onclick="selectOption('interest_type', 'week')" class="cursor-pointer px-4 py-2 hover:bg-gray-100">Weekly</div>
-                                        <div onclick="selectOption('interest_type', 'day')" class="cursor-pointer px-4 py-2 hover:bg-gray-100">Daily</div>
+                                        <div onclick="selectOption('interest_calculation_type', 'percentage')" class="cursor-pointer px-4 py-2 hover:bg-gray-100">Percentage (%)</div>
+                                        <div onclick="selectOption('interest_calculation_type', 'fixed')" class="cursor-pointer px-4 py-2 hover:bg-gray-100">Fixed (₦)</div>
                                     </div>
                                 </div>
                             </div>
@@ -338,10 +338,10 @@
                         <div>
                             <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Processing Fee (Optional)</label>
                             <div class="flex rounded-xl shadow-sm relative">
-                                <input type="number" wire:model="processing_fee" class="flex-1 min-w-0 block w-full px-4 py-3 rounded-l-xl border-gray-200 bg-white focus:ring-blue-700 focus:border-blue-700 sm:text-sm">
+                                <input type="number" wire:model="processing_fee" @disabled(!auth()->user()->hasRole('Admin')) class="flex-1 min-w-0 block w-full px-4 py-3 rounded-l-xl border-gray-200 bg-white focus:ring-blue-700 focus:border-blue-700 sm:text-sm disabled:opacity-75 disabled:cursor-not-allowed">
                                 
                                 <div class="relative custom-dropdown" id="dd-fee-type">
-                                    <button type="button" onclick="toggleDropdown('dd-fee-type')" class="inline-flex items-center px-4 py-3 border border-l-0 border-gray-200 rounded-r-xl bg-gray-100 text-gray-600 font-medium sm:text-sm hover:bg-gray-200 focus:outline-none">
+                                    <button type="button" @disabled(!auth()->user()->hasRole('Admin')) onclick="toggleDropdown('dd-fee-type')" class="inline-flex items-center px-4 py-3 border border-l-0 border-gray-200 rounded-r-xl bg-gray-100 text-gray-600 font-medium sm:text-sm hover:bg-gray-200 focus:outline-none disabled:opacity-75 disabled:cursor-not-allowed">
                                         {{ $processing_fee_type == 'fixed' ? 'Fixed' : '%' }}
                                         <svg class="ml-2 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                                     </button>
@@ -356,11 +356,19 @@
                          <!-- Insurance Fee -->
                          <div>
                             <label class="block text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Insurance Fee (Optional)</label>
-                             <div class="relative rounded-xl shadow-sm">
-                                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                    <span class="text-gray-500 sm:text-sm font-bold">₦</span>
+                            <div class="flex rounded-xl shadow-sm relative">
+                                <input type="number" wire:model="insurance_fee" @disabled(!auth()->user()->hasRole('Admin')) class="flex-1 min-w-0 block w-full px-4 py-3 rounded-l-xl border-gray-200 bg-white focus:ring-blue-700 focus:border-blue-700 sm:text-sm disabled:opacity-75 disabled:cursor-not-allowed" placeholder="0.00">
+                                
+                                <div class="relative custom-dropdown" id="dd-ins-type">
+                                    <button type="button" @disabled(!auth()->user()->hasRole('Admin')) onclick="toggleDropdown('dd-ins-type')" class="inline-flex items-center px-4 py-3 border border-l-0 border-gray-200 rounded-r-xl bg-gray-100 text-gray-600 font-medium sm:text-sm hover:bg-gray-200 focus:outline-none disabled:opacity-75 disabled:cursor-not-allowed">
+                                        {{ $insurance_fee_type == 'fixed' ? 'Fixed' : '%' }}
+                                        <svg class="ml-2 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                    </button>
+                                     <div wire:ignore class="hidden absolute right-0 z-[9999] mt-1 w-24 bg-white shadow-lg rounded-xl py-1 text-base ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm dd-menu">
+                                        <div onclick="selectOption('insurance_fee_type', 'fixed')" class="cursor-pointer px-4 py-2 hover:bg-gray-100">Fixed</div>
+                                        <div onclick="selectOption('insurance_fee_type', 'percentage')" class="cursor-pointer px-4 py-2 hover:bg-gray-100">%</div>
+                                    </div>
                                 </div>
-                                <input type="number" wire:model="insurance_fee" class="block w-full pl-10 pr-12 py-3 border-gray-200 rounded-xl focus:ring-blue-700 focus:border-blue-700 sm:text-sm bg-white" placeholder="0.00">
                             </div>
                         </div>
 
@@ -516,7 +524,8 @@
         // Update hidden inputs for local calc
         if(modelName === 'repayment_cycle') document.getElementById('h_repayment_cycle').value = value;
         if(modelName === 'duration_unit') document.getElementById('h_duration_unit').value = value;
-        if(modelName === 'interest_type') document.getElementById('h_interest_type').value = value;
+        if(modelName === 'interest_calculation_type') document.getElementById('h_interest_calc_type').value = value;
+        if(modelName === 'insurance_fee_type') document.getElementById('h_insurance_fee_type').value = value;
 
         setTimeout(window.calculateLoanDetails, 50);
     }
@@ -525,11 +534,14 @@
         const amount = parseFloat(document.getElementById('amount')?.value) || 0;
         const interestRate = parseFloat(document.getElementById('interest_rate')?.value) || 0;
         const duration = parseInt(document.getElementById('duration')?.value) || 0;
+        const insuranceFee = parseFloat(document.getElementById('insurance_fee')?.value) || 0;
+        
         const numRepaymentsInput = document.getElementById('num_repayments');
         const summaryText = document.getElementById('loan-summary-text');
         const summaryContainer = document.getElementById('loan-summary-container');
         
-        const interestType = document.getElementById('h_interest_type')?.value || 'year';
+        const interestCalcType = document.getElementById('h_interest_calc_type')?.value || 'percentage';
+        const insuranceFeeType = document.getElementById('h_insurance_fee_type')?.value || 'fixed';
         const durationUnit = document.getElementById('h_duration_unit')?.value || 'month';
         const cycle = document.getElementById('h_repayment_cycle')?.value || 'monthly';
 
@@ -584,18 +596,23 @@
             calcRepayments = parseInt(numRepaymentsInput.value) || calcRepayments;
         }
 
-        // Calculate Interest
-        let ratePeriodInDays = 365;
-        switch(interestType) {
-            case 'year': ratePeriodInDays = 365; break;
-            case 'month': ratePeriodInDays = 30; break;
-            case 'week': ratePeriodInDays = 7; break;
-            case 'day': ratePeriodInDays = 1; break;
+        // Calculate Flat Interest
+        let totalInterest = 0;
+        if (interestCalcType === 'percentage') {
+            totalInterest = amount * (interestRate / 100);
+        } else {
+            totalInterest = interestRate; // Fixed amount
         }
-        
-        const effectiveRate = interestRate * (durationInDays / ratePeriodInDays);
-        const totalInterest = amount * (effectiveRate / 100);
-        const totalDue = amount + totalInterest;
+
+        // Calculate Flat Insurance
+        let totalInsurance = 0;
+        if (insuranceFeeType === 'percentage') {
+            totalInsurance = amount * (insuranceFee / 100);
+        } else {
+            totalInsurance = insuranceFee; // Fixed amount
+        }
+
+        const totalDue = amount + totalInterest + totalInsurance;
         const installmentAmount = totalDue / calcRepayments;
 
         // Update Summary and Show

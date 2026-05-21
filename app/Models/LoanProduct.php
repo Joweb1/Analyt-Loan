@@ -45,8 +45,34 @@ class LoanProduct extends Model
         'name',
         'description',
         'default_interest_rate',
+        'interest_calculation_type',
         'default_duration',
         'duration_unit',
         'repayment_cycle',
+        'processing_fee',
+        'processing_fee_type',
+        'insurance_fee',
+        'insurance_fee_type',
     ];
+
+    protected $casts = [
+        'default_interest_rate' => 'decimal:2',
+        'processing_fee' => \App\Casts\MoneyCast::class,
+        'insurance_fee' => \App\Casts\MoneyCast::class,
+    ];
+
+    public function setInterestCalculationTypeAttribute($value)
+    {
+        $this->attributes['interest_calculation_type'] = $value ? strtolower($value) : 'percentage';
+    }
+
+    public function setProcessingFeeTypeAttribute($value)
+    {
+        $this->attributes['processing_fee_type'] = $value ? strtolower($value) : 'fixed';
+    }
+
+    public function setInsuranceFeeTypeAttribute($value)
+    {
+        $this->attributes['insurance_fee_type'] = $value ? strtolower($value) : 'fixed';
+    }
 }

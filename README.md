@@ -42,6 +42,7 @@ Small lenders often lose up to 20% of their capital due to poor organization. An
 | :--- | :--- |
 | **Multi-Tenancy** | Secure data isolation for multiple organizations on a single platform. |
 | **Trust Score™** | Proprietary algorithm identifying high-risk vs. reliable borrowers based on history. |
+| **Records Hub** | Comprehensive digital registers for Disbursement, Cashbook, Thrift, and Collections. |
 | **Omnibar Search** | Command-K style search to find any borrower or loan record instantly. |
 | **Digital Vault** | Integrated collateral management system with automated valuation rules. |
 | **Flexible Repayments** | Support for custom installment logic, grace periods, and late penalties. |

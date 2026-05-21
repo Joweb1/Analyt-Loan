@@ -94,25 +94,64 @@
                         </div>
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-xs font-bold text-gray-500 uppercase">Default Rate (%)</label>
-                                <input wire:model="default_interest_rate" type="number" step="0.01" class="w-full rounded-lg border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white">
+                                <label class="block text-xs font-bold text-gray-500 uppercase">Default Rate</label>
+                                <input wire:model="default_interest_rate" type="number" step="0.01" class="w-full rounded-lg border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white" placeholder="0.00">
                             </div>
                             <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase">Rate Type</label>
+                                <select wire:model="interest_calculation_type" class="w-full rounded-lg border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white text-xs">
+                                    <option value="percentage">Percentage (%)</option>
+                                    <option value="fixed">Fixed Amount (₦)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase">Insurance Fee</label>
+                                <input wire:model="insurance_fee" type="number" step="0.01" class="w-full rounded-lg border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white" placeholder="0.00">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase">Insurance Type</label>
+                                <select wire:model="insurance_fee_type" class="w-full rounded-lg border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white text-xs">
+                                    <option value="fixed">Fixed Amount (₦)</option>
+                                    <option value="percentage">Percentage (%)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase">Processing Fee</label>
+                                <input wire:model="processing_fee" type="number" step="0.01" class="w-full rounded-lg border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white" placeholder="0.00">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase">Processing Type</label>
+                                <select wire:model="processing_fee_type" class="w-full rounded-lg border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white text-xs">
+                                    <option value="fixed">Fixed Amount (₦)</option>
+                                    <option value="percentage">Percentage (%)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
                                 <label class="block text-xs font-bold text-gray-500 uppercase">Default Duration</label>
-                                <div class="flex gap-2">
-                                    <input wire:model="default_duration" type="number" class="w-1/2 rounded-lg border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white">
-                                    <select wire:model="duration_unit" class="w-1/2 rounded-lg border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white text-xs">
-                                        <option value="day">Days</option>
-                                        <option value="week">Weeks</option>
-                                        <option value="month">Months</option>
-                                        <option value="year">Years</option>
-                                    </select>
-                                </div>
+                                <input wire:model="default_duration" type="number" class="w-full rounded-lg border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white" placeholder="1">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-gray-500 uppercase">Duration Unit</label>
+                                <select wire:model="duration_unit" class="w-full rounded-lg border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white text-xs">
+                                    <option value="day">Days</option>
+                                    <option value="week">Weeks</option>
+                                    <option value="month">Months</option>
+                                    <option value="year">Years</option>
+                                </select>
                             </div>
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-gray-500 uppercase">Repayment Cycle</label>
-                            <select wire:model="repayment_cycle" class="w-full rounded-lg border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white">
+                            <select wire:model="repayment_cycle" class="w-full rounded-lg border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white text-sm">
                                 <option value="daily">Daily</option>
                                 <option value="weekly">Weekly</option>
                                 <option value="biweekly">Bi-Weekly</option>

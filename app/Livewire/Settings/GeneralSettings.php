@@ -52,6 +52,8 @@ class GeneralSettings extends Component
     // Preferences
     public $interest_rate;
 
+    public $interest_calculation_type = 'percentage';
+
     public $grace_period;
 
     public $currency = 'NGN';
@@ -89,6 +91,7 @@ class GeneralSettings extends Component
             $this->repayment_account_name = $this->organization->repayment_account_name;
 
             $this->interest_rate = $this->organization->default_interest_rate;
+            $this->interest_calculation_type = $this->organization->interest_calculation_type ?? 'percentage';
             $this->grace_period = $this->organization->grace_period_days;
             $this->currency = $this->organization->currency_code ?? 'NGN';
             $this->timezone = $this->organization->timezone ?? 'UTC';
@@ -112,6 +115,7 @@ class GeneralSettings extends Component
             'repayment_account_number' => 'nullable|string|max:20',
             'repayment_account_name' => 'nullable|string|max:100',
             'interest_rate' => 'required|numeric|min:0',
+            'interest_calculation_type' => 'required|in:fixed,percentage',
             'thrift_cycle_days' => 'required|integer|in:5,6',
             'system_date' => 'required|date',
             'timezone' => 'required|string',
@@ -134,6 +138,7 @@ class GeneralSettings extends Component
             'repayment_account_number' => $this->repayment_account_number,
             'repayment_account_name' => $this->repayment_account_name,
             'default_interest_rate' => $this->interest_rate,
+            'interest_calculation_type' => $this->interest_calculation_type,
             'grace_period_days' => $this->grace_period,
             'thrift_cycle_days' => $this->thrift_cycle_days,
             'allow_flexible_repayments' => $this->allow_flexible_repayments,

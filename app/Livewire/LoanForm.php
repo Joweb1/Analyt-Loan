@@ -42,6 +42,8 @@ class LoanForm extends Component
 
     public $interest_rate;
 
+    public $interest_calculation_type = 'percentage';
+
     public $interest_type = 'year';
 
     public $duration = 1;
@@ -58,6 +60,8 @@ class LoanForm extends Component
     public $processing_fee_type = 'fixed';
 
     public $insurance_fee;
+
+    public $insurance_fee_type = 'fixed';
 
     public $portfolio_id;
 
@@ -109,6 +113,7 @@ class LoanForm extends Component
             'release_date' => 'nullable|date',
             'amount' => 'required|numeric|min:1',
             'interest_rate' => 'required|numeric|min:0',
+            'interest_calculation_type' => 'required|in:fixed,percentage',
             'interest_type' => 'required|in:year,month,week,day',
             'duration' => 'required|integer|min:1',
             'duration_unit' => 'required|in:year,month,week,day',
@@ -117,6 +122,7 @@ class LoanForm extends Component
             'processing_fee' => 'nullable|numeric|min:0',
             'processing_fee_type' => 'nullable|in:fixed,percentage',
             'insurance_fee' => 'nullable|numeric|min:0',
+            'insurance_fee_type' => 'nullable|in:fixed,percentage',
             'description' => 'nullable|string',
             'collateralId' => ['nullable', 'exists:collaterals,id'],
             'attachments' => ['nullable', 'file', 'max:10240'], // 10MB max
@@ -132,7 +138,6 @@ class LoanForm extends Component
         $this->portfolios = \App\Models\Portfolio::orderBy('name')->get();
 
         if ($loan && $loan->exists) {
-            // ... (existing edit mode logic)
             $this->isEditMode = true;
             $this->loanId = $loan->id;
             $this->borrowerId = $loan->borrower_id;
@@ -145,6 +150,7 @@ class LoanForm extends Component
             $this->release_date = $loan->release_date ? $loan->release_date->format('Y-m-d') : now()->format('Y-m-d');
             $this->amount = $loan->amount->getMajorAmount();
             $this->interest_rate = $loan->interest_rate;
+            $this->interest_calculation_type = $loan->interest_calculation_type ?? 'percentage';
             $this->interest_type = $loan->interest_type;
             $this->duration = $loan->duration;
             $this->duration_unit = $loan->duration_unit;
@@ -153,6 +159,7 @@ class LoanForm extends Component
             $this->processing_fee = $loan->processing_fee?->getMajorAmount();
             $this->processing_fee_type = $loan->processing_fee_type;
             $this->insurance_fee = $loan->insurance_fee?->getMajorAmount();
+            $this->insurance_fee_type = $loan->insurance_fee_type ?? 'fixed';
             $this->portfolio_id = $loan->portfolio_id;
             $this->description = $loan->description;
             $this->collateralId = $loan->collateral?->id;
@@ -167,6 +174,12 @@ class LoanForm extends Component
             }
         } else {
             $this->release_date = now()->format('Y-m-d');
+            // Default from Organization
+            $org = Auth::user()->organization;
+            if ($org) {
+                $this->interest_rate = $org->default_interest_rate;
+                $this->interest_calculation_type = $org->interest_calculation_type ?? 'percentage';
+            }
 
             // Check for borrower_id in query string
             if ($borrowerId = request()->query('borrower_id')) {
@@ -174,7 +187,6 @@ class LoanForm extends Component
                 if ($borrower) {
                     $this->selectBorrower($borrower->user_id);
                 } else {
-                    // Fallback to searching by User ID if Borrower ID not found
                     $this->selectBorrower($borrowerId);
                 }
             }
@@ -186,7 +198,6 @@ class LoanForm extends Component
             })
             ->get();
 
-        $orgId = Auth::user()->organization_id;
         $this->staffMembers = \App\Models\User::where('organization_id', $orgId)
             ->whereIn('type', ['admin', 'staff'])
             ->get();
@@ -270,9 +281,14 @@ class LoanForm extends Component
         $product = \App\Models\LoanProduct::where('name', $value)->first();
         if ($product) {
             $this->interest_rate = $product->default_interest_rate;
+            $this->interest_calculation_type = $product->interest_calculation_type;
             $this->duration = $product->default_duration;
             $this->duration_unit = $product->duration_unit;
             $this->repayment_cycle = $product->repayment_cycle;
+            $this->processing_fee = $product->processing_fee ? $product->processing_fee->getMajorAmount() : null;
+            $this->processing_fee_type = $product->processing_fee_type;
+            $this->insurance_fee = $product->insurance_fee ? $product->insurance_fee->getMajorAmount() : null;
+            $this->insurance_fee_type = $product->insurance_fee_type;
         }
     }
 
@@ -299,6 +315,7 @@ class LoanForm extends Component
             'release_date' => $this->release_date,
             'amount' => $this->amount,
             'interest_rate' => $this->interest_rate,
+            'interest_calculation_type' => $this->interest_calculation_type,
             'interest_type' => $this->interest_type,
             'portfolio_id' => $this->portfolio_id,
             'duration' => $this->duration,
@@ -308,6 +325,7 @@ class LoanForm extends Component
             'processing_fee' => $this->processing_fee,
             'processing_fee_type' => $this->processing_fee_type,
             'insurance_fee' => $this->insurance_fee,
+            'insurance_fee_type' => $this->insurance_fee_type,
             'description' => $this->description,
             'loan_officer_id' => $this->loan_officer_id,
             'guarantor_id' => $this->guarantor_type === 'internal' ? $this->guarantor_id : null,

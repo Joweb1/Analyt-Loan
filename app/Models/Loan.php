@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property string|null $loan_product
  * @property \Illuminate\Support\Carbon|null $release_date
  * @property numeric $interest_rate
+ * @property string $interest_calculation_type
  * @property string $interest_type
  * @property int $duration
  * @property string $duration_unit
@@ -28,6 +29,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property \App\ValueObjects\Money|null $processing_fee
  * @property string|null $processing_fee_type
  * @property \App\ValueObjects\Money|null $insurance_fee
+ * @property string|null $insurance_fee_type
  * @property string|null $description
  * @property array<array-key, mixed>|null $attachments
  * @property string $status
@@ -117,6 +119,7 @@ class Loan extends Model
         'loan_product',
         'release_date',
         'interest_rate',
+        'interest_calculation_type',
         'interest_type',
         'duration',
         'duration_unit',
@@ -125,6 +128,7 @@ class Loan extends Model
         'processing_fee',
         'processing_fee_type',
         'insurance_fee',
+        'insurance_fee_type',
         'penalty_value',
         'penalty_type',
         'penalty_frequency',
@@ -156,6 +160,11 @@ class Loan extends Model
         $this->attributes['interest_type'] = $value ? strtolower($value) : 'year';
     }
 
+    public function setInterestCalculationTypeAttribute($value)
+    {
+        $this->attributes['interest_calculation_type'] = $value ? strtolower($value) : 'percentage';
+    }
+
     public function setDurationUnitAttribute($value)
     {
         $this->attributes['duration_unit'] = $value ? strtolower($value) : 'month';
@@ -164,6 +173,16 @@ class Loan extends Model
     public function setStatusAttribute($value)
     {
         $this->attributes['status'] = $value ? strtolower($value) : 'applied';
+    }
+
+    public function setProcessingFeeTypeAttribute($value)
+    {
+        $this->attributes['processing_fee_type'] = $value ? strtolower($value) : 'fixed';
+    }
+
+    public function setInsuranceFeeTypeAttribute($value)
+    {
+        $this->attributes['insurance_fee_type'] = $value ? strtolower($value) : 'fixed';
     }
 
     public function repayments(): \Illuminate\Database\Eloquent\Relations\HasMany
@@ -228,38 +247,22 @@ class Loan extends Model
     }
 
     /**
-     * Get the total expected interest for the entire duration of the loan.
+     * Get the total expected interest for the loan (Flat model).
+     * Now independent of duration.
      */
     public function getTotalExpectedInterest(): \App\ValueObjects\Money
     {
-        /** @var \App\ValueObjects\Money $principal */
         $principal = $this->amount;
         $currency = $principal->getCurrency();
 
-        $rate = (string) (($this->interest_rate ?? 0) / 100);
-        $duration = (int) ($this->duration ?? 1);
-        $durationUnit = $this->duration_unit ?? 'month';
-        $interestType = $this->interest_type ?? 'year';
-
-        if ($durationUnit === $interestType) {
-            return $principal->multiply(bcmul($rate, (string) $duration, 4));
+        if ($this->interest_calculation_type === 'fixed') {
+            return new \App\ValueObjects\Money((int) bcmul((string) ($this->interest_rate ?? 0), '100', 0), $currency);
         }
 
-        // Conversion factors to a base unit (days)
-        $conversion = [
-            'day' => '1',
-            'week' => '7',
-            'month' => '30.44', // average month length
-            'year' => '365.25',
-        ];
+        // Percentage logic: Principal * (Rate / 100)
+        $rate = (string) (($this->interest_rate ?? 0) / 100);
 
-        $durationInDays = bcmul((string) $duration, ($conversion[$durationUnit] ?? '30.44'), 4);
-        $interestPeriodInDays = $conversion[$interestType] ?? '365.25';
-
-        $multiplier = bcdiv($durationInDays, $interestPeriodInDays, 4);
-        $totalMultiplier = bcmul($rate, $multiplier, 4);
-
-        return $principal->multiply($totalMultiplier);
+        return $principal->multiply($rate);
     }
 
     /**
@@ -267,16 +270,36 @@ class Loan extends Model
      */
     public function getTotalCost(): \App\ValueObjects\Money
     {
-        $currency = $this->amount->getCurrency();
-
         $totalInterest = $this->getTotalExpectedInterest();
         $processingFee = $this->getCalculatedProcessingFee();
-        $insuranceFee = $this->insurance_fee ?? new \App\ValueObjects\Money(0, $currency);
+        $insuranceFee = $this->getCalculatedInsuranceFee();
 
         return $this->amount
             ->add($totalInterest)
             ->add($processingFee)
             ->add($insuranceFee);
+    }
+
+    /**
+     * Calculate the insurance fee based on its type (fixed or percentage).
+     * Now follows the same distributed model as interest.
+     */
+    public function getCalculatedInsuranceFee(): \App\ValueObjects\Money
+    {
+        $currency = $this->amount->getCurrency();
+
+        if (! $this->insurance_fee || $this->insurance_fee->isZero()) {
+            return new \App\ValueObjects\Money(0, $currency);
+        }
+
+        if ($this->insurance_fee_type === 'percentage') {
+            // When stored as a percentage, the 'major amount' is the percentage value
+            $percentage = $this->insurance_fee->getMajorAmount();
+
+            return $this->amount->multiply($percentage / 100);
+        }
+
+        return $this->insurance_fee;
     }
 
     /**
@@ -326,7 +349,7 @@ class Loan extends Model
         /** @var \App\ValueObjects\Money $processingFee */
         $processingFee = $this->getCalculatedProcessingFee();
         /** @var \App\ValueObjects\Money $insuranceFee */
-        $insuranceFee = $this->insurance_fee ?? new \App\ValueObjects\Money(0, $currency);
+        $insuranceFee = $this->getCalculatedInsuranceFee();
 
         $totalPayable = $principal->add($totalInterest)->add($processingFee)->add($insuranceFee);
         $totalPaidMinor = (int) $this->repayments()->sum('amount');

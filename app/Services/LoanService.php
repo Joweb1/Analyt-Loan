@@ -78,14 +78,17 @@ class LoanService
         $principal = $loan->amount;
         $principalShare = $principal->divide($numRepayments);
 
+        // Interest and Insurance are now distributed evenly
         $totalInterest = $loan->getTotalExpectedInterest();
         $interestShare = $totalInterest->divide($numRepayments);
 
-        // Fees added to first installment during creation
-        $currency = $principal->getCurrency();
-        $processingFee = $loan->getCalculatedProcessingFee();
-        $insuranceFee = $loan->insurance_fee ?? new \App\ValueObjects\Money(0, $currency);
+        $totalInsurance = $loan->getCalculatedInsuranceFee();
+        $insuranceShare = $totalInsurance->divide($numRepayments);
 
+        // Processing Fee remains front-loaded (Added only to installment #1)
+        $processingFee = $loan->getCalculatedProcessingFee();
+
+        $currency = $principal->getCurrency();
         $startDate = \Carbon\Carbon::parse($loan->release_date ?? now());
         $cycle = $loan->repayment_cycle ?? 'monthly';
 
@@ -104,18 +107,21 @@ class LoanService
                 default => $dueDate->addMonths($i),
             };
 
-            /** @var \App\ValueObjects\Money $initialFee */
-            $initialFee = new \App\ValueObjects\Money(0, $currency);
+            // Combine Interest Share and Insurance Share
+            $totalInterestAndInsurance = $interestShare->add($insuranceShare);
+
+            /** @var \App\ValueObjects\Money $upfrontFee */
+            $upfrontFee = new \App\ValueObjects\Money(0, $currency);
             if ($i === 1) {
-                $initialFee = $processingFee->add($insuranceFee);
+                $upfrontFee = $processingFee;
             }
 
             ScheduledRepayment::create([
                 'loan_id' => $loan->id,
                 'due_date' => $dueDate,
                 'principal_amount' => $principalShare,
-                'interest_amount' => $interestShare,
-                'penalty_amount' => $initialFee, // Using 'penalty_amount' as a catch-all for upfront fees
+                'interest_amount' => $totalInterestAndInsurance,
+                'penalty_amount' => $upfrontFee, // Using 'penalty_amount' as a catch-all for upfront fees
                 'installment_number' => $i,
                 'status' => 'applied',
             ]);

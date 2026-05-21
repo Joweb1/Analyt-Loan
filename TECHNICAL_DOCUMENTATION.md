@@ -15,49 +15,70 @@ This document provides an in-depth technical overview of the Analyt Loan platfor
 *   **Framework:** Laravel 12.x (PHP 8.4)
 *   **Frontend:** Livewire 3 (Full-stack reactivity), Volt (Functional API components), Alpine.js, Tailwind CSS 4.
 *   **Database:** MySQL 8.0+ (Production) / SQLite (Development).
-*   **Queue System:** Database-driven queues for background processing (Emails, Push Notifications).
-*   **Static Analysis:** Larastan (PHPStan Level 5).
+*   **Queue System:** Database-driven queues for background processing.
+*   **Static Analysis:** PHPStan (Level 5).
 
 ### 1.2 Multi-Tenancy Design
 The application uses a **Shared Database, Shared Schema** multi-tenancy model.
-*   **Entity Isolation:** Data isolation is enforced at the Eloquent model level using the `App\Traits\BelongsToOrganization` trait.
-*   **Global Scope:** A global scope automatically applies `where organization_id = ?` to all queries based on the authenticated user's organization.
-*   **App Owner Exception:** The "App Owner" (super admin) bypasses these scopes to view platform-wide data.
+*   **Entity Isolation:** Data isolation is enforced via the `App\Traits\BelongsToOrganization` trait using **Global Scopes**.
+*   **Failsafe:** A hard enforcement `where 1=0` is applied if a tenant context is missing for non-system users.
+*   **App Owner Exception:** The "App Owner" (Super Admin) bypasses these scopes for platform-wide visibility.
 
-### 1.3 Service Layer Pattern
-Business logic is decoupled from Controllers/Livewire components into dedicated services:
-*   **`LoanService`**: Handles loan creation, attachment storage, and collateral linking.
-*   **`TrustScoringService`**: (Proprietary) Calculates borrower reliability based on repayment timeliness.
-*   **`ActionTaskService`**: Generates daily actionable tasks for staff (e.g., "Call overdue borrower X").
-*   **`SystemHealthService`**: Logs critical system events and health metrics.
+### 1.3 Advanced Architectural Pillars
+*   **Financial Precision:** Uses a `Money` Value Object. All internal math is performed on **integers (minor units)** using **BCMath** to prevent floating-point errors.
+*   **Financial Idempotency:** Implements an `X-Idempotency-Key` middleware. Prevents duplicate state-changing operations (like disbursements or repayments) within a 24-hour window per user.
+*   **Resilience Layer:** Integrated `CircuitBreaker` and `ResilienceService` with **Exponential Backoff** for external API integrations.
+*   **Service Layer:** Business logic is decoupled into dedicated services (`LoanService`, `CashbookService`, `TrustScoringService`, etc.).
 
 ---
 
-## 2. Core Subsystems
+## 2. User & Access Management
 
-### 2.1 The Lending Engine (`LoanService` & `LoanObserver`)
-The lifecycle of a loan is event-driven:
-1.  **Application:** Borrower applies -> `LoanObserver::created` triggers alerts.
-2.  **Approval:** Staff approves -> Status changes to `approved`.
-3.  **Activation:**
-    *   Logic: Checks if Collateral Value / Loan Amount >= 50% (via `FiftyPercentRule`).
-    *   Action: Status `active`, funds "disbursed" (logical).
-4.  **Repayment:**
-    *   `refreshRepaymentStatus()`: A crucial method in the `Loan` model. It acts as a reconciliation engine, matching total paid amounts against the schedule (Principal -> Interest -> Penalties).
-    *   Automatic Closure: If `total_paid >= total_due`, status becomes `repaid`.
+### 2.1 User Types (Hardcoded Identity)
+The `users.type` column defines the primary identity level and determines which functional roles a user can hold:
+*   **`owner`**: The platform creator (App Owner). Can manage organizations and bypass multi-tenancy.
+*   **`admin`**: The organization owner/administrator. Full control over their organization's data.
+*   **`staff`**: Employees of an organization. Permissions are further refined by Staff-specific Roles.
+*   **`customer`**: Borrowers, Savers, or Guarantors. **This is the only type authorized to hold customer-facing functional roles.**
 
-### 2.2 Automation (Cron & Queues)
-Shared hosting environments often lack SSH access, so automation is triggered via secure HTTP endpoints.
+### 2.2 Role-Based Access Control (RBAC)
+Implemented via `spatie/laravel-permission`. The system enforces a strict separation between Staff roles and Customer roles:
 
-*   **Scheduler (`app:midnight-sync`):**
-    *   Runs daily at midnight.
-    *   Marks loans as `overdue`.
-    *   Applies recurring penalties.
-    *   Recalculates Trust Scores.
-    *   Generates daily staff tasks.
-*   **Queue Worker:**
-    *   Processes `PushSystemNotification` and email jobs.
-    *   Should be triggered every minute to ensure near-real-time alerts.
+#### Staff & Admin Roles
+*   **Admin**: Inherits all organization permissions (KYC approval, settings, vault).
+*   **Loan Analyst / Vault Manager / Credit Analyst**: Specialized roles for back-office operations.
+*   **Collection Specialist / Officer**: Roles focused on debt recovery and ledger management.
+
+#### Customer Roles (Restricted to `customer` type)
+*   **Borrower**: Authorized to apply for loans and access the borrower self-service portal.
+*   **Saver**: Authorized to manage regular savings and high-frequency thrift accounts.
+*   **Guarantor**: Limited access for verifying and backing loan applications.
+
+*Note: The system logic prevents assigning Customer roles to Staff/Admin types to maintain strict separation of concerns and prevent unauthorized internal access to customer-specific features.*
+
+### 2.3 Portfolio Scoping
+Staff can be assigned to specific **Portfolios**. If assigned, the `BelongsToOrganization` trait further restricts their visibility to only the Borrowers and Loans within their assigned portfolios.
+
+---
+
+## 3. Core Subsystems & Records Hub
+
+### 3.1 The Lending Engine
+*   **Lifecycle:** `Application -> KYC Approval -> Loan Approval -> Activation (Disbursement)`.
+*   **Reconciliation:** The `SynchronizeLoanState` action matches payments against schedules (Principal -> Interest -> Penalties).
+*   **Savings Integration:** Over-payments are automatically routed to a linked `SavingsAccount`.
+
+### 3.2 Records Hub (Digital Registers)
+The platform maintains several real-time digital record books:
+*   **Loan Disbursement Register:** Monthly grouping of all issued loans with notes and installment tracking.
+*   **Daily Savings (Thrift) Record:** A weekly grid for high-frequency collections. Only the "System Today" is editable by staff; admins can unlock past dates for corrections.
+*   **Cashbook Dashboard:** Daily reconciliation of **System Inflows** (automatic) vs **Physical Cash at Hand** (manual). Requires a "Shortfall Report" if physical cash is insufficient.
+*   **Collection Ledger:** Groups borrowers by "Collection Days" (e.g., Monday Group) to track weekly performance and unpaid indicators.
+*   **Savings Withdrawal Ledger:** Tracks withdrawal requests with an audit trail of status changes (Pending -> Approved -> Verified).
+
+### 3.3 Automation (Cron & Queues)
+*   **Midnight Sync:** Runs daily to mark overdue loans, apply penalties, and generate staff tasks.
+*   **Health Logs:** `SystemHealthService` monitors database size, failed jobs, and server latency.
 
 ---
 

@@ -19,8 +19,17 @@ The documentation highlights that small lenders often lose up to 20% of their ca
 | Trust Score | A proprietary metric that identifies high-risk vs. reliable borrowers. |
 | Omnibar Search | A "Google-like" search bar to find any borrower or loan instantly. |
 | Nightly Cron Jobs | Backend automation that updates loan statuses and triggers penalties overnight. |
+| Records Hub | Digital record books for Disbursement, Cashbook, Thrift (Daily Savings), and Collections. |
 
-## 4. Technical Structure
+## 4. The Records Hub: Digital Accountability
+A centralized hub for financial transparency, replacing physical ledgers with five specialized digital registers:
+- **Loan Disbursement Register:** Tracks the month-by-month issuance of capital, allowing for installment adjustments and staff notes.
+- **Daily Savings (Thrift) Record:** A high-frequency collection grid with strict "System Today" editing rules and Admin-only unlocking for past dates.
+- **Digital Cashbook:** A reconciliation engine that matches automated system inflows against manual physical cash reporting, complete with shortfall auditing.
+- **Collection Ledger:** An operations-focused dashboard that groups borrowers by their scheduled "Collection Day" to track weekly recovery performance.
+- **Savings Withdrawal Ledger:** A verified transaction log for tracking withdrawals, ensuring each transaction has a clear approval audit trail.
+
+## 5. Technical Structure
 The system is built for speed and scale using a MYSQL database for data integrity and Material Design (Roboto Flex) for a clean, intuitive user interface. It is structured into five core sections:
 - **Dashboard (Home):** For instant business insights and charts.
 - **People (CRM):** To manage borrower profiles.

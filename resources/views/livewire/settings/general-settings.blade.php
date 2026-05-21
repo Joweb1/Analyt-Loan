@@ -177,8 +177,14 @@
                     <h2 class="text-lg font-bold text-primary dark:text-white mb-6">Loan Preferences</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div class="flex flex-col gap-2">
-                            <label class="text-sm font-bold text-gray-700 dark:text-gray-300">Default Interest Rate (Monthly %)</label>
-                            <input wire:model="interest_rate" type="number" step="0.1" class="rounded-xl border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white focus:ring-primary focus:border-primary text-sm">
+                            <label class="text-sm font-bold text-gray-700 dark:text-gray-300">Default Interest Rate</label>
+                            <div class="flex gap-2">
+                                <input wire:model="interest_rate" type="number" step="0.1" class="flex-1 rounded-xl border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white focus:ring-primary focus:border-primary text-sm">
+                                <select wire:model="interest_calculation_type" class="w-1/3 rounded-xl border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white focus:ring-primary focus:border-primary text-xs">
+                                    <option value="percentage">Percent (%)</option>
+                                    <option value="fixed">Fixed (₦)</option>
+                                </select>
+                            </div>
                         </div>
                         <div class="flex flex-col gap-2">
                             <label class="text-sm font-bold text-gray-700 dark:text-gray-300">Grace Period (Days)</label>

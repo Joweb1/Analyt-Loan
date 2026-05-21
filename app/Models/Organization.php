@@ -160,6 +160,8 @@ class Organization extends Model
         'repayment_bank_name',
         'repayment_account_number',
         'repayment_account_name',
+        'default_interest_rate',
+        'interest_calculation_type',
         'system_date',
         'timezone',
     ];
@@ -169,6 +171,11 @@ class Organization extends Model
         'signature_url',
         'kyc_document_url',
     ];
+
+    public function setInterestCalculationTypeAttribute($value)
+    {
+        $this->attributes['interest_calculation_type'] = $value ? strtolower($value) : 'percentage';
+    }
 
     /**
      * Get the current system time for this organization.

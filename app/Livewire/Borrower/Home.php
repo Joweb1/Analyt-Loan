@@ -53,7 +53,10 @@ class Home extends Component
         // Base limit: 50,000. Each trust score point adds 1,000.
         // Max limit: 500,000
         $score = $user->borrower->trust_score ?? 0;
-        $this->creditLimit = min(500000, 50000 + ($score * 2000));
+        $majorLimit = min(500000, 50000 + ($score * 2000));
+        $currency = $this->organization->currency_code ?? config('app.currency', 'NGN');
+
+        $this->creditLimit = \App\ValueObjects\Money::fromMajor($majorLimit, $currency);
 
         $this->setGreeting();
     }

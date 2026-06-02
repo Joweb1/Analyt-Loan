@@ -3,6 +3,7 @@
 namespace App\Livewire\Admin;
 
 use App\Models\Organization;
+use App\Models\Repayment;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
@@ -50,7 +51,7 @@ class DistributionPanel extends Component
 
         foreach ($organizations as $org) {
             $org->total_lent = (float) ($org->total_lent ?? 0) / 100;
-            $org->total_collected = \App\Models\Repayment::whereHas('loan', function ($q) use ($org) {
+            $org->total_collected = Repayment::whereHas('loan', function ($q) use ($org) {
                 $q->where('organization_id', $org->id);
             })->sum('amount') / 100;
 
@@ -59,7 +60,7 @@ class DistributionPanel extends Component
                 ->whereIn('status', ['active', 'repaid', 'overdue'])
                 ->whereMonth('created_at', now()->month)
                 ->sum('amount') / 100;
-            $org->monthly_collected = \App\Models\Repayment::whereHas('loan', function ($q) use ($org) {
+            $org->monthly_collected = Repayment::whereHas('loan', function ($q) use ($org) {
                 $q->where('organization_id', $org->id);
             })->whereMonth('paid_at', now()->month)->sum('amount') / 100;
 

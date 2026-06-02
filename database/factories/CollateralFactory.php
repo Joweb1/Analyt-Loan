@@ -2,10 +2,12 @@
 
 namespace Database\Factories;
 
+use App\Models\Collateral;
+use App\Models\Organization;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Collateral>
+ * @extends Factory<Collateral>
  */
 class CollateralFactory extends Factory
 {
@@ -17,7 +19,7 @@ class CollateralFactory extends Factory
     public function definition(): array
     {
         return [
-            'organization_id' => \App\Models\Organization::factory(),
+            'organization_id' => Organization::factory(),
             'name' => $this->faker->words(3, true),
             'description' => $this->faker->sentence,
             'value' => $this->faker->randomFloat(2, 50000, 500000), // More realistic Naira values

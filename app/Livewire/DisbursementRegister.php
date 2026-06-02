@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\Loan;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -10,13 +11,23 @@ class DisbursementRegister extends Component
 {
     use WithPagination;
 
+    #[Url]
     public $search = '';
 
+    #[Url]
     public $status = '';
 
+    #[Url]
     public $loan_type = '';
 
     protected $listeners = ['refreshRegister' => '$refresh'];
+
+    public function updating($property)
+    {
+        if (in_array($property, ['search', 'status', 'loan_type'])) {
+            $this->resetPage();
+        }
+    }
 
     public function updateInstallmentDate($loanId, $date)
     {
@@ -47,9 +58,12 @@ class DisbursementRegister extends Component
             ->orderBy('release_date', 'desc');
 
         if ($this->search) {
-            $query->whereHas('borrower.user', function ($q) {
-                $q->where('name', 'like', '%'.$this->search.'%');
-            })->orWhere('loan_number', 'like', '%'.$this->search.'%');
+            $term = '%'.strtolower(trim($this->search)).'%';
+            $query->where(function ($q) use ($term) {
+                $q->whereHas('borrower.user', function ($sq) use ($term) {
+                    $sq->whereRaw('LOWER(name) LIKE ?', [$term]);
+                })->orWhere('loan_number', 'like', $term);
+            });
         }
 
         if ($this->status) {

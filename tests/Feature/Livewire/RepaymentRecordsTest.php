@@ -7,6 +7,7 @@ use App\Models\Loan;
 use App\Models\Organization;
 use App\Models\Repayment;
 use App\Models\User;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -25,7 +26,7 @@ class RepaymentRecordsTest extends TestCase
 
         $this->organization = Organization::factory()->create();
 
-        $this->seed(\Database\Seeders\RoleSeeder::class);
+        $this->seed(RoleSeeder::class);
 
         $this->admin = User::factory()->create(['organization_id' => $this->organization->id]);
         $this->admin->assignRole('Admin');

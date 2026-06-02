@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\SavingsAccount;
 use App\Models\SavingsTransaction;
+use App\Models\User;
 use App\ValueObjects\Money;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -18,7 +19,7 @@ class SavingsTransactionFactory extends Factory
             'amount' => Money::fromMajor(100),
             'type' => 'deposit',
             'transaction_date' => now(),
-            'staff_id' => \App\Models\User::factory(),
+            'staff_id' => User::factory(),
         ];
     }
 }

@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\LoanProduct;
+use App\Models\Organization;
 use Illuminate\Database\Seeder;
 
 class LoanProductSeeder extends Seeder
@@ -11,7 +13,7 @@ class LoanProductSeeder extends Seeder
      */
     public function run(): void
     {
-        $demoOrg = \App\Models\Organization::where('slug', 'analyt-org-demo')->first();
+        $demoOrg = Organization::where('slug', 'analyt-org-demo')->first();
         if (! $demoOrg) {
             return;
         }
@@ -56,7 +58,7 @@ class LoanProductSeeder extends Seeder
         ];
 
         foreach ($products as $p) {
-            \App\Models\LoanProduct::create($p);
+            LoanProduct::create($p);
         }
     }
 }

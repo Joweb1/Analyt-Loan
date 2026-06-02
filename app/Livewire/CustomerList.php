@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\Portfolio;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -14,18 +15,19 @@ class CustomerList extends Component
 
     public $viewMode = 'grid';
 
+    #[Url]
     public $search = '';
 
+    #[Url]
     public $portfolioId = null;
 
+    #[Url]
     public $roleFilter = ''; // borrower or saver
 
-    #[\Livewire\Attributes\Url]
+    #[Url]
     public $showFilters = false;
 
     public $portfolios = [];
-
-    protected $updatesQueryString = ['search', 'portfolioId', 'roleFilter'];
 
     public function mount()
     {
@@ -37,19 +39,11 @@ class CustomerList extends Component
         }
     }
 
-    public function updatingSearch()
+    public function updating($property)
     {
-        $this->resetPage();
-    }
-
-    public function updatingPortfolioId()
-    {
-        $this->resetPage();
-    }
-
-    public function updatingRoleFilter()
-    {
-        $this->resetPage();
+        if (in_array($property, ['search', 'portfolioId', 'roleFilter'])) {
+            $this->resetPage();
+        }
     }
 
     public function toggleView($mode)
@@ -65,10 +59,14 @@ class CustomerList extends Component
             ->with(['borrower', 'saver', 'guarantor', 'roles']);
 
         if ($this->search) {
-            $query->where(function ($q) {
-                $q->where('name', 'like', '%'.$this->search.'%')
-                    ->orWhere('email', 'like', '%'.$this->search.'%')
-                    ->orWhere('phone', 'like', '%'.$this->search.'%');
+            $term = '%'.strtolower(trim($this->search)).'%';
+            $query->where(function ($q) use ($term) {
+                $q->whereRaw('LOWER(name) LIKE ?', [$term])
+                    ->orWhereRaw('LOWER(email) LIKE ?', [$term])
+                    ->orWhere('phone', 'like', $term)
+                    ->orWhereHas('borrower', fn ($bq) => $bq->where('custom_id', 'like', $term))
+                    ->orWhereHas('saver', fn ($sq) => $sq->where('custom_id', 'like', $term))
+                    ->orWhereHas('guarantor', fn ($gq) => $gq->where('custom_id', 'like', $term));
             });
         }
 

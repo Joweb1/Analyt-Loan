@@ -3,30 +3,33 @@
 namespace App\Models;
 
 use App\Traits\BelongsToOrganization;
+use App\ValueObjects\Money;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
 /**
  * @property string $id
  * @property string $organization_id
  * @property string $name
  * @property string|null $description
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Borrower> $borrowers
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read Collection<int, Borrower> $borrowers
  * @property-read int|null $borrowers_count
  * @property-read float $par_percentage
- * @property-read \App\ValueObjects\Money $portfolio_at_risk
- * @property-read \App\ValueObjects\Money $portfolio_balance
- * @property-read \App\ValueObjects\Money $profit_loss
- * @property-read \App\ValueObjects\Money $savings_balance
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Loan> $loans
+ * @property-read Money $portfolio_at_risk
+ * @property-read Money $portfolio_balance
+ * @property-read Money $profit_loss
+ * @property-read Money $savings_balance
+ * @property-read Collection<int, Loan> $loans
  * @property-read int|null $loans_count
- * @property-read \App\Models\Organization $organization
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $staff
+ * @property-read Organization $organization
+ * @property-read Collection<int, User> $staff
  * @property-read int|null $staff_count
  *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Portfolio newModelQuery()
@@ -69,7 +72,7 @@ class Portfolio extends Model
     /**
      * Total Portfolio Balance (Lending): total loaned + interest + fees - repayments
      */
-    public function getPortfolioBalanceAttribute(): \App\ValueObjects\Money
+    public function getPortfolioBalanceAttribute(): Money
     {
         // Get all loans that are not drafted, rejected or pending application
         $loans = $this->loans()->whereNotIn('status', ['draft', 'rejected', 'applied'])->get();
@@ -77,32 +80,32 @@ class Portfolio extends Model
 
         $totalValueMinor = 0;
         foreach ($loans as $loan) {
-            /** @var \App\Models\Loan $loan */
+            /** @var Loan $loan */
             $totalValueMinor += $loan->getTotalCost()->getMinorAmount();
         }
 
         $totalCollectedMinor = (int) Repayment::whereIn('loan_id', $loans->pluck('id'))->sum('amount');
 
-        return new \App\ValueObjects\Money($totalValueMinor - $totalCollectedMinor, $currency);
+        return new Money($totalValueMinor - $totalCollectedMinor, $currency);
     }
 
     /**
      * Total Portfolio Savings Amount
      */
-    public function getSavingsBalanceAttribute(): \App\ValueObjects\Money
+    public function getSavingsBalanceAttribute(): Money
     {
         $currency = $this->organization->currency_code ?? config('app.currency', 'NGN');
         // Corrected to use user_id from the linked borrowers
         $userIds = $this->borrowers()->pluck('user_id');
         $totalMinor = (int) SavingsAccount::whereIn('user_id', $userIds)->sum('balance');
 
-        return new \App\ValueObjects\Money($totalMinor, $currency);
+        return new Money($totalMinor, $currency);
     }
 
     /**
      * Portfolio At Risk (PAR): Entire outstanding principal of loans with overdue installments.
      */
-    public function getPortfolioAtRiskAttribute(): \App\ValueObjects\Money
+    public function getPortfolioAtRiskAttribute(): Money
     {
         $currency = $this->organization->currency_code ?? config('app.currency', 'NGN');
         // Standard PAR: Outstanding principal of any loan that has an installment overdue
@@ -111,12 +114,12 @@ class Portfolio extends Model
             ->pluck('loan_id')
             ->unique();
 
-        $totalPAR = new \App\ValueObjects\Money(0, $currency);
+        $totalPAR = new Money(0, $currency);
         $loans = Loan::whereIn('id', $overdueLoanIds)->get();
 
         foreach ($loans as $loan) {
             $totalPaidPrincipalMinor = (int) $loan->repayments()->sum('principal_amount');
-            $totalPaidPrincipal = new \App\ValueObjects\Money($totalPaidPrincipalMinor, $currency);
+            $totalPaidPrincipal = new Money($totalPaidPrincipalMinor, $currency);
             $totalPAR = $totalPAR->add($loan->amount->subtract($totalPaidPrincipal));
         }
 
@@ -139,13 +142,13 @@ class Portfolio extends Model
     /**
      * Profit and Loss (PnL): Interest Collected - Principal of Loans Overdue > 7 days
      */
-    public function getProfitLossAttribute(): \App\ValueObjects\Money
+    public function getProfitLossAttribute(): Money
     {
         $currency = $this->organization->currency_code ?? config('app.currency', 'NGN');
         // Profit = Total Interest Collected
         $totalInterestCollectedMinor = (int) Repayment::whereIn('loan_id', $this->loans()->pluck('id'))
             ->sum('interest_amount');
-        $totalInterestCollected = new \App\ValueObjects\Money($totalInterestCollectedMinor, $currency);
+        $totalInterestCollected = new Money($totalInterestCollectedMinor, $currency);
 
         // Loss = Principal of Loans Overdue > 7 days
         $defaultedLoanIds = ScheduledRepayment::whereIn('loan_id', $this->loans()->pluck('id'))
@@ -154,12 +157,12 @@ class Portfolio extends Model
             ->pluck('loan_id')
             ->unique();
 
-        $totalLossPrincipal = new \App\ValueObjects\Money(0, $currency);
+        $totalLossPrincipal = new Money(0, $currency);
         $loans = Loan::whereIn('id', $defaultedLoanIds)->get();
 
         foreach ($loans as $loan) {
             $totalPaidPrincipalMinor = (int) $loan->repayments()->sum('principal_amount');
-            $totalPaidPrincipal = new \App\ValueObjects\Money($totalPaidPrincipalMinor, $currency);
+            $totalPaidPrincipal = new Money($totalPaidPrincipalMinor, $currency);
             $totalLossPrincipal = $totalLossPrincipal->add($loan->amount->subtract($totalPaidPrincipal));
         }
 

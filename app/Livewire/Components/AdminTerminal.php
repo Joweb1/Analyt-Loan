@@ -6,6 +6,7 @@ use App\Models\SystemHealthLog;
 use App\Services\SystemHealthService;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
@@ -110,8 +111,8 @@ class AdminTerminal extends Component
         $dbLatency = round((microtime(true) - $start) * 1000, 2);
 
         $start = microtime(true);
-        \Illuminate\Support\Facades\Cache::put('latency_test', true, 1);
-        \Illuminate\Support\Facades\Cache::get('latency_test');
+        Cache::put('latency_test', true, 1);
+        Cache::get('latency_test');
         $cacheLatency = round((microtime(true) - $start) * 1000, 2);
 
         $this->log('success', "Database Latency: {$dbLatency}ms", 'network');

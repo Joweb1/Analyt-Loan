@@ -2,8 +2,14 @@
 
 namespace App\Observers;
 
+use App\Events\DashboardUpdated;
 use App\Helpers\SystemLogger;
+use App\Livewire\AdminDashboard;
+use App\Livewire\LoanDashboard;
+use App\Livewire\Reports;
 use App\Models\Loan;
+use App\Models\ScheduledRepayment;
+use App\ValueObjects\Money;
 
 class LoanObserver
 {
@@ -47,10 +53,10 @@ class LoanObserver
             );
         }
 
-        \App\Events\DashboardUpdated::dispatch($loan->organization_id);
-        \App\Livewire\LoanDashboard::clearCache($loan->organization_id);
-        \App\Livewire\AdminDashboard::clearCache($loan->organization_id, $loan->portfolio_id);
-        \App\Livewire\Reports::clearCache($loan->organization_id);
+        DashboardUpdated::dispatch($loan->organization_id);
+        LoanDashboard::clearCache($loan->organization_id);
+        AdminDashboard::clearCache($loan->organization_id, $loan->portfolio_id);
+        Reports::clearCache($loan->organization_id);
     }
 
     /**
@@ -112,24 +118,24 @@ class LoanObserver
             $diffMinor = 0;
 
             if ($loan->wasChanged('processing_fee')) {
-                /** @var \App\ValueObjects\Money $newProc */
-                $newProc = $loan->processing_fee ?? new \App\ValueObjects\Money(0, $currency);
-                /** @var \App\ValueObjects\Money $oldProc */
-                $oldProc = $loan->getOriginal('processing_fee') ?? new \App\ValueObjects\Money(0, $currency);
+                /** @var Money $newProc */
+                $newProc = $loan->processing_fee ?? new Money(0, $currency);
+                /** @var Money $oldProc */
+                $oldProc = $loan->getOriginal('processing_fee') ?? new Money(0, $currency);
                 $diffMinor += ($newProc->getMinorAmount() - $oldProc->getMinorAmount());
             }
 
             if ($loan->wasChanged('insurance_fee')) {
-                /** @var \App\ValueObjects\Money $newIns */
-                $newIns = $loan->insurance_fee ?? new \App\ValueObjects\Money(0, $currency);
-                /** @var \App\ValueObjects\Money $oldIns */
-                $oldIns = $loan->getOriginal('insurance_fee') ?? new \App\ValueObjects\Money(0, $currency);
+                /** @var Money $newIns */
+                $newIns = $loan->insurance_fee ?? new Money(0, $currency);
+                /** @var Money $oldIns */
+                $oldIns = $loan->getOriginal('insurance_fee') ?? new Money(0, $currency);
                 $diffMinor += ($newIns->getMinorAmount() - $oldIns->getMinorAmount());
             }
 
             if ($diffMinor != 0) {
                 // Find next unpaid schedule
-                /** @var \App\Models\ScheduledRepayment|null $nextSchedule */
+                /** @var ScheduledRepayment|null $nextSchedule */
                 $nextSchedule = $loan->scheduledRepayments()
                     ->whereIn('status', ['applied', 'partial', 'overdue'])
                     ->orderBy('due_date')
@@ -137,12 +143,12 @@ class LoanObserver
 
                 if ($nextSchedule) {
                     $nextSchedule->update([
-                        'penalty_amount' => $nextSchedule->penalty_amount->add(new \App\ValueObjects\Money($diffMinor, $currency)),
+                        'penalty_amount' => $nextSchedule->penalty_amount->add(new Money($diffMinor, $currency)),
                     ]);
                 }
             }
 
-            $diffMoney = new \App\ValueObjects\Money($diffMinor, $currency);
+            $diffMoney = new Money($diffMinor, $currency);
 
             SystemLogger::log(
                 'Loan Fees Updated',
@@ -165,10 +171,10 @@ class LoanObserver
             );
         }
 
-        \App\Events\DashboardUpdated::dispatch($loan->organization_id);
-        \App\Livewire\LoanDashboard::clearCache($loan->organization_id);
-        \App\Livewire\AdminDashboard::clearCache($loan->organization_id, $loan->portfolio_id);
-        \App\Livewire\Reports::clearCache($loan->organization_id);
+        DashboardUpdated::dispatch($loan->organization_id);
+        LoanDashboard::clearCache($loan->organization_id);
+        AdminDashboard::clearCache($loan->organization_id, $loan->portfolio_id);
+        Reports::clearCache($loan->organization_id);
     }
 
     /**
@@ -185,10 +191,10 @@ class LoanObserver
             null // Subject is null as it's deleted
         );
 
-        \App\Events\DashboardUpdated::dispatch($loan->organization_id);
-        \App\Livewire\LoanDashboard::clearCache($loan->organization_id);
-        \App\Livewire\AdminDashboard::clearCache($loan->organization_id, $loan->portfolio_id);
-        \App\Livewire\Reports::clearCache($loan->organization_id);
+        DashboardUpdated::dispatch($loan->organization_id);
+        LoanDashboard::clearCache($loan->organization_id);
+        AdminDashboard::clearCache($loan->organization_id, $loan->portfolio_id);
+        Reports::clearCache($loan->organization_id);
     }
 
     /**

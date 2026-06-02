@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
 
 class UpdateUserLastSeen
@@ -11,7 +12,7 @@ class UpdateUserLastSeen
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param  Closure(Request): (Response)  $next
      */
     public function handle(Request $request, Closure $next): Response
     {
@@ -30,7 +31,7 @@ class UpdateUserLastSeen
             }
 
             if ($needsUpdate) {
-                \Illuminate\Support\Facades\DB::table('users')
+                DB::table('users')
                     ->where('id', $user->id)
                     ->update(['last_seen_at' => now()]);
             }

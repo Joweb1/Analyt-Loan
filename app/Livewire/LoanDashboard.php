@@ -3,10 +3,14 @@
 namespace App\Livewire;
 
 use App\Models\Loan;
+use App\Models\Organization;
 use App\Models\Repayment;
 use App\Models\SystemNotification;
+use App\Models\User;
+use App\Services\ActionTaskService;
 use App\ValueObjects\Money;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Component;
 
 class LoanDashboard extends Component
@@ -45,7 +49,7 @@ class LoanDashboard extends Component
     {
         $filters = ['today', 'week', 'month', 'year'];
         foreach ($filters as $f) {
-            \Illuminate\Support\Facades\Cache::forget("dashboard_stats_v2_{$orgId}_filter_{$f}");
+            Cache::forget("dashboard_stats_v2_{$orgId}_filter_{$f}");
         }
     }
 
@@ -83,11 +87,11 @@ class LoanDashboard extends Component
         $cacheKey = "dashboard_stats_v2_{$orgId}_filter_{$this->filter}";
 
         if ($force) {
-            \Illuminate\Support\Facades\Cache::forget($cacheKey);
+            Cache::forget($cacheKey);
         }
 
         // With real-time invalidation, we can cache for much longer (e.g., 1 hour)
-        $stats = \Illuminate\Support\Facades\Cache::remember($cacheKey, now()->addHour(), function () use ($isOwner, $orgId) {
+        $stats = Cache::remember($cacheKey, now()->addHour(), function () use ($isOwner, $orgId) {
             $startDate = now()->startOfDay();
             $endDate = now()->endOfDay();
 
@@ -114,7 +118,7 @@ class LoanDashboard extends Component
             // Base queries
             $loanQuery = Loan::query();
             $repaymentQuery = Repayment::query();
-            $customerQuery = \App\Models\User::where('type', 'customer');
+            $customerQuery = User::where('type', 'customer');
 
             if ($isOwner) {
                 $loanQuery->withoutGlobalScopes();
@@ -127,14 +131,14 @@ class LoanDashboard extends Component
             }
 
             $res = [];
-            $org = \App\Models\Organization::current();
+            $org = Organization::current();
             $currency = $org ? $org->currency_code : 'NGN';
 
             // Repaid in period
             $repaidTodayMinor = (int) ((clone $repaymentQuery)
                 ->whereBetween('paid_at', [$startDate, $endDate])
                 ->sum('amount'));
-            /** @var \App\ValueObjects\Money $repaidToday */
+            /** @var Money $repaidToday */
             $repaidToday = new Money($repaidTodayMinor, $currency);
             $res['repaidToday'] = $repaidToday;
 
@@ -218,8 +222,8 @@ class LoanDashboard extends Component
         // Action Box Items & Tasks
         if (! $isOwner) {
             $currentDateStr = now()->toDateString();
-            \Illuminate\Support\Facades\Cache::remember("daily_tasks_run_{$orgId}_{$currentDateStr}", now()->addHour(), function () use ($orgId) {
-                \App\Services\ActionTaskService::generateDailyTasks($orgId);
+            Cache::remember("daily_tasks_run_{$orgId}_{$currentDateStr}", now()->addHour(), function () use ($orgId) {
+                ActionTaskService::generateDailyTasks($orgId);
 
                 return true;
             });

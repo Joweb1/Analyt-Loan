@@ -2,24 +2,27 @@
 
 namespace App\Models;
 
+use App\Casts\MoneyCast;
+use App\ValueObjects\Money;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
 /**
  * @property string $id
  * @property string $savings_account_id
- * @property \App\ValueObjects\Money $amount
+ * @property Money $amount
  * @property string $type
  * @property string|null $reference
  * @property string|null $notes
  * @property string $staff_id
- * @property \Illuminate\Support\Carbon $transaction_date
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Models\SavingsAccount $savingsAccount
- * @property-read \App\Models\User $staff
+ * @property Carbon $transaction_date
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read SavingsAccount $savingsAccount
+ * @property-read User $staff
  *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SavingsTransaction newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SavingsTransaction newQuery()
@@ -37,7 +40,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  *
  * @property string|null $repayment_id
  * @property string|null $payment_method
- * @property-read \App\Models\Repayment|null $repayment
+ * @property-read Repayment|null $repayment
  *
  * @method static \Database\Factories\SavingsTransactionFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SavingsTransaction wherePaymentMethod($value)
@@ -63,7 +66,7 @@ class SavingsTransaction extends Model
 
     protected $casts = [
         'transaction_date' => 'datetime',
-        'amount' => \App\Casts\MoneyCast::class,
+        'amount' => MoneyCast::class,
     ];
 
     public function savingsAccount(): BelongsTo

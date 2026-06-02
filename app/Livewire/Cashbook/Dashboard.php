@@ -5,6 +5,7 @@ namespace App\Livewire\Cashbook;
 use App\Models\CashbookEntry;
 use App\Models\Organization;
 use App\Services\CashbookService;
+use App\ValueObjects\Money;
 use Illuminate\Support\Carbon;
 use Livewire\Component;
 
@@ -71,7 +72,7 @@ class Dashboard extends Component
     {
         foreach (array_keys($this->manualFields) as $field) {
             $value = $this->entry->{$field};
-            $this->manualFields[$field] = $value instanceof \App\ValueObjects\Money
+            $this->manualFields[$field] = $value instanceof Money
                 ? $value->getMajorAmount()
                 : $value;
         }

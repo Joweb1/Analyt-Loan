@@ -18,7 +18,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property array<array-key, mixed>|null $cookies
  * @property array<array-key, mixed>|null $payload
  * @property string $created_at
- * @property-read \App\Models\User|null $user
+ * @property-read User|null $user
  *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SessionLog newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SessionLog newQuery()

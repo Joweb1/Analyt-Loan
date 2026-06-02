@@ -6,6 +6,7 @@ use App\Livewire\LoanForm;
 use App\Models\Borrower;
 use App\Models\Collateral;
 use App\Models\Loan;
+use App\Models\LoanProduct;
 use App\Models\Organization;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -84,7 +85,7 @@ class LoanFormTest extends TestCase
 
     public function test_selecting_loan_product_autofills_terms()
     {
-        $product = \App\Models\LoanProduct::create([
+        $product = LoanProduct::create([
             'organization_id' => $this->organization->id,
             'name' => 'Enterprise Product',
             'default_interest_rate' => 12.5,

@@ -2,15 +2,17 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Loan;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Support\Carbon;
 
 /**
- * @mixin \App\Models\Loan
+ * @mixin Loan
  *
  * @property string $repayment_status
- * @property \Illuminate\Support\Carbon|null $disbursed_at
- * @property \Illuminate\Support\Carbon|null $due_at
+ * @property Carbon|null $disbursed_at
+ * @property Carbon|null $due_at
  */
 class LoanResource extends JsonResource
 {

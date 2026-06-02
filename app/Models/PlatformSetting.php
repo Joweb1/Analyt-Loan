@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * @property int $id
@@ -11,8 +13,8 @@ use Illuminate\Database\Eloquent\Model;
  * @property array<array-key, mixed>|null $value
  * @property string $type
  * @property string|null $description
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PlatformSetting newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PlatformSetting newQuery()
@@ -39,7 +41,7 @@ class PlatformSetting extends Model
 
     public static function get($key, $default = null)
     {
-        return \Illuminate\Support\Facades\Cache::remember("platform_setting_{$key}", now()->addDay(), function () use ($key, $default) {
+        return Cache::remember("platform_setting_{$key}", now()->addDay(), function () use ($key, $default) {
             $setting = static::where('key', $key)->first();
 
             return $setting ? $setting->value : $default;
@@ -48,7 +50,7 @@ class PlatformSetting extends Model
 
     public static function set($key, $value, $type = 'string', $description = null)
     {
-        \Illuminate\Support\Facades\Cache::forget("platform_setting_{$key}");
+        Cache::forget("platform_setting_{$key}");
 
         return static::updateOrCreate(
             ['key' => $key],

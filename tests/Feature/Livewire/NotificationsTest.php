@@ -8,6 +8,7 @@ use App\Models\SystemNotification;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -22,7 +23,7 @@ class NotificationsTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        \Spatie\Permission\Models\Permission::firstOrCreate(['name' => 'access_org_notifications', 'guard_name' => 'web']);
+        Permission::firstOrCreate(['name' => 'access_org_notifications', 'guard_name' => 'web']);
         Role::firstOrCreate(['name' => 'Admin', 'guard_name' => 'web']);
         Role::firstOrCreate(['name' => 'Borrower', 'guard_name' => 'web']);
 

@@ -3,12 +3,24 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Database\Factories\UserFactory;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\DatabaseNotification;
+use Illuminate\Notifications\DatabaseNotificationCollection;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 use NotificationChannels\WebPush\HasPushSubscriptions;
+use NotificationChannels\WebPush\PushSubscription;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 use Spatie\Permission\Traits\HasRoles;
 
 /**
@@ -17,27 +29,27 @@ use Spatie\Permission\Traits\HasRoles;
  * @property string|null $email
  * @property string $role
  * @property string|null $branch_id
- * @property \Illuminate\Support\Carbon|null $email_verified_at
+ * @property Carbon|null $email_verified_at
  * @property string $password
  * @property string|null $remember_token
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  * @property string|null $organization_id
  * @property string|null $phone
- * @property \Illuminate\Support\Carbon|null $last_login_at
+ * @property Carbon|null $last_login_at
  * @property array<array-key, mixed>|null $settings
- * @property \Illuminate\Support\Carbon|null $last_seen_at
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Loan> $assignedLoans
+ * @property Carbon|null $last_seen_at
+ * @property-read Collection<int, Loan> $assignedLoans
  * @property-read int|null $assigned_loans_count
- * @property-read \App\Models\Borrower|null $borrower
- * @property-read \Illuminate\Notifications\DatabaseNotificationCollection<int, \Illuminate\Notifications\DatabaseNotification> $notifications
+ * @property-read Borrower|null $borrower
+ * @property-read DatabaseNotificationCollection<int, DatabaseNotification> $notifications
  * @property-read int|null $notifications_count
- * @property-read \App\Models\Organization|null $organization
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Permission> $permissions
+ * @property-read Organization|null $organization
+ * @property-read Collection<int, Permission> $permissions
  * @property-read int|null $permissions_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \NotificationChannels\WebPush\PushSubscription> $pushSubscriptions
+ * @property-read Collection<int, PushSubscription> $pushSubscriptions
  * @property-read int|null $push_subscriptions_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \Spatie\Permission\Models\Role> $roles
+ * @property-read Collection<int, Role> $roles
  * @property-read int|null $roles_count
  *
  * @method static \Database\Factories\UserFactory factory($count = null, $state = [])
@@ -65,11 +77,11 @@ use Spatie\Permission\Traits\HasRoles;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User withoutRole($roles, $guard = null)
  *
  * @property string $type
- * @property-read \App\Models\Guarantor|null $guarantor
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Portfolio> $portfolios
+ * @property-read Guarantor|null $guarantor
+ * @property-read Collection<int, Portfolio> $portfolios
  * @property-read int|null $portfolios_count
- * @property-read \App\Models\Saver|null $saver
- * @property-read \App\Models\SavingsAccount|null $savingsAccount
+ * @property-read Saver|null $saver
+ * @property-read SavingsAccount|null $savingsAccount
  *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|User whereType($value)
  *
@@ -77,14 +89,14 @@ use Spatie\Permission\Traits\HasRoles;
  */
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
+    /** @use HasFactory<UserFactory> */
     use HasFactory, HasPushSubscriptions, HasRoles, HasUuids, Notifiable;
 
     protected static function booted()
     {
         static::creating(function ($user) {
             if (empty($user->email)) {
-                $phone = $user->phone ? preg_replace('/[^0-9]/', '', $user->phone) : \Illuminate\Support\Str::random(10);
+                $phone = $user->phone ? preg_replace('/[^0-9]/', '', $user->phone) : Str::random(10);
                 $user->email = $phone.'@analyt-loan.com';
             }
         });
@@ -158,32 +170,32 @@ class User extends Authenticatable
         return $this->belongsTo(Organization::class);
     }
 
-    public function borrower(): \Illuminate\Database\Eloquent\Relations\HasOne
+    public function borrower(): HasOne
     {
         return $this->hasOne(Borrower::class);
     }
 
-    public function saver(): \Illuminate\Database\Eloquent\Relations\HasOne
+    public function saver(): HasOne
     {
         return $this->hasOne(Saver::class);
     }
 
-    public function guarantor(): \Illuminate\Database\Eloquent\Relations\HasOne
+    public function guarantor(): HasOne
     {
         return $this->hasOne(Guarantor::class);
     }
 
-    public function savingsAccount(): \Illuminate\Database\Eloquent\Relations\HasOne
+    public function savingsAccount(): HasOne
     {
         return $this->hasOne(SavingsAccount::class);
     }
 
-    public function assignedLoans(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function assignedLoans(): HasMany
     {
         return $this->hasMany(Loan::class, 'loan_officer_id');
     }
 
-    public function portfolios(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    public function portfolios(): BelongsToMany
     {
         return $this->belongsToMany(Portfolio::class, 'portfolio_user');
     }
@@ -229,6 +241,6 @@ class User extends Authenticatable
      */
     public function freshTimestamp()
     {
-        return new \Illuminate\Support\Carbon(new \DateTime);
+        return new Carbon(new \DateTime);
     }
 }

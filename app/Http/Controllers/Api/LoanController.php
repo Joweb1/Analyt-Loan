@@ -7,7 +7,9 @@ use App\DTOs\LoanApplicationDTO;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\LoanResource;
 use App\Models\Loan;
+use App\Services\LoanService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class LoanController extends Controller
 {
@@ -22,7 +24,7 @@ class LoanController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request, \App\Services\LoanService $loanService)
+    public function store(Request $request, LoanService $loanService)
     {
         $validated = $request->validate([
             'borrower_id' => 'required|uuid|exists:borrowers,id',
@@ -38,7 +40,7 @@ class LoanController extends Controller
         ]);
 
         $dto = LoanApplicationDTO::fromArray($validated + [
-            'loan_number' => 'LN-'.strtoupper(\Illuminate\Support\Str::random(8)),
+            'loan_number' => 'LN-'.strtoupper(Str::random(8)),
         ]);
 
         $loan = $loanService->createLoan($dto);

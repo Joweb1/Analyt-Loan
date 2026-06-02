@@ -3,6 +3,7 @@
 namespace Tests\Feature\Livewire;
 
 use App\Livewire\PendingLoans;
+use App\Models\Borrower;
 use App\Models\Loan;
 use App\Models\Organization;
 use App\Models\User;
@@ -34,7 +35,7 @@ class PendingLoansTest extends TestCase
 
     public function test_it_lists_pending_loans()
     {
-        $borrower = \App\Models\Borrower::factory()->create([
+        $borrower = Borrower::factory()->create([
             'organization_id' => $this->organization->id,
         ]);
 

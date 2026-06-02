@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Models\SystemNotification;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -14,7 +15,7 @@ class Notifications extends Component
 
     public function markAllAsRead()
     {
-        $user = \Illuminate\Support\Facades\Auth::user();
+        $user = Auth::user();
 
         if ($user->isAppOwner()) {
             $query = SystemNotification::whereNull('organization_id')->whereNull('read_at');
@@ -38,7 +39,7 @@ class Notifications extends Component
 
     public function render()
     {
-        $user = \Illuminate\Support\Facades\Auth::user();
+        $user = Auth::user();
         $orgId = $user->organization_id;
 
         // Security check: Staff can be restricted from seeing org-wide notifications

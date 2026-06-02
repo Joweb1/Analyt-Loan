@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Models\Organization;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Volt\Volt;
 use Tests\TestCase;
@@ -21,8 +23,8 @@ class RegistrationTest extends TestCase
 
     public function test_new_users_can_register(): void
     {
-        $this->seed(\Database\Seeders\RoleSeeder::class);
-        $org = \App\Models\Organization::factory()->create(['status' => 'active', 'kyc_status' => 'approved']);
+        $this->seed(RoleSeeder::class);
+        $org = Organization::factory()->create(['status' => 'active', 'kyc_status' => 'approved']);
 
         $component = Volt::test('pages.auth.register')
             ->set('organization_id', $org->id)

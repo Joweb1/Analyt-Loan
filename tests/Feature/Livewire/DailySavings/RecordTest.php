@@ -8,7 +8,9 @@ use App\Models\Organization;
 use App\Models\SavingsAccount;
 use App\Models\SavingsTransaction;
 use App\Models\User;
+use App\Services\TenantSession;
 use App\ValueObjects\Money;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use PHPUnit\Framework\Attributes\Test;
@@ -28,8 +30,8 @@ class RecordTest extends TestCase
         $this->organization = Organization::factory()->create([
             'system_date' => now()->toDateString(),
         ]);
-        app(\App\Services\TenantSession::class)->setTenantId($this->organization->id);
-        $this->seed(\Database\Seeders\RoleSeeder::class);
+        app(TenantSession::class)->setTenantId($this->organization->id);
+        $this->seed(RoleSeeder::class);
         $this->admin = User::factory()->create(['organization_id' => $this->organization->id]);
         $this->admin->assignRole('Admin');
     }

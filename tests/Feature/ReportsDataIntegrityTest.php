@@ -7,6 +7,7 @@ use App\Models\Borrower;
 use App\Models\Loan;
 use App\Models\Organization;
 use App\Models\User;
+use App\Services\TenantSession;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -25,7 +26,7 @@ class ReportsDataIntegrityTest extends TestCase
         parent::setUp();
         $this->seed(RoleSeeder::class);
         $this->organization = Organization::factory()->create();
-        app(\App\Services\TenantSession::class)->setTenantId($this->organization->id);
+        app(TenantSession::class)->setTenantId($this->organization->id);
         $this->admin = User::factory()->create(['organization_id' => $this->organization->id]);
         $this->admin->assignRole('Admin');
     }

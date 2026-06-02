@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin;
 
+use App\Helpers\SystemLogger;
 use App\Models\Borrower;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
@@ -17,7 +18,7 @@ class KycApproval extends Component
         $borrower->update(['kyc_status' => 'approved']);
 
         // Log the action
-        \App\Helpers\SystemLogger::success(
+        SystemLogger::success(
             'KYC Approved',
             'KYC for '.$borrower->user->name.' was approved.',
             'kyc',

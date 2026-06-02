@@ -2,11 +2,12 @@
 
 namespace App\Http\Resources;
 
+use App\Models\Borrower;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 /**
- * @mixin \App\Models\Borrower
+ * @mixin Borrower
  *
  * @property string $name
  * @property string $email

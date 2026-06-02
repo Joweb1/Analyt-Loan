@@ -2,29 +2,34 @@
 
 namespace App\Models;
 
+use App\Casts\MoneyCast;
 use App\Traits\BelongsToOrganization;
+use App\ValueObjects\Money;
+use Database\Factories\CollateralFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * @property string $id
  * @property string $name
  * @property string|null $description
- * @property \App\ValueObjects\Money $value
+ * @property Money $value
  * @property string|null $image_path
  * @property string|null $loan_id
  * @property string $status
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  * @property string $type
  * @property string|null $condition
  * @property array<array-key, mixed>|null $documents
- * @property \Illuminate\Support\Carbon|null $registered_date
+ * @property Carbon|null $registered_date
  * @property string|null $organization_id
- * @property-read \App\Models\Loan|null $loan
- * @property-read \App\Models\Organization|null $organization
+ * @property-read Loan|null $loan
+ * @property-read Organization|null $organization
  *
  * @method static \Database\Factories\CollateralFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Collateral newModelQuery()
@@ -51,7 +56,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class Collateral extends Model
 {
-    /** @use HasFactory<\Database\Factories\CollateralFactory> */
+    /** @use HasFactory<CollateralFactory> */
     use BelongsToOrganization, HasFactory, HasUuids;
 
     protected $fillable = [
@@ -75,7 +80,7 @@ class Collateral extends Model
     protected $casts = [
         'documents' => 'array',
         'registered_date' => 'date',
-        'value' => \App\Casts\MoneyCast::class,
+        'value' => MoneyCast::class,
     ];
 
     public function loan(): BelongsTo
@@ -95,6 +100,6 @@ class Collateral extends Model
 
         $disk = config('filesystems.disks.supabase.is_configured') ? 'supabase' : config('filesystems.default');
 
-        return \Illuminate\Support\Facades\Storage::disk($disk)->url($this->image_path);
+        return Storage::disk($disk)->url($this->image_path);
     }
 }

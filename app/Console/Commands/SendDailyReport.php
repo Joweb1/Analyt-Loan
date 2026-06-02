@@ -2,7 +2,12 @@
 
 namespace App\Console\Commands;
 
+use App\Helpers\SystemLogger;
+use App\Models\Borrower;
+use App\Models\Loan;
 use App\Models\Organization;
+use App\Models\Repayment;
+use App\Services\SystemHealthService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 
@@ -27,13 +32,13 @@ class SendDailyReport extends Command
      */
     public function handle()
     {
-        \App\Services\SystemHealthService::log('Reports', 'info', 'Generating daily business summary...');
+        SystemHealthService::log('Reports', 'info', 'Generating daily business summary...');
         $organizations = Organization::where('status', 'active')->get();
 
         foreach ($organizations as $org) {
             // Set test time if manual date is enabled
             if ($org->system_date) {
-                \Carbon\Carbon::setTestNow($org->getSystemTime());
+                Carbon::setTestNow($org->getSystemTime());
             } else {
                 Carbon::setTestNow(); // Use real time
             }
@@ -41,14 +46,14 @@ class SendDailyReport extends Command
             $today = now()->startOfDay();
 
             // Stats
-            $repayments = \App\Models\Repayment::whereHas('loan', function ($q) use ($org) {
+            $repayments = Repayment::whereHas('loan', function ($q) use ($org) {
                 $q->where('organization_id', $org->id);
             })->where('paid_at', '>=', $today)->sum('amount') / 100;
 
-            $newLoansCount = \App\Models\Loan::where('organization_id', $org->id)
+            $newLoansCount = Loan::where('organization_id', $org->id)
                 ->where('created_at', '>=', $today)->count();
 
-            $newBorrowersCount = \App\Models\Borrower::where('organization_id', $org->id)
+            $newBorrowersCount = Borrower::where('organization_id', $org->id)
                 ->where('created_at', '>=', $today)->count();
 
             $message = 'Daily Summary for '.now()->format('M d, Y').":\n";
@@ -56,7 +61,7 @@ class SendDailyReport extends Command
             $message .= '• New Loans: '.$newLoansCount."\n";
             $message .= '• New Customers: '.$newBorrowersCount;
 
-            \App\Helpers\SystemLogger::log(
+            SystemLogger::log(
                 'Daily Performance Report',
                 $message,
                 'success',
@@ -71,7 +76,7 @@ class SendDailyReport extends Command
         // Reset
         Carbon::setTestNow();
 
-        \App\Services\SystemHealthService::log('Reports', 'success', 'Daily performance reports dispatched.');
+        SystemHealthService::log('Reports', 'success', 'Daily performance reports dispatched.');
         $this->info('Daily reports sent successfully.');
     }
 }

@@ -2,8 +2,13 @@
 
 namespace App\Observers;
 
+use App\Events\DashboardUpdated;
 use App\Helpers\SystemLogger;
+use App\Livewire\AdminDashboard;
+use App\Livewire\LoanDashboard;
+use App\Livewire\Reports;
 use App\Models\Collateral;
+use App\ValueObjects\Money;
 
 class CollateralObserver
 {
@@ -16,7 +21,7 @@ class CollateralObserver
             ? "to Loan #{$collateral->loan->loan_number}"
             : 'as Company Asset';
 
-        /** @var \App\ValueObjects\Money $value */
+        /** @var Money $value */
         $value = $collateral->value;
         SystemLogger::success(
             'New Collateral Added',
@@ -25,10 +30,10 @@ class CollateralObserver
             $collateral
         );
 
-        \App\Events\DashboardUpdated::dispatch($collateral->organization_id);
-        \App\Livewire\LoanDashboard::clearCache($collateral->organization_id);
-        \App\Livewire\AdminDashboard::clearCache($collateral->organization_id);
-        \App\Livewire\Reports::clearCache($collateral->organization_id);
+        DashboardUpdated::dispatch($collateral->organization_id);
+        LoanDashboard::clearCache($collateral->organization_id);
+        AdminDashboard::clearCache($collateral->organization_id);
+        Reports::clearCache($collateral->organization_id);
     }
 
     /**
@@ -50,10 +55,10 @@ class CollateralObserver
             );
         }
 
-        \App\Events\DashboardUpdated::dispatch($collateral->organization_id);
-        \App\Livewire\LoanDashboard::clearCache($collateral->organization_id);
-        \App\Livewire\AdminDashboard::clearCache($collateral->organization_id);
-        \App\Livewire\Reports::clearCache($collateral->organization_id);
+        DashboardUpdated::dispatch($collateral->organization_id);
+        LoanDashboard::clearCache($collateral->organization_id);
+        AdminDashboard::clearCache($collateral->organization_id);
+        Reports::clearCache($collateral->organization_id);
     }
 
     /**
@@ -72,10 +77,10 @@ class CollateralObserver
             $collateral
         );
 
-        \App\Events\DashboardUpdated::dispatch($collateral->organization_id);
-        \App\Livewire\LoanDashboard::clearCache($collateral->organization_id);
-        \App\Livewire\AdminDashboard::clearCache($collateral->organization_id);
-        \App\Livewire\Reports::clearCache($collateral->organization_id);
+        DashboardUpdated::dispatch($collateral->organization_id);
+        LoanDashboard::clearCache($collateral->organization_id);
+        AdminDashboard::clearCache($collateral->organization_id);
+        Reports::clearCache($collateral->organization_id);
     }
 
     /**

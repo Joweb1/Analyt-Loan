@@ -1,8 +1,21 @@
 <?php
 
+use App\Http\Middleware\CheckOrganizationStatus;
+use App\Http\Middleware\DebugSession;
+use App\Http\Middleware\EnforceTenancy;
+use App\Http\Middleware\FinancialIdempotency;
+use App\Http\Middleware\InjectTraceId;
+use App\Http\Middleware\OverrideOrganizationTime;
+use App\Http\Middleware\RoleMiddleware;
+use App\Http\Middleware\UpdateUserLastSeen;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
+use Spatie\Permission\Exceptions\UnauthorizedException;
+use Spatie\Permission\Middleware\PermissionMiddleware;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -30,22 +43,22 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->alias([
-            'role' => \App\Http\Middleware\RoleMiddleware::class,
-            'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
-            'update_last_seen' => \App\Http\Middleware\UpdateUserLastSeen::class,
-            'idempotency' => \App\Http\Middleware\FinancialIdempotency::class,
+            'role' => RoleMiddleware::class,
+            'permission' => PermissionMiddleware::class,
+            'update_last_seen' => UpdateUserLastSeen::class,
+            'idempotency' => FinancialIdempotency::class,
         ]);
-        $middleware->append(\App\Http\Middleware\InjectTraceId::class);
+        $middleware->append(InjectTraceId::class);
 
         $middleware->web(append: [
-            \App\Http\Middleware\DebugSession::class,
-            \App\Http\Middleware\EnforceTenancy::class,
-            \App\Http\Middleware\OverrideOrganizationTime::class,
-            \App\Http\Middleware\CheckOrganizationStatus::class,
+            DebugSession::class,
+            EnforceTenancy::class,
+            OverrideOrganizationTime::class,
+            CheckOrganizationStatus::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        $exceptions->render(function (\Spatie\Permission\Exceptions\UnauthorizedException|\Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException|\Illuminate\Auth\Access\AuthorizationException $e, \Illuminate\Http\Request $request) {
+        $exceptions->render(function (UnauthorizedException|AccessDeniedHttpException|AuthorizationException $e, Request $request) {
             if ($request->expectsJson()) {
                 return response()->json(['message' => 'Unauthorized.'], 403);
             }

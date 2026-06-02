@@ -6,6 +6,7 @@ use App\Traits\BelongsToOrganization;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 /**
  * @property string $id
@@ -19,9 +20,9 @@ use Illuminate\Database\Eloquent\Model;
  * @property bool $is_active
  * @property bool $is_system
  * @property int $sort_order
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Models\Organization $organization
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read Organization $organization
  *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|FormFieldConfig newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|FormFieldConfig newQuery()

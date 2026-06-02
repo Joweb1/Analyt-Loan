@@ -4,6 +4,8 @@ namespace App\Livewire\Components;
 
 use App\Models\Collateral;
 use App\Models\Loan;
+use App\Models\Portfolio;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
@@ -79,7 +81,7 @@ class OmnibarSearch extends Component
 
         // 2. Search Customers
         if (! $prefix || in_array($prefix, ['customer', 'borrower', 'saver', 'guarantor', 'staff'])) {
-            $customers = \App\Models\User::where('organization_id', $orgId)
+            $customers = User::where('organization_id', $orgId)
                 ->where('type', 'customer')
                 ->where(function ($q) use ($search, $prefix) {
                     if ($prefix === 'staff') {
@@ -156,7 +158,7 @@ class OmnibarSearch extends Component
 
         // 4. Search Portfolios
         if (! $prefix || $prefix === 'portfolio') {
-            $portfolios = \App\Models\Portfolio::where('organization_id', $orgId)
+            $portfolios = Portfolio::where('organization_id', $orgId)
                 ->where(function ($q) use ($search) {
                     $q->where('name', 'like', '%'.$search.'%')
                         ->orWhere('description', 'like', '%'.$search.'%');
@@ -200,7 +202,7 @@ class OmnibarSearch extends Component
 
         // 6. Search Staff
         if (! $prefix || $prefix === 'staff' || $prefix === 'admin') {
-            $staff = \App\Models\User::where('organization_id', $orgId)
+            $staff = User::where('organization_id', $orgId)
                 ->whereIn('type', ['admin', 'staff'])
                 ->where(function ($q) use ($search) {
                     $q->where('name', 'like', '%'.$search.'%')

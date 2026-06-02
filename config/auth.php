@@ -1,5 +1,8 @@
 <?php
 
+use App\Models\Borrower;
+use App\Models\User;
+
 return [
 
     /*
@@ -66,12 +69,12 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => App\Models\User::class,
+            'model' => User::class,
         ],
 
         'borrowers' => [
             'driver' => 'eloquent',
-            'model' => App\Models\Borrower::class,
+            'model' => Borrower::class,
         ],
     ],
 

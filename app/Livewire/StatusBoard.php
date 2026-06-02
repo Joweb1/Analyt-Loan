@@ -6,6 +6,7 @@ use App\Models\Loan;
 use App\Models\Portfolio;
 use App\ValueObjects\Money;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -13,14 +14,19 @@ class StatusBoard extends Component
 {
     use WithPagination;
 
+    #[Url]
     public $search = '';
 
+    #[Url]
     public $statusFilter = '';
 
+    #[Url]
     public $riskFilter = '';
 
+    #[Url]
     public $dateFilter = '';
 
+    #[Url]
     public $portfolioId = null;
 
     public $portfolios = [];
@@ -53,43 +59,27 @@ class StatusBoard extends Component
         }
     }
 
-    public function updatingSearch()
+    public function updating($property)
     {
-        $this->resetPage();
-    }
-
-    public function updatingStatusFilter()
-    {
-        $this->resetPage();
-    }
-
-    public function updatingRiskFilter()
-    {
-        $this->resetPage();
-    }
-
-    public function updatingDateFilter()
-    {
-        $this->resetPage();
-    }
-
-    public function updatingPortfolioId()
-    {
-        $this->resetPage();
+        if (in_array($property, ['search', 'statusFilter', 'riskFilter', 'dateFilter', 'portfolioId'])) {
+            $this->resetPage();
+        }
     }
 
     private function applyFilters($query)
     {
         if ($this->search) {
-            $query->where(function ($q) {
-                $q->where('loan_number', 'like', '%'.$this->search.'%')
-                    ->orWhereHas('borrower.user', function ($bq) {
-                        $bq->where('name', 'like', '%'.$this->search.'%');
+            $term = '%'.strtolower(trim($this->search)).'%';
+            $query->where(function ($q) use ($term) {
+                $q->where('loan_number', 'like', $term)
+                    ->orWhereHas('borrower.user', function ($uq) use ($term) {
+                        $uq->whereRaw('LOWER(name) LIKE ?', [$term]);
                     })
-                    ->orWhereHas('borrower', function ($bq) {
-                        $bq->where('phone', 'like', '%'.$this->search.'%')
-                            ->orWhere('bvn', 'like', '%'.$this->search.'%')
-                            ->orWhere('national_identity_number', 'like', '%'.$this->search.'%');
+                    ->orWhereHas('borrower', function ($bq) use ($term) {
+                        $bq->where('phone', 'like', $term)
+                            ->orWhere('bvn', 'like', $term)
+                            ->orWhere('national_identity_number', 'like', $term)
+                            ->orWhere('custom_id', 'like', $term);
                     });
             });
         }

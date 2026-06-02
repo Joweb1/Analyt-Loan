@@ -3,12 +3,20 @@
 namespace Tests\Feature\Livewire;
 
 use App\Livewire\AdminDashboard;
+use App\Models\AccountBalance;
 use App\Models\Borrower;
+use App\Models\CashbookEntry;
+use App\Models\Guarantor;
 use App\Models\Loan;
 use App\Models\Organization;
+use App\Models\Portfolio;
 use App\Models\Repayment;
+use App\Models\Saver;
+use App\Models\ScheduledRepayment;
 use App\Models\SystemNotification;
 use App\Models\User;
+use App\ValueObjects\Money;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -25,7 +33,7 @@ class AdminDashboardTest extends TestCase
     {
         parent::setUp();
         $this->organization = Organization::factory()->create();
-        $this->seed(\Database\Seeders\RoleSeeder::class);
+        $this->seed(RoleSeeder::class);
         $this->admin = User::factory()->create(['organization_id' => $this->organization->id]);
         $this->admin->assignRole('Admin');
     }
@@ -53,7 +61,7 @@ class AdminDashboardTest extends TestCase
             'status' => 'active',
         ]);
 
-        \App\Models\ScheduledRepayment::create([
+        ScheduledRepayment::create([
             'loan_id' => $loan1->id,
             'installment_number' => 1,
             'principal_amount' => 100000.0,
@@ -74,7 +82,7 @@ class AdminDashboardTest extends TestCase
             'status' => 'active',
         ]);
 
-        \App\Models\ScheduledRepayment::create([
+        ScheduledRepayment::create([
             'loan_id' => $loan2->id,
             'installment_number' => 1,
             'principal_amount' => 50000.0,
@@ -102,10 +110,10 @@ class AdminDashboardTest extends TestCase
             ->assertSet('totalLoaned', function ($val) {
                 // \Log::info('Val type: ' . get_class($val));
                 // \Log::info('Val minor: ' . $val->getMinorAmount());
-                return $val instanceof \App\ValueObjects\Money && $val->getMinorAmount() === 10000000;
+                return $val instanceof Money && $val->getMinorAmount() === 10000000;
             })
             ->assertSet('totalCollected', function ($val) {
-                return $val instanceof \App\ValueObjects\Money && $val->getMinorAmount() === 5500000;
+                return $val instanceof Money && $val->getMinorAmount() === 5500000;
             })
             ->assertSet('activeLoansCount', 1) // Only Loan 1 is active
             ->assertSet('paidLoansCount', 1); // Loan 2 is repaid
@@ -135,12 +143,12 @@ class AdminDashboardTest extends TestCase
         // 1 Saver
         $userSaver = User::factory()->create(['organization_id' => $this->organization->id, 'type' => 'customer']);
         $userSaver->assignRole('Saver');
-        $portfolio = \App\Models\Portfolio::create([
+        $portfolio = Portfolio::create([
             'organization_id' => $this->organization->id,
             'name' => 'Main Portfolio',
             'code' => 'MAIN',
         ]);
-        \App\Models\Saver::create([
+        Saver::create([
             'user_id' => $userSaver->id,
             'organization_id' => $this->organization->id,
             'portfolio_id' => $portfolio->id,
@@ -150,7 +158,7 @@ class AdminDashboardTest extends TestCase
         // 1 Guarantor
         $userGuarantor = User::factory()->create(['organization_id' => $this->organization->id, 'type' => 'customer']);
         $userGuarantor->assignRole('Guarantor');
-        \App\Models\Guarantor::create([
+        Guarantor::create([
             'user_id' => $userGuarantor->id,
             'organization_id' => $this->organization->id,
             'name' => 'John Doe',
@@ -172,14 +180,14 @@ class AdminDashboardTest extends TestCase
         $date = $this->organization->getSystemTime();
         AdminDashboard::clearCache($this->organization->id);
 
-        \App\Models\AccountBalance::create([
+        AccountBalance::create([
             'organization_id' => $this->organization->id,
             'month' => $date->month,
             'year' => $date->year,
             'opening_balance' => 10000.0, // 1M minor
         ]);
 
-        \App\Models\CashbookEntry::create([
+        CashbookEntry::create([
             'organization_id' => $this->organization->id,
             'entry_date' => $date->toDateString(),
             'bank_deposit_amount' => 5000.0,
@@ -191,7 +199,7 @@ class AdminDashboardTest extends TestCase
         Livewire::actingAs($this->admin)
             ->test(AdminDashboard::class)
             ->assertSet('accountBalance', function ($val) {
-                return $val instanceof \App\ValueObjects\Money && $val->getMinorAmount() === 1300000;
+                return $val instanceof Money && $val->getMinorAmount() === 1300000;
             })
             ->assertSee('Live Bank Balance')
             ->assertSee('₦ 13,000.00');

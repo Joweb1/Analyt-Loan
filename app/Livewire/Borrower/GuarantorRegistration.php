@@ -2,10 +2,13 @@
 
 namespace App\Livewire\Borrower;
 
+use App\Livewire\Settings\FormBuilder;
 use App\Models\FormFieldConfig;
 use App\Models\Guarantor;
 use App\Traits\SterilizesPhone;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Component;
@@ -51,7 +54,7 @@ class GuarantorRegistration extends Component
             ->get();
 
         if ($rawConfigs->isEmpty()) {
-            \App\Livewire\Settings\FormBuilder::seedDefaults($orgId, 'guarantor');
+            FormBuilder::seedDefaults($orgId, 'guarantor');
             $rawConfigs = FormFieldConfig::where('organization_id', $orgId)
                 ->where('form_type', 'guarantor')
                 ->where('is_active', true)
@@ -105,7 +108,7 @@ class GuarantorRegistration extends Component
                         $rule[] = 'nullable';
                     }
 
-                    if ($currentValue instanceof \Illuminate\Http\UploadedFile) {
+                    if ($currentValue instanceof UploadedFile) {
                         $rule[] = 'file';
                         $rule[] = 'max:10240';
                     }
@@ -146,11 +149,11 @@ class GuarantorRegistration extends Component
             // Handle file uploads in custom data
             $disk = (config('filesystems.disks.supabase.is_configured') && ! app()->environment('testing')) ? 'supabase' : config('filesystems.default');
             foreach ($this->customData as $key => $value) {
-                if ($value instanceof \Illuminate\Http\UploadedFile) {
+                if ($value instanceof UploadedFile) {
                     $filename = Str::random(40).'.'.$value->getClientOriginalExtension();
                     $path = 'guarantor-files/'.$filename;
                     $stream = fopen($value->getRealPath(), 'r');
-                    \Illuminate\Support\Facades\Storage::disk($disk)->put($path, $stream);
+                    Storage::disk($disk)->put($path, $stream);
                     if (is_resource($stream)) {
                         fclose($stream);
                     }

@@ -4,17 +4,19 @@ namespace App\Models;
 
 use App\Casts\MoneyCast;
 use App\Traits\BelongsToOrganization;
+use App\ValueObjects\Money;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
  * @property int $organization_id
  * @property int $month
  * @property int $year
- * @property \App\ValueObjects\Money $opening_balance
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Models\Organization $organization
+ * @property Money $opening_balance
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read Organization $organization
  *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AccountBalance newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|AccountBalance newQuery()

@@ -2,7 +2,9 @@
 
 namespace App\Livewire\Admin;
 
+use App\Helpers\SystemLogger;
 use App\Models\Loan;
+use App\Services\LoanService;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -19,7 +21,7 @@ class LoanApproval extends Component
         $loan->update(['status' => 'approved']);
 
         // Log the action
-        \App\Helpers\SystemLogger::success(
+        SystemLogger::success(
             'Loan Approved',
             'Loan #'.$loan->loan_number.' was approved.',
             'loan',
@@ -32,12 +34,12 @@ class LoanApproval extends Component
     public function activateLoan($id)
     {
         $loan = Loan::findOrFail($id);
-        $loanService = app(\App\Services\LoanService::class);
+        $loanService = app(LoanService::class);
 
         try {
             $loanService->activateLoan($loan);
 
-            \App\Helpers\SystemLogger::success(
+            SystemLogger::success(
                 'Loan Activated',
                 'Loan #'.$loan->loan_number.' was activated.',
                 'loan',

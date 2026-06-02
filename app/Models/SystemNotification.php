@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Support\Carbon;
 
 /**
  * @property string $id
@@ -18,18 +19,18 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property string|null $category
  * @property string|null $subject_type
  * @property string|null $subject_id
- * @property \Illuminate\Support\Carbon|null $read_at
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property Carbon|null $read_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  * @property string|null $organization_id
  * @property int $is_actionable
  * @property string|null $action_link
  * @property string $priority
  * @property string|null $recipient_id
- * @property-read \App\Models\Organization|null $organization
- * @property-read \App\Models\User|null $recipient
+ * @property-read Organization|null $organization
+ * @property-read User|null $recipient
  * @property-read Model|\Eloquent|null $subject
- * @property-read \App\Models\User|null $user
+ * @property-read User|null $user
  *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SystemNotification newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SystemNotification newQuery()

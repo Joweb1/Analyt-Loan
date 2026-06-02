@@ -2,11 +2,13 @@
 
 namespace Database\Factories;
 
+use App\Models\Borrower;
+use App\Models\Organization;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Borrower>
+ * @extends Factory<Borrower>
  */
 class BorrowerFactory extends Factory
 {
@@ -18,7 +20,7 @@ class BorrowerFactory extends Factory
     public function definition(): array
     {
         return [
-            'organization_id' => \App\Models\Organization::factory(),
+            'organization_id' => Organization::factory(),
             'user_id' => function (array $attributes) {
                 return User::factory()->create([
                     'organization_id' => $attributes['organization_id'] ?? null,

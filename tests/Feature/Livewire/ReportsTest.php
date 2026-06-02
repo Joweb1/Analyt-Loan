@@ -7,6 +7,7 @@ use App\Models\Loan;
 use App\Models\Organization;
 use App\Models\Repayment;
 use App\Models\User;
+use App\Services\TenantSession;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -23,7 +24,7 @@ class ReportsTest extends TestCase
     {
         parent::setUp();
         $this->organization = Organization::factory()->create();
-        app(\App\Services\TenantSession::class)->setTenantId($this->organization->id);
+        app(TenantSession::class)->setTenantId($this->organization->id);
 
         // Clear all caches for this org to be absolutely sure
         Reports::clearCache($this->organization->id);

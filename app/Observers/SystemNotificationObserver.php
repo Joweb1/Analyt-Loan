@@ -2,8 +2,12 @@
 
 namespace App\Observers;
 
+use App\Models\Loan;
 use App\Models\SystemNotification;
+use App\Models\User;
 use App\Notifications\PushSystemNotification;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class SystemNotificationObserver
 {
@@ -16,7 +20,7 @@ class SystemNotificationObserver
 
         // 1. Handle Explicit Recipient (Borrower or App Owner)
         if ($explicitRecipientId) {
-            $recipient = \App\Models\User::find($explicitRecipientId);
+            $recipient = User::find($explicitRecipientId);
 
             if ($recipient) {
                 // Direct notifications always go through if the user has push enabled
@@ -42,19 +46,19 @@ class SystemNotificationObserver
         }
 
         $targetRoles = ['Admin', 'Loan Analyst', 'Vault Manager', 'Credit Analyst', 'Collection Specialist'];
-        $existingRoles = \Spatie\Permission\Models\Role::whereIn('name', $targetRoles)->pluck('name')->toArray();
+        $existingRoles = Role::whereIn('name', $targetRoles)->pluck('name')->toArray();
 
         $roleStaff = collect();
         if (! empty($existingRoles)) {
-            $roleStaff = \App\Models\User::where('organization_id', $orgId)
+            $roleStaff = User::where('organization_id', $orgId)
                 ->role($existingRoles)
                 ->get();
         }
 
         $permissionStaff = collect();
         // Only attempt permission-based lookup if the permission exists to avoid Spatie exceptions during tests/seeds
-        if (\Spatie\Permission\Models\Permission::where('name', 'access_org_notifications')->exists()) {
-            $permissionStaff = \App\Models\User::where('organization_id', $orgId)
+        if (Permission::where('name', 'access_org_notifications')->exists()) {
+            $permissionStaff = User::where('organization_id', $orgId)
                 ->permission('access_org_notifications')
                 ->get();
         }
@@ -66,7 +70,7 @@ class SystemNotificationObserver
             // don't send a broadcast push to the person who is actually the borrower of that loan.
             // They would have already received a direct notification (or shouldn't be bothered by staff-targeted alerts for their own loan).
             $loan = $systemNotification->subject;
-            if ($loan instanceof \App\Models\Loan) {
+            if ($loan instanceof Loan) {
                 if ($loan->borrower->user_id === $staff->id) {
                     continue;
                 }

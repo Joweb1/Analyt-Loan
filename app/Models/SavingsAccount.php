@@ -2,27 +2,31 @@
 
 namespace App\Models;
 
+use App\Casts\MoneyCast;
 use App\Traits\BelongsToOrganization;
+use App\ValueObjects\Money;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 
 /**
  * @property string $id
  * @property string $user_id
  * @property string $organization_id
  * @property string $account_number
- * @property \App\ValueObjects\Money $balance
- * @property \App\ValueObjects\Money $daily_savings_balance
+ * @property Money $balance
+ * @property Money $daily_savings_balance
  * @property numeric $interest_rate
  * @property string $status
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Models\User $user
- * @property-read \App\Models\Organization $organization
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\SavingsTransaction> $transactions
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read User $user
+ * @property-read Organization $organization
+ * @property-read Collection<int, SavingsTransaction> $transactions
  * @property-read int|null $transactions_count
  *
  * @method static \Database\Factories\SavingsAccountFactory factory($count = null, $state = [])
@@ -57,8 +61,8 @@ class SavingsAccount extends Model
     ];
 
     protected $casts = [
-        'balance' => \App\Casts\MoneyCast::class,
-        'daily_savings_balance' => \App\Casts\MoneyCast::class,
+        'balance' => MoneyCast::class,
+        'daily_savings_balance' => MoneyCast::class,
     ];
 
     public function user(): BelongsTo

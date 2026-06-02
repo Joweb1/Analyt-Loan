@@ -2,24 +2,27 @@
 
 namespace App\Models;
 
+use App\Casts\MoneyCast;
+use App\ValueObjects\Money;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
 /**
  * @property string $id
  * @property string $loan_id
- * @property \Illuminate\Support\Carbon $due_date
- * @property \App\ValueObjects\Money $principal_amount
- * @property \App\ValueObjects\Money $interest_amount
- * @property \App\ValueObjects\Money $penalty_amount
- * @property \App\ValueObjects\Money $paid_amount
+ * @property Carbon $due_date
+ * @property Money $principal_amount
+ * @property Money $interest_amount
+ * @property Money $penalty_amount
+ * @property Money $paid_amount
  * @property string $status
  * @property int $installment_number
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Models\Loan $loan
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read Loan $loan
  *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ScheduledRepayment newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ScheduledRepayment newQuery()
@@ -56,10 +59,10 @@ class ScheduledRepayment extends Model
 
     protected $casts = [
         'due_date' => 'date',
-        'principal_amount' => \App\Casts\MoneyCast::class,
-        'interest_amount' => \App\Casts\MoneyCast::class,
-        'penalty_amount' => \App\Casts\MoneyCast::class,
-        'paid_amount' => \App\Casts\MoneyCast::class,
+        'principal_amount' => MoneyCast::class,
+        'interest_amount' => MoneyCast::class,
+        'penalty_amount' => MoneyCast::class,
+        'paid_amount' => MoneyCast::class,
     ];
 
     public function setStatusAttribute($value)

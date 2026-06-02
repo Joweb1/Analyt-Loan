@@ -2,9 +2,17 @@
 
 namespace App\Livewire;
 
+use App\Events\DashboardUpdated;
+use App\Helpers\SystemLogger;
 use App\Models\Portfolio;
+use App\Models\SavingsAccount;
 use App\Models\User;
+use App\Services\CashbookService;
+use App\ValueObjects\Money;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -12,8 +20,10 @@ class SavingsEntry extends Component
 {
     use WithPagination;
 
+    #[Url]
     public $search = '';
 
+    #[Url]
     public $portfolioId = null;
 
     public $portfolios = [];
@@ -31,8 +41,6 @@ class SavingsEntry extends Component
 
     public $notes = '';
 
-    protected $updatesQueryString = ['search', 'portfolioId'];
-
     public function mount()
     {
         $user = Auth::user();
@@ -45,14 +53,11 @@ class SavingsEntry extends Component
         $this->transaction_date = now()->format('Y-m-d');
     }
 
-    public function updatingSearch()
+    public function updating($property)
     {
-        $this->resetPage();
-    }
-
-    public function updatingPortfolioId()
-    {
-        $this->resetPage();
+        if (in_array($property, ['search', 'portfolioId'])) {
+            $this->resetPage();
+        }
     }
 
     public function selectCustomer($id)
@@ -79,11 +84,11 @@ class SavingsEntry extends Component
         $customer = User::findOrFail($this->selectedCustomerId);
 
         // Ensure they have a savings account
-        /** @var \App\Models\SavingsAccount $account */
+        /** @var SavingsAccount $account */
         $account = $customer->savingsAccount()->firstOrCreate([
             'organization_id' => $customer->organization_id,
         ], [
-            'account_number' => 'SAV-'.strtoupper(\Illuminate\Support\Str::random(8)),
+            'account_number' => 'SAV-'.strtoupper(Str::random(8)),
             'balance' => 0,
             'interest_rate' => 0,
             'status' => 'active',
@@ -96,7 +101,7 @@ class SavingsEntry extends Component
         $transaction = $account->transactions()->create([
             'amount' => $this->amount,
             'type' => 'deposit',
-            'reference' => 'DEP-'.strtoupper(\Illuminate\Support\Str::random(8)),
+            'reference' => 'DEP-'.strtoupper(Str::random(8)),
             'notes' => $this->notes.' ('.$this->payment_method.')',
             'staff_id' => Auth::id(),
             'payment_method' => $normalizedMethod,
@@ -104,13 +109,13 @@ class SavingsEntry extends Component
         ]);
 
         // Update balance
-        $amountMoney = \App\ValueObjects\Money::fromMajor($this->amount, $customer->organization->currency_code ?? 'NGN');
-        /** @var \App\ValueObjects\Money $balance */
+        $amountMoney = Money::fromMajor($this->amount, $customer->organization->currency_code ?? 'NGN');
+        /** @var Money $balance */
         $balance = $account->balance;
         $account->update(['balance' => $balance->add($amountMoney)]);
 
         // Trigger Notification
-        \App\Helpers\SystemLogger::success(
+        SystemLogger::success(
             'Savings Deposit',
             'Deposit of ₦'.number_format($this->amount, 2).' received from '.$customer->name,
             'savings',
@@ -118,12 +123,12 @@ class SavingsEntry extends Component
         );
 
         // Refresh Cashbook for this date
-        $cashbookService = app(\App\Services\CashbookService::class);
-        $entry = $cashbookService->getEntryForDate(\Illuminate\Support\Carbon::parse($this->transaction_date), $customer->organization);
+        $cashbookService = app(CashbookService::class);
+        $entry = $cashbookService->getEntryForDate(Carbon::parse($this->transaction_date), $customer->organization);
         $cashbookService->fetchSystemData($entry);
 
-        \App\Events\DashboardUpdated::dispatch($customer->organization_id);
-        \App\Livewire\Reports::clearCache($customer->organization_id);
+        DashboardUpdated::dispatch($customer->organization_id);
+        Reports::clearCache($customer->organization_id);
 
         $this->showSavingsModal = false;
         $this->dispatch('custom-alert', ['type' => 'success', 'message' => 'Savings deposit added successfully.']);
@@ -140,12 +145,13 @@ class SavingsEntry extends Component
             ->with(['savingsAccount', 'borrower', 'saver']);
 
         if (! empty($this->search)) {
-            $search = strtolower(trim($this->search));
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', '%'.$search.'%')
-                    ->orWhere('email', 'like', '%'.$search.'%')
-                    ->orWhere('phone', 'like', '%'.$search.'%')
-                    ->orWhereHas('borrower', fn ($bq) => $bq->where('custom_id', 'like', '%'.$search.'%'));
+            $term = '%'.strtolower(trim($this->search)).'%';
+            $query->where(function ($q) use ($term) {
+                $q->whereRaw('LOWER(name) LIKE ?', [$term])
+                    ->orWhereRaw('LOWER(email) LIKE ?', [$term])
+                    ->orWhere('phone', 'like', $term)
+                    ->orWhereHas('borrower', fn ($bq) => $bq->where('custom_id', 'like', $term))
+                    ->orWhereHas('saver', fn ($sq) => $sq->where('custom_id', 'like', $term));
             });
         }
 

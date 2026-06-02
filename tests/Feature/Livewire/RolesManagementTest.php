@@ -4,8 +4,10 @@ namespace Tests\Feature\Livewire;
 
 use App\Livewire\Settings\RolesManagement;
 use App\Models\User;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use PHPUnit\Framework\Attributes\Test;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
@@ -16,10 +18,10 @@ class RolesManagementTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->seed(\Database\Seeders\RoleSeeder::class);
+        $this->seed(RoleSeeder::class);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function it_renders_successfully()
     {
         $user = User::factory()->create();
@@ -30,7 +32,7 @@ class RolesManagementTest extends TestCase
             ->assertStatus(200);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function it_can_edit_system_roles()
     {
         $user = User::factory()->create();
@@ -45,7 +47,7 @@ class RolesManagementTest extends TestCase
             ->assertSet('editingRoleId', $role->id);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function it_cannot_delete_system_roles()
     {
         $user = User::factory()->create();
@@ -63,7 +65,7 @@ class RolesManagementTest extends TestCase
         $this->assertDatabaseHas('roles', ['id' => $role->id]);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function it_can_delete_custom_roles()
     {
         $user = User::factory()->create();

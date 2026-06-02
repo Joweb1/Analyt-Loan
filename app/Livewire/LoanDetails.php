@@ -2,10 +2,13 @@
 
 namespace App\Livewire;
 
+use App\Exceptions\CollateralInsufficientException;
 use App\Models\Loan;
+use App\Models\PaymentProof;
 use App\Models\Repayment;
 use App\Models\ScheduledRepayment;
 use App\Models\User;
+use App\Services\LoanService;
 use App\ValueObjects\Money;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
@@ -99,7 +102,7 @@ class LoanDetails extends Component
 
     public function loadPendingProofs()
     {
-        $this->pendingProofs = \App\Models\PaymentProof::where('loan_id', $this->loan->id)
+        $this->pendingProofs = PaymentProof::where('loan_id', $this->loan->id)
             ->where('status', 'applied')
             ->latest()
             ->get();
@@ -107,14 +110,14 @@ class LoanDetails extends Component
 
     public function approveProof($id)
     {
-        $proof = \App\Models\PaymentProof::findOrFail($id);
+        $proof = PaymentProof::findOrFail($id);
 
         if ($proof->status !== 'applied') {
             return;
         }
 
         // Distribution Logic (Match with PaymentVerifications logic)
-        /** @var \App\ValueObjects\Money $amount */
+        /** @var Money $amount */
         $amount = $proof->amount;
         $currency = $amount->getCurrency();
 
@@ -123,26 +126,26 @@ class LoanDetails extends Component
             ->orderBy('due_date')
             ->first();
 
-        /** @var \App\ValueObjects\Money $interestPart */
-        $interestPart = new \App\ValueObjects\Money(0, $currency);
-        /** @var \App\ValueObjects\Money $principalPart */
-        $principalPart = new \App\ValueObjects\Money(0, $currency);
-        /** @var \App\ValueObjects\Money $extraPart */
-        $extraPart = new \App\ValueObjects\Money(0, $currency);
+        /** @var Money $interestPart */
+        $interestPart = new Money(0, $currency);
+        /** @var Money $principalPart */
+        $principalPart = new Money(0, $currency);
+        /** @var Money $extraPart */
+        $extraPart = new Money(0, $currency);
 
         if ($nextSchedule) {
-            /** @var \App\Models\ScheduledRepayment $nextSchedule */
-            $interestPart = new \App\ValueObjects\Money(min($amount->getMinorAmount(), $nextSchedule->interest_amount->getMinorAmount()), $currency);
+            /** @var ScheduledRepayment $nextSchedule */
+            $interestPart = new Money(min($amount->getMinorAmount(), $nextSchedule->interest_amount->getMinorAmount()), $currency);
             $remaining = $amount->subtract($interestPart);
 
-            $feePart = new \App\ValueObjects\Money(min($remaining->getMinorAmount(), $nextSchedule->penalty_amount->getMinorAmount()), $currency);
+            $feePart = new Money(min($remaining->getMinorAmount(), $nextSchedule->penalty_amount->getMinorAmount()), $currency);
             $remaining = $remaining->subtract($feePart);
 
-            $principalPart = new \App\ValueObjects\Money(min($remaining->getMinorAmount(), $nextSchedule->principal_amount->getMinorAmount()), $currency);
+            $principalPart = new Money(min($remaining->getMinorAmount(), $nextSchedule->principal_amount->getMinorAmount()), $currency);
             $extraPart = $remaining->subtract($principalPart);
         } else {
             $principalPart = $amount;
-            $feePart = new \App\ValueObjects\Money(0, $currency);
+            $feePart = new Money(0, $currency);
         }
 
         // Create Repayment
@@ -172,7 +175,7 @@ class LoanDetails extends Component
 
     public function declineProof($id)
     {
-        $proof = \App\Models\PaymentProof::findOrFail($id);
+        $proof = PaymentProof::findOrFail($id);
         $proof->update([
             'status' => 'rejected',
             'admin_notes' => 'Rejected by '.Auth::user()->name.' via Loan Details',
@@ -195,7 +198,7 @@ class LoanDetails extends Component
             $this->suggestedPrincipal = $nextSchedule->principal_amount->getMajorAmount();
             // Calculate remaining interest + penalty needed
             $totalDueForSchedule = $nextSchedule->principal_amount->add($nextSchedule->interest_amount)->add($nextSchedule->penalty_amount);
-            $remainingDue = new \App\ValueObjects\Money(max(0, $totalDueForSchedule->getMinorAmount() - $nextSchedule->paid_amount->getMinorAmount()), $currency);
+            $remainingDue = new Money(max(0, $totalDueForSchedule->getMinorAmount() - $nextSchedule->paid_amount->getMinorAmount()), $currency);
 
             // We attribute the 'suggested interest' to be the remaining amount needed after principal
             // This is a simplification for the UI suggestion
@@ -226,7 +229,7 @@ class LoanDetails extends Component
 
     public function generateSchedule()
     {
-        app(\App\Services\LoanService::class)->generateRepaymentSchedule($this->loan);
+        app(LoanService::class)->generateRepaymentSchedule($this->loan);
         $this->loan->load('scheduledRepayments');
     }
 
@@ -530,10 +533,10 @@ class LoanDetails extends Component
     public function activateLoan()
     {
         try {
-            $loanService = app(\App\Services\LoanService::class);
+            $loanService = app(LoanService::class);
             $loanService->activateLoan($this->loan);
             $this->dispatch('custom-alert', ['type' => 'success', 'message' => 'Loan activated and funds disbursed.']);
-        } catch (\App\Exceptions\CollateralInsufficientException $e) {
+        } catch (CollateralInsufficientException $e) {
             $this->dispatch('custom-alert', ['type' => 'error', 'message' => $e->getMessage()]);
         } catch (\Exception $e) {
             $this->dispatch('custom-alert', ['type' => 'error', 'message' => 'Failed to activate loan.']);

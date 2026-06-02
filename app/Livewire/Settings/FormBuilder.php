@@ -4,6 +4,7 @@ namespace App\Livewire\Settings;
 
 use App\Models\FormFieldConfig;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 use Livewire\Component;
 
 class FormBuilder extends Component
@@ -200,7 +201,7 @@ class FormBuilder extends Component
             'newFieldSection' => 'required|in:'.implode(',', array_keys($this->sections)),
         ]);
 
-        $name = \Illuminate\Support\Str::slug($this->newFieldLabel, '_');
+        $name = Str::slug($this->newFieldLabel, '_');
         $orgId = Auth::user()->organization_id;
 
         // Check unique name in section for current form type

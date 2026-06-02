@@ -6,6 +6,7 @@ use App\Livewire\CollectionEntry;
 use App\Models\Borrower;
 use App\Models\Loan;
 use App\Models\Organization;
+use App\Models\ScheduledRepayment;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -43,7 +44,7 @@ class CollectionEntryTest extends TestCase
             'num_repayments' => 1,
         ]);
 
-        \App\Models\ScheduledRepayment::create([
+        ScheduledRepayment::create([
             'loan_id' => $loan->id,
             'installment_number' => 1,
             'amount' => 11000,

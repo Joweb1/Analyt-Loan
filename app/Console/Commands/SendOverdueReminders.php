@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Helpers\SystemLogger;
 use App\Models\Loan;
 use App\Models\Organization;
+use App\Services\SystemHealthService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 
@@ -29,13 +30,13 @@ class SendOverdueReminders extends Command
      */
     public function handle()
     {
-        \App\Services\SystemHealthService::log('Communications', 'info', 'Scanning for overdue loans...');
+        SystemHealthService::log('Communications', 'info', 'Scanning for overdue loans...');
 
         Organization::where('status', 'active')->chunk(50, function ($organizations) {
             foreach ($organizations as $org) {
                 // Set test time if manual date is enabled
                 if ($org->system_date) {
-                    \Carbon\Carbon::setTestNow($org->getSystemTime());
+                    Carbon::setTestNow($org->getSystemTime());
                 } else {
                     Carbon::setTestNow();
                 }
@@ -66,7 +67,7 @@ class SendOverdueReminders extends Command
         // Reset
         Carbon::setTestNow();
 
-        \App\Services\SystemHealthService::log('Communications', 'success', 'Overdue reminders process completed.');
+        SystemHealthService::log('Communications', 'success', 'Overdue reminders process completed.');
         $this->info('Overdue reminders sent successfully.');
     }
 }

@@ -3,8 +3,10 @@
 namespace Tests\Feature\Livewire;
 
 use App\Livewire\LoanDetails;
+use App\Models\Borrower;
 use App\Models\Loan;
 use App\Models\Organization;
+use App\Models\Repayment;
 use App\Models\ScheduledRepayment;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -40,7 +42,7 @@ class LoanDetailsTest extends TestCase
         $borrowerUser->assignRole('Borrower');
 
         // Need a borrower record linked to user
-        $borrower = \App\Models\Borrower::factory()->create([
+        $borrower = Borrower::factory()->create([
             'user_id' => $borrowerUser->id,
             'organization_id' => $this->organization->id,
         ]);
@@ -138,7 +140,7 @@ class LoanDetailsTest extends TestCase
     public function test_it_reopens_loan_if_repayment_deleted()
     {
         // Pay full amount first
-        /** @var \App\Models\Repayment $repayment */
+        /** @var Repayment $repayment */
         $repayment = $this->loan->repayments()->create([
             'organization_id' => $this->organization->id,
             'amount' => 110000,

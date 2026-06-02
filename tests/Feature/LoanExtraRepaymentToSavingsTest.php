@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Borrower;
 use App\Models\Loan;
 use App\Models\Organization;
+use App\Models\Repayment;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -56,7 +57,7 @@ class LoanExtraRepaymentToSavingsTest extends TestCase
 
         // Repay 15,000 (4,000 extra)
         $this->actingAs($user);
-        /** @var \App\Models\Repayment $repayment */
+        /** @var Repayment $repayment */
         $repayment = $loan->repayments()->create([
             'amount' => 15000.0,
             'paid_at' => now(),

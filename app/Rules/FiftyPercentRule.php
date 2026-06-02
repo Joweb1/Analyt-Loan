@@ -2,6 +2,8 @@
 
 namespace App\Rules;
 
+use App\Models\Collateral;
+use App\ValueObjects\Money;
 use Illuminate\Contracts\Validation\Rule;
 
 class FiftyPercentRule implements Rule
@@ -30,13 +32,13 @@ class FiftyPercentRule implements Rule
      */
     public function passes($attribute, $value)
     {
-        $collateral = \App\Models\Collateral::find($value);
+        $collateral = Collateral::find($value);
 
         if (! $collateral) {
             return false;
         }
 
-        /** @var \App\ValueObjects\Money $val */
+        /** @var Money $val */
         $val = $collateral->value;
 
         return $val->getMajorAmount() >= ($this->loanAmount / 2);

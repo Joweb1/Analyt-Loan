@@ -6,6 +6,7 @@ use App\Models\Borrower;
 use App\Models\Loan;
 use App\Models\Organization;
 use App\Models\ScheduledRepayment;
+use App\ValueObjects\Money;
 use Carbon\Carbon;
 
 class SystemMaintenanceService
@@ -101,7 +102,7 @@ class SystemMaintenanceService
                 ? $loan->penalty_value
                 : ($schedule->principal_amount->multiply($loan->penalty_value->getMajorAmount() / 100));
 
-            $currentPenalty = $schedule->penalty_amount ?? new \App\ValueObjects\Money(0, $schedule->principal_amount->getCurrency());
+            $currentPenalty = $schedule->penalty_amount ?? new Money(0, $schedule->principal_amount->getCurrency());
             $schedule->penalty_amount = $currentPenalty->add($penaltyToAdd);
             $schedule->save();
         }

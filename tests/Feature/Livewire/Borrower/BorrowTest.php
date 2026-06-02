@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Livewire\Borrower;
 
+use App\Livewire\Borrower\Borrow;
 use App\Models\Borrower;
 use App\Models\Loan;
 use App\Models\LoanProduct;
@@ -9,6 +10,7 @@ use App\Models\Organization;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class BorrowTest extends TestCase
@@ -50,22 +52,22 @@ class BorrowTest extends TestCase
         ]);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function it_can_render_borrow_page()
     {
         $this->actingAs($this->user);
 
-        Livewire::test(\App\Livewire\Borrower\Borrow::class)
+        Livewire::test(Borrow::class)
             ->assertStatus(200)
             ->assertSee($this->product->name);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function it_calculates_installments_correctly()
     {
         $this->actingAs($this->user);
 
-        Livewire::test(\App\Livewire\Borrower\Borrow::class)
+        Livewire::test(Borrow::class)
             ->set('amount', 10000)
             ->set('duration', 3)
             ->set('duration_unit', 'month')
@@ -76,12 +78,12 @@ class BorrowTest extends TestCase
             });
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function it_submits_loan_application_with_applied_status()
     {
         $this->actingAs($this->user);
 
-        Livewire::test(\App\Livewire\Borrower\Borrow::class)
+        Livewire::test(Borrow::class)
             ->set('amount', 5000)
             ->call('submitApplication')
             ->assertSet('showSuccess', true);
@@ -93,7 +95,7 @@ class BorrowTest extends TestCase
         ]);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function it_prevents_borrowing_if_active_loan_exists()
     {
         Loan::create([
@@ -113,7 +115,7 @@ class BorrowTest extends TestCase
 
         $this->actingAs($this->user);
 
-        Livewire::test(\App\Livewire\Borrower\Borrow::class)
+        Livewire::test(Borrow::class)
             ->assertRedirect(route('borrower.home'));
     }
 }

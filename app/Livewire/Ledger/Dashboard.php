@@ -6,8 +6,10 @@ use App\Models\Borrower;
 use App\Models\Loan;
 use App\Models\Organization;
 use App\Models\Repayment;
+use App\Models\SavingsAccount;
 use App\Models\ScheduledRepayment;
 use App\ValueObjects\Money;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
@@ -47,7 +49,7 @@ class Dashboard extends Component
     public function calculateStats()
     {
         $org = Organization::current();
-        $selected = \Illuminate\Support\Carbon::parse($this->selectedDate);
+        $selected = Carbon::parse($this->selectedDate);
         $startOfWeek = $selected->copy()->startOfWeek();
         $endOfWeek = $selected->copy()->endOfWeek();
         $currency = $org->currency_code ?? config('app.currency', 'NGN');
@@ -61,7 +63,7 @@ class Dashboard extends Component
         $this->stats['total_repayments_week'] = new Money($repaymentsWeekMinor, $currency);
 
         // 2. Total Savings Balance (All Users - Regular only, Thrift excluded)
-        $allSavings = \App\Models\SavingsAccount::where('organization_id', $org->id)->get();
+        $allSavings = SavingsAccount::where('organization_id', $org->id)->get();
         $totalSavingsMinor = $allSavings->sum(fn ($a) => $a->balance->getMinorAmount());
         $this->stats['total_savings_all'] = new Money($totalSavingsMinor, $currency);
 
@@ -100,7 +102,7 @@ class Dashboard extends Component
     {
         $org = Organization::current();
         $currency = $org->currency_code ?? config('app.currency', 'NGN');
-        $selected = \Illuminate\Support\Carbon::parse($this->selectedDate);
+        $selected = Carbon::parse($this->selectedDate);
         $startOfWeek = $selected->copy()->startOfWeek();
         $endOfWeek = $selected->copy()->endOfWeek();
 

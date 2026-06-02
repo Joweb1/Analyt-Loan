@@ -5,6 +5,8 @@ namespace App\Livewire\Settings;
 use App\Services\SystemMaintenanceService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -106,7 +108,7 @@ class GeneralSettings extends Component
             $this->default_customer_password = $this->organization->default_customer_password;
 
             $this->system_date = $this->organization->system_date
-                ? \Carbon\Carbon::parse($this->organization->system_date)->format('Y-m-d')
+                ? Carbon::parse($this->organization->system_date)->format('Y-m-d')
                 : \Illuminate\Support\Carbon::now($this->timezone)->format('Y-m-d');
         }
     }
@@ -159,11 +161,11 @@ class GeneralSettings extends Component
 
         // Handle File Uploads
         if ($this->logo) {
-            $filename = \Illuminate\Support\Str::random(40).'.'.$this->logo->getClientOriginalExtension();
+            $filename = Str::random(40).'.'.$this->logo->getClientOriginalExtension();
             $path = 'logos/'.$filename;
             $stream = fopen($this->logo->getRealPath(), 'r');
             $disk = config('filesystems.disks.supabase.is_configured') ? 'supabase' : config('filesystems.default');
-            \Illuminate\Support\Facades\Storage::disk($disk)->put($path, $stream);
+            Storage::disk($disk)->put($path, $stream);
             if (is_resource($stream)) {
                 fclose($stream);
             }
@@ -172,11 +174,11 @@ class GeneralSettings extends Component
 
         // ... signature and kyc_document logic (omitted for brevity in replace, but keeping in full write)
         if ($this->signature) {
-            $filename = \Illuminate\Support\Str::random(40).'.'.$this->signature->getClientOriginalExtension();
+            $filename = Str::random(40).'.'.$this->signature->getClientOriginalExtension();
             $path = 'signatures/'.$filename;
             $stream = fopen($this->signature->getRealPath(), 'r');
             $disk = config('filesystems.disks.supabase.is_configured') ? 'supabase' : config('filesystems.default');
-            \Illuminate\Support\Facades\Storage::disk($disk)->put($path, $stream);
+            Storage::disk($disk)->put($path, $stream);
             if (is_resource($stream)) {
                 fclose($stream);
             }
@@ -184,11 +186,11 @@ class GeneralSettings extends Component
         }
 
         if ($this->kyc_document) {
-            $filename = \Illuminate\Support\Str::random(40).'.'.$this->kyc_document->getClientOriginalExtension();
+            $filename = Str::random(40).'.'.$this->kyc_document->getClientOriginalExtension();
             $path = 'kyc-docs/'.$filename;
             $stream = fopen($this->kyc_document->getRealPath(), 'r');
             $disk = config('filesystems.disks.supabase.is_configured') ? 'supabase' : config('filesystems.default');
-            \Illuminate\Support\Facades\Storage::disk($disk)->put($path, $stream);
+            Storage::disk($disk)->put($path, $stream);
             if (is_resource($stream)) {
                 fclose($stream);
             }
@@ -214,7 +216,7 @@ class GeneralSettings extends Component
         }
 
         // Apply simulation to current request
-        \Carbon\Carbon::setTestNow($this->organization->getSystemTime());
+        Carbon::setTestNow($this->organization->getSystemTime());
 
         $this->dispatch('custom-alert', ['type' => 'success', 'message' => 'Settings updated successfully. System date changed to '.$newSystemDate->format('M d, Y')]);
 

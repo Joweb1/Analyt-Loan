@@ -5,9 +5,12 @@ namespace App\Livewire;
 use App\Models\Borrower;
 use App\Models\Loan;
 use App\Models\Repayment;
+use App\Models\SavingsTransaction;
 use App\Models\ScheduledRepayment;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 class GeneralReportPrint extends Component
@@ -114,14 +117,14 @@ class GeneralReportPrint extends Component
             ->count();
 
         // 5. Net Savings Growth in Period
-        $savingsDeposits = \App\Models\SavingsTransaction::whereHas('savingsAccount', function ($q) use ($orgId) {
+        $savingsDeposits = SavingsTransaction::whereHas('savingsAccount', function ($q) use ($orgId) {
             $q->where('organization_id', $orgId);
         })
             ->where('type', 'deposit')
             ->whereBetween('transaction_date', [$startDate, $endDate])
             ->sum('amount') / 100;
 
-        $savingsWithdrawals = \App\Models\SavingsTransaction::whereHas('savingsAccount', function ($q) use ($orgId) {
+        $savingsWithdrawals = SavingsTransaction::whereHas('savingsAccount', function ($q) use ($orgId) {
             $q->where('organization_id', $orgId);
         })
             ->where('type', 'withdrawal')
@@ -176,7 +179,7 @@ class GeneralReportPrint extends Component
                             ->whereBetween('created_at', [$startDate, $endDate]);
                     });
             })
-            ->sum(\Illuminate\Support\Facades\DB::raw('processing_fee + insurance_fee')) / 100;
+            ->sum(DB::raw('processing_fee + insurance_fee')) / 100;
 
         $this->metrics['totalPnL'] = $periodPaidInterest + $totalFeesPeriod;
 
@@ -266,8 +269,8 @@ class GeneralReportPrint extends Component
                 $label = $date->format('M Y');
             } elseif ($interval === 'year') {
                 $year = now()->subYears($i)->year;
-                $currentStart = \Carbon\Carbon::create($year, 1, 1)->startOfDay();
-                $currentEnd = \Carbon\Carbon::create($year, 12, 31)->endOfDay();
+                $currentStart = Carbon::create($year, 1, 1)->startOfDay();
+                $currentEnd = Carbon::create($year, 12, 31)->endOfDay();
                 $label = (string) $year;
             }
 
@@ -326,14 +329,14 @@ class GeneralReportPrint extends Component
                 })
                 ->count();
 
-            $dep = \App\Models\SavingsTransaction::whereHas('savingsAccount', function ($q) use ($orgId) {
+            $dep = SavingsTransaction::whereHas('savingsAccount', function ($q) use ($orgId) {
                 $q->where('organization_id', $orgId);
             })
                 ->where('type', 'deposit')
                 ->whereBetween('transaction_date', [$currentStart->toDateString(), $currentEnd->toDateString()])
                 ->sum('amount') / 100;
 
-            $wit = \App\Models\SavingsTransaction::whereHas('savingsAccount', function ($q) use ($orgId) {
+            $wit = SavingsTransaction::whereHas('savingsAccount', function ($q) use ($orgId) {
                 $q->where('organization_id', $orgId);
             })
                 ->where('type', 'withdrawal')

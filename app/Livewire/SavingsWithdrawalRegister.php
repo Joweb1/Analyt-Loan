@@ -3,10 +3,12 @@
 namespace App\Livewire;
 
 use App\Models\Organization;
+use App\Models\SavingsAccount;
 use App\Models\SavingsWithdrawal;
 use App\ValueObjects\Money;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -14,8 +16,10 @@ class SavingsWithdrawalRegister extends Component
 {
     use WithPagination;
 
+    #[Url]
     public $search = '';
 
+    #[Url]
     public $status = '';
 
     public $selectedDate;
@@ -85,10 +89,11 @@ class SavingsWithdrawalRegister extends Component
         }
 
         if ($this->search) {
-            $query->where(function ($q) {
-                $q->whereHas('savingsAccount.user', function ($sub) {
-                    $sub->where('name', 'like', '%'.$this->search.'%');
-                })->orWhere('reference', 'like', '%'.$this->search.'%');
+            $term = '%'.strtolower(trim($this->search)).'%';
+            $query->where(function ($q) use ($term) {
+                $q->whereHas('savingsAccount.user', function ($sq) use ($term) {
+                    $sq->whereRaw('LOWER(name) LIKE ?', [$term]);
+                })->orWhere('reference', 'like', $term);
             });
         }
 
@@ -104,7 +109,7 @@ class SavingsWithdrawalRegister extends Component
         });
 
         // Org-wide Balances
-        $orgSavings = \App\Models\SavingsAccount::get();
+        $orgSavings = SavingsAccount::get();
         $totalRegularMinor = $orgSavings->sum(fn ($a) => $a->balance->getMinorAmount());
         $totalThriftMinor = $orgSavings->sum(fn ($a) => $a->daily_savings_balance->getMinorAmount());
 

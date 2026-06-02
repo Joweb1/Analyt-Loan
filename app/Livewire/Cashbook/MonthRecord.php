@@ -2,7 +2,9 @@
 
 namespace App\Livewire\Cashbook;
 
+use App\Models\AccountBalance;
 use App\Models\CashbookEntry;
+use App\Models\ExpenseBudget;
 use App\Models\Organization;
 use App\Services\CashbookService;
 use App\ValueObjects\Money;
@@ -66,12 +68,12 @@ class MonthRecord extends Component
         $org = Organization::current();
         $service = app(CashbookService::class);
 
-        $balance = \App\Models\AccountBalance::where('organization_id', $org->id)
+        $balance = AccountBalance::where('organization_id', $org->id)
             ->where('month', $this->month)
             ->where('year', $this->year)
             ->first();
 
-        $this->openingBalance = $balance ? $balance->opening_balance : new \App\ValueObjects\Money(0, $org->currency_code);
+        $this->openingBalance = $balance ? $balance->opening_balance : new Money(0, $org->currency_code);
         $this->newOpeningBalanceAmount = $this->openingBalance->getMajorAmount();
 
         // Live balance calculation
@@ -106,12 +108,12 @@ class MonthRecord extends Component
 
         $org = Organization::current();
 
-        \App\Models\AccountBalance::updateOrCreate([
+        AccountBalance::updateOrCreate([
             'organization_id' => $org->id,
             'month' => $this->month,
             'year' => $this->year,
         ], [
-            'opening_balance' => \App\ValueObjects\Money::fromMajor($this->newOpeningBalanceAmount, $org->currency_code),
+            'opening_balance' => Money::fromMajor($this->newOpeningBalanceAmount, $org->currency_code),
         ]);
 
         $this->showBalanceModal = false;
@@ -128,12 +130,12 @@ class MonthRecord extends Component
 
         $org = Organization::current();
 
-        $budget = \App\Models\ExpenseBudget::updateOrCreate([
+        $budget = ExpenseBudget::updateOrCreate([
             'organization_id' => $org->id,
             'month' => $this->month,
             'year' => $this->year,
         ], [
-            'total_budget_amount' => \App\ValueObjects\Money::fromMajor($this->newBudgetAmount, $org->currency_code),
+            'total_budget_amount' => Money::fromMajor($this->newBudgetAmount, $org->currency_code),
         ]);
 
         $this->showBudgetModal = false;

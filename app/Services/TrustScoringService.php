@@ -6,6 +6,7 @@ use App\Models\Borrower;
 use App\Models\Loan;
 use App\Models\Repayment;
 use App\Models\ScheduledRepayment;
+use App\ValueObjects\Money;
 
 class TrustScoringService
 {
@@ -27,9 +28,9 @@ class TrustScoringService
 
         foreach ($schedules as $schedule) {
             $currency = $schedule->loan->organization->currency_code ?? 'NGN';
-            $principal = $schedule->principal_amount ?? new \App\ValueObjects\Money(0, $currency);
-            $interest = $schedule->interest_amount ?? new \App\ValueObjects\Money(0, $currency);
-            $penalty = $schedule->penalty_amount ?? new \App\ValueObjects\Money(0, $currency);
+            $principal = $schedule->principal_amount ?? new Money(0, $currency);
+            $interest = $schedule->interest_amount ?? new Money(0, $currency);
+            $penalty = $schedule->penalty_amount ?? new Money(0, $currency);
 
             $scheduleTotal = $principal->add($interest)->add($penalty);
             $scheduleTotalMinor = $scheduleTotal->getMinorAmount();

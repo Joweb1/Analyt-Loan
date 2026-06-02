@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Helpers\SystemLogger;
 use App\Models\PaymentProof;
+use App\ValueObjects\Money;
 
 class PaymentProofObserver
 {
@@ -15,7 +16,7 @@ class PaymentProofObserver
         $borrowerName = $paymentProof->borrower->user->name ?? 'A borrower';
         $loanNumber = $paymentProof->loan->loan_number ?? 'N/A';
 
-        /** @var \App\ValueObjects\Money $amount */
+        /** @var Money $amount */
         $amount = $paymentProof->amount;
         // 1. Notify the Admins (Broadcast)
         SystemLogger::action(

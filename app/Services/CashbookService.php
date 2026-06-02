@@ -2,8 +2,10 @@
 
 namespace App\Services;
 
+use App\Models\AccountBalance;
 use App\Models\Borrower;
 use App\Models\CashbookEntry;
+use App\Models\ExpenseBudget;
 use App\Models\Loan;
 use App\Models\Organization;
 use App\Models\Repayment;
@@ -141,7 +143,7 @@ class CashbookService
         $orgId = $organization->id;
         $currency = $organization->currency_code;
 
-        $opening = \App\Models\AccountBalance::where('organization_id', $orgId)
+        $opening = AccountBalance::where('organization_id', $orgId)
             ->where('month', $date->month)
             ->where('year', $date->year)
             ->first();
@@ -157,7 +159,7 @@ class CashbookService
 
         // 2. Total System Outflows (Directly from source tables to be truly live)
         // Loan Disbursements
-        $totalDisbursementsMinor = \App\Models\Loan::where('organization_id', $orgId)
+        $totalDisbursementsMinor = Loan::where('organization_id', $orgId)
             ->whereMonth('release_date', $date->month)
             ->whereYear('release_date', $date->year)
             ->whereDate('release_date', '<=', $date->toDateString())
@@ -165,7 +167,7 @@ class CashbookService
             ->sum('amount');
 
         // Savings Withdrawals
-        $totalSavingsWithdrawalsMinor = \App\Models\SavingsTransaction::whereHas('savingsAccount', fn ($q) => $q->where('organization_id', $orgId))
+        $totalSavingsWithdrawalsMinor = SavingsTransaction::whereHas('savingsAccount', fn ($q) => $q->where('organization_id', $orgId))
             ->whereMonth('transaction_date', $date->month)
             ->whereYear('transaction_date', $date->year)
             ->whereDate('transaction_date', '<=', $date->toDateString())
@@ -196,7 +198,7 @@ class CashbookService
     protected function syncMonthlyBudget(CashbookEntry $entry): void
     {
         $date = $entry->entry_date;
-        $budget = \App\Models\ExpenseBudget::firstOrCreate([
+        $budget = ExpenseBudget::firstOrCreate([
             'organization_id' => $entry->organization_id,
             'month' => $date->month,
             'year' => $date->year,
@@ -219,7 +221,7 @@ class CashbookService
      */
     public function getRemainingBudget(Carbon $date, Organization $organization): Money
     {
-        $budget = \App\Models\ExpenseBudget::where('organization_id', $organization->id)
+        $budget = ExpenseBudget::where('organization_id', $organization->id)
             ->where('month', $date->month)
             ->where('year', $date->year)
             ->first();
@@ -232,7 +234,7 @@ class CashbookService
      */
     public function getTotalBudget(Carbon $date, Organization $organization): Money
     {
-        $budget = \App\Models\ExpenseBudget::where('organization_id', $organization->id)
+        $budget = ExpenseBudget::where('organization_id', $organization->id)
             ->where('month', $date->month)
             ->where('year', $date->year)
             ->first();

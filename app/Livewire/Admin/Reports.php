@@ -5,6 +5,7 @@ namespace App\Livewire\Admin;
 use App\Models\Loan;
 use App\Models\Organization;
 use App\Models\Repayment;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
@@ -48,7 +49,7 @@ class Reports extends Component
                 ->sum('amount') / 100,
             'collected' => Repayment::withoutGlobalScopes()->sum('amount') / 100,
             'organizations' => Organization::count(),
-            'borrowers' => \App\Models\User::where('type', 'customer')->count(),
+            'borrowers' => User::where('type', 'customer')->count(),
         ];
 
         return view('livewire.admin.reports', [

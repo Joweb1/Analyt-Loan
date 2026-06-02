@@ -3,10 +3,12 @@
 namespace Database\Factories;
 
 use App\Models\Borrower;
+use App\Models\Loan;
+use App\Models\Organization;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Loan>
+ * @extends Factory<Loan>
  */
 class LoanFactory extends Factory
 {
@@ -18,7 +20,7 @@ class LoanFactory extends Factory
     public function definition(): array
     {
         return [
-            'organization_id' => \App\Models\Organization::factory(),
+            'organization_id' => Organization::factory(),
             'borrower_id' => function (array $attributes) {
                 return Borrower::factory()->create([
                     'organization_id' => $attributes['organization_id'] ?? null,

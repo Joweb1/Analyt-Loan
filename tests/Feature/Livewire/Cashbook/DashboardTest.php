@@ -6,9 +6,13 @@ use App\Livewire\Cashbook\Dashboard;
 use App\Models\CashbookEntry;
 use App\Models\Organization;
 use App\Models\User;
+use App\Services\TenantSession;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use PHPUnit\Framework\Attributes\Test;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class DashboardTest extends TestCase
@@ -25,12 +29,12 @@ class DashboardTest extends TestCase
         $this->organization = Organization::factory()->create([
             'system_date' => now()->toDateString(),
         ]);
-        app(\App\Services\TenantSession::class)->setTenantId($this->organization->id);
-        $this->seed(\Database\Seeders\RoleSeeder::class);
+        app(TenantSession::class)->setTenantId($this->organization->id);
+        $this->seed(RoleSeeder::class);
 
         // Ensure Admin has manage_vault permission
-        $role = \Spatie\Permission\Models\Role::findOrCreate('Admin');
-        $permission = \Spatie\Permission\Models\Permission::findOrCreate('manage_vault');
+        $role = Role::findOrCreate('Admin');
+        $permission = Permission::findOrCreate('manage_vault');
         $role->givePermissionTo($permission);
 
         $this->admin = User::factory()->create([

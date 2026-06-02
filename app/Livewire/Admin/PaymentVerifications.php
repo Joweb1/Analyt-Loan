@@ -4,6 +4,8 @@ namespace App\Livewire\Admin;
 
 use App\Models\PaymentProof;
 use App\Models\Repayment;
+use App\Models\ScheduledRepayment;
+use App\ValueObjects\Money;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -30,7 +32,7 @@ class PaymentVerifications extends Component
             ->first();
 
         if ($nextSchedule) {
-            /** @var \App\Models\ScheduledRepayment $nextSchedule */
+            /** @var ScheduledRepayment $nextSchedule */
             $sugInterest = $nextSchedule->interest_amount;
             $sugFee = $nextSchedule->penalty_amount;
             $sugPrincipal = $nextSchedule->principal_amount;
@@ -38,15 +40,15 @@ class PaymentVerifications extends Component
             $remaining = $amount;
 
             // Prioritize Interest
-            $interestPart = new \App\ValueObjects\Money(min($remaining->getMinorAmount(), $sugInterest->getMinorAmount()), $amount->getCurrency());
+            $interestPart = new Money(min($remaining->getMinorAmount(), $sugInterest->getMinorAmount()), $amount->getCurrency());
             $remaining = $remaining->subtract($interestPart);
 
             // Then Fee
-            $feePart = new \App\ValueObjects\Money(min($remaining->getMinorAmount(), $sugFee->getMinorAmount()), $amount->getCurrency());
+            $feePart = new Money(min($remaining->getMinorAmount(), $sugFee->getMinorAmount()), $amount->getCurrency());
             $remaining = $remaining->subtract($feePart);
 
             // Then Principal
-            $principalPart = new \App\ValueObjects\Money(min($remaining->getMinorAmount(), $sugPrincipal->getMinorAmount()), $amount->getCurrency());
+            $principalPart = new Money(min($remaining->getMinorAmount(), $sugPrincipal->getMinorAmount()), $amount->getCurrency());
             $remaining = $remaining->subtract($principalPart);
 
             // Rest is Extra
@@ -54,9 +56,9 @@ class PaymentVerifications extends Component
         } else {
             // No schedule? Just treat as principal
             $principalPart = $amount;
-            $interestPart = new \App\ValueObjects\Money(0, $currency);
-            $feePart = new \App\ValueObjects\Money(0, $currency);
-            $extraPart = new \App\ValueObjects\Money(0, $currency);
+            $interestPart = new Money(0, $currency);
+            $feePart = new Money(0, $currency);
+            $extraPart = new Money(0, $currency);
         }
 
         // Create Repayment

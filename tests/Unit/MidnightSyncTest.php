@@ -6,13 +6,14 @@ use App\Models\Loan;
 use App\Models\ScheduledRepayment;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Artisan;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class MidnightSyncTest extends TestCase
 {
     use RefreshDatabase;
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function it_marks_late_loans_as_overdue()
     {
         $loan = Loan::factory()->create(['status' => 'active']);
@@ -30,7 +31,7 @@ class MidnightSyncTest extends TestCase
         $this->assertEquals('overdue', $loan->fresh()->status);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function it_applies_recurring_penalties()
     {
         $loan = Loan::factory()->create([

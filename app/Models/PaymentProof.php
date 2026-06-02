@@ -2,28 +2,32 @@
 
 namespace App\Models;
 
+use App\Casts\MoneyCast;
+use App\ValueObjects\Money;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * @property string $id
  * @property string $organization_id
  * @property string $loan_id
  * @property string $borrower_id
- * @property \App\ValueObjects\Money $amount
+ * @property Money $amount
  * @property string $payment_method
  * @property string $reference_code
  * @property string|null $receipt_path
  * @property string $status
  * @property string|null $admin_notes
- * @property \Illuminate\Support\Carbon $paid_at
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Models\Borrower $borrower
- * @property-read \App\Models\Loan $loan
- * @property-read \App\Models\Organization $organization
+ * @property Carbon $paid_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read Borrower $borrower
+ * @property-read Loan $loan
+ * @property-read Organization $organization
  *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentProof newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|PaymentProof newQuery()
@@ -69,7 +73,7 @@ class PaymentProof extends Model
 
     protected $casts = [
         'paid_at' => 'datetime',
-        'amount' => \App\Casts\MoneyCast::class,
+        'amount' => MoneyCast::class,
     ];
 
     public function organization(): BelongsTo
@@ -95,6 +99,6 @@ class PaymentProof extends Model
 
         $disk = config('filesystems.disks.supabase.is_configured') ? 'supabase' : config('filesystems.default');
 
-        return \Illuminate\Support\Facades\Storage::disk($disk)->url($this->receipt_path);
+        return Storage::disk($disk)->url($this->receipt_path);
     }
 }

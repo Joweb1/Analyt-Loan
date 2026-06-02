@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use App\Casts\MoneyCast;
 use App\Traits\BelongsToOrganization;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 /**
  * @property string $id
@@ -16,9 +18,9 @@ use Illuminate\Database\Eloquent\Model;
  * @property int|null $default_duration
  * @property string $duration_unit
  * @property string $repayment_cycle
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Models\Organization $organization
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read Organization $organization
  *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanProduct newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|LoanProduct newQuery()
@@ -57,8 +59,8 @@ class LoanProduct extends Model
 
     protected $casts = [
         'default_interest_rate' => 'decimal:2',
-        'processing_fee' => \App\Casts\MoneyCast::class,
-        'insurance_fee' => \App\Casts\MoneyCast::class,
+        'processing_fee' => MoneyCast::class,
+        'insurance_fee' => MoneyCast::class,
     ];
 
     public function setInterestCalculationTypeAttribute($value)

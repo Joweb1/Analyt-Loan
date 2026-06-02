@@ -2,8 +2,11 @@
 
 namespace App\Livewire;
 
+use App\Helpers\SystemLogger;
 use App\Models\Borrower;
+use App\Models\SystemNotification;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -56,7 +59,7 @@ class BorrowerProfile extends Component
 
     public function mount(Borrower $borrower)
     {
-        if (! \Illuminate\Support\Facades\Auth::user()->hasPermissionTo('manage_borrowers')) {
+        if (! Auth::user()->hasPermissionTo('manage_borrowers')) {
             abort(403);
         }
         $this->borrower = $borrower->load('user');
@@ -84,7 +87,7 @@ class BorrowerProfile extends Component
 
     public function approveKyc()
     {
-        if (! \Illuminate\Support\Facades\Auth::user()->hasPermissionTo('manage_borrowers')) {
+        if (! Auth::user()->hasPermissionTo('manage_borrowers')) {
             $this->dispatch('custom-alert', ['type' => 'error', 'message' => 'Unauthorized action.']);
 
             return;
@@ -95,7 +98,7 @@ class BorrowerProfile extends Component
             'rejection_reason' => null,
         ]);
 
-        \App\Helpers\SystemLogger::success(
+        SystemLogger::success(
             'KYC Approved',
             "Identity verification for {$this->borrower->user->name} has been approved.",
             'kyc',
@@ -110,7 +113,7 @@ class BorrowerProfile extends Component
 
     public function declineKyc()
     {
-        if (! \Illuminate\Support\Facades\Auth::user()->hasPermissionTo('manage_borrowers')) {
+        if (! Auth::user()->hasPermissionTo('manage_borrowers')) {
             $this->dispatch('custom-alert', ['type' => 'error', 'message' => 'Unauthorized action.']);
 
             return;
@@ -125,7 +128,7 @@ class BorrowerProfile extends Component
             'rejection_reason' => $this->rejection_reason,
         ]);
 
-        \App\Helpers\SystemLogger::danger(
+        SystemLogger::danger(
             'KYC Rejected',
             "Identity verification for {$this->borrower->user->name} was rejected. Reason: {$this->rejection_reason}",
             'kyc',
@@ -139,7 +142,7 @@ class BorrowerProfile extends Component
 
     protected function resolveKycNotifications()
     {
-        \App\Models\SystemNotification::where('subject_id', $this->borrower->id)
+        SystemNotification::where('subject_id', $this->borrower->id)
             ->where('subject_type', Borrower::class)
             ->where('category', 'kyc')
             ->whereNull('read_at')
@@ -156,7 +159,7 @@ class BorrowerProfile extends Component
 
     public function save()
     {
-        if (! \Illuminate\Support\Facades\Auth::user()->hasPermissionTo('edit_borrowers')) {
+        if (! Auth::user()->hasPermissionTo('edit_borrowers')) {
             $this->dispatch('custom-alert', ['type' => 'error', 'message' => 'You do not have permission to edit customer profiles.']);
 
             return;

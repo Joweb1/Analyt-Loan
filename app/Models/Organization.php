@@ -2,12 +2,17 @@
 
 namespace App\Models;
 
+use App\Services\TenantSession;
+use App\ValueObjects\Money;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * @property string $id
@@ -22,8 +27,8 @@ use Illuminate\Support\Facades\Cache;
  * @property string $kyc_status
  * @property string|null $rejection_reason
  * @property string|null $owner_id
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  * @property string|null $kyc_document_path
  * @property numeric $default_interest_rate
  * @property int $grace_period_days
@@ -49,18 +54,18 @@ use Illuminate\Support\Facades\Cache;
  * @property numeric|null $monthly_lent
  * @property numeric|null $monthly_collected
  * @property int|null $active_loans_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Borrower> $borrowers
+ * @property-read Collection<int, Borrower> $borrowers
  * @property-read int|null $borrowers_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Collateral> $collaterals
+ * @property-read Collection<int, Collateral> $collaterals
  * @property-read int|null $collaterals_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Loan> $loans
+ * @property-read Collection<int, Loan> $loans
  * @property-read int|null $loans_count
- * @property-read \App\Models\User|null $owner
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\SavingsAccount> $savingsAccounts
+ * @property-read User|null $owner
+ * @property-read Collection<int, SavingsAccount> $savingsAccounts
  * @property-read int|null $savings_accounts_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $staff
+ * @property-read Collection<int, User> $staff
  * @property-read int|null $staff_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $users
+ * @property-read Collection<int, User> $users
  * @property-read int|null $users_count
  *
  * @method static \Database\Factories\OrganizationFactory factory($count = null, $state = [])
@@ -101,13 +106,13 @@ use Illuminate\Support\Facades\Cache;
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organization whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organization whereWebsite($value)
  *
- * @property \Illuminate\Support\Carbon|null $system_date
+ * @property Carbon|null $system_date
  * @property string $default_customer_password
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\User> $customers
+ * @property-read Collection<int, User> $customers
  * @property-read int|null $customers_count
  * @property-read string|null $kyc_document_url
  * @property-read string|null $logo_url
- * @property-read \App\ValueObjects\Money $organization_balance
+ * @property-read Money $organization_balance
  * @property-read string|null $signature_url
  *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Organization whereDefaultCustomerPassword($value)
@@ -183,14 +188,14 @@ class Organization extends Model
      * Get the current system time for this organization.
      * Combines the pinned system_date with the exact real-world time.
      */
-    public function getSystemTime(): \Illuminate\Support\Carbon
+    public function getSystemTime(): Carbon
     {
         $tz = $this->timezone ?: config('app.timezone', 'UTC');
-        $realNow = \Illuminate\Support\Carbon::createFromTimestamp(time(), $tz);
+        $realNow = Carbon::createFromTimestamp(time(), $tz);
 
         if ($this->system_date) {
             // Return the system date but with the real hours/mins/secs
-            return \Illuminate\Support\Carbon::parse($this->system_date, $tz)
+            return Carbon::parse($this->system_date, $tz)
                 ->setTimeFrom($realNow);
         }
 
@@ -233,7 +238,7 @@ class Organization extends Model
 
     public static function current(bool $fresh = false): ?self
     {
-        $tenantSession = app(\App\Services\TenantSession::class);
+        $tenantSession = app(TenantSession::class);
         $orgId = $tenantSession->getTenantId();
 
         if (! $orgId) {
@@ -292,21 +297,21 @@ class Organization extends Model
     /**
      * Total Organization Portfolio Balance: total loaned + interest - repayments
      */
-    public function getOrganizationBalanceAttribute(): \App\ValueObjects\Money
+    public function getOrganizationBalanceAttribute(): Money
     {
         $loans = $this->loans()->whereNotIn('status', ['draft', 'rejected', 'applied'])->get();
         $currency = $this->currency_code ?: config('app.currency', 'NGN');
 
         $totalValueMinor = 0;
         foreach ($loans as $loan) {
-            /** @var \App\Models\Loan $loan */
+            /** @var Loan $loan */
             $totalValueMinor += $loan->getTotalCost()->getMinorAmount();
         }
 
         $totalCollectedMinor = (int) Repayment::whereIn('loan_id', $loans->pluck('id'))
             ->sum('amount');
 
-        return new \App\ValueObjects\Money($totalValueMinor - $totalCollectedMinor, $currency);
+        return new Money($totalValueMinor - $totalCollectedMinor, $currency);
     }
 
     public function getLogoUrlAttribute(): ?string
@@ -316,7 +321,7 @@ class Organization extends Model
         }
         $disk = config('filesystems.disks.supabase.is_configured') ? 'supabase' : config('filesystems.default');
 
-        return \Illuminate\Support\Facades\Storage::disk($disk)->url($this->logo_path);
+        return Storage::disk($disk)->url($this->logo_path);
     }
 
     public function getSignatureUrlAttribute(): ?string
@@ -326,7 +331,7 @@ class Organization extends Model
         }
         $disk = config('filesystems.disks.supabase.is_configured') ? 'supabase' : config('filesystems.default');
 
-        return \Illuminate\Support\Facades\Storage::disk($disk)->url($this->signature_path);
+        return Storage::disk($disk)->url($this->signature_path);
     }
 
     public function getKycDocumentUrlAttribute(): ?string
@@ -336,6 +341,6 @@ class Organization extends Model
         }
         $disk = config('filesystems.disks.supabase.is_configured') ? 'supabase' : config('filesystems.default');
 
-        return \Illuminate\Support\Facades\Storage::disk($disk)->url($this->kyc_document_path);
+        return Storage::disk($disk)->url($this->kyc_document_path);
     }
 }

@@ -2,14 +2,17 @@
 
 namespace Tests\Feature;
 
+use App\Helpers\SystemLogger;
 use App\Models\Organization;
 use App\Models\SystemNotification;
 use App\Models\User;
 use App\Notifications\PushSystemNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
+use PHPUnit\Framework\Attributes\Test;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
 class PushNotificationTest extends TestCase
@@ -33,7 +36,7 @@ class PushNotificationTest extends TestCase
         Role::firstOrCreate(['name' => 'Admin']);
         Role::firstOrCreate(['name' => 'Borrower']);
 
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
 
         // Setup App Owner
         $ownerEmail = config('app.owner');
@@ -61,13 +64,13 @@ class PushNotificationTest extends TestCase
         $this->borrower->assignRole('Borrower');
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function it_sends_push_notification_to_specific_recipient()
     {
         Notification::fake();
 
         // Create a notification for the borrower, linked to their org
-        \App\Helpers\SystemLogger::log(
+        SystemLogger::log(
             'Test Notification',
             'Hello Borrower',
             'info',
@@ -83,13 +86,13 @@ class PushNotificationTest extends TestCase
         Notification::assertNotSentTo($this->admin, PushSystemNotification::class);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function it_broadcasts_push_notification_to_org_admins()
     {
         Notification::fake();
 
         // Create a broadcast notification for the organization
-        \App\Helpers\SystemLogger::log(
+        SystemLogger::log(
             'Admin Alert',
             'Something happened in your org',
             'warning',
@@ -101,14 +104,14 @@ class PushNotificationTest extends TestCase
         Notification::assertNotSentTo($this->borrower, PushSystemNotification::class);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function it_respects_push_enabled_setting()
     {
         Notification::fake();
 
         $this->admin->update(['settings' => ['push_enabled' => false]]);
 
-        \App\Helpers\SystemLogger::log(
+        SystemLogger::log(
             'Admin Alert',
             'Something happened',
             'warning',
@@ -119,7 +122,7 @@ class PushNotificationTest extends TestCase
         Notification::assertNotSentTo($this->admin, PushSystemNotification::class);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function it_notifies_app_owner_when_new_org_is_created()
     {
         Notification::fake();
@@ -137,7 +140,7 @@ class PushNotificationTest extends TestCase
         ]);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function it_notifies_app_owner_for_platform_events()
     {
         Notification::fake();

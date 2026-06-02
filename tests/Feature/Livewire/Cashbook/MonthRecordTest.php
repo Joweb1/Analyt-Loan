@@ -5,6 +5,8 @@ namespace Tests\Feature\Livewire\Cashbook;
 use App\Livewire\Cashbook\MonthRecord;
 use App\Models\Organization;
 use App\Models\User;
+use App\Services\TenantSession;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -24,8 +26,8 @@ class MonthRecordTest extends TestCase
         parent::setUp();
 
         $this->organization = Organization::factory()->create();
-        app(\App\Services\TenantSession::class)->setTenantId($this->organization->id);
-        $this->seed(\Database\Seeders\RoleSeeder::class);
+        app(TenantSession::class)->setTenantId($this->organization->id);
+        $this->seed(RoleSeeder::class);
 
         $this->admin = User::factory()->create([
             'organization_id' => $this->organization->id,

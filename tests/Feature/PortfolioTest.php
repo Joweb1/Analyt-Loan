@@ -13,8 +13,11 @@ use App\Models\Organization;
 use App\Models\Portfolio;
 use App\Models\Repayment;
 use App\Models\SavingsAccount;
+use App\Models\SavingsTransaction;
 use App\Models\ScheduledRepayment;
 use App\Models\User;
+use App\Services\TenantSession;
+use App\ValueObjects\Money;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use PHPUnit\Framework\Attributes\Test;
@@ -188,7 +191,7 @@ class PortfolioTest extends TestCase
     public function reports_page_shows_org_wide_metrics()
     {
         $org = Organization::factory()->create();
-        app(\App\Services\TenantSession::class)->setTenantId($org->id);
+        app(TenantSession::class)->setTenantId($org->id);
 
         $admin = User::factory()->create(['organization_id' => $org->id]);
         $admin->assignRole('Admin');
@@ -201,7 +204,7 @@ class PortfolioTest extends TestCase
             'balance' => 0,
         ]);
 
-        \App\Models\SavingsTransaction::create([
+        SavingsTransaction::create([
             'savings_account_id' => $account->id,
             'amount' => 15, // 15 Major = 1500 Minor
             'type' => 'deposit',
@@ -325,11 +328,11 @@ class PortfolioTest extends TestCase
         Livewire::actingAs($admin)
             ->test(AdminDashboard::class)
             ->assertSet('totalLoaned', function ($val) {
-                return $val instanceof \App\ValueObjects\Money && $val->getMinorAmount() === 1500000;
+                return $val instanceof Money && $val->getMinorAmount() === 1500000;
             })
             ->set('selectedPortfolioId', $portfolio->id)
             ->assertSet('totalLoaned', function ($val) {
-                return $val instanceof \App\ValueObjects\Money && $val->getMinorAmount() === 500000;
+                return $val instanceof Money && $val->getMinorAmount() === 500000;
             });
     }
 

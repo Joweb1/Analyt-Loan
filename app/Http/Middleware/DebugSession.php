@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\SessionLog;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -24,7 +25,7 @@ class DebugSession
             try {
                 $session = $request->session();
 
-                \App\Models\SessionLog::create([
+                SessionLog::create([
                     'user_id' => Auth::id(),
                     'session_id' => $session->getId(),
                     'path' => $request->fullUrl(),

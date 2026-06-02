@@ -5,13 +5,14 @@ namespace Tests\Unit;
 use App\Models\SystemHealthLog;
 use App\Services\SystemHealthService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class SystemHealthServiceTest extends TestCase
 {
     use RefreshDatabase;
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function it_can_log_system_events_with_levels()
     {
         SystemHealthService::log('Database', 'success', 'DB is up');
@@ -23,7 +24,7 @@ class SystemHealthServiceTest extends TestCase
         ]);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function it_can_run_full_system_checks()
     {
         $results = SystemHealthService::check();

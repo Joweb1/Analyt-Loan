@@ -2,9 +2,14 @@
 
 namespace App\Observers;
 
+use App\Events\DashboardUpdated;
 use App\Events\LoanRepaymentReceived;
 use App\Helpers\SystemLogger;
+use App\Livewire\AdminDashboard;
+use App\Livewire\LoanDashboard;
+use App\Livewire\Reports;
 use App\Models\Repayment;
+use App\Models\SavingsTransaction;
 
 class RepaymentObserver
 {
@@ -48,10 +53,10 @@ class RepaymentObserver
         }
 
         LoanRepaymentReceived::dispatch($loan, $repayment);
-        \App\Events\DashboardUpdated::dispatch($repayment->loan->organization_id);
-        \App\Livewire\LoanDashboard::clearCache($repayment->loan->organization_id);
-        \App\Livewire\AdminDashboard::clearCache($repayment->loan->organization_id, $repayment->loan->portfolio_id);
-        \App\Livewire\Reports::clearCache($repayment->loan->organization_id);
+        DashboardUpdated::dispatch($repayment->loan->organization_id);
+        LoanDashboard::clearCache($repayment->loan->organization_id);
+        AdminDashboard::clearCache($repayment->loan->organization_id, $repayment->loan->portfolio_id);
+        Reports::clearCache($repayment->loan->organization_id);
     }
 
     /**
@@ -60,10 +65,10 @@ class RepaymentObserver
     public function updated(Repayment $repayment): void
     {
         LoanRepaymentReceived::dispatch($repayment->loan, $repayment);
-        \App\Events\DashboardUpdated::dispatch($repayment->loan->organization_id);
-        \App\Livewire\LoanDashboard::clearCache($repayment->loan->organization_id);
-        \App\Livewire\AdminDashboard::clearCache($repayment->loan->organization_id, $repayment->loan->portfolio_id);
-        \App\Livewire\Reports::clearCache($repayment->loan->organization_id);
+        DashboardUpdated::dispatch($repayment->loan->organization_id);
+        LoanDashboard::clearCache($repayment->loan->organization_id);
+        AdminDashboard::clearCache($repayment->loan->organization_id, $repayment->loan->portfolio_id);
+        Reports::clearCache($repayment->loan->organization_id);
     }
 
     /**
@@ -72,10 +77,10 @@ class RepaymentObserver
     public function deleted(Repayment $repayment): void
     {
         LoanRepaymentReceived::dispatch($repayment->loan, null);
-        \App\Events\DashboardUpdated::dispatch($repayment->loan->organization_id);
-        \App\Livewire\LoanDashboard::clearCache($repayment->loan->organization_id);
-        \App\Livewire\AdminDashboard::clearCache($repayment->loan->organization_id, $repayment->loan->portfolio_id);
-        \App\Livewire\Reports::clearCache($repayment->loan->organization_id);
+        DashboardUpdated::dispatch($repayment->loan->organization_id);
+        LoanDashboard::clearCache($repayment->loan->organization_id);
+        AdminDashboard::clearCache($repayment->loan->organization_id, $repayment->loan->portfolio_id);
+        Reports::clearCache($repayment->loan->organization_id);
     }
 
     /**
@@ -86,7 +91,7 @@ class RepaymentObserver
         // When a repayment is deleted, we must also remove the savings transaction
         // that was created from its extra_amount.
         foreach ($repayment->savingsTransactions as $transaction) {
-            /** @var \App\Models\SavingsTransaction $transaction */
+            /** @var SavingsTransaction $transaction */
             $account = $transaction->savingsAccount;
             $account->update([
                 'balance' => $account->balance->subtract($transaction->amount),

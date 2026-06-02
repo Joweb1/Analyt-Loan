@@ -4,11 +4,14 @@ namespace Tests\Feature;
 
 use App\Livewire\AdminDashboard;
 use App\Livewire\LoanDashboard;
+use App\Livewire\Reports;
 use App\Models\Borrower;
 use App\Models\Loan;
 use App\Models\Organization;
 use App\Models\Repayment;
 use App\Models\User;
+use App\Services\TenantSession;
+use App\ValueObjects\Money;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
@@ -28,7 +31,7 @@ class DashboardCacheTest extends TestCase
         parent::setUp();
         $this->seed(RoleSeeder::class);
         $this->organization = Organization::factory()->create();
-        app(\App\Services\TenantSession::class)->setTenantId($this->organization->id);
+        app(TenantSession::class)->setTenantId($this->organization->id);
         $this->user = User::factory()->create(['organization_id' => $this->organization->id]);
         $this->user->assignRole('Admin');
     }
@@ -41,7 +44,7 @@ class DashboardCacheTest extends TestCase
         Livewire::actingAs($this->user)
             ->test(LoanDashboard::class)
             ->assertSet('totalLent', function ($val) {
-                return $val instanceof \App\ValueObjects\Money && $val->isZero();
+                return $val instanceof Money && $val->isZero();
             });
 
         $cacheKey = "dashboard_stats_v2_{$orgId}_filter_today";
@@ -74,7 +77,7 @@ class DashboardCacheTest extends TestCase
         Livewire::actingAs($this->user)
             ->test(AdminDashboard::class)
             ->assertSet('totalCollected', function ($val) {
-                return $val instanceof \App\ValueObjects\Money && $val->isZero();
+                return $val instanceof Money && $val->isZero();
             });
 
         $cacheKey = "admin_dashboard_stats_v2_{$orgId}_all";
@@ -109,7 +112,7 @@ class DashboardCacheTest extends TestCase
 
         // 1. Prime reports cache
         Livewire::actingAs($this->user)
-            ->test(\App\Livewire\Reports::class)
+            ->test(Reports::class)
             ->assertSet('reportType', 'daily');
 
         $cacheKey = "reports_stats_{$orgId}_daily";

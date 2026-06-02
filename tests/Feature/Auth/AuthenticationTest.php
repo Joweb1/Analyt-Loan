@@ -2,7 +2,9 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Models\Organization;
 use App\Models\User;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Volt\Volt;
 use Tests\TestCase;
@@ -56,11 +58,11 @@ class AuthenticationTest extends TestCase
 
     public function test_navigation_menu_can_be_rendered(): void
     {
-        $org = \App\Models\Organization::factory()->create();
+        $org = Organization::factory()->create();
         $user = User::factory()->create(['organization_id' => $org->id]);
 
         // Seed roles and assign Admin
-        $this->seed(\Database\Seeders\RoleSeeder::class);
+        $this->seed(RoleSeeder::class);
         $user->assignRole('Admin');
 
         $this->actingAs($user);

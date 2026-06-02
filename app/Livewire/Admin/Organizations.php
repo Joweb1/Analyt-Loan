@@ -4,6 +4,7 @@ namespace App\Livewire\Admin;
 
 use App\Models\Organization;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -11,22 +12,30 @@ class Organizations extends Component
 {
     use WithPagination;
 
+    #[Url]
     public $search = '';
 
+    #[Url]
     public $statusFilter = '';
 
+    #[Url]
     public $kycFilter = '';
 
     public $selectedOrg = null;
 
     public $showDetailsModal = false;
 
-    protected $queryString = ['search', 'statusFilter', 'kycFilter'];
-
     public function mount()
     {
         if (! Auth::user()->isAppOwner()) {
             abort(403);
+        }
+    }
+
+    public function updating($property)
+    {
+        if (in_array($property, ['search', 'statusFilter', 'kycFilter'])) {
+            $this->resetPage();
         }
     }
 
@@ -77,9 +86,12 @@ class Organizations extends Component
     {
         $query = Organization::withCount(['borrowers', 'loans', 'staff'])
             ->when($this->search, function ($q) {
-                $q->where('name', 'like', "%{$this->search}%")
-                    ->orWhere('email', 'like', "%{$this->search}%")
-                    ->orWhere('rc_number', 'like', "%{$this->search}%");
+                $term = '%'.strtolower(trim($this->search)).'%';
+                $q->where(function ($sq) use ($term) {
+                    $sq->whereRaw('LOWER(name) LIKE ?', [$term])
+                        ->orWhereRaw('LOWER(email) LIKE ?', [$term])
+                        ->orWhere('rc_number', 'like', $term);
+                });
             })
             ->when($this->statusFilter, function ($q) {
                 $q->where('status', $this->statusFilter);

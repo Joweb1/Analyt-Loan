@@ -6,6 +6,8 @@ use App\Livewire\Cashbook\Dashboard;
 use App\Models\CashbookEntry;
 use App\Models\Organization;
 use App\Models\User;
+use App\Services\TenantSession;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Spatie\Permission\Models\Permission;
@@ -31,8 +33,8 @@ class AccessControlTest extends TestCase
             'allow_staff_cashbook_unlock' => true,
         ]);
 
-        app(\App\Services\TenantSession::class)->setTenantId($this->organization->id);
-        $this->seed(\Database\Seeders\RoleSeeder::class);
+        app(TenantSession::class)->setTenantId($this->organization->id);
+        $this->seed(RoleSeeder::class);
 
         // Setup Admin
         $this->admin = User::factory()->create([

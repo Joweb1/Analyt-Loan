@@ -7,6 +7,8 @@ use App\Models\Organization;
 use App\Models\User;
 use App\ValueObjects\Money;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 use Tests\TestCase;
 
 class FinancialPrecisionTest extends TestCase
@@ -31,7 +33,7 @@ class FinancialPrecisionTest extends TestCase
         ]);
 
         // Check DB directly
-        $dbValue = \Illuminate\Support\Facades\DB::table('loans')->where('id', $loan->id)->value('amount');
+        $dbValue = DB::table('loans')->where('id', $loan->id)->value('amount');
         $this->assertEquals(123456, $dbValue);
 
         // Check model casting
@@ -85,7 +87,7 @@ class FinancialPrecisionTest extends TestCase
     public function test_route_serialization_conflict_is_resolved()
     {
         // This test ensures the LogicException from the prompt doesn't occur when caching/listing routes
-        $output = \Illuminate\Support\Facades\Artisan::call('route:list');
+        $output = Artisan::call('route:list');
         $this->assertEquals(0, $output);
     }
 }

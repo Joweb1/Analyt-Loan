@@ -3,11 +3,12 @@
 namespace Database\Factories;
 
 use App\Models\Organization;
+use App\Models\SystemNotification;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\SystemNotification>
+ * @extends Factory<SystemNotification>
  */
 class SystemNotificationFactory extends Factory
 {

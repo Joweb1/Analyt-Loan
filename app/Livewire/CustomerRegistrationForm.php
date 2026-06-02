@@ -2,14 +2,20 @@
 
 namespace App\Livewire;
 
+use App\Livewire\Settings\FormBuilder;
 use App\Models\Borrower;
 use App\Models\FormFieldConfig;
+use App\Models\Guarantor;
 use App\Models\Organization;
 use App\Models\Portfolio;
+use App\Models\Saver;
 use App\Models\User;
 use App\Traits\SterilizesPhone;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -153,7 +159,7 @@ class CustomerRegistrationForm extends Component
 
         // If no configs found, seed defaults for the current type
         if ($rawConfigs->isEmpty()) {
-            \App\Livewire\Settings\FormBuilder::seedDefaults($this->organization_id, $this->registration_type);
+            FormBuilder::seedDefaults($this->organization_id, $this->registration_type);
             $rawConfigs = FormFieldConfig::where('organization_id', $this->organization_id)
                 ->where('form_type', $this->registration_type)
                 ->where('is_active', true)
@@ -231,7 +237,7 @@ class CustomerRegistrationForm extends Component
 
                 // File validation
                 $currentValue = $this->$fieldName;
-                if ($currentValue instanceof \Illuminate\Http\UploadedFile) {
+                if ($currentValue instanceof UploadedFile) {
                     $rule[] = 'file';
                     if ($fieldName === 'passport_photo') {
                         $rule[] = 'image';
@@ -304,7 +310,7 @@ class CustomerRegistrationForm extends Component
             }
 
             if ($this->registration_type === 'saver') {
-                \App\Models\Saver::firstOrCreate(
+                Saver::firstOrCreate(
                     ['user_id' => $user->id],
                     [
                         'organization_id' => $this->organization_id,
@@ -323,7 +329,7 @@ class CustomerRegistrationForm extends Component
             }
 
             if ($this->registration_type === 'guarantor') {
-                \App\Models\Guarantor::firstOrCreate(
+                Guarantor::firstOrCreate(
                     ['email' => $this->email, 'organization_id' => $this->organization_id],
                     [
                         'user_id' => $user->id,
@@ -387,40 +393,40 @@ class CustomerRegistrationForm extends Component
             $disk = (config('filesystems.disks.supabase.is_configured') && ! app()->environment('testing')) ? 'supabase' : config('filesystems.default');
 
             if ($this->passport_photo) {
-                $filename = \Illuminate\Support\Str::random(40).'.'.$this->passport_photo->getClientOriginalExtension();
+                $filename = Str::random(40).'.'.$this->passport_photo->getClientOriginalExtension();
                 $path = 'passports/'.$filename;
                 $stream = fopen($this->passport_photo->getRealPath(), 'r');
-                \Illuminate\Support\Facades\Storage::disk($disk)->put($path, $stream);
+                Storage::disk($disk)->put($path, $stream);
                 if (is_resource($stream)) {
                     fclose($stream);
                 }
                 $borrower->passport_photograph = $path;
             }
             if ($this->bank_statement) {
-                $filename = \Illuminate\Support\Str::random(40).'.'.$this->bank_statement->getClientOriginalExtension();
+                $filename = Str::random(40).'.'.$this->bank_statement->getClientOriginalExtension();
                 $path = 'bank-statements/'.$filename;
                 $stream = fopen($this->bank_statement->getRealPath(), 'r');
-                \Illuminate\Support\Facades\Storage::disk($disk)->put($path, $stream);
+                Storage::disk($disk)->put($path, $stream);
                 if (is_resource($stream)) {
                     fclose($stream);
                 }
                 $borrower->bank_statement = $path;
             }
             if ($this->identity_document) {
-                $filename = \Illuminate\Support\Str::random(40).'.'.$this->identity_document->getClientOriginalExtension();
+                $filename = Str::random(40).'.'.$this->identity_document->getClientOriginalExtension();
                 $path = 'identity-documents/'.$filename;
                 $stream = fopen($this->identity_document->getRealPath(), 'r');
-                \Illuminate\Support\Facades\Storage::disk($disk)->put($path, $stream);
+                Storage::disk($disk)->put($path, $stream);
                 if (is_resource($stream)) {
                     fclose($stream);
                 }
                 $borrower->identity_document = $path;
             }
             if ($this->income_proof) {
-                $filename = \Illuminate\Support\Str::random(40).'.'.$this->income_proof->getClientOriginalExtension();
+                $filename = Str::random(40).'.'.$this->income_proof->getClientOriginalExtension();
                 $path = 'income-proofs/'.$filename;
                 $stream = fopen($this->income_proof->getRealPath(), 'r');
-                \Illuminate\Support\Facades\Storage::disk($disk)->put($path, $stream);
+                Storage::disk($disk)->put($path, $stream);
                 if (is_resource($stream)) {
                     fclose($stream);
                 }
@@ -429,11 +435,11 @@ class CustomerRegistrationForm extends Component
 
             // Save Custom Data
             foreach ($this->customData as $key => $value) {
-                if ($value instanceof \Illuminate\Http\UploadedFile) {
-                    $filename = \Illuminate\Support\Str::random(40).'.'.$value->getClientOriginalExtension();
+                if ($value instanceof UploadedFile) {
+                    $filename = Str::random(40).'.'.$value->getClientOriginalExtension();
                     $path = 'custom-files/'.$filename;
                     $stream = fopen($value->getRealPath(), 'r');
-                    \Illuminate\Support\Facades\Storage::disk($disk)->put($path, $stream);
+                    Storage::disk($disk)->put($path, $stream);
                     if (is_resource($stream)) {
                         fclose($stream);
                     }

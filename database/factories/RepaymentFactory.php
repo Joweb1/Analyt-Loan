@@ -3,10 +3,11 @@
 namespace Database\Factories;
 
 use App\Models\Loan;
+use App\Models\Repayment;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Repayment>
+ * @extends Factory<Repayment>
  */
 class RepaymentFactory extends Factory
 {

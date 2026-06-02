@@ -2,6 +2,8 @@
 
 namespace Tests\Feature\Services;
 
+use App\DTOs\LoanApplicationDTO;
+use App\Events\DashboardUpdated;
 use App\Models\Borrower;
 use App\Models\Collateral;
 use App\Models\Loan;
@@ -10,7 +12,9 @@ use App\Models\User;
 use App\Services\LoanService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Storage;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class LoanServiceTest extends TestCase
@@ -27,8 +31,8 @@ class LoanServiceTest extends TestCase
     {
         parent::setUp();
 
-        \Illuminate\Support\Facades\Event::fake([
-            \App\Events\DashboardUpdated::class,
+        Event::fake([
+            DashboardUpdated::class,
         ]);
 
         $this->loanService = new LoanService;
@@ -37,7 +41,7 @@ class LoanServiceTest extends TestCase
             'organization_id' => $this->organization->id,
         ]);
 
-        \Spatie\Permission\Models\Role::firstOrCreate(['name' => 'Admin']);
+        Role::firstOrCreate(['name' => 'Admin']);
         $this->user->assignRole('Admin');
 
         $this->actingAs($this->user);
@@ -61,7 +65,7 @@ class LoanServiceTest extends TestCase
             'num_repayments' => 6,
         ];
 
-        $dto = \App\DTOs\LoanApplicationDTO::fromArray($data);
+        $dto = LoanApplicationDTO::fromArray($data);
         $loan = $this->loanService->createLoan($dto);
 
         $this->assertInstanceOf(Loan::class, $loan);
@@ -102,7 +106,7 @@ class LoanServiceTest extends TestCase
             'num_repayments' => 1,
         ];
 
-        $dto = \App\DTOs\LoanApplicationDTO::fromArray($data);
+        $dto = LoanApplicationDTO::fromArray($data);
         $loan = $this->loanService->createLoan($dto, $file);
 
         $loan->refresh();
@@ -132,7 +136,7 @@ class LoanServiceTest extends TestCase
             'num_repayments' => 1,
         ];
 
-        $dto = \App\DTOs\LoanApplicationDTO::fromArray($data);
+        $dto = LoanApplicationDTO::fromArray($data);
         $loan = $this->loanService->createLoan($dto, null, $collateral->id);
 
         $this->assertDatabaseHas('collaterals', [
@@ -158,7 +162,7 @@ class LoanServiceTest extends TestCase
             'num_repayments' => $loan->num_repayments,
         ];
 
-        $dto = \App\DTOs\LoanApplicationDTO::fromArray($newData);
+        $dto = LoanApplicationDTO::fromArray($newData);
         $updatedLoan = $this->loanService->updateLoan($loan, $dto);
 
         $this->assertEquals(250000, $updatedLoan->amount->getMinorAmount());
@@ -188,7 +192,7 @@ class LoanServiceTest extends TestCase
             'insurance_fee_type' => 'fixed',
         ];
 
-        $dto = \App\DTOs\LoanApplicationDTO::fromArray($data);
+        $dto = LoanApplicationDTO::fromArray($data);
         $loan = $this->loanService->createLoan($dto);
 
         $schedules = $loan->scheduledRepayments;
@@ -221,7 +225,7 @@ class LoanServiceTest extends TestCase
             'num_repayments' => 1,
         ];
 
-        $dto = \App\DTOs\LoanApplicationDTO::fromArray($data);
+        $dto = LoanApplicationDTO::fromArray($data);
         $loan = $this->loanService->createLoan($dto);
 
         // 10% base * 0.8 (20% discount) = 8%
@@ -249,7 +253,7 @@ class LoanServiceTest extends TestCase
             'num_repayments' => 1,
         ];
 
-        $dto = \App\DTOs\LoanApplicationDTO::fromArray($data);
+        $dto = LoanApplicationDTO::fromArray($data);
         $loan = $this->loanService->createLoan($dto);
 
         // 10% base * 1.25 (25% premium) = 12.5%

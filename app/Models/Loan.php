@@ -2,23 +2,32 @@
 
 namespace App\Models;
 
+use App\Actions\Loans\SynchronizeLoanState;
+use App\Casts\MoneyCast;
 use App\Traits\Auditable;
 use App\Traits\BelongsToOrganization;
+use App\ValueObjects\Money;
+use Database\Factories\LoanFactory;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * @property string $id
  * @property string $borrower_id
- * @property \App\ValueObjects\Money $amount
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property Money $amount
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  * @property string $loan_number
  * @property string|null $loan_product
- * @property \Illuminate\Support\Carbon|null $release_date
+ * @property Carbon|null $release_date
  * @property numeric $interest_rate
  * @property string $interest_calculation_type
  * @property string $interest_type
@@ -26,28 +35,28 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property string $duration_unit
  * @property string $repayment_cycle
  * @property int $num_repayments
- * @property \App\ValueObjects\Money|null $processing_fee
+ * @property Money|null $processing_fee
  * @property string|null $processing_fee_type
- * @property \App\ValueObjects\Money|null $insurance_fee
+ * @property Money|null $insurance_fee
  * @property string|null $insurance_fee_type
  * @property string|null $description
  * @property array<array-key, mixed>|null $attachments
  * @property string $status
- * @property \App\ValueObjects\Money $penalty_value
+ * @property Money $penalty_value
  * @property string $penalty_type
  * @property string $penalty_frequency
  * @property bool $override_system_penalty
  * @property string|null $organization_id
  * @property string|null $loan_officer_id
- * @property-read \App\Models\Borrower $borrower
- * @property-read \App\Models\Collateral|null $collateral
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Comment> $comments
+ * @property-read Borrower $borrower
+ * @property-read Collateral|null $collateral
+ * @property-read Collection<int, Comment> $comments
  * @property-read int|null $comments_count
- * @property-read \App\Models\User|null $loanOfficer
- * @property-read \App\Models\Organization|null $organization
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\Repayment> $repayments
+ * @property-read User|null $loanOfficer
+ * @property-read Organization|null $organization
+ * @property-read Collection<int, Repayment> $repayments
  * @property-read int|null $repayments_count
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\ScheduledRepayment> $scheduledRepayments
+ * @property-read Collection<int, ScheduledRepayment> $scheduledRepayments
  * @property-read int|null $scheduled_repayments_count
  *
  * @method static \Database\Factories\LoanFactory factory($count = null, $state = [])
@@ -84,15 +93,15 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  * @property string|null $guarantor_id
  * @property string|null $external_guarantor_id
  * @property string|null $portfolio_id
- * @property \Illuminate\Support\Carbon|null $installment_date
+ * @property Carbon|null $installment_date
  * @property string|null $register_notes
- * @property-read \Illuminate\Database\Eloquent\Collection<int, \App\Models\AuditTrail> $auditTrails
+ * @property-read Collection<int, AuditTrail> $auditTrails
  * @property-read int|null $audit_trails_count
- * @property-read \App\Models\Guarantor|null $externalGuarantor
+ * @property-read Guarantor|null $externalGuarantor
  * @property-read array $attachment_urls
- * @property-read \App\ValueObjects\Money $balance
- * @property-read \App\Models\User|null $guarantor
- * @property-read \App\Models\Portfolio|null $portfolio
+ * @property-read Money $balance
+ * @property-read User|null $guarantor
+ * @property-read Portfolio|null $portfolio
  *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Loan whereExternalGuarantorId($value)
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Loan whereGuarantorId($value)
@@ -104,7 +113,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  */
 class Loan extends Model
 {
-    /** @use HasFactory<\Database\Factories\LoanFactory> */
+    /** @use HasFactory<LoanFactory> */
     use Auditable, BelongsToOrganization, HasFactory, HasUuids;
 
     protected $fillable = [
@@ -147,12 +156,12 @@ class Loan extends Model
     protected $casts = [
         'release_date' => 'date',
         'installment_date' => 'date',
-        'amount' => \App\Casts\MoneyCast::class,
+        'amount' => MoneyCast::class,
         'attachments' => 'array',
         'override_system_penalty' => 'boolean',
-        'penalty_value' => \App\Casts\MoneyCast::class,
-        'processing_fee' => \App\Casts\MoneyCast::class,
-        'insurance_fee' => \App\Casts\MoneyCast::class,
+        'penalty_value' => MoneyCast::class,
+        'processing_fee' => MoneyCast::class,
+        'insurance_fee' => MoneyCast::class,
     ];
 
     public function setInterestTypeAttribute($value)
@@ -185,20 +194,20 @@ class Loan extends Model
         $this->attributes['insurance_fee_type'] = $value ? strtolower($value) : 'fixed';
     }
 
-    public function repayments(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function repayments(): HasMany
     {
         return $this->hasMany(Repayment::class);
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany<\App\Models\ScheduledRepayment, $this>
+     * @return HasMany<ScheduledRepayment, $this>
      */
-    public function scheduledRepayments(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function scheduledRepayments(): HasMany
     {
         return $this->hasMany(ScheduledRepayment::class)->orderBy('due_date');
     }
 
-    public function comments(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    public function comments(): MorphMany
     {
         return $this->morphMany(Comment::class, 'commentable')->oldest();
     }
@@ -242,7 +251,7 @@ class Loan extends Model
         $disk = config('filesystems.disks.supabase.is_configured') ? 'supabase' : config('filesystems.default');
 
         return collect($this->attachments)->map(function ($path) use ($disk) {
-            return \Illuminate\Support\Facades\Storage::disk($disk)->url($path);
+            return Storage::disk($disk)->url($path);
         })->toArray();
     }
 
@@ -250,13 +259,13 @@ class Loan extends Model
      * Get the total expected interest for the loan (Flat model).
      * Now independent of duration.
      */
-    public function getTotalExpectedInterest(): \App\ValueObjects\Money
+    public function getTotalExpectedInterest(): Money
     {
         $principal = $this->amount;
         $currency = $principal->getCurrency();
 
         if ($this->interest_calculation_type === 'fixed') {
-            return new \App\ValueObjects\Money((int) bcmul((string) ($this->interest_rate ?? 0), '100', 0), $currency);
+            return new Money((int) bcmul((string) ($this->interest_rate ?? 0), '100', 0), $currency);
         }
 
         // Percentage logic: Principal * (Rate / 100)
@@ -268,7 +277,7 @@ class Loan extends Model
     /**
      * Get the total cost of the loan (Principal + Total Interest + Fees).
      */
-    public function getTotalCost(): \App\ValueObjects\Money
+    public function getTotalCost(): Money
     {
         $totalInterest = $this->getTotalExpectedInterest();
         $processingFee = $this->getCalculatedProcessingFee();
@@ -284,12 +293,12 @@ class Loan extends Model
      * Calculate the insurance fee based on its type (fixed or percentage).
      * Now follows the same distributed model as interest.
      */
-    public function getCalculatedInsuranceFee(): \App\ValueObjects\Money
+    public function getCalculatedInsuranceFee(): Money
     {
         $currency = $this->amount->getCurrency();
 
         if (! $this->insurance_fee || $this->insurance_fee->isZero()) {
-            return new \App\ValueObjects\Money(0, $currency);
+            return new Money(0, $currency);
         }
 
         if ($this->insurance_fee_type === 'percentage') {
@@ -305,12 +314,12 @@ class Loan extends Model
     /**
      * Calculate the processing fee based on its type (fixed or percentage).
      */
-    public function getCalculatedProcessingFee(): \App\ValueObjects\Money
+    public function getCalculatedProcessingFee(): Money
     {
         $currency = $this->amount->getCurrency();
 
         if (! $this->processing_fee || $this->processing_fee->isZero()) {
-            return new \App\ValueObjects\Money(0, $currency);
+            return new Money(0, $currency);
         }
 
         if ($this->processing_fee_type === 'percentage') {
@@ -323,9 +332,9 @@ class Loan extends Model
         return $this->processing_fee;
     }
 
-    public function getBalanceAttribute(): \App\ValueObjects\Money
+    public function getBalanceAttribute(): Money
     {
-        /** @var \App\ValueObjects\Money $principal */
+        /** @var Money $principal */
         $principal = $this->amount;
         $currency = $principal->getCurrency();
 
@@ -339,22 +348,22 @@ class Loan extends Model
             $totalPaidMinor = (int) $this->repayments()->sum('amount');
             $remainingMinor = max(0, $totalDueMinor - $totalPaidMinor);
 
-            return new \App\ValueObjects\Money($remainingMinor, $currency);
+            return new Money($remainingMinor, $currency);
         }
 
         // Fallback if no schedules exist (should not happen in production)
-        /** @var \App\ValueObjects\Money $totalInterest */
+        /** @var Money $totalInterest */
         $totalInterest = $this->getTotalExpectedInterest();
 
-        /** @var \App\ValueObjects\Money $processingFee */
+        /** @var Money $processingFee */
         $processingFee = $this->getCalculatedProcessingFee();
-        /** @var \App\ValueObjects\Money $insuranceFee */
+        /** @var Money $insuranceFee */
         $insuranceFee = $this->getCalculatedInsuranceFee();
 
         $totalPayable = $principal->add($totalInterest)->add($processingFee)->add($insuranceFee);
         $totalPaidMinor = (int) $this->repayments()->sum('amount');
 
-        return new \App\ValueObjects\Money(max(0, $totalPayable->getMinorAmount() - $totalPaidMinor), $currency);
+        return new Money(max(0, $totalPayable->getMinorAmount() - $totalPaidMinor), $currency);
     }
 
     /**
@@ -362,6 +371,6 @@ class Loan extends Model
      */
     public function refreshRepaymentStatus(): void
     {
-        app(\App\Actions\Loans\SynchronizeLoanState::class)->execute($this);
+        app(SynchronizeLoanState::class)->execute($this);
     }
 }

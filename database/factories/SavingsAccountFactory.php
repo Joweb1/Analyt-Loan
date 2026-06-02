@@ -3,11 +3,13 @@
 namespace Database\Factories;
 
 use App\Models\Organization;
+use App\Models\SavingsAccount;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\SavingsAccount>
+ * @extends Factory<SavingsAccount>
  */
 class SavingsAccountFactory extends Factory
 {
@@ -20,7 +22,7 @@ class SavingsAccountFactory extends Factory
     {
         return [
             'organization_id' => Organization::factory(),
-            'user_id' => \App\Models\User::factory(),
+            'user_id' => User::factory(),
             'account_number' => 'SAV-'.strtoupper(Str::random(8)),
             'balance' => $this->faker->numberBetween(0, 10000000),
             'daily_savings_balance' => 0,

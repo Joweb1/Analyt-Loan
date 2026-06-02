@@ -4,11 +4,15 @@ namespace App\Services;
 
 use App\DTOs\LoanApplicationDTO;
 use App\Jobs\ProcessLoanAttachment;
+use App\Models\Borrower;
 use App\Models\Collateral;
 use App\Models\Loan;
 use App\Models\ScheduledRepayment;
+use App\ValueObjects\Money;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class LoanService
 {
@@ -24,7 +28,7 @@ class LoanService
 
             // Apply Risk-Based Pricing if interest_rate is not explicitly set (or 0)
             if ($data['interest_rate'] <= 0) {
-                $borrower = \App\Models\Borrower::find($data['borrower_id']);
+                $borrower = Borrower::find($data['borrower_id']);
                 if ($borrower) {
                     // Default to 10% if product not found or rate missing
                     $defaultRate = 10.0;
@@ -41,10 +45,10 @@ class LoanService
 
             // Ensure release_date defaults to organization's business date
             $systemNow = now();
-            \Illuminate\Support\Facades\Log::info('Loan Creation - System Now resolved to: '.$systemNow->toDateTimeString());
+            Log::info('Loan Creation - System Now resolved to: '.$systemNow->toDateTimeString());
 
             $data['release_date'] ??= $systemNow;
-            \Illuminate\Support\Facades\Log::info('Loan Creation - Release Date set to: '.($data['release_date'] instanceof \Carbon\Carbon ? $data['release_date']->toDateTimeString() : $data['release_date']));
+            Log::info('Loan Creation - Release Date set to: '.($data['release_date'] instanceof Carbon ? $data['release_date']->toDateTimeString() : $data['release_date']));
 
             $loan = Loan::create($data);
 
@@ -74,7 +78,7 @@ class LoanService
     {
         $numRepayments = max(1, $loan->num_repayments ?? 1);
 
-        /** @var \App\ValueObjects\Money $principal */
+        /** @var Money $principal */
         $principal = $loan->amount;
         $principalShare = $principal->divide($numRepayments);
 
@@ -89,7 +93,7 @@ class LoanService
         $processingFee = $loan->getCalculatedProcessingFee();
 
         $currency = $principal->getCurrency();
-        $startDate = \Carbon\Carbon::parse($loan->release_date ?? now());
+        $startDate = Carbon::parse($loan->release_date ?? now());
         $cycle = $loan->repayment_cycle ?? 'monthly';
 
         // Delete existing schedules if any (to allow regeneration)
@@ -110,8 +114,8 @@ class LoanService
             // Combine Interest Share and Insurance Share
             $totalInterestAndInsurance = $interestShare->add($insuranceShare);
 
-            /** @var \App\ValueObjects\Money $upfrontFee */
-            $upfrontFee = new \App\ValueObjects\Money(0, $currency);
+            /** @var Money $upfrontFee */
+            $upfrontFee = new Money(0, $currency);
             if ($i === 1) {
                 $upfrontFee = $processingFee;
             }
@@ -133,7 +137,7 @@ class LoanService
     /**
      * Suggest an interest rate based on the borrower's trust score.
      */
-    public function suggestInterestRate(\App\Models\Borrower $borrower, float $baseRate): float
+    public function suggestInterestRate(Borrower $borrower, float $baseRate): float
     {
         $score = $borrower->trust_score;
 

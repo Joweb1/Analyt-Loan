@@ -3,6 +3,7 @@
 namespace App\Livewire\Components;
 
 use App\Models\Guarantor;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
@@ -36,17 +37,17 @@ class GuarantorSelect extends Component
         }
 
         $orgId = Auth::user()->organization_id;
-        $term = '%'.$this->search.'%';
+        $term = '%'.strtolower(trim($this->search)).'%';
 
         // Search All Customers (Borrowers, Savers, Guarantor-Users)
-        $this->results = \App\Models\User::where('type', 'customer')
+        $this->results = User::where('type', 'customer')
             ->where('organization_id', $orgId)
             ->when($this->excludeId, function ($q) {
                 $q->where('id', '!=', $this->excludeId);
             })
             ->where(function ($q) use ($term) {
-                $q->where('name', 'like', $term)
-                    ->orWhere('email', 'like', $term)
+                $q->whereRaw('LOWER(name) LIKE ?', [$term])
+                    ->orWhereRaw('LOWER(email) LIKE ?', [$term])
                     ->orWhere('phone', 'like', $term);
             })
             ->take(10)
@@ -59,7 +60,7 @@ class GuarantorSelect extends Component
                     'type' => 'internal',
                     'name' => $u->name,
                     'subtitle' => $role.' | '.$u->phone,
-                    'custom_id' => $u->borrower->custom_id ?? ($u->guarantor->custom_id ?? 'CUST-'.substr($u->id, 0, 5)),
+                    'custom_id' => $u->borrower->custom_id ?? ($u->guarantor->custom_id ?? ($u->saver->custom_id ?? 'CUST-'.substr($u->id, 0, 5))),
                 ];
             })
             ->toArray();

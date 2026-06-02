@@ -13,7 +13,7 @@ return new class extends Migration
         $teams = config('permission.teams');
 
         if (empty($tableNames)) {
-            throw new \Exception('Error: config/permission.php not loaded or table_names key is missing.');
+            throw new Exception('Error: config/permission.php not loaded or table_names key is missing.');
         }
 
         Schema::create($tableNames['permissions'], function (Blueprint $table) {
@@ -96,7 +96,7 @@ return new class extends Migration
             app('cache')
                 ->store(config('permission.cache.store') != 'default' ? config('permission.cache.store') : null)
                 ->forget(config('permission.cache.key'));
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Silently ignore cache connection errors during migration
         }
     }

@@ -7,6 +7,7 @@ use App\Models\Borrower;
 use App\Models\Organization;
 use App\Models\SavingsAccount;
 use App\Models\User;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -26,7 +27,7 @@ class SavingsDetailsTest extends TestCase
         parent::setUp();
 
         $this->organization = Organization::factory()->create();
-        $this->seed(\Database\Seeders\RoleSeeder::class);
+        $this->seed(RoleSeeder::class);
 
         $this->admin = User::factory()->create(['organization_id' => $this->organization->id]);
         $this->admin->assignRole('Admin');

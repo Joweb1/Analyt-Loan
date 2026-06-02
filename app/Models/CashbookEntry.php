@@ -4,46 +4,48 @@ namespace App\Models;
 
 use App\Casts\MoneyCast;
 use App\Traits\BelongsToOrganization;
+use App\ValueObjects\Money;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
  * @property int $organization_id
- * @property \Illuminate\Support\Carbon $entry_date
+ * @property Carbon $entry_date
  * @property string|null $description
- * @property \App\ValueObjects\Money $loan_repayments
- * @property \App\ValueObjects\Money $savings_deposits
- * @property \App\ValueObjects\Money $registration_fees
- * @property \App\ValueObjects\Money $loan_processing_fees
- * @property \App\ValueObjects\Money $insurance_fees
- * @property \App\ValueObjects\Money $bank_withdrawals
- * @property \App\ValueObjects\Money $excess_cash
- * @property \App\ValueObjects\Money $loan_disbursements
- * @property \App\ValueObjects\Money $savings_withdrawals
- * @property \App\ValueObjects\Money $daily_expense_amount
- * @property \App\ValueObjects\Money $opening_cash
- * @property \App\ValueObjects\Money $expected_cash_at_hand
- * @property \App\ValueObjects\Money $actual_cash_at_hand
- * @property \App\ValueObjects\Money $bank_deposit_amount
+ * @property Money $loan_repayments
+ * @property Money $savings_deposits
+ * @property Money $registration_fees
+ * @property Money $loan_processing_fees
+ * @property Money $insurance_fees
+ * @property Money $bank_withdrawals
+ * @property Money $excess_cash
+ * @property Money $loan_disbursements
+ * @property Money $savings_withdrawals
+ * @property Money $daily_expense_amount
+ * @property Money $opening_cash
+ * @property Money $expected_cash_at_hand
+ * @property Money $actual_cash_at_hand
+ * @property Money $bank_deposit_amount
  * @property string $status
- * @property \Illuminate\Support\Carbon|null $verified_at
+ * @property Carbon|null $verified_at
  * @property string|null $audit_hash
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \App\ValueObjects\Money $card_payments
- * @property \App\ValueObjects\Money $default_amount
- * @property \App\ValueObjects\Money $charges
- * @property \App\ValueObjects\Money $bonuses
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property Money $card_payments
+ * @property Money $default_amount
+ * @property Money $charges
+ * @property Money $bonuses
  * @property string|null $shortfall_report
- * @property \App\ValueObjects\Money $daily_savings
- * @property \App\ValueObjects\Money $loan_interest
- * @property \App\ValueObjects\Money $expected_bank_transfers
+ * @property Money $daily_savings
+ * @property Money $loan_interest
+ * @property Money $expected_bank_transfers
  * @property-read mixed $daily_net
  * @property-read mixed $expected_deposit
  * @property-read mixed $total_inflow
  * @property-read mixed $total_outflow
- * @property-read \App\Models\Organization $organization
+ * @property-read Organization $organization
  *
  * @method static \Database\Factories\CashbookEntryFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|CashbookEntry newModelQuery()
@@ -179,7 +181,7 @@ class CashbookEntry extends Model
     public function getTotalInflowAttribute()
     {
         $currency = $this->organization->currency_code ?? config('app.currency', 'NGN');
-        $zero = new \App\ValueObjects\Money(0, $currency);
+        $zero = new Money(0, $currency);
 
         return ($this->loan_repayments ?? $zero)
             ->add($this->loan_interest ?? $zero)
@@ -199,7 +201,7 @@ class CashbookEntry extends Model
     public function getTotalOutflowAttribute()
     {
         $currency = $this->organization->currency_code ?? config('app.currency', 'NGN');
-        $zero = new \App\ValueObjects\Money(0, $currency);
+        $zero = new Money(0, $currency);
 
         return ($this->loan_disbursements ?? $zero)
             ->add($this->savings_withdrawals ?? $zero)
@@ -223,7 +225,7 @@ class CashbookEntry extends Model
     public function getDailyNetAttribute()
     {
         $currency = $this->organization->currency_code ?? config('app.currency', 'NGN');
-        $zero = new \App\ValueObjects\Money(0, $currency);
+        $zero = new Money(0, $currency);
 
         return ($this->bank_deposit_amount ?? $zero)->subtract($this->expected_deposit ?? $zero);
     }

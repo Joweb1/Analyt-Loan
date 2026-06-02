@@ -2,6 +2,8 @@
 
 namespace App\Livewire\Borrower;
 
+use App\Models\SystemNotification;
+use App\ValueObjects\Money;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
@@ -40,11 +42,11 @@ class Home extends Component
             ->latest()
             ->first();
 
-        $this->unreadAlertsCount = \App\Models\SystemNotification::where('recipient_id', $user->id)
+        $this->unreadAlertsCount = SystemNotification::where('recipient_id', $user->id)
             ->whereNull('read_at')
             ->count();
 
-        $this->recentAlerts = \App\Models\SystemNotification::where('recipient_id', $user->id)
+        $this->recentAlerts = SystemNotification::where('recipient_id', $user->id)
             ->latest()
             ->limit(3)
             ->get();
@@ -56,7 +58,7 @@ class Home extends Component
         $majorLimit = min(500000, 50000 + ($score * 2000));
         $currency = $this->organization->currency_code ?? config('app.currency', 'NGN');
 
-        $this->creditLimit = \App\ValueObjects\Money::fromMajor($majorLimit, $currency);
+        $this->creditLimit = Money::fromMajor($majorLimit, $currency);
 
         $this->setGreeting();
     }

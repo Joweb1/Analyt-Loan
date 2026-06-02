@@ -8,8 +8,10 @@ use App\Models\User;
 use App\Notifications\PushSystemNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
+use PHPUnit\Framework\Attributes\Test;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 use Tests\TestCase;
 
 class KycNotificationTest extends TestCase
@@ -25,10 +27,10 @@ class KycNotificationTest extends TestCase
         Role::firstOrCreate(['name' => 'Admin']);
         Role::firstOrCreate(['name' => 'Borrower']);
 
-        app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function it_notifies_admin_when_kyc_status_changes_to_pending()
     {
         $org = Organization::factory()->create(['push_notifications_enabled' => true]);
@@ -59,7 +61,7 @@ class KycNotificationTest extends TestCase
         ]);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function it_notifies_staff_with_permission_when_kyc_is_submitted()
     {
         $org = Organization::factory()->create(['push_notifications_enabled' => true]);

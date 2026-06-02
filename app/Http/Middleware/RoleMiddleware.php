@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Spatie\Permission\Exceptions\UnauthorizedException;
 use Symfony\Component\HttpFoundation\Response;
 
 class RoleMiddleware
@@ -19,7 +20,7 @@ class RoleMiddleware
 
         // If roles are required for this route, and the user does not have any of them
         if (count($roles) > 0 && ! $user->hasAnyRole($roles)) {
-            throw \Spatie\Permission\Exceptions\UnauthorizedException::forRoles($roles);
+            throw UnauthorizedException::forRoles($roles);
         }
 
         return $next($request);

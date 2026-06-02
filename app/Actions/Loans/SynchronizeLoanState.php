@@ -6,7 +6,10 @@ use App\Helpers\SystemLogger;
 use App\Models\Loan;
 use App\Models\Repayment;
 use App\Models\SavingsAccount;
+use App\Models\ScheduledRepayment;
+use App\Support\Tracing;
 use App\ValueObjects\Money;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
@@ -17,27 +20,27 @@ class SynchronizeLoanState
      */
     public function execute(Loan $loan): void
     {
-        $span = \App\Support\Tracing::startSpan('loan.synchronize', "Synchronizing state for loan #{$loan->loan_number}");
+        $span = Tracing::startSpan('loan.synchronize', "Synchronizing state for loan #{$loan->loan_number}");
 
-        /** @var \Illuminate\Database\Eloquent\Collection<int, \App\Models\Repayment> $repayments */
+        /** @var Collection<int, Repayment> $repayments */
         $repayments = $loan->repayments()->orderBy('paid_at')->get();
         $schedules = $loan->scheduledRepayments()->orderBy('due_date')->get();
 
         $currency = $loan->organization->currency_code ?? 'NGN';
 
-        $totalPaidMinor = (int) $repayments->sum(fn (\App\Models\Repayment $r) => $r->amount->getMinorAmount());
+        $totalPaidMinor = (int) $repayments->sum(fn (Repayment $r) => $r->amount->getMinorAmount());
         $remaining = new Money($totalPaidMinor, $currency);
 
         $org = $loan->organization;
         $today = $org->getSystemTime()->startOfDay();
 
         foreach ($schedules as $s) {
-            /** @var \App\Models\ScheduledRepayment $s */
-            /** @var \App\ValueObjects\Money $principal */
+            /** @var ScheduledRepayment $s */
+            /** @var Money $principal */
             $principal = $s->principal_amount ?? new Money(0, $currency);
-            /** @var \App\ValueObjects\Money $interest */
+            /** @var Money $interest */
             $interest = $s->interest_amount ?? new Money(0, $currency);
-            /** @var \App\ValueObjects\Money $penalty */
+            /** @var Money $penalty */
             $penalty = $s->penalty_amount ?? new Money(0, $currency);
 
             $totalDue = $principal->add($interest)->add($penalty);
@@ -124,7 +127,7 @@ class SynchronizeLoanState
                     'transaction_date' => now(),
                 ]);
 
-                /** @var \App\ValueObjects\Money $balance */
+                /** @var Money $balance */
                 $balance = $account->balance;
                 $account->update(['balance' => $balance->add($repayment->extra_amount)]);
 

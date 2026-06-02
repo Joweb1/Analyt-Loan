@@ -4,6 +4,9 @@ namespace App\Livewire;
 
 use App\Models\Collateral;
 use App\Models\Loan;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
@@ -62,28 +65,33 @@ class CollateralForm extends Component
             return;
         }
 
-        $orgId = \Illuminate\Support\Facades\Auth::user()->organization_id;
+        $orgId = Auth::user()->organization_id;
+        $term = '%'.strtolower(trim($this->searchQuery)).'%';
+
         $this->searchedLoans = Loan::with('borrower.user')
             ->where('organization_id', $orgId)
-            ->where(function ($q) {
-                $q->where('loan_number', 'like', "%{$this->searchQuery}%")
-                    ->orWhereHas('borrower.user', function ($q) {
-                        $q->where('name', 'like', "%{$this->searchQuery}%")
-                            ->orWhere('email', 'like', "%{$this->searchQuery}%");
+            ->where(function ($q) use ($term) {
+                $q->where('loan_number', 'like', $term)
+                    ->orWhereHas('borrower.user', function ($uq) use ($term) {
+                        $uq->whereRaw('LOWER(name) LIKE ?', [$term])
+                            ->orWhereRaw('LOWER(email) LIKE ?', [$term])
+                            ->orWhere('phone', 'like', $term);
                     })
-                    ->orWhereHas('borrower', function ($q) {
-                        $q->where('phone', 'like', "%{$this->searchQuery}%")
-                            ->orWhere('national_identity_number', 'like', "%{$this->searchQuery}%");
+                    ->orWhereHas('borrower', function ($bq) use ($term) {
+                        $bq->where('phone', 'like', $term)
+                            ->orWhere('bvn', 'like', $term)
+                            ->orWhere('national_identity_number', 'like', $term)
+                            ->orWhere('custom_id', 'like', $term);
                     });
             })
-            ->take(5)
+            ->take(10)
             ->get();
     }
 
     public function selectLoan($id)
     {
         $this->loan_id = $id;
-        $this->selectedLoan = Loan::where('organization_id', \Illuminate\Support\Facades\Auth::user()->organization_id)
+        $this->selectedLoan = Loan::where('organization_id', Auth::user()->organization_id)
             ->with('borrower.user', 'collateral')
             ->find($id);
         $this->isBranchAsset = false;
@@ -138,7 +146,7 @@ class CollateralForm extends Component
         ]);
 
         $data = [
-            'organization_id' => \Illuminate\Support\Facades\Auth::user()->organization_id,
+            'organization_id' => Auth::user()->organization_id,
             'loan_id' => $this->loan_id,
             'name' => $this->name,
             'type' => $this->type,
@@ -150,11 +158,11 @@ class CollateralForm extends Component
         ];
 
         if ($this->image) {
-            $filename = \Illuminate\Support\Str::random(40).'.'.$this->image->getClientOriginalExtension();
+            $filename = Str::random(40).'.'.$this->image->getClientOriginalExtension();
             $path = 'collaterals/'.$filename;
             $stream = fopen($this->image->getRealPath(), 'r');
             $disk = (config('filesystems.disks.supabase.is_configured') && ! app()->environment('testing')) ? 'supabase' : config('filesystems.default');
-            \Illuminate\Support\Facades\Storage::disk($disk)->put($path, $stream);
+            Storage::disk($disk)->put($path, $stream);
             if (is_resource($stream)) {
                 fclose($stream);
             }

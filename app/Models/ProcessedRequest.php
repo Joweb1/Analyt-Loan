@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 /**
  * @property string $id
@@ -11,8 +12,8 @@ use Illuminate\Database\Eloquent\Model;
  * @property string|null $user_id
  * @property int $status_code
  * @property array<array-key, mixed> $response_body
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ProcessedRequest newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ProcessedRequest newQuery()

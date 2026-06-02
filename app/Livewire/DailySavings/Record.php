@@ -9,16 +9,21 @@ use App\Models\SavingsAccount;
 use App\Models\SavingsTransaction;
 use App\ValueObjects\Money;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 
 /**
- * @property-read \Illuminate\Support\Collection $customers
+ * @property-read Collection $customers
  */
 class Record extends Component
 {
+    #[Url]
     public $search = '';
 
+    #[Url]
     public $selectedDate;
 
     public $weekDays = [];
@@ -189,7 +194,7 @@ class Record extends Component
             $account = SavingsAccount::firstOrCreate(
                 ['user_id' => $userId, 'organization_id' => $org->id],
                 [
-                    'account_number' => 'SAV-'.strtoupper(\Illuminate\Support\Str::random(8)),
+                    'account_number' => 'SAV-'.strtoupper(Str::random(8)),
                     'balance' => new Money(0, $currency),
                     'daily_savings_balance' => new Money(0, $currency),
                     'status' => 'active',
@@ -273,8 +278,11 @@ class Record extends Component
             ->with(['user', 'user.savingsAccount']);
 
         if ($this->search) {
-            $borrowerQuery->whereHas('user', fn ($q) => $q->where('name', 'like', '%'.$this->search.'%'))
-                ->orWhere('custom_id', 'like', '%'.$this->search.'%');
+            $term = '%'.strtolower(trim($this->search)).'%';
+            $borrowerQuery->where(function ($sq) use ($term) {
+                $sq->whereHas('user', fn ($uq) => $uq->whereRaw('LOWER(name) LIKE ?', [$term]))
+                    ->orWhere('custom_id', 'like', $term);
+            });
         }
 
         $borrowers = $borrowerQuery->get()->map(function ($b) use ($startOfWeek, $endOfWeek) {
@@ -286,8 +294,11 @@ class Record extends Component
             ->with(['user', 'user.savingsAccount']);
 
         if ($this->search) {
-            $saverQuery->whereHas('user', fn ($q) => $q->where('name', 'like', '%'.$this->search.'%'))
-                ->orWhere('custom_id', 'like', '%'.$this->search.'%');
+            $term = '%'.strtolower(trim($this->search)).'%';
+            $saverQuery->where(function ($sq) use ($term) {
+                $sq->whereHas('user', fn ($uq) => $uq->whereRaw('LOWER(name) LIKE ?', [$term]))
+                    ->orWhere('custom_id', 'like', $term);
+            });
         }
 
         $savers = $saverQuery->get()->map(function ($s) use ($startOfWeek, $endOfWeek) {

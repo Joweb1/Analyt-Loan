@@ -7,6 +7,9 @@ use App\Models\User;
 use App\Traits\SterilizesPhone;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Spatie\Permission\Models\Role;
@@ -34,7 +37,7 @@ class OrgRegistrationForm extends Component
     public function save()
     {
         try {
-            \Illuminate\Support\Facades\Log::info('OrgRegistrationForm::save started');
+            Log::info('OrgRegistrationForm::save started');
             $this->phone = $this->sterilize($this->phone);
 
             $this->validate([
@@ -46,36 +49,36 @@ class OrgRegistrationForm extends Component
                 'email' => 'nullable|email|unique:users,email',
                 'password' => 'required|string|confirmed|min:8',
             ]);
-            \Illuminate\Support\Facades\Log::info('OrgRegistrationForm validation passed');
+            Log::info('OrgRegistrationForm validation passed');
 
             $logoPath = null;
             if ($this->orgLogo) {
-                \Illuminate\Support\Facades\Log::info('OrgRegistrationForm storing logo on supabase disk manually');
-                $filename = \Illuminate\Support\Str::random(40).'.'.$this->orgLogo->getClientOriginalExtension();
+                Log::info('OrgRegistrationForm storing logo on supabase disk manually');
+                $filename = Str::random(40).'.'.$this->orgLogo->getClientOriginalExtension();
                 $logoPath = 'logos/'.$filename;
 
                 // Read from temporary local storage and put to supabase disk if configured, else default
                 $stream = fopen($this->orgLogo->getRealPath(), 'r');
                 $disk = config('filesystems.disks.supabase.is_configured') ? 'supabase' : config('filesystems.default');
-                \Illuminate\Support\Facades\Storage::disk($disk)->put($logoPath, $stream);
+                Storage::disk($disk)->put($logoPath, $stream);
                 if (is_resource($stream)) {
                     fclose($stream);
                 }
 
-                \Illuminate\Support\Facades\Log::info('OrgRegistrationForm logo stored at: '.$logoPath);
+                Log::info('OrgRegistrationForm logo stored at: '.$logoPath);
             }
 
             // Create Org
-            \Illuminate\Support\Facades\Log::info('OrgRegistrationForm creating organization');
+            Log::info('OrgRegistrationForm creating organization');
             $org = Organization::create([
                 'name' => $this->orgName,
                 'email' => $this->orgEmail,
-                'slug' => \Illuminate\Support\Str::slug($this->orgName),
+                'slug' => Str::slug($this->orgName),
                 'logo_path' => $logoPath,
                 'status' => 'active', // Allow login
                 'kyc_status' => 'pending', // Needs approval
             ]);
-            \Illuminate\Support\Facades\Log::info('OrgRegistrationForm organization created with ID: '.$org->id);
+            Log::info('OrgRegistrationForm organization created with ID: '.$org->id);
 
             // Create Admin User
             $user = User::create([
@@ -91,7 +94,7 @@ class OrgRegistrationForm extends Component
             $org->save();
 
             // Assign Role
-            /** @var \Spatie\Permission\Models\Role|null $adminRole */
+            /** @var Role|null $adminRole */
             $adminRole = Role::where('name', 'Admin')->first();
             if ($adminRole) {
                 $user->assignRole($adminRole);
@@ -102,8 +105,8 @@ class OrgRegistrationForm extends Component
 
             return redirect()->route('dashboard');
         } catch (\Throwable $e) {
-            \Illuminate\Support\Facades\Log::error('OrgRegistrationForm::save failed: '.$e->getMessage());
-            \Illuminate\Support\Facades\Log::error($e->getTraceAsString());
+            Log::error('OrgRegistrationForm::save failed: '.$e->getMessage());
+            Log::error($e->getTraceAsString());
             throw $e;
         }
     }

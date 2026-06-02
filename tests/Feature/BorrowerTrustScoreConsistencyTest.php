@@ -6,6 +6,7 @@ use App\Livewire\CustomerList;
 use App\Models\Borrower;
 use App\Models\Organization;
 use App\Models\User;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use PHPUnit\Framework\Attributes\Test;
@@ -18,7 +19,7 @@ class BorrowerTrustScoreConsistencyTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->seed(\Database\Seeders\RoleSeeder::class);
+        $this->seed(RoleSeeder::class);
     }
 
     #[Test]

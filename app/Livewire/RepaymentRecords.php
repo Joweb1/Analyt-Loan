@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\Portfolio;
 use App\Models\Repayment;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -12,19 +13,20 @@ class RepaymentRecords extends Component
 {
     use WithPagination;
 
+    #[Url]
     public $dateRange = 'all';
 
     public $customStartDate;
 
     public $customEndDate;
 
+    #[Url]
     public $search = '';
 
+    #[Url]
     public $portfolioId = null;
 
     public $portfolios = [];
-
-    protected $updatesQueryString = ['search', 'dateRange', 'portfolioId'];
 
     public function mount()
     {
@@ -36,19 +38,11 @@ class RepaymentRecords extends Component
         }
     }
 
-    public function updatingSearch()
+    public function updating($property)
     {
-        $this->resetPage();
-    }
-
-    public function updatingDateRange()
-    {
-        $this->resetPage();
-    }
-
-    public function updatingPortfolioId()
-    {
-        $this->resetPage();
+        if (in_array($property, ['search', 'dateRange', 'portfolioId'])) {
+            $this->resetPage();
+        }
     }
 
     public function render()
@@ -65,12 +59,14 @@ class RepaymentRecords extends Component
 
         // Search
         if ($this->search) {
-            $query->where(function ($q) {
-                $q->whereHas('loan.borrower.user', function ($uq) {
-                    $uq->where('name', 'like', '%'.$this->search.'%');
+            $term = '%'.strtolower(trim($this->search)).'%';
+            $query->where(function ($q) use ($term) {
+                $q->whereHas('loan.borrower.user', function ($uq) use ($term) {
+                    $uq->whereRaw('LOWER(name) LIKE ?', [$term])
+                        ->orWhere('phone', 'like', $term);
                 })
-                    ->orWhereHas('loan', function ($lq) {
-                        $lq->where('loan_number', 'like', '%'.$this->search.'%');
+                    ->orWhereHas('loan', function ($lq) use ($term) {
+                        $lq->where('loan_number', 'like', $term);
                     });
             });
         }

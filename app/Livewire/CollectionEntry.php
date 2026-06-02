@@ -2,11 +2,16 @@
 
 namespace App\Livewire;
 
+use App\Models\Borrower;
 use App\Models\Loan;
 use App\Models\Portfolio;
 use App\Models\Repayment;
+use App\Models\ScheduledRepayment;
 use App\Models\User;
+use App\Services\TrustScoringService;
+use App\ValueObjects\Money;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -14,8 +19,10 @@ class CollectionEntry extends Component
 {
     use WithPagination;
 
+    #[Url]
     public $search = '';
 
+    #[Url]
     public $portfolioId = null;
 
     public $portfolios = [];
@@ -35,8 +42,6 @@ class CollectionEntry extends Component
 
     public $collected_by;
 
-    protected $updatesQueryString = ['search', 'portfolioId'];
-
     public function mount()
     {
         $user = Auth::user();
@@ -49,14 +54,11 @@ class CollectionEntry extends Component
         $this->collected_by = Auth::id();
     }
 
-    public function updatingSearch()
+    public function updating($property)
     {
-        $this->resetPage();
-    }
-
-    public function updatingPortfolioId()
-    {
-        $this->resetPage();
+        if (in_array($property, ['search', 'portfolioId'])) {
+            $this->resetPage();
+        }
     }
 
     public function toggleFilter()
@@ -76,7 +78,7 @@ class CollectionEntry extends Component
             ->where('status', '!=', 'paid')
             ->where('due_date', '<=', $today)
             ->get()
-            ->sum(fn (\App\Models\ScheduledRepayment $s) => $s->principal_amount->getMinorAmount() + $s->interest_amount->getMinorAmount() + $s->penalty_amount->getMinorAmount() - $s->paid_amount->getMinorAmount());
+            ->sum(fn (ScheduledRepayment $s) => $s->principal_amount->getMinorAmount() + $s->interest_amount->getMinorAmount() + $s->penalty_amount->getMinorAmount() - $s->paid_amount->getMinorAmount());
 
         $this->amount = $dueAmountMinor / 100;
         $this->showRepaymentModal = true;
@@ -154,10 +156,10 @@ class CollectionEntry extends Component
         $repayment = $loan->repayments()->create([
             'organization_id' => $loan->organization_id,
             'amount' => $this->amount, // Cast will handle float to Money
-            'principal_amount' => new \App\ValueObjects\Money($principalPaidMinor, $currency),
-            'interest_amount' => new \App\ValueObjects\Money($interestPaidMinor, $currency),
-            'fee_amount' => new \App\ValueObjects\Money($feePaidMinor, $currency),
-            'extra_amount' => new \App\ValueObjects\Money($extraPaidMinor, $currency),
+            'principal_amount' => new Money($principalPaidMinor, $currency),
+            'interest_amount' => new Money($interestPaidMinor, $currency),
+            'fee_amount' => new Money($feePaidMinor, $currency),
+            'extra_amount' => new Money($extraPaidMinor, $currency),
             'payment_method' => $this->normalizePaymentMethod($this->payment_method),
             'paid_at' => $paidAt,
             'collected_by' => $this->collected_by,
@@ -168,8 +170,8 @@ class CollectionEntry extends Component
         $loan->refreshRepaymentStatus();
 
         // Recalculate Trust Score
-        \App\Models\Borrower::find($loan->borrower_id)->update([
-            'trust_score' => \App\Services\TrustScoringService::calculate($loan->borrower),
+        Borrower::find($loan->borrower_id)->update([
+            'trust_score' => TrustScoringService::calculate($loan->borrower),
         ]);
 
         $this->showRepaymentModal = false;
@@ -208,13 +210,15 @@ class CollectionEntry extends Component
             if (str_starts_with($search, 'staff:')) {
                 $staffName = substr($search, 6);
                 $query->whereHas('loanOfficer', function ($q) use ($staffName) {
-                    $q->where('name', 'like', '%'.$staffName.'%');
+                    $q->whereRaw('LOWER(name) LIKE ?', ['%'.strtolower($staffName).'%']);
                 });
             } else {
-                $query->where(function ($q) use ($search) {
-                    $q->where('loan_number', 'like', '%'.$search.'%')
-                        ->orWhereHas('borrower.user', function ($uq) use ($search) {
-                            $uq->where('name', 'like', '%'.$search.'%');
+                $term = '%'.$search.'%';
+                $query->where(function ($q) use ($term) {
+                    $q->where('loan_number', 'like', $term)
+                        ->orWhereHas('borrower.user', function ($uq) use ($term) {
+                            $uq->whereRaw('LOWER(name) LIKE ?', [$term])
+                                ->orWhere('phone', 'like', $term);
                         });
                 });
             }

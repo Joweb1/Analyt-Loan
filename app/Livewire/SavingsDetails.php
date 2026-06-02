@@ -2,10 +2,15 @@
 
 namespace App\Livewire;
 
+use App\Events\DashboardUpdated;
 use App\Models\SavingsAccount;
 use App\Models\SavingsTransaction;
+use App\Models\SavingsWithdrawal;
 use App\Models\SystemNotification;
 use App\Models\User;
+use App\Services\CashbookService;
+use App\ValueObjects\Money;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -86,7 +91,7 @@ class SavingsDetails extends Component
             'sourceAccount' => 'required|in:regular,daily_thrift',
         ]);
 
-        $amountMoney = \App\ValueObjects\Money::fromMajor($this->amount, $this->user->organization->currency_code ?? 'NGN');
+        $amountMoney = Money::fromMajor($this->amount, $this->user->organization->currency_code ?? 'NGN');
 
         // Check balance based on source
         if ($this->transactionType === 'withdrawal') {
@@ -122,7 +127,7 @@ class SavingsDetails extends Component
 
             // If it's a withdrawal, also create a record in the formal Withdrawal Ledger
             if ($this->transactionType === 'withdrawal') {
-                \App\Models\SavingsWithdrawal::create([
+                SavingsWithdrawal::create([
                     'organization_id' => $this->user->organization_id,
                     'reference' => $this->reference,
                     'savings_account_id' => $this->savingsAccount->id,
@@ -156,8 +161,8 @@ class SavingsDetails extends Component
             $this->savingsAccount->save();
 
             // Refresh Cashbook for this date
-            $cashbookService = app(\App\Services\CashbookService::class);
-            $entry = $cashbookService->getEntryForDate(\Illuminate\Support\Carbon::parse($this->transactionDate), $this->user->organization);
+            $cashbookService = app(CashbookService::class);
+            $entry = $cashbookService->getEntryForDate(Carbon::parse($this->transactionDate), $this->user->organization);
             $cashbookService->fetchSystemData($entry);
 
             // Create notification for the user
@@ -186,8 +191,8 @@ class SavingsDetails extends Component
             ]);
         });
 
-        \App\Events\DashboardUpdated::dispatch($this->user->organization_id);
-        \App\Livewire\Reports::clearCache($this->user->organization_id);
+        DashboardUpdated::dispatch($this->user->organization_id);
+        Reports::clearCache($this->user->organization_id);
 
         $this->savingsAccount->refresh();
         $this->showTransactionModal = false; // Close the modal
@@ -232,13 +237,13 @@ class SavingsDetails extends Component
             $this->savingsAccount->save();
 
             // Delete associated SavingsWithdrawal record if it exists
-            \App\Models\SavingsWithdrawal::where('reference', $transaction->reference)->delete();
+            SavingsWithdrawal::where('reference', $transaction->reference)->delete();
 
             $transaction->delete();
         });
 
-        \App\Events\DashboardUpdated::dispatch($this->user->organization_id);
-        \App\Livewire\Reports::clearCache($this->user->organization_id);
+        DashboardUpdated::dispatch($this->user->organization_id);
+        Reports::clearCache($this->user->organization_id);
 
         $this->savingsAccount->refresh();
         $this->dispatch('custom-alert', ['type' => 'warning', 'message' => 'Transaction deleted and balance adjusted.']);

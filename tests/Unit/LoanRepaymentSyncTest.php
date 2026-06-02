@@ -8,13 +8,14 @@ use App\Models\Repayment;
 use App\Models\ScheduledRepayment;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class LoanRepaymentSyncTest extends TestCase
 {
     use RefreshDatabase;
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function it_updates_schedule_status_when_payments_are_made()
     {
         $user = User::factory()->create();
@@ -73,7 +74,7 @@ class LoanRepaymentSyncTest extends TestCase
         $this->assertEquals(200000, $s2->fresh()->paid_amount->getMinorAmount());
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function it_updates_schedule_status_when_payments_are_updated_or_deleted()
     {
         $user = User::factory()->create();

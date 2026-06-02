@@ -4,20 +4,22 @@ namespace App\Models;
 
 use App\Casts\MoneyCast;
 use App\Traits\BelongsToOrganization;
+use App\ValueObjects\Money;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 /**
  * @property int $id
  * @property int $organization_id
  * @property int $month
  * @property int $year
- * @property \App\ValueObjects\Money $total_budget_amount
- * @property \App\ValueObjects\Money $spent_amount
+ * @property Money $total_budget_amount
+ * @property Money $spent_amount
  * @property string|null $notes
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  * @property-read mixed $remaining
- * @property-read \App\Models\Organization $organization
+ * @property-read Organization $organization
  *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ExpenseBudget newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|ExpenseBudget newQuery()

@@ -3,6 +3,8 @@
 namespace App\Livewire;
 
 use App\Models\Collateral;
+use Illuminate\Support\Facades\Auth;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -10,8 +12,10 @@ class Vault extends Component
 {
     use WithPagination;
 
+    #[Url]
     public $filter = 'all';
 
+    #[Url]
     public $search = '';
 
     // View Modal State
@@ -32,7 +36,7 @@ class Vault extends Component
 
     public function viewAsset($id)
     {
-        $this->viewingAsset = Collateral::where('organization_id', \Illuminate\Support\Facades\Auth::user()->organization_id)
+        $this->viewingAsset = Collateral::where('organization_id', Auth::user()->organization_id)
             ->with('loan.borrower.user')
             ->find($id);
         $this->showViewModal = true;
@@ -40,7 +44,7 @@ class Vault extends Component
 
     public function deleteAsset($id)
     {
-        $asset = Collateral::where('organization_id', \Illuminate\Support\Facades\Auth::user()->organization_id)->find($id);
+        $asset = Collateral::where('organization_id', Auth::user()->organization_id)->find($id);
         if ($asset) {
             $asset->delete();
             $this->dispatch('custom-alert', ['type' => 'warning', 'message' => 'Asset deleted from vault.']);
@@ -50,7 +54,7 @@ class Vault extends Component
 
     public function render()
     {
-        $orgId = \Illuminate\Support\Facades\Auth::user()->organization_id;
+        $orgId = Auth::user()->organization_id;
         $query = Collateral::where('organization_id', $orgId)->with('loan.borrower.user');
 
         if ($this->filter === 'in_vault') {
@@ -60,19 +64,19 @@ class Vault extends Component
         }
 
         if (! empty($this->search)) {
-            $search = $this->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('type', 'like', "%{$search}%")
-                    ->orWhereHas('loan', function ($q) use ($search) {
-                        $q->where('loan_number', 'like', "%{$search}%")
-                            ->orWhereHas('borrower', function ($q) use ($search) {
-                                $q->where('national_identity_number', 'like', "%{$search}%")
-                                    ->orWhere('bvn', 'like', "%{$search}%")
-                                    ->orWhere('phone', 'like', "%{$search}%")
-                                    ->orWhereHas('user', function ($q) use ($search) {
-                                        $q->where('name', 'like', "%{$search}%")
-                                            ->orWhere('email', 'like', "%{$search}%");
+            $term = '%'.strtolower(trim($this->search)).'%';
+            $query->where(function ($q) use ($term) {
+                $q->whereRaw('LOWER(name) LIKE ?', [$term])
+                    ->orWhereRaw('LOWER(type) LIKE ?', [$term])
+                    ->orWhereHas('loan', function ($sq) use ($term) {
+                        $sq->where('loan_number', 'like', $term)
+                            ->orWhereHas('borrower', function ($bq) use ($term) {
+                                $bq->where('national_identity_number', 'like', $term)
+                                    ->orWhere('bvn', 'like', $term)
+                                    ->orWhere('phone', 'like', $term)
+                                    ->orWhereHas('user', function ($uq) use ($term) {
+                                        $uq->whereRaw('LOWER(name) LIKE ?', [$term])
+                                            ->orWhereRaw('LOWER(email) LIKE ?', [$term]);
                                     });
                             });
                     });

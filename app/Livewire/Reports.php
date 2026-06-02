@@ -2,10 +2,16 @@
 
 namespace App\Livewire;
 
+use App\Models\Collateral;
 use App\Models\Loan;
 use App\Models\Repayment;
+use App\Models\SavingsTransaction;
 use App\Models\ScheduledRepayment;
+use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 class Reports extends Component
@@ -66,7 +72,7 @@ class Reports extends Component
     public function exportCustomers()
     {
         $orgId = Auth::user()->organization_id;
-        $customers = \App\Models\User::where('organization_id', $orgId)
+        $customers = User::where('organization_id', $orgId)
             ->where('type', 'customer')
             ->with(['borrower', 'saver', 'guarantor'])
             ->latest()
@@ -102,7 +108,7 @@ class Reports extends Component
     public function exportCollateral()
     {
         $orgId = Auth::user()->organization_id;
-        $assets = \App\Models\Collateral::where('organization_id', $orgId)->with('loan.borrower.user')->latest()->get();
+        $assets = Collateral::where('organization_id', $orgId)->with('loan.borrower.user')->latest()->get();
         $filename = 'collateral_export_'.now()->format('Y-m-d').'.csv';
 
         $callback = function () use ($assets) {
@@ -130,7 +136,7 @@ class Reports extends Component
     public function exportStaff()
     {
         $orgId = Auth::user()->organization_id;
-        $staff = \App\Models\User::where('organization_id', $orgId)
+        $staff = User::where('organization_id', $orgId)
             ->whereIn('type', ['admin', 'staff'])
             ->get();
         $filename = 'staff_export_'.now()->format('Y-m-d').'.csv';
@@ -159,7 +165,7 @@ class Reports extends Component
     {
         $types = ['daily', 'weekly', 'monthly', 'yearly', 'custom'];
         foreach ($types as $t) {
-            \Illuminate\Support\Facades\Cache::forget("reports_stats_{$orgId}_{$t}");
+            Cache::forget("reports_stats_{$orgId}_{$t}");
         }
     }
 
@@ -188,10 +194,10 @@ class Reports extends Component
         $cacheKey = "reports_stats_{$orgId}_{$this->reportType}{$suffix}";
 
         if ($force) {
-            \Illuminate\Support\Facades\Cache::forget($cacheKey);
+            Cache::forget($cacheKey);
         }
 
-        $data = \Illuminate\Support\Facades\Cache::remember($cacheKey, now()->addHour(), function () use ($orgId) {
+        $data = Cache::remember($cacheKey, now()->addHour(), function () use ($orgId) {
             $startDate = now();
             $endDate = now();
 
@@ -208,8 +214,8 @@ class Reports extends Component
                 $startDate = now()->startOfYear();
                 $endDate = now()->endOfYear();
             } elseif ($this->reportType === 'custom' && $this->customStartDate && $this->customEndDate) {
-                $startDate = \Carbon\Carbon::parse($this->customStartDate)->startOfDay();
-                $endDate = \Carbon\Carbon::parse($this->customEndDate)->endOfDay();
+                $startDate = Carbon::parse($this->customStartDate)->startOfDay();
+                $endDate = Carbon::parse($this->customEndDate)->endOfDay();
             }
 
             // 1. Total Disbursed (Period)
@@ -244,20 +250,20 @@ class Reports extends Component
                 ->sum('amount') / 100;
 
             // 4. New Customers in Period
-            $newCustomers = \App\Models\User::where('organization_id', $orgId)
+            $newCustomers = User::where('organization_id', $orgId)
                 ->where('type', 'customer')
                 ->whereBetween('created_at', [$startDate, $endDate])
                 ->count();
 
             // 5. Net Savings Growth in Period
-            $savingsDeposits = \App\Models\SavingsTransaction::whereHas('savingsAccount', function ($q) use ($orgId) {
+            $savingsDeposits = SavingsTransaction::whereHas('savingsAccount', function ($q) use ($orgId) {
                 $q->where('organization_id', $orgId);
             })
                 ->where('type', 'deposit')
                 ->whereBetween('transaction_date', [$startDate, $endDate])
                 ->sum('amount') / 100;
 
-            $savingsWithdrawals = \App\Models\SavingsTransaction::whereHas('savingsAccount', function ($q) use ($orgId) {
+            $savingsWithdrawals = SavingsTransaction::whereHas('savingsAccount', function ($q) use ($orgId) {
                 $q->where('organization_id', $orgId);
             })
                 ->where('type', 'withdrawal')
@@ -312,7 +318,7 @@ class Reports extends Component
                                 ->whereBetween('created_at', [$startDate->startOfDay(), $endDate->endOfDay()]);
                         });
                 })
-                ->sum(\Illuminate\Support\Facades\DB::raw('processing_fee + insurance_fee')) / 100;
+                ->sum(DB::raw('processing_fee + insurance_fee')) / 100;
 
             $totalPnLPeriod = $periodPaidInterest + $totalFeesPeriod;
 
@@ -400,8 +406,8 @@ class Reports extends Component
                 $label = $date->format('M Y');
             } elseif ($interval === 'year') {
                 $year = now()->subYears($i)->year;
-                $currentStart = \Carbon\Carbon::create($year, 1, 1)->startOfDay();
-                $currentEnd = \Carbon\Carbon::create($year, 12, 31)->endOfDay();
+                $currentStart = Carbon::create($year, 1, 1)->startOfDay();
+                $currentEnd = Carbon::create($year, 12, 31)->endOfDay();
                 $label = (string) $year;
             }
 
@@ -445,7 +451,7 @@ class Reports extends Component
                 ->whereBetween('paid_at', [$currentStart, $currentEnd])
                 ->sum('interest_amount') / 100;
 
-            $customerData[] = \App\Models\User::where('organization_id', $orgId)
+            $customerData[] = User::where('organization_id', $orgId)
                 ->where('type', 'customer')
                 ->whereBetween('created_at', [$currentStart, $currentEnd])
                 ->count();
@@ -461,14 +467,14 @@ class Reports extends Component
                 })
                 ->count();
 
-            $dep = \App\Models\SavingsTransaction::whereHas('savingsAccount', function ($q) use ($orgId) {
+            $dep = SavingsTransaction::whereHas('savingsAccount', function ($q) use ($orgId) {
                 $q->where('organization_id', $orgId);
             })
                 ->where('type', 'deposit')
                 ->whereBetween('transaction_date', [$currentStart->toDateString(), $currentEnd->toDateString()])
                 ->sum('amount') / 100;
 
-            $wit = \App\Models\SavingsTransaction::whereHas('savingsAccount', function ($q) use ($orgId) {
+            $wit = SavingsTransaction::whereHas('savingsAccount', function ($q) use ($orgId) {
                 $q->where('organization_id', $orgId);
             })
                 ->where('type', 'withdrawal')

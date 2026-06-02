@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 
 /**
  * @property string $id
@@ -22,12 +24,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|null $employer
  * @property numeric|null $income
  * @property array<array-key, mixed>|null $custom_data
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  * @property string|null $portfolio_id
- * @property-read \App\Models\Organization $organization
- * @property-read \App\Models\Portfolio|null $portfolio
- * @property-read \App\Models\User|null $user
+ * @property-read Organization $organization
+ * @property-read Portfolio|null $portfolio
+ * @property-read User|null $user
  *
  * @method static \Database\Factories\GuarantorFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|Guarantor newModelQuery()
@@ -60,7 +62,7 @@ class Guarantor extends Model
     {
         static::creating(function ($guarantor) {
             if (empty($guarantor->custom_id)) {
-                $guarantor->custom_id = 'GUA-'.strtoupper(\Illuminate\Support\Str::random(6));
+                $guarantor->custom_id = 'GUA-'.strtoupper(Str::random(6));
             }
         });
     }

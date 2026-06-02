@@ -8,14 +8,18 @@ use App\Models\Organization;
 use App\Models\Repayment;
 use App\Models\SavingsTransaction;
 use App\Models\ScheduledRepayment;
+use App\Services\CashbookService;
 use App\ValueObjects\Money;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 
 class GroupLedger extends Component
 {
     public $group;
 
+    #[Url]
     public $search = '';
 
     public $members = [];
@@ -92,9 +96,10 @@ class GroupLedger extends Component
         }
 
         if ($this->search) {
-            $query->where(function ($q) {
-                $q->whereHas('user', fn ($sub) => $sub->where('name', 'like', '%'.$this->search.'%'))
-                    ->orWhere('custom_id', 'like', '%'.$this->search.'%');
+            $term = '%'.strtolower(trim($this->search)).'%';
+            $query->where(function ($q) use ($term) {
+                $q->whereHas('user', fn ($uq) => $uq->whereRaw('LOWER(name) LIKE ?', [$term]))
+                    ->orWhere('custom_id', 'like', $term);
             });
         }
 
@@ -389,8 +394,8 @@ class GroupLedger extends Component
             DB::commit();
 
             // 3. Trigger Cashbook Refresh for today
-            $cashbookService = app(\App\Services\CashbookService::class);
-            $entry = $cashbookService->getEntryForDate(\Illuminate\Support\Carbon::parse($today), $org);
+            $cashbookService = app(CashbookService::class);
+            $entry = $cashbookService->getEntryForDate(Carbon::parse($today), $org);
             $cashbookService->fetchSystemData($entry);
 
             $this->paymentData[$borrowerId] = [

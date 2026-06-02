@@ -3,6 +3,7 @@
 namespace App\Livewire\Settings;
 
 use App\Models\Borrower;
+use App\Models\Loan;
 use App\Models\Portfolio;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -89,7 +90,7 @@ class Portfolios extends Component
         if (! empty($this->selectedBorrowerIds)) {
             Borrower::whereIn('id', $this->selectedBorrowerIds)->update(['portfolio_id' => $portfolio->id]);
             // Also sync loans
-            \App\Models\Loan::whereIn('borrower_id', $this->selectedBorrowerIds)->update(['portfolio_id' => $portfolio->id]);
+            Loan::whereIn('borrower_id', $this->selectedBorrowerIds)->update(['portfolio_id' => $portfolio->id]);
         }
 
         $this->reset(['showModal', 'portfolioId', 'name', 'description', 'staffIds', 'selectedBorrowerIds', 'searchBorrower']);
@@ -114,7 +115,7 @@ class Portfolios extends Component
         $portfolio = Portfolio::findOrFail($id);
         // Unassign borrowers and loans before deleting
         Borrower::where('portfolio_id', $portfolio->id)->update(['portfolio_id' => null]);
-        \App\Models\Loan::where('portfolio_id', $portfolio->id)->update(['portfolio_id' => null]);
+        Loan::where('portfolio_id', $portfolio->id)->update(['portfolio_id' => null]);
 
         $portfolio->delete();
         $this->dispatch('custom-alert', ['type' => 'warning', 'message' => 'Portfolio removed.']);

@@ -2,12 +2,14 @@
 
 namespace Tests\Feature;
 
+use App\Helpers\SystemLogger;
 use App\Livewire\BorrowerProfile;
 use App\Models\Borrower;
 use App\Models\Organization;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use PHPUnit\Framework\Attributes\Test;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Tests\TestCase;
@@ -23,7 +25,7 @@ class BorrowerProfileKycTest extends TestCase
         Role::firstOrCreate(['name' => 'Admin'])->givePermissionTo('manage_borrowers');
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function admin_can_approve_kyc()
     {
         $org = Organization::factory()->create();
@@ -39,7 +41,7 @@ class BorrowerProfileKycTest extends TestCase
         ]);
 
         // Simulate a notification
-        \App\Helpers\SystemLogger::action('KYC Submission', 'Message', 'link', 'kyc', $borrower);
+        SystemLogger::action('KYC Submission', 'Message', 'link', 'kyc', $borrower);
 
         $this->actingAs($admin);
 
@@ -62,7 +64,7 @@ class BorrowerProfileKycTest extends TestCase
         ]);
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function admin_can_decline_kyc_with_reason()
     {
         $org = Organization::factory()->create();
@@ -78,7 +80,7 @@ class BorrowerProfileKycTest extends TestCase
         ]);
 
         // Simulate a notification
-        \App\Helpers\SystemLogger::action('KYC Submission', 'Message', 'link', 'kyc', $borrower);
+        SystemLogger::action('KYC Submission', 'Message', 'link', 'kyc', $borrower);
 
         $this->actingAs($admin);
 

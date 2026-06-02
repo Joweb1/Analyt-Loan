@@ -8,20 +8,21 @@ use App\Models\Repayment;
 use App\Models\ScheduledRepayment;
 use App\Services\TrustScoringService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class TrustScoreCalculationTest extends TestCase
 {
     use RefreshDatabase;
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function it_returns_0_for_borrowers_with_no_schedules()
     {
         $borrower = Borrower::factory()->create();
         $this->assertEquals(0, TrustScoringService::calculate($borrower));
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function it_calculates_perfect_score_for_on_time_payments()
     {
         $borrower = Borrower::factory()->create();
@@ -46,7 +47,7 @@ class TrustScoreCalculationTest extends TestCase
         $this->assertEquals(100, TrustScoringService::calculate($borrower));
     }
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function it_penalizes_late_payments()
     {
         $borrower = Borrower::factory()->create();

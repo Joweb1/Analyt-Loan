@@ -3,7 +3,9 @@
 namespace Database\Seeders;
 
 use App\Models\Borrower;
+use App\Models\Guarantor;
 use App\Models\Organization;
+use App\Models\Saver;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
@@ -104,7 +106,7 @@ class OrganizationSeeder extends Seeder
         );
         $saver->assignRole('Saver');
 
-        \App\Models\Saver::firstOrCreate(
+        Saver::firstOrCreate(
             ['user_id' => $saver->id],
             [
                 'organization_id' => $demoOrg->id,
@@ -126,7 +128,7 @@ class OrganizationSeeder extends Seeder
         );
         $guarantor->assignRole('Guarantor');
 
-        \App\Models\Guarantor::firstOrCreate(
+        Guarantor::firstOrCreate(
             ['user_id' => $guarantor->id],
             [
                 'organization_id' => $demoOrg->id,

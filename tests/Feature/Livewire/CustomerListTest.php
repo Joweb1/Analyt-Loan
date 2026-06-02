@@ -6,6 +6,7 @@ use App\Livewire\CustomerList;
 use App\Models\Borrower;
 use App\Models\Organization;
 use App\Models\User;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -34,7 +35,7 @@ class CustomerListTest extends TestCase
 
     public function test_it_filters_borrowers_by_search()
     {
-        $this->seed(\Database\Seeders\RoleSeeder::class);
+        $this->seed(RoleSeeder::class);
 
         $user1 = User::factory()->create(['name' => 'UniqueSearchableName', 'organization_id' => $this->organization->id, 'type' => 'customer']);
         $user1->assignRole('Borrower');

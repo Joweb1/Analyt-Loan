@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Borrower;
 
+use App\DTOs\LoanApplicationDTO;
 use App\Models\Loan;
 use App\Models\LoanProduct;
 use App\Services\LoanService;
@@ -193,7 +194,7 @@ class Borrow extends Component
             'loan_number' => 'LN-'.$year.'-'.strtoupper(Str::random(5)),
         ];
 
-        $dto = \App\DTOs\LoanApplicationDTO::fromArray($data);
+        $dto = LoanApplicationDTO::fromArray($data);
         $loanService->createLoan($dto);
 
         $this->showBreakdown = false;

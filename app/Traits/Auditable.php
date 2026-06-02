@@ -4,6 +4,7 @@ namespace App\Traits;
 
 use App\Models\AuditTrail;
 use App\Services\TenantSession;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Request;
 
@@ -52,7 +53,7 @@ trait Auditable
         ]);
     }
 
-    public function auditTrails(): \Illuminate\Database\Eloquent\Relations\MorphMany
+    public function auditTrails(): MorphMany
     {
         return $this->morphMany(AuditTrail::class, 'auditable');
     }

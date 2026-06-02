@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Borrower;
 
+use App\Models\Loan;
 use App\Models\PaymentProof;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
@@ -11,7 +12,7 @@ class Repayment extends Component
 {
     use WithFileUploads;
 
-    /** @var \App\Models\Loan|null */
+    /** @var Loan|null */
     public $activeLoan;
 
     public $hasPendingApplication = false;
@@ -31,7 +32,7 @@ class Repayment extends Component
             return redirect()->route('borrower.home');
         }
 
-        /** @var \App\Models\Loan|null $activeLoan */
+        /** @var Loan|null $activeLoan */
         $activeLoan = $user->borrower->loans()
             ->whereIn('status', ['active', 'overdue', 'approved'])
             ->with(['organization', 'scheduledRepayments', 'repayments'])

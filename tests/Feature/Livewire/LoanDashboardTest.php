@@ -7,6 +7,7 @@ use App\Models\Loan;
 use App\Models\Organization;
 use App\Models\Repayment;
 use App\Models\User;
+use App\ValueObjects\Money;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -75,7 +76,7 @@ class LoanDashboardTest extends TestCase
         Livewire::actingAs($this->staff)
             ->test(LoanDashboard::class)
             ->assertSet('repaidToday', function ($val) {
-                return $val instanceof \App\ValueObjects\Money && $val->getMinorAmount() === 100000;
+                return $val instanceof Money && $val->getMinorAmount() === 100000;
             });
     }
 }

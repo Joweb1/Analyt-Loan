@@ -2,16 +2,20 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Organization;
+use App\Services\Localization;
+use App\Services\TenantSession;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 
 class EnforceTenancy
 {
     public function __construct(
-        protected \App\Services\TenantSession $tenantSession,
-        protected \App\Services\Localization $localization
+        protected TenantSession $tenantSession,
+        protected Localization $localization
     ) {}
 
     /**
@@ -32,7 +36,7 @@ class EnforceTenancy
 
                 // Apply localization context (No global side-effects here)
                 if ($this->tenantSession->hasTenant()) {
-                    $organization = \App\Models\Organization::current(true);
+                    $organization = Organization::current(true);
                     if ($organization) {
                         $this->localization->setContext($organization);
                     }
@@ -73,7 +77,7 @@ class EnforceTenancy
                 }
             }
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Tenancy Error: '.$e->getMessage());
+            Log::error('Tenancy Error: '.$e->getMessage());
         }
 
         return $next($request);

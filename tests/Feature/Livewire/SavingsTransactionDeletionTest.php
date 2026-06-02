@@ -4,6 +4,7 @@ namespace Tests\Feature\Livewire;
 
 use App\Livewire\SavingsDetails;
 use App\Models\Borrower;
+use App\Models\Loan;
 use App\Models\Organization;
 use App\Models\Repayment;
 use App\Models\SavingsAccount;
@@ -72,7 +73,7 @@ class SavingsTransactionDeletionTest extends TestCase
         ]);
 
         // Create a fake repayment to link to
-        $loan = \App\Models\Loan::factory()->create(['organization_id' => $org->id, 'borrower_id' => $borrower->id]);
+        $loan = Loan::factory()->create(['organization_id' => $org->id, 'borrower_id' => $borrower->id]);
         $repayment = Repayment::create([
             'organization_id' => $org->id,
             'loan_id' => $loan->id,

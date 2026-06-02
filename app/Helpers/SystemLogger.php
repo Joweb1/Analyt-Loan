@@ -2,6 +2,7 @@
 
 namespace App\Helpers;
 
+use App\Models\Organization;
 use App\Models\SystemNotification;
 use Illuminate\Support\Facades\Auth;
 
@@ -17,7 +18,7 @@ class SystemLogger
 
         // If subject is provided, try to find organization_id
         if ($subject) {
-            if ($subject instanceof \App\Models\Organization) {
+            if ($subject instanceof Organization) {
                 $orgId = $subject->id;
             } else {
                 $orgId = data_get($subject, 'organization_id')

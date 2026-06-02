@@ -6,6 +6,7 @@ use App\Livewire\StatusBoard;
 use App\Models\Loan;
 use App\Models\Organization;
 use App\Models\User;
+use App\ValueObjects\Money;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -70,10 +71,10 @@ class StatusBoardTest extends TestCase
             ->assertSet('counts.active', 1)
             ->assertSet('counts.repaid', 1)
             ->assertSet('sums.active', function ($val) {
-                return $val instanceof \App\ValueObjects\Money && $val->getMinorAmount() === 1000000;
+                return $val instanceof Money && $val->getMinorAmount() === 1000000;
             })
             ->assertSet('sums.repaid', function ($val) {
-                return $val instanceof \App\ValueObjects\Money && $val->getMinorAmount() === 500000;
+                return $val instanceof Money && $val->getMinorAmount() === 500000;
             });
     }
 }

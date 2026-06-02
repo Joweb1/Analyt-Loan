@@ -5,13 +5,14 @@ namespace Tests\Unit;
 use App\Models\LoanProduct;
 use App\Models\Organization;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class LoanProductDefaultsTest extends TestCase
 {
     use RefreshDatabase;
 
-    #[\PHPUnit\Framework\Attributes\Test]
+    #[Test]
     public function it_can_create_a_loan_product_with_defaults()
     {
         $org = Organization::factory()->create();

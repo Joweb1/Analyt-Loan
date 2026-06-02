@@ -2,6 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Organization;
+use Carbon\Carbon;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -17,13 +19,13 @@ class OverrideOrganizationTime
             return $next($request);
         }
 
-        $org = \App\Models\Organization::current();
+        $org = Organization::current();
 
         if ($org && $org->system_date) {
             // Save the original last_activity to prevent poisoning by setTestNow()
             $originalLastActivity = $request->session()->get('last_activity');
 
-            \Carbon\Carbon::setTestNow($org->getSystemTime());
+            Carbon::setTestNow($org->getSystemTime());
 
             try {
                 $response = $next($request);
@@ -31,7 +33,7 @@ class OverrideOrganizationTime
                 // CRITICAL: Reset the simulated time BEFORE the response is sent back
                 // up the middleware stack. This ensures Laravel's session handler
                 // uses REAL-WORLD time to set cookie expiration and session timeouts.
-                \Carbon\Carbon::setTestNow();
+                Carbon::setTestNow();
             }
 
             // Restore last_activity if it was changed by Laravel's session handler

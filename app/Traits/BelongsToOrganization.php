@@ -2,7 +2,10 @@
 
 namespace App\Traits;
 
+use App\Models\Borrower;
+use App\Models\Loan;
 use App\Models\Organization;
+use App\Services\TenantSession;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Facades\Auth;
@@ -15,7 +18,7 @@ trait BelongsToOrganization
     protected static function bootBelongsToOrganization(): void
     {
         static::creating(function ($model) {
-            $tenantSession = app(\App\Services\TenantSession::class);
+            $tenantSession = app(TenantSession::class);
 
             if (Auth::check() && ! $tenantSession->hasTenant()) {
                 $tenantSession->setTenantFromUser();
@@ -35,7 +38,7 @@ trait BelongsToOrganization
                     return;
                 }
 
-                $tenantSession = app(\App\Services\TenantSession::class);
+                $tenantSession = app(TenantSession::class);
                 $tenantSession->setTenantFromUser();
 
                 if ($orgId = $tenantSession->getTenantId()) {
@@ -47,7 +50,7 @@ trait BelongsToOrganization
                 }
 
                 // Portfolio Scoping for Staff
-                if (! $user->hasRole('Admin') && ! $user->isOrgOwner() && in_array(get_class($builder->getModel()), [\App\Models\Borrower::class, \App\Models\Loan::class])) {
+                if (! $user->hasRole('Admin') && ! $user->isOrgOwner() && in_array(get_class($builder->getModel()), [Borrower::class, Loan::class])) {
                     $portfolioIds = $user->portfolios()->pluck('portfolios.id')->toArray();
 
                     if (! empty($portfolioIds)) {

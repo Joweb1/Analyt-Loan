@@ -2,34 +2,37 @@
 
 namespace App\Models;
 
+use App\Casts\MoneyCast;
 use App\Traits\BelongsToOrganization;
+use App\ValueObjects\Money;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
 /**
  * @property string $id
  * @property string $organization_id
  * @property string $reference
  * @property string $savings_account_id
- * @property \Illuminate\Support\Carbon $transaction_date
- * @property \App\ValueObjects\Money $snapshot_balance
- * @property \App\ValueObjects\Money $amount_withdrawn
- * @property \App\ValueObjects\Money $loan_adjustment_amount
+ * @property Carbon $transaction_date
+ * @property Money $snapshot_balance
+ * @property Money $amount_withdrawn
+ * @property Money $loan_adjustment_amount
  * @property string $status
  * @property string|null $notes
  * @property string $staff_id
  * @property string|null $approved_by
- * @property \Illuminate\Support\Carbon|null $approved_at
+ * @property Carbon|null $approved_at
  * @property array<array-key, mixed>|null $audit_trail
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Models\User|null $approver
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read User|null $approver
  * @property-read mixed $total_amount
- * @property-read \App\Models\Organization $organization
- * @property-read \App\Models\SavingsAccount $savingsAccount
- * @property-read \App\Models\User $staff
+ * @property-read Organization $organization
+ * @property-read SavingsAccount $savingsAccount
+ * @property-read User $staff
  *
  * @method static \Database\Factories\SavingsWithdrawalFactory factory($count = null, $state = [])
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SavingsWithdrawal newModelQuery()
@@ -76,9 +79,9 @@ class SavingsWithdrawal extends Model
 
     protected $casts = [
         'transaction_date' => 'datetime',
-        'snapshot_balance' => \App\Casts\MoneyCast::class,
-        'amount_withdrawn' => \App\Casts\MoneyCast::class,
-        'loan_adjustment_amount' => \App\Casts\MoneyCast::class,
+        'snapshot_balance' => MoneyCast::class,
+        'amount_withdrawn' => MoneyCast::class,
+        'loan_adjustment_amount' => MoneyCast::class,
         'approved_at' => 'datetime',
         'audit_trail' => 'array',
     ];

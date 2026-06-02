@@ -6,6 +6,7 @@ use App\Traits\BelongsToOrganization;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
 /**
  * @property string $id
@@ -13,10 +14,10 @@ use Illuminate\Database\Eloquent\Model;
  * @property string $component
  * @property string $message
  * @property array<array-key, mixed>|null $payload
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  * @property string|null $organization_id
- * @property-read \App\Models\Organization|null $organization
+ * @property-read Organization|null $organization
  *
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SystemHealthLog newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|SystemHealthLog newQuery()

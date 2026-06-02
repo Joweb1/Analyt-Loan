@@ -2,7 +2,11 @@
 
 namespace App\Observers;
 
+use App\Events\DashboardUpdated;
 use App\Helpers\SystemLogger;
+use App\Livewire\AdminDashboard;
+use App\Livewire\LoanDashboard;
+use App\Livewire\Reports;
 use App\Models\Borrower;
 
 class BorrowerObserver
@@ -32,10 +36,10 @@ class BorrowerObserver
             );
         }
 
-        \App\Events\DashboardUpdated::dispatch($borrower->organization_id);
-        \App\Livewire\LoanDashboard::clearCache($borrower->organization_id);
-        \App\Livewire\AdminDashboard::clearCache($borrower->organization_id);
-        \App\Livewire\Reports::clearCache($borrower->organization_id);
+        DashboardUpdated::dispatch($borrower->organization_id);
+        LoanDashboard::clearCache($borrower->organization_id);
+        AdminDashboard::clearCache($borrower->organization_id);
+        Reports::clearCache($borrower->organization_id);
     }
 
     /**
@@ -99,10 +103,10 @@ class BorrowerObserver
             }
         }
 
-        \App\Events\DashboardUpdated::dispatch($borrower->organization_id);
-        \App\Livewire\LoanDashboard::clearCache($borrower->organization_id);
-        \App\Livewire\AdminDashboard::clearCache($borrower->organization_id);
-        \App\Livewire\Reports::clearCache($borrower->organization_id);
+        DashboardUpdated::dispatch($borrower->organization_id);
+        LoanDashboard::clearCache($borrower->organization_id);
+        AdminDashboard::clearCache($borrower->organization_id);
+        Reports::clearCache($borrower->organization_id);
     }
 
     /**
@@ -110,10 +114,10 @@ class BorrowerObserver
      */
     public function deleted(Borrower $borrower): void
     {
-        \App\Events\DashboardUpdated::dispatch($borrower->organization_id);
-        \App\Livewire\LoanDashboard::clearCache($borrower->organization_id);
-        \App\Livewire\AdminDashboard::clearCache($borrower->organization_id);
-        \App\Livewire\Reports::clearCache($borrower->organization_id);
+        DashboardUpdated::dispatch($borrower->organization_id);
+        LoanDashboard::clearCache($borrower->organization_id);
+        AdminDashboard::clearCache($borrower->organization_id);
+        Reports::clearCache($borrower->organization_id);
     }
 
     /**

@@ -6,9 +6,13 @@ use App\DTOs\LoanApplicationDTO;
 use App\Models\Borrower;
 use App\Models\Collateral;
 use App\Models\Loan;
+use App\Models\LoanProduct;
+use App\Models\Portfolio;
+use App\Models\User;
 use App\Services\LoanService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\On;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -17,7 +21,7 @@ class LoanForm extends Component
 {
     use WithFileUploads;
 
-    /** @var \App\Models\Borrower|null */
+    /** @var Borrower|null */
     public $selectedBorrower;
 
     // Borrower Selection
@@ -134,14 +138,14 @@ class LoanForm extends Component
     public function mount(?Loan $loan = null)
     {
         $orgId = Auth::user()->organization_id;
-        $this->loanProducts = \App\Models\LoanProduct::orderBy('name')->get();
-        $this->portfolios = \App\Models\Portfolio::orderBy('name')->get();
+        $this->loanProducts = LoanProduct::orderBy('name')->get();
+        $this->portfolios = Portfolio::orderBy('name')->get();
 
         if ($loan && $loan->exists) {
             $this->isEditMode = true;
             $this->loanId = $loan->id;
             $this->borrowerId = $loan->borrower_id;
-            /** @var \App\Models\Borrower|null $borrower */
+            /** @var Borrower|null $borrower */
             $borrower = $loan->borrower()->with('user')->first();
             $this->selectedBorrower = $borrower;
             $this->borrowerUserId = $borrower?->user_id;
@@ -183,7 +187,7 @@ class LoanForm extends Component
 
             // Check for borrower_id in query string
             if ($borrowerId = request()->query('borrower_id')) {
-                $borrower = \App\Models\Borrower::find($borrowerId);
+                $borrower = Borrower::find($borrowerId);
                 if ($borrower) {
                     $this->selectBorrower($borrower->user_id);
                 } else {
@@ -198,7 +202,7 @@ class LoanForm extends Component
             })
             ->get();
 
-        $this->staffMembers = \App\Models\User::where('organization_id', $orgId)
+        $this->staffMembers = User::where('organization_id', $orgId)
             ->whereIn('type', ['admin', 'staff'])
             ->get();
     }
@@ -213,13 +217,15 @@ class LoanForm extends Component
         }
 
         $orgId = Auth::user()->organization_id;
+        $term = '%'.strtolower(trim($this->search)).'%';
 
-        $this->searchResults = \App\Models\User::role('Borrower')
+        $this->searchResults = User::role('Borrower')
             ->where('organization_id', $orgId)
-            ->where(function ($query) {
-                $query->where('name', 'like', '%'.$this->search.'%')
-                    ->orWhere('email', 'like', '%'.$this->search.'%')
-                    ->orWhere('phone', 'like', '%'.$this->search.'%');
+            ->where(function ($query) use ($term) {
+                $query->whereRaw('LOWER(name) LIKE ?', [$term])
+                    ->orWhereRaw('LOWER(email) LIKE ?', [$term])
+                    ->orWhere('phone', 'like', $term)
+                    ->orWhereHas('borrower', fn ($bq) => $bq->where('custom_id', 'like', $term));
             })
             ->with(['borrower', 'saver', 'guarantor'])
             ->take(10)
@@ -228,14 +234,14 @@ class LoanForm extends Component
 
     public function selectBorrower($userId)
     {
-        $user = \App\Models\User::with(['borrower'])->find($userId);
+        $user = User::with(['borrower'])->find($userId);
         if (! $user) {
             return;
         }
 
         if (! $user->borrower) {
             // Ensure borrower profile exists
-            $borrower = \App\Models\Borrower::create([
+            $borrower = Borrower::create([
                 'organization_id' => $user->organization_id,
                 'user_id' => $user->id,
                 'phone' => $user->phone,
@@ -278,7 +284,7 @@ class LoanForm extends Component
 
     public function updatedLoanProduct($value)
     {
-        $product = \App\Models\LoanProduct::where('name', $value)->first();
+        $product = LoanProduct::where('name', $value)->first();
         if ($product) {
             $this->interest_rate = $product->default_interest_rate;
             $this->interest_calculation_type = $product->interest_calculation_type;
@@ -303,7 +309,7 @@ class LoanForm extends Component
 
         try {
             $this->validate($rules);
-        } catch (\Illuminate\Validation\ValidationException $e) {
+        } catch (ValidationException $e) {
             $this->dispatch('custom-alert', ['message' => 'Validation failed. Please check the form.', 'type' => 'error']);
             throw $e;
         }

@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\Loan;
+use App\Support\Tracing;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -25,7 +26,7 @@ class ProcessLoanAttachment implements ShouldQueue
         public string $tempPath,
         public string $originalName
     ) {
-        $this->traceId = \App\Support\Tracing::getTraceId();
+        $this->traceId = Tracing::getTraceId();
     }
 
     /**
@@ -34,10 +35,10 @@ class ProcessLoanAttachment implements ShouldQueue
     public function handle(): void
     {
         if ($this->traceId) {
-            \App\Support\Tracing::setTraceId($this->traceId);
+            Tracing::setTraceId($this->traceId);
         }
 
-        $span = \App\Support\Tracing::startSpan('job.process_attachment', "Processing attachment for loan #{$this->loan->loan_number}");
+        $span = Tracing::startSpan('job.process_attachment', "Processing attachment for loan #{$this->loan->loan_number}");
 
         if (! Storage::disk('local')->exists($this->tempPath)) {
             if ($span) {
@@ -61,7 +62,7 @@ class ProcessLoanAttachment implements ShouldQueue
         }
 
         // Update loan attachments
-        $loan = \App\Models\Loan::withoutGlobalScopes()->find($this->loan->id);
+        $loan = Loan::withoutGlobalScopes()->find($this->loan->id);
         if ($loan) {
             $currentAttachments = $loan->attachments ?? [];
             $currentAttachments[] = $attachmentPath;

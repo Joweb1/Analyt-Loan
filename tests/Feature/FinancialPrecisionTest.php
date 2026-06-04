@@ -25,14 +25,14 @@ class FinancialPrecisionTest extends TestCase
         $this->actingAs($user);
     }
 
-    public function test_loan_amount_is_persisted_as_minor_units()
+    public function test_loan_amount_is_persisted_as_exact_minor_units()
     {
         $amount = 1234.56;
         $loan = Loan::factory()->create([
             'amount' => $amount,
         ]);
 
-        // Check DB directly
+        // Check DB directly: should be EXACT (no more rounding in constructor)
         $dbValue = DB::table('loans')->where('id', $loan->id)->value('amount');
         $this->assertEquals(123456, $dbValue);
 
@@ -40,6 +40,8 @@ class FinancialPrecisionTest extends TestCase
         $this->assertInstanceOf(Money::class, $loan->amount);
         $this->assertEquals(123456, $loan->amount->getMinorAmount());
         $this->assertEquals(1234.56, $loan->amount->getMajorAmount());
+        // But formatting is rounded
+        $this->assertEquals('1,235', $loan->amount->format());
     }
 
     public function test_loan_interest_calculation_is_precise()
@@ -58,7 +60,7 @@ class FinancialPrecisionTest extends TestCase
         $this->assertEquals(10000, $interest->getMinorAmount());
     }
 
-    public function test_loan_balance_calculation_uses_minor_units()
+    public function test_loan_balance_calculation_uses_exact_minor_units()
     {
         $loan = Loan::factory()->create([
             'amount' => 1000.00,
@@ -75,13 +77,12 @@ class FinancialPrecisionTest extends TestCase
         ]);
 
         // Manually trigger total expected interest in calculation context
-        // (Simplified balance calc for test without schedules)
-        $expectedTotal = 1100.00; // 1000 principal + 100 interest
-        $paid = 500.25;
         $expectedBalanceMajor = 599.75;
 
         $this->assertEquals($expectedBalanceMajor, $loan->balance->getMajorAmount());
         $this->assertEquals(59975, $loan->balance->getMinorAmount());
+        // Formatting rounds up
+        $this->assertEquals('600', $loan->balance->format());
     }
 
     public function test_route_serialization_conflict_is_resolved()

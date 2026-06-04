@@ -44,7 +44,7 @@ class Money implements JsonSerializable, Wireable
      */
     public static function fromMajor(float|string $amount, string $currency = 'NGN'): self
     {
-        // We use string conversion to avoid float precision issues during the multiplier phase
+        // Use string conversion to avoid float precision issues
         $minor = (int) bcmul((string) $amount, '100', 0);
 
         return new self($minor, $currency);
@@ -81,10 +81,10 @@ class Money implements JsonSerializable, Wireable
 
     public function multiply(float|string $multiplier): self
     {
-        // Ensure the multiplier is a well-formed decimal string (prevents scientific notation issues with BCMath)
+        // Ensure the multiplier is a well-formed decimal string
         $multiplierStr = is_numeric($multiplier) ? number_format((float) $multiplier, 10, '.', '') : (string) $multiplier;
 
-        // When multiplying (e.g., for interest), we use bcmath for precision
+        // Keep 0 scale for minor units as they are integers
         $result = bcmul((string) $this->amount, $multiplierStr, 0);
 
         return new self((int) $result, $this->currency, $this->isMissing);
@@ -138,7 +138,17 @@ class Money implements JsonSerializable, Wireable
             return 'Error fetching data';
         }
 
-        return number_format($this->getMajorAmount(), 2);
+        // Round UP to nearest whole number for display (e.g. 999.99 -> 1000)
+        return number_format(ceil($this->getMajorAmount()), 0);
+    }
+
+    public function formatWithDecimals(int $decimals = 2): string
+    {
+        if ($this->isMissing) {
+            return 'Error fetching data';
+        }
+
+        return number_format($this->getMajorAmount(), $decimals);
     }
 
     public function jsonSerialize(): mixed

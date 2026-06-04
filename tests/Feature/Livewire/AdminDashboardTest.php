@@ -202,7 +202,7 @@ class AdminDashboardTest extends TestCase
                 return $val instanceof Money && $val->getMinorAmount() === 1300000;
             })
             ->assertSee('Live Bank Balance')
-            ->assertSee('₦ 13,000.00');
+            ->assertSee('₦ 13,000');
     }
 
     public function test_it_loads_action_items()

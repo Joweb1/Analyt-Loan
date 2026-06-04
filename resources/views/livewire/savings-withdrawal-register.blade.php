@@ -46,32 +46,32 @@
     </div>
 
     {{-- Stats Summary Area --}}
-    <div class="max-w-7xl mx-auto grid grid-cols-2 gap-3 lg:grid-cols-4 xl:grid-cols-7 mb-10">
-        <div class="bg-white overflow-hidden shadow-sm border border-gray-200 rounded p-3 sm:p-4 transition hover:shadow-md">
+    <div class="max-w-7xl mx-auto flex flex-wrap gap-3 mb-10">
+        <div class="flex-1 min-w-[140px] bg-white overflow-hidden shadow-sm border border-gray-200 rounded p-3 sm:p-4 transition hover:shadow-md">
             <dt class="text-[10px] sm:text-xs font-bold text-gray-400 truncate uppercase tracking-widest">Withdrawals</dt>
             <dd class="mt-1 text-lg sm:text-2xl font-black text-rose-600">{{ $stats['total_withdrawals'] }}</dd>
         </div>
-        <div class="bg-white overflow-hidden shadow-sm border border-gray-200 rounded p-3 sm:p-4 transition hover:shadow-md">
+        <div class="flex-1 min-w-[140px] bg-white overflow-hidden shadow-sm border border-gray-200 rounded p-3 sm:p-4 transition hover:shadow-md">
             <dt class="text-[10px] sm:text-xs font-bold text-gray-400 truncate uppercase tracking-widest">Regular Bal.</dt>
             <dd class="mt-1 text-lg sm:text-2xl font-black text-emerald-600">{{ $stats['total_savings_balance'] }}</dd>
         </div>
-        <div class="bg-white overflow-hidden shadow-sm border border-gray-200 rounded p-3 sm:p-4 transition hover:shadow-md">
+        <div class="flex-1 min-w-[140px] bg-white overflow-hidden shadow-sm border border-gray-200 rounded p-3 sm:p-4 transition hover:shadow-md">
             <dt class="text-[10px] sm:text-xs font-bold text-gray-400 truncate uppercase tracking-widest">Daily Thrift</dt>
             <dd class="mt-1 text-lg sm:text-2xl font-black text-blue-600">{{ $stats['total_thrift_balance'] }}</dd>
         </div>
-        <div class="bg-white overflow-hidden shadow-sm border border-gray-200 rounded p-3 sm:p-4 transition hover:shadow-md">
+        <div class="flex-1 min-w-[140px] bg-white overflow-hidden shadow-sm border border-gray-200 rounded p-3 sm:p-4 transition hover:shadow-md">
             <dt class="text-[10px] sm:text-xs font-bold text-gray-400 truncate uppercase tracking-widest">Loan Adjusts</dt>
             <dd class="mt-1 text-lg sm:text-2xl font-black text-slate-700">{{ $stats['total_loan_adjustments'] }}</dd>
         </div>
-        <div class="bg-white overflow-hidden shadow-sm border border-gray-200 rounded p-3 sm:p-4 transition hover:shadow-md">
+        <div class="flex-1 min-w-[140px] bg-white overflow-hidden shadow-sm border border-gray-200 rounded p-3 sm:p-4 transition hover:shadow-md">
             <dt class="text-[10px] sm:text-xs font-bold text-gray-400 truncate uppercase tracking-widest">Approved</dt>
             <dd class="mt-1 text-lg sm:text-2xl font-black text-gray-900">{{ $stats['approved_count'] }}</dd>
         </div>
-        <div class="bg-white overflow-hidden shadow-sm border border-gray-200 rounded p-3 sm:p-4 transition hover:shadow-md">
+        <div class="flex-1 min-w-[140px] bg-white overflow-hidden shadow-sm border border-gray-200 rounded p-3 sm:p-4 transition hover:shadow-md">
             <dt class="text-[10px] sm:text-xs font-bold text-gray-400 truncate uppercase tracking-widest">Pending</dt>
             <dd class="mt-1 text-lg sm:text-2xl font-black text-amber-500">{{ $stats['pending_count'] }}</dd>
         </div>
-        <div class="bg-white overflow-hidden shadow-sm border border-gray-200 rounded p-3 sm:p-4 transition hover:shadow-md">
+        <div class="flex-1 min-w-[140px] bg-white overflow-hidden shadow-sm border border-gray-200 rounded p-3 sm:p-4 transition hover:shadow-md">
             <dt class="text-[10px] sm:text-xs font-bold text-gray-400 truncate uppercase tracking-widest">Daily Flow</dt>
             <dd class="mt-1 text-lg sm:text-2xl font-black text-gray-900">{{ $stats['daily_flow'] }}</dd>
         </div>

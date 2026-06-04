@@ -4,7 +4,7 @@
         <p class="mt-1 text-xs text-slate-500 font-medium tracking-wide">Select a digital record book to view or manage entries.</p>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+    <div class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-3">
         {{-- Loan Disbursement Record --}}
         <a href="{{ route('loan.disbursement-register') }}" 
            class="group flex items-center gap-3 bg-white p-3 rounded-lg border border-slate-200 hover:border-emerald-500/50 hover:shadow-md transition-all duration-200">

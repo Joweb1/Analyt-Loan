@@ -19,7 +19,7 @@ class DigitalShelfTest extends TestCase
         Livewire::test(DigitalShelf::class)
             ->assertStatus(200)
             ->assertSee($collaterals->first()->name)
-            ->assertSee(number_format(ceil($collaterals->first()->value->getMajorAmount()), 0))
+            ->assertSee(number_format(round($collaterals->first()->value->getMajorAmount()), 0))
             ->assertSee($collaterals->first()->image_path);
     }
 }

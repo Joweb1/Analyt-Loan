@@ -41,9 +41,9 @@
 
     {{-- Operational Summary Cards --}}
     <div class="max-w-7xl mx-auto mb-12">
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="flex flex-wrap gap-6">
             {{-- Total Repayments Week --}}
-            <div class="bg-white p-6 rounded-sm border border-slate-200 shadow-sm group hover:border-emerald-200 transition-colors">
+            <div class="flex-1 min-w-[240px] bg-white p-6 rounded-sm border border-slate-200 shadow-sm group hover:border-emerald-200 transition-colors">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Weekly Repayments</h3>
                     <span class="material-symbols-outlined text-slate-200 text-sm group-hover:text-emerald-400 transition-colors">payments</span>
@@ -52,7 +52,7 @@
             </div>
 
             {{-- Weekly Due --}}
-            <div class="bg-white p-6 rounded-sm border border-slate-200 shadow-sm group hover:border-amber-200 transition-colors">
+            <div class="flex-1 min-w-[240px] bg-white p-6 rounded-sm border border-slate-200 shadow-sm group hover:border-amber-200 transition-colors">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Weekly Due</h3>
                     <span class="material-symbols-outlined text-slate-200 text-sm group-hover:text-amber-400 transition-colors">event_repeat</span>
@@ -61,7 +61,7 @@
             </div>
 
             {{-- Monthly Due --}}
-            <div class="bg-white p-6 rounded-sm border border-slate-200 shadow-sm group hover:border-purple-200 transition-colors">
+            <div class="flex-1 min-w-[240px] bg-white p-6 rounded-sm border border-slate-200 shadow-sm group hover:border-purple-200 transition-colors">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Monthly Due</h3>
                     <span class="material-symbols-outlined text-slate-200 text-sm group-hover:text-purple-400 transition-colors">calendar_month</span>
@@ -70,7 +70,7 @@
             </div>
 
             {{-- Overdue Amount --}}
-            <div class="bg-white p-6 rounded-sm border border-slate-200 shadow-sm group hover:border-rose-200 transition-colors">
+            <div class="flex-1 min-w-[240px] bg-white p-6 rounded-sm border border-slate-200 shadow-sm group hover:border-rose-200 transition-colors">
                 <div class="flex items-center justify-between mb-4">
                     <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Overdue Acc.</h3>
                     <span class="material-symbols-outlined text-slate-200 text-sm group-hover:text-rose-400 transition-colors">warning</span>
@@ -90,7 +90,7 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div class="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-8">
             @foreach($groups as $group)
                 <a href="{{ route('ledger.group', ['group' => $group['name']]) }}" 
                    class="group block bg-white rounded-sm border border-slate-200 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden relative">

@@ -80,28 +80,28 @@
     {{-- Stats Summary Area (Standardized 2-grid structure) --}}
     <div class="max-w-7xl mx-auto space-y-4 mb-10">
         {{-- Row 1: System Ledger Totals --}}
-        <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
-            <div class="bg-white overflow-hidden shadow-sm border border-gray-200 rounded-sm p-5 transition hover:shadow-md border-l-4 border-l-blue-500">
+        <div class="flex flex-wrap gap-4">
+            <div class="flex-1 min-w-[240px] bg-white overflow-hidden shadow-sm border border-gray-200 rounded-sm p-5 transition hover:shadow-md border-l-4 border-l-blue-500">
                 <dt class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Live Account Balance</dt>
                 <dd class="text-2xl font-black text-blue-600">{{ fetch_data($accountBalance?->format() ?? null) }}</dd>
             </div>
-            <div class="bg-white overflow-hidden shadow-sm border border-gray-200 rounded-sm p-5 transition hover:shadow-md">
+            <div class="flex-1 min-w-[240px] bg-white overflow-hidden shadow-sm border border-gray-200 rounded-sm p-5 transition hover:shadow-md">
                 <dt class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Total Inflow</dt>
                 <dd class="text-2xl font-black text-emerald-600">+{{ fetch_data($entry?->total_inflow?->format() ?? null) }}</dd>
             </div>
-            <div class="bg-white overflow-hidden shadow-sm border border-gray-200 rounded-sm p-5 transition hover:shadow-md">
+            <div class="flex-1 min-w-[240px] bg-white overflow-hidden shadow-sm border border-gray-200 rounded-sm p-5 transition hover:shadow-md">
                 <dt class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Total Outflow</dt>
                 <dd class="text-2xl font-black text-rose-600">-{{ fetch_data($entry?->total_outflow?->format() ?? null) }}</dd>
             </div>
-            <div class="bg-white overflow-hidden shadow-sm border border-gray-200 rounded-sm p-5 transition hover:shadow-md">
+            <div class="flex-1 min-w-[240px] bg-white overflow-hidden shadow-sm border border-gray-200 rounded-sm p-5 transition hover:shadow-md">
                 <dt class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Expected Deposit</dt>
                 <dd class="text-2xl font-black text-gray-900">{{ fetch_data($entry?->expected_deposit?->format() ?? null) }}</dd>
             </div>
         </div>
 
         {{-- Row 2: Manual Reconciliation & Budget --}}
-        <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-            <div class="bg-white overflow-hidden shadow-sm border border-gray-200 rounded-sm p-6 transition hover:shadow-md border-l-4 border-l-emerald-500">
+        <div class="flex flex-wrap gap-4">
+            <div class="flex-1 min-w-[300px] bg-white overflow-hidden shadow-sm border border-gray-200 rounded-sm p-6 transition hover:shadow-md border-l-4 border-l-emerald-500">
                 <div class="flex items-center justify-between">
                     <div>
                         <dt class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Daily Bank Deposit</dt>
@@ -115,7 +115,7 @@
                     </div>
                 </div>
             </div>
-            <div class="bg-white overflow-hidden shadow-sm border border-gray-200 rounded-sm p-6 transition hover:shadow-md">
+            <div class="flex-1 min-w-[300px] bg-white overflow-hidden shadow-sm border border-gray-200 rounded-sm p-6 transition hover:shadow-md">
                 <div class="flex items-center justify-between">
                     <div>
                         <dt class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Physical Cash (Hand)</dt>
@@ -133,7 +133,7 @@
                     </div>
                 </div>
             </div>
-            <div class="bg-white overflow-hidden shadow-sm border border-gray-200 rounded-sm p-6 transition hover:shadow-md border-l-4 {{ fetch_data($remainingBudget?->isNegative() ? 'border-l-rose-500' : 'border-l-amber-500' ?? null) }}">
+            <div class="flex-1 min-w-[300px] bg-white overflow-hidden shadow-sm border border-gray-200 rounded-sm p-6 transition hover:shadow-md border-l-4 {{ fetch_data($remainingBudget?->isNegative() ? 'border-l-rose-500' : 'border-l-amber-500' ?? null) }}">
                 <dt class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Remaining Expense Budget</dt>
                 <dd class="text-2xl font-black {{ fetch_data($remainingBudget?->isNegative() ? 'text-rose-600' : 'text-amber-600' ?? null) }}">
                     {{ fetch_data($remainingBudget?->format() ?? null) }}

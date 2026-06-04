@@ -39,18 +39,20 @@
     </div>
 
     <!-- Search & Filters Bar -->
-    <div class="flex flex-col gap-3 md:flex-row md:items-center">
-        <x-portfolio-filter :portfolios="$portfolios" :portfolioId="$portfolioId" />
+    <div class="flex flex-wrap items-center gap-3">
+        <div class="shrink-0">
+            <x-portfolio-filter :portfolios="$portfolios" :portfolioId="$portfolioId" />
+        </div>
 
-        <div class="relative group w-full flex-1">
+        <div class="relative group flex-1 min-w-[280px]">
             <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                 <span class="material-symbols-outlined text-slate-400 text-xl group-focus-within:text-primary transition-colors">search</span>
             </span>
             <input wire:model.live.debounce.300ms="search" type="text" placeholder="Search Borrower or Loan ID..." class="w-full pl-12 pr-4 py-4 bg-white dark:bg-[#1a1f2b] border-none rounded-2xl shadow-sm focus:ring-2 focus:ring-primary/20 transition-all text-sm font-bold placeholder-slate-400 h-[52px]">
         </div>
 
-        <div class="flex items-center gap-3 w-full md:w-auto shrink-0">
-            <div class="relative flex-1 md:w-48">
+        <div class="flex items-center gap-3 min-w-[200px]">
+            <div class="relative flex-1">
                 <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <span class="material-symbols-outlined text-slate-400 text-lg">calendar_month</span>
                 </span>

@@ -7,8 +7,8 @@
         </a>
     </div>
     
-    <section class="px-0 py-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div class="bg-white dark:bg-gray-900 p-4 rounded-[12px] border border-[#dbdee6] dark:border-gray-800 shadow-sm">
+    <div class="flex flex-wrap gap-6 py-8">
+        <div class="flex-1 min-w-[280px] bg-white dark:bg-gray-900 p-4 rounded-[12px] border border-[#dbdee6] dark:border-gray-800 shadow-sm">
             <div class="flex justify-between items-start mb-2">
                 <p class="text-xs font-semibold text-[#606e8a]">Total Vault Value</p>
                 <div class="p-1.5 bg-primary/10 text-primary rounded-lg">
@@ -20,7 +20,7 @@
             </div>
             <p class="text-[9px] text-[#606e8a] mt-1 font-medium tracking-wide uppercase">Real-time Value</p>
         </div>
-        <div class="bg-white dark:bg-gray-900 p-4 rounded-[12px] border border-[#dbdee6] dark:border-gray-800 shadow-sm">
+        <div class="flex-1 min-w-[280px] bg-white dark:bg-gray-900 p-4 rounded-[12px] border border-[#dbdee6] dark:border-gray-800 shadow-sm">
             <div class="flex justify-between items-start mb-2">
                 <p class="text-xs font-semibold text-[#606e8a]">Items In Vault</p>
                 <div class="p-1.5 bg-green-500/10 text-green-500 rounded-lg">
@@ -30,7 +30,7 @@
             <h3 class="text-xl font-extrabold">{{ $inVaultCount }}</h3>
             <p class="text-[9px] text-[#606e8a] mt-1 font-medium tracking-wide uppercase">Secured Assets</p>
         </div>
-        <div class="bg-white dark:bg-gray-900 p-4 rounded-[12px] border border-[#dbdee6] dark:border-gray-800 shadow-sm">
+        <div class="flex-1 min-w-[280px] bg-white dark:bg-gray-900 p-4 rounded-[12px] border border-[#dbdee6] dark:border-gray-800 shadow-sm">
             <div class="flex justify-between items-start mb-2">
                 <p class="text-xs font-semibold text-[#606e8a]">Returned Items</p>
                 <div class="p-1.5 bg-blue-500/10 text-blue-500 rounded-lg">
@@ -40,7 +40,7 @@
             <h3 class="text-xl font-extrabold">{{ $returnedCount }}</h3>
             <p class="text-[9px] text-[#606e8a] mt-1 font-medium tracking-wide uppercase">Released to Borrower</p>
         </div>
-    </section>
+    </div>
 
     <section class="px-0 mb-4">
         <div class="flex flex-wrap items-center justify-between gap-4 p-4 bg-white dark:bg-gray-900 rounded-[16px] border border-[#dbdee6] dark:border-gray-800">

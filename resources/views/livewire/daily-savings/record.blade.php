@@ -43,22 +43,22 @@
 
     {{-- Summary Cards --}}
     <div class="max-w-7xl mx-auto mb-10">
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            <div class="bg-white p-6 rounded-sm border border-slate-200 shadow-sm">
+        <div class="flex flex-wrap gap-6">
+            <div class="flex-1 min-w-[240px] bg-white p-6 rounded-sm border border-slate-200 shadow-sm">
                 <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Collections: Today</p>
                 <div class="flex items-center justify-between">
                     <h4 class="text-2xl font-black text-slate-900 tracking-tighter italic">₦{{ fetch_data($this?->summary['today']?->format() ?? null) }}</h4>
                     <span class="material-symbols-outlined text-blue-500">payments</span>
                 </div>
             </div>
-            <div class="bg-white p-6 rounded-sm border border-slate-200 shadow-sm">
+            <div class="flex-1 min-w-[240px] bg-white p-6 rounded-sm border border-slate-200 shadow-sm">
                 <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Collections: This Week</p>
                 <div class="flex items-center justify-between">
                     <h4 class="text-2xl font-black text-slate-900 tracking-tighter italic">₦{{ fetch_data($this?->summary['week']?->format() ?? null) }}</h4>
                     <span class="material-symbols-outlined text-emerald-500">account_balance_wallet</span>
                 </div>
             </div>
-            <div class="bg-white p-6 rounded-sm border border-slate-200 shadow-sm">
+            <div class="flex-1 min-w-[240px] bg-white p-6 rounded-sm border border-slate-200 shadow-sm">
                 <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Collections: This Month</p>
                 <div class="flex items-center justify-between">
                     <h4 class="text-2xl font-black text-slate-900 tracking-tighter italic">₦{{ fetch_data($this?->summary['month']?->format() ?? null) }}</h4>
@@ -109,7 +109,7 @@
 
                 {{-- Daily Input Grid --}}
                 <div class="p-8">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
+                    <div class="grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-6">
                         @foreach($weekDays as $day)
                             <div class="relative group">
                                 <label class="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2 flex items-center justify-between">

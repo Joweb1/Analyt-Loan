@@ -20,7 +20,7 @@ class CollateralDetailDrawerTest extends TestCase
         $testable->assertStatus(200);
         $testable->call('openDrawer', $collateral->id)
             ->assertSee($collateral->name)
-            ->assertSee(number_format(ceil($collateral->value->getMajorAmount()), 0));
+            ->assertSee(number_format(round($collateral->value->getMajorAmount()), 0));
     }
 
     public function test_collateral_detail_drawer_can_open_and_close(): void

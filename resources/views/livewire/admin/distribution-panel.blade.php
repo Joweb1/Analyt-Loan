@@ -6,7 +6,7 @@
                     Distribution Panel
                 </h2>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-6">
                     @foreach ($organizations as $org)
                         <div class="bg-white dark:bg-zinc-800 rounded-lg shadow p-6 border border-gray-200 dark:border-zinc-700 relative group transition hover:shadow-lg">
                             <div class="flex items-center justify-between mb-4">

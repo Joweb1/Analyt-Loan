@@ -112,7 +112,7 @@
     
     @if($viewMode === 'grid')
         <!-- Grid View -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-10">
+        <div class="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-x-6 gap-y-10">
             @foreach($customers as $customer)
                 @php
                     $isBorrower = $customer->isBorrower();

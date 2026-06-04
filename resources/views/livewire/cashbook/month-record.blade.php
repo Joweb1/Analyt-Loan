@@ -33,20 +33,20 @@
     </div>
 
     {{-- Stats Summary Area --}}
-    <div class="max-w-7xl mx-auto grid grid-cols-2 gap-4 md:grid-cols-5 mb-10">
-        <div class="bg-white overflow-hidden shadow-sm border border-gray-200 rounded-sm p-5 transition hover:shadow-md">
+    <div class="max-w-7xl mx-auto flex flex-wrap gap-4 mb-10">
+        <div class="flex-1 min-w-[200px] bg-white overflow-hidden shadow-sm border border-gray-200 rounded-sm p-5 transition hover:shadow-md">
             <dt class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Total Inflow</dt>
             <dd class="text-2xl font-black text-emerald-600">+{{ fetch_data($stats['total_inflow']?->format() ?? null) }}</dd>
         </div>
-        <div class="bg-white overflow-hidden shadow-sm border border-gray-200 rounded-sm p-5 transition hover:shadow-md">
+        <div class="flex-1 min-w-[200px] bg-white overflow-hidden shadow-sm border border-gray-200 rounded-sm p-5 transition hover:shadow-md">
             <dt class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Total Outflow</dt>
             <dd class="text-2xl font-black text-rose-600">-{{ fetch_data($stats['total_outflow']?->format() ?? null) }}</dd>
         </div>
-        <div class="bg-white overflow-hidden shadow-sm border border-gray-200 rounded-sm p-5 transition hover:shadow-md">
+        <div class="flex-1 min-w-[200px] bg-white overflow-hidden shadow-sm border border-gray-200 rounded-sm p-5 transition hover:shadow-md">
             <dt class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Live Bank Balance</dt>
             <dd class="text-2xl font-black text-blue-600">{{ fetch_data($liveBalance?->format() ?? null) }}</dd>
         </div>
-        <div class="bg-white overflow-hidden shadow-sm border border-gray-200 rounded-sm p-5 transition hover:shadow-md group relative">
+        <div class="flex-1 min-w-[200px] bg-white overflow-hidden shadow-sm border border-gray-200 rounded-sm p-5 transition hover:shadow-md group relative">
             <dt class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Initial Balance</dt>
             <dd class="text-2xl font-black text-gray-900">{{ fetch_data($openingBalance?->format() ?? null) }}</dd>
             @if(auth()->user()->isAdmin())
@@ -55,7 +55,7 @@
                 </button>
             @endif
         </div>
-        <div class="bg-white overflow-hidden shadow-sm border border-gray-200 rounded-sm p-5 transition hover:shadow-md border-l-4 border-l-blue-500">
+        <div class="flex-1 min-w-[200px] bg-white overflow-hidden shadow-sm border border-gray-200 rounded-sm p-5 transition hover:shadow-md border-l-4 border-l-blue-500">
             <dt class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Audit Status</dt>
             <dd class="text-2xl font-black text-blue-600">{{ $stats['verified_count'] }}/{{ $stats['days_count'] }} Days</dd>
         </div>

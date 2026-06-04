@@ -54,9 +54,9 @@
             </a>        </div>
     
     <!-- Control Cards (KPIs) -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" wire:loading.class="opacity-50">
+    <div class="flex flex-wrap gap-4" wire:loading.class="opacity-50">
         <!-- Repaid Period -->
-        <div class="bg-white dark:bg-gray-900 p-4 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-md transition-shadow">
+        <div class="flex-1 min-w-[240px] bg-white dark:bg-gray-900 p-4 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-md transition-shadow">
             <div class="flex items-center justify-between mb-2">
                 <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Repaid ({{ $filter }})</p>
                 <div class="p-1 bg-green-50 rounded-lg">
@@ -72,7 +72,7 @@
         </div>
 
         <!-- Total Lent (Period) -->
-        <div class="bg-white dark:bg-gray-900 p-4 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-md transition-shadow">
+        <div class="flex-1 min-w-[240px] bg-white dark:bg-gray-900 p-4 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-md transition-shadow">
             <div class="flex items-center justify-between mb-2">
                 <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Total Lent</p>
                 <div class="p-1 bg-blue-50 rounded-lg">
@@ -88,7 +88,7 @@
         </div>
 
         <!-- Active Customers (Period) -->
-        <div class="bg-white dark:bg-gray-900 p-4 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-md transition-shadow">
+        <div class="flex-1 min-w-[240px] bg-white dark:bg-gray-900 p-4 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-md transition-shadow">
             <div class="flex items-center justify-between mb-2">
                 <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">New Customers</p>
                 <div class="p-1 bg-purple-50 rounded-lg">
@@ -104,7 +104,7 @@
         </div>
 
         <!-- Overdue Amount (Period) -->
-        <div class="bg-white dark:bg-gray-900 p-4 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-md transition-shadow">
+        <div class="flex-1 min-w-[240px] bg-white dark:bg-gray-900 p-4 rounded-xl border border-gray-200 dark:border-gray-800 shadow-sm hover:shadow-md transition-shadow">
             <div class="flex items-center justify-between mb-2">
                 <p class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">Overdue Amount</p>
                 <div class="p-1 bg-red-50 rounded-lg">

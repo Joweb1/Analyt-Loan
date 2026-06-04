@@ -33,20 +33,20 @@
     </div>
 
     {{-- Stats Summary Area --}}
-    <div class="max-w-7xl mx-auto grid grid-cols-2 gap-3 lg:grid-cols-4 mb-10">
-        <div class="bg-white overflow-hidden shadow-sm border border-gray-200 rounded p-3 sm:p-4 transition hover:shadow-md">
+    <div class="max-w-7xl mx-auto flex flex-wrap gap-3 mb-10">
+        <div class="flex-1 min-w-[160px] bg-white overflow-hidden shadow-sm border border-gray-200 rounded p-3 sm:p-4 transition hover:shadow-md">
             <dt class="text-[10px] sm:text-xs font-bold text-gray-400 truncate uppercase tracking-widest">Total Issued</dt>
             <dd class="mt-1 text-lg sm:text-2xl font-black text-gray-900">{{ $stats['total_issued'] }}</dd>
         </div>
-        <div class="bg-white overflow-hidden shadow-sm border border-gray-200 rounded p-3 sm:p-4 transition hover:shadow-md">
+        <div class="flex-1 min-w-[160px] bg-white overflow-hidden shadow-sm border border-gray-200 rounded p-3 sm:p-4 transition hover:shadow-md">
             <dt class="text-[10px] sm:text-xs font-bold text-gray-400 truncate uppercase tracking-widest">Active Loans</dt>
             <dd class="mt-1 text-lg sm:text-2xl font-black text-blue-600">{{ $stats['active_count'] }}</dd>
         </div>
-        <div class="bg-white overflow-hidden shadow-sm border border-gray-200 rounded p-3 sm:p-4 transition hover:shadow-md">
+        <div class="flex-1 min-w-[160px] bg-white overflow-hidden shadow-sm border border-gray-200 rounded p-3 sm:p-4 transition hover:shadow-md">
             <dt class="text-[10px] sm:text-xs font-bold text-gray-400 truncate uppercase tracking-widest">Completed</dt>
             <dd class="mt-1 text-lg sm:text-2xl font-black text-emerald-600">{{ $stats['completed_count'] }}</dd>
         </div>
-        <div class="bg-white overflow-hidden shadow-sm border border-gray-200 rounded p-3 sm:p-4 transition hover:shadow-md">
+        <div class="flex-1 min-w-[160px] bg-white overflow-hidden shadow-sm border border-gray-200 rounded p-3 sm:p-4 transition hover:shadow-md">
             <dt class="text-[10px] sm:text-xs font-bold text-gray-400 truncate uppercase tracking-widest">Expected Val</dt>
             <dd class="mt-1 text-lg sm:text-2xl font-black text-gray-900">{{ $stats['total_repayment_value'] }}</dd>
         </div>

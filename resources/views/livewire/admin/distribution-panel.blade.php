@@ -13,63 +13,63 @@
                                 <div class="flex items-center space-x-3">
                                     <div class="h-12 w-12 rounded-full bg-gray-200 dark:bg-zinc-700 flex items-center justify-center overflow-hidden">
                                         @if($org->logo_path)
-                                            <img src="{{ $org->logo_url }}" alt="{{ $org->name }}" class="h-full w-full object-cover">
+                                            <img src="{{ fetch_data($org?->logo_url ?? null) }}" alt="{{ fetch_data($org?->name ?? null) }}" class="h-full w-full object-cover">
                                         @else
-                                            <span class="text-lg font-bold text-gray-500">{{ substr($org->name, 0, 1) }}</span>
+                                            <span class="text-lg font-bold text-gray-500">{{ fetch_data(substr($org?->name, 0, 1) ?? null) }}</span>
                                         @endif
                                     </div>
                                     <div>
-                                        <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ $org->name }}</h3>
-                                        <span class="text-xs text-gray-500 dark:text-gray-400">{{ $org->email ?? 'No email' }}</span>
+                                        <h3 class="text-lg font-bold text-gray-900 dark:text-white">{{ fetch_data($org?->name ?? null) }}</h3>
+                                        <span class="text-xs text-gray-500 dark:text-gray-400">{{ fetch_data($org?->email ?? 'No email' ?? null) }}</span>
                                     </div>
                                 </div>
-                                <div class="text-xs font-semibold px-2 py-1 rounded {{ $org->status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                                    {{ ucfirst($org->status) }}
+                                <div class="text-xs font-semibold px-2 py-1 rounded {{ fetch_data($org?->status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' ?? null) }}">
+                                    {{ fetch_data(ucfirst($org?->status) ?? null) }}
                                 </div>
                             </div>
 
                             <div class="space-y-2 mb-4 text-sm text-gray-600 dark:text-gray-300">
                                 <div class="flex justify-between">
                                     <span>Lent (Month):</span>
-                                    <span class="font-medium">₦{{ number_format($org->monthly_lent ?? 0) }}</span>
+                                    <span class="font-medium">₦{{ fetch_data(number_format($org?->monthly_lent ?? 0) ?? null) }}</span>
                                 </div>
                                 <div class="flex justify-between">
                                     <span>Collected (Month):</span>
-                                    <span class="font-medium">₦{{ number_format($org->monthly_collected ?? 0) }}</span>
+                                    <span class="font-medium">₦{{ fetch_data(number_format($org?->monthly_collected ?? 0) ?? null) }}</span>
                                 </div>
                                 <div class="flex justify-between border-t border-gray-100 dark:border-zinc-700 pt-2">
                                     <span>Active Customers:</span>
-                                    <span class="font-medium">{{ $org->borrowers_count }}</span>
+                                    <span class="font-medium">{{ fetch_data($org?->borrowers_count ?? null) }}</span>
                                 </div>
                                 <div class="flex justify-between">
                                     <span>Active Staff:</span>
-                                    <span class="font-medium">{{ $org->staff_count }}</span>
+                                    <span class="font-medium">{{ fetch_data($org?->staff_count ?? null) }}</span>
                                 </div>
                                 <div class="flex justify-between">
                                     <span>Active Loans:</span>
-                                    <span class="font-medium">{{ $org->active_loans_count }}</span>
+                                    <span class="font-medium">{{ fetch_data($org?->active_loans_count ?? null) }}</span>
                                 </div>
                             </div>
 
                             <div class="border-t border-gray-200 dark:border-zinc-700 pt-4 flex flex-col space-y-3">
                                 <div class="flex justify-between items-center">
                                     <span class="text-xs font-bold uppercase text-gray-500">KYC Status</span>
-                                    <span class="text-xs font-bold {{ $org->kyc_status === 'approved' ? 'text-green-600' : ($org->kyc_status === 'rejected' ? 'text-red-600' : 'text-yellow-600') }}">
-                                        {{ ucfirst($org->kyc_status) }}
+                                    <span class="text-xs font-bold {{ fetch_data($org?->kyc_status === 'approved' ? 'text-green-600' : ($org?->kyc_status === 'rejected' ? 'text-red-600' : 'text-yellow-600') ?? null) }}">
+                                        {{ fetch_data(ucfirst($org?->kyc_status) ?? null) }}
                                     </span>
                                 </div>
                                 
                                 <div class="grid grid-cols-2 gap-2">
-                                    <button wire:click="toggleStatus('{{ $org->id }}')" class="w-full px-3 py-2 text-xs font-bold text-center rounded {{ $org->status === 'active' ? 'bg-red-50 text-red-600 hover:bg-red-100' : 'bg-green-50 text-green-600 hover:bg-green-100' }}">
-                                        {{ $org->status === 'active' ? 'Suspend' : 'Activate' }}
+                                    <button wire:click="toggleStatus('{{ fetch_data($org?->id ?? null) }}')" class="w-full px-3 py-2 text-xs font-bold text-center rounded {{ fetch_data($org?->status === 'active' ? 'bg-red-50 text-red-600 hover:bg-red-100' : 'bg-green-50 text-green-600 hover:bg-green-100' ?? null) }}">
+                                        {{ fetch_data($org?->status === 'active' ? 'Suspend' : 'Activate' ?? null) }}
                                     </button>
                                     
                                     @if($org->kyc_status !== 'approved')
-                                        <button wire:click="updateKycStatus('{{ $org->id }}', 'approved')" class="w-full px-3 py-2 text-xs font-bold text-center bg-blue-50 text-blue-600 hover:bg-blue-100 rounded">
+                                        <button wire:click="updateKycStatus('{{ fetch_data($org?->id ?? null) }}', 'approved')" class="w-full px-3 py-2 text-xs font-bold text-center bg-blue-50 text-blue-600 hover:bg-blue-100 rounded">
                                             Approve KYC
                                         </button>
                                     @else
-                                        <button wire:click="updateKycStatus('{{ $org->id }}', 'rejected')" class="w-full px-3 py-2 text-xs font-bold text-center bg-gray-50 text-gray-600 hover:bg-gray-100 rounded">
+                                        <button wire:click="updateKycStatus('{{ fetch_data($org?->id ?? null) }}', 'rejected')" class="w-full px-3 py-2 text-xs font-bold text-center bg-gray-50 text-gray-600 hover:bg-gray-100 rounded">
                                             Reject KYC
                                         </button>
                                     @endif

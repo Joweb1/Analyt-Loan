@@ -64,7 +64,7 @@
                 </div>
             </div>
             <div class="flex items-end justify-between">
-                <h3 class="text-xl font-black dark:text-white tracking-tight">₦{{ $repaidToday?->format() ?? '0.00' }}</h3>
+                <h3 class="text-xl font-black dark:text-white tracking-tight">₦{{ fetch_data($repaidToday?->format() ?? '0.00' ?? null) }}</h3>
                 <span class="flex items-center text-green-600 text-[9px] font-bold mb-0.5 bg-green-50 px-1.5 py-0.5 rounded-full uppercase">
                     Collected
                 </span>
@@ -80,7 +80,7 @@
                 </div>
             </div>
             <div class="flex items-end justify-between">
-                <h3 class="text-xl font-black dark:text-white tracking-tight">₦{{ $totalLent?->format() ?? '0.00' }}</h3>
+                <h3 class="text-xl font-black dark:text-white tracking-tight">₦{{ fetch_data($totalLent?->format() ?? '0.00' ?? null) }}</h3>
                 <span class="flex items-center text-blue-600 text-[9px] font-bold mb-0.5 bg-blue-50 px-1.5 py-0.5 rounded-full uppercase">
                     {{ $filter === 'today' ? 'Today' : ($filter === 'week' ? 'This Week' : ($filter === 'month' ? 'This Month' : 'This Year')) }}
                 </span>
@@ -112,7 +112,7 @@
                 </div>
             </div>
             <div class="flex items-end justify-between">
-                <h3 class="text-xl font-black dark:text-white tracking-tight">₦{{ $overdueAmount?->format() ?? '0.00' }}</h3>
+                <h3 class="text-xl font-black dark:text-white tracking-tight">₦{{ fetch_data($overdueAmount?->format() ?? '0.00' ?? null) }}</h3>
                 <span class="flex items-center text-red-600 text-[9px] font-bold mb-0.5 bg-red-50 px-1.5 py-0.5 rounded-full">
                     At Risk
                 </span>
@@ -177,7 +177,7 @@
                     <p class="text-slate-500 text-xs font-medium uppercase tracking-wider">7-Day Recovery Trend</p>
                 </div>
                 <div class="flex flex-col text-right">
-                    <span class="text-2xl font-black text-primary dark:text-white leading-none">₦ {{ number_format(collect($pulseData)->sum('amount')) }}</span>
+                    <span class="text-2xl font-black text-primary dark:text-white leading-none">₦ {{ fetch_data(number_format(collect($pulseData)?->sum('amount')) ?? null) }}</span>
                     <span class="text-[10px] font-bold text-slate-400 uppercase">Total This Week</span>
                 </div>
             </div>
@@ -279,21 +279,21 @@
                         <span class="w-2 h-2 rounded-full bg-brand-green"></span>
                         <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider">Repaid</span>
                     </div>
-                    <span class="text-sm font-black text-primary dark:text-white">₦ {{ $repaidAmount?->format() ?? '0.00' }}</span>
+                    <span class="text-sm font-black text-primary dark:text-white">₦ {{ fetch_data($repaidAmount?->format() ?? '0.00' ?? null) }}</span>
                 </div>
                 <div class="flex flex-col gap-1 border-x border-slate-100 dark:border-slate-800 px-4">
                     <div class="flex items-center gap-1.5">
                         <span class="w-2 h-2 rounded-full bg-brand-blue"></span>
                         <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider">Active</span>
                     </div>
-                    <span class="text-sm font-black text-primary dark:text-white">₦ {{ $activeAmount?->format() ?? '0.00' }}</span>
+                    <span class="text-sm font-black text-primary dark:text-white">₦ {{ fetch_data($activeAmount?->format() ?? '0.00' ?? null) }}</span>
                 </div>
                 <div class="flex flex-col gap-1 pl-4">
                     <div class="flex items-center gap-1.5">
                         <span class="w-2 h-2 rounded-full bg-brand-red"></span>
                         <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider">Overdue</span>
                     </div>
-                    <span class="text-sm font-black text-primary dark:text-white">₦ {{ $overdueAmountTotal?->format() ?? '0.00' }}</span>
+                    <span class="text-sm font-black text-primary dark:text-white">₦ {{ fetch_data($overdueAmountTotal?->format() ?? '0.00' ?? null) }}</span>
                 </div>
             </div>
         </div>
@@ -317,7 +317,7 @@
                         </div>
                         <div class="flex-1 min-w-0">
                             <p class="text-sm font-semibold text-primary dark:text-white leading-tight truncate">{{ $item['message'] }}</p>
-                            <p class="text-[10px] text-gray-500 mt-1 uppercase font-bold tracking-wider">{{ \Carbon\Carbon::parse($item['date'])->diffForHumans() }}</p>
+                            <p class="text-[10px] text-gray-500 mt-1 uppercase font-bold tracking-wider">{{ fetch_data(\Carbon\Carbon::parse($item['date'])?->diffForHumans() ?? null) }}</p>
                         </div>
                         @if($item['type'] === 'overdue')
                             <span class="bg-red-100 text-red-700 text-[10px] font-bold px-1.5 py-0.5 rounded">CRITICAL</span>

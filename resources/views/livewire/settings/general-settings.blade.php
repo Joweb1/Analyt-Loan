@@ -25,9 +25,9 @@
                             <div class="relative group">
                                 <div class="w-20 h-20 rounded-xl bg-gray-100 dark:bg-zinc-800 flex items-center justify-center overflow-hidden border-2 border-dashed border-gray-300 dark:border-zinc-700">
                                     @if($logo)
-                                        <img src="{{ $logo->temporaryUrl() }}" class="w-full h-full object-cover">
+                                        <img src="{{ fetch_data($logo?->temporaryUrl() ?? null) }}" class="w-full h-full object-cover">
                                     @elseif($currentLogo)
-                                        <img src="{{ $organization->logo_url }}" class="w-full h-full object-cover">
+                                        <img src="{{ fetch_data($organization?->logo_url ?? null) }}" class="w-full h-full object-cover">
                                     @else
                                         <span class="material-symbols-outlined text-gray-400 text-3xl">add_a_photo</span>
                                     @endif
@@ -45,9 +45,9 @@
                             <div class="relative group">
                                 <div class="w-20 h-20 rounded-xl bg-gray-100 dark:bg-zinc-800 flex items-center justify-center overflow-hidden border-2 border-dashed border-gray-300 dark:border-zinc-700">
                                     @if($signature)
-                                        <img src="{{ $signature->temporaryUrl() }}" class="w-full h-full object-cover">
+                                        <img src="{{ fetch_data($signature?->temporaryUrl() ?? null) }}" class="w-full h-full object-cover">
                                     @elseif($currentSignature)
-                                        <img src="{{ $organization->signature_url }}" class="w-full h-full object-cover">
+                                        <img src="{{ fetch_data($organization?->signature_url ?? null) }}" class="w-full h-full object-cover">
                                     @else
                                         <span class="material-symbols-outlined text-gray-400 text-3xl">draw</span>
                                     @endif
@@ -99,7 +99,7 @@
                     <div class="bg-blue-50 dark:bg-blue-900/10 p-4 rounded-xl mb-6">
                         <p class="text-xs text-blue-700 dark:text-blue-400 font-medium leading-relaxed">
                             Upload your organization's registration documents (CAC, Tax ID, etc.) for verification. 
-                            Your current KYC status is: <span class="font-bold uppercase">{{ $organization->kyc_status ?? 'N/A' }}</span>
+                            Your current KYC status is: <span class="font-bold uppercase">{{ fetch_data($organization?->kyc_status ?? 'N/A' ?? null) }}</span>
                         </p>
                     </div>
                     

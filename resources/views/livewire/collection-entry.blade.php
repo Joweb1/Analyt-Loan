@@ -43,23 +43,23 @@
                     @forelse($loans as $loan)
                         <tr class="border-b border-slate-50 dark:border-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                             <td class="px-4 py-4">
-                                <p class="font-bold text-slate-900 dark:text-white">{{ $loan->loan_number }}</p>
-                                <p class="text-xs text-slate-500">{{ $loan->borrower->user->name }} | {{ $loan->borrower->phone }}</p>
+                                <p class="font-bold text-slate-900 dark:text-white">{{ fetch_data($loan?->loan_number ?? null) }}</p>
+                                <p class="text-xs text-slate-500">{{ fetch_data($loan?->borrower?->user?->name ?? null) }} | {{ fetch_data($loan?->borrower?->phone ?? null) }}</p>
                             </td>
                             <td class="px-4 py-4">
-                                {{ $loan->loanOfficer->name ?? 'Unassigned' }}
+                                {{ fetch_data($loan?->loanOfficer?->name ?? 'Unassigned' ?? null) }}
                             </td>
                             <td class="px-4 py-4 font-medium text-slate-900 dark:text-white">
-                                ₦{{ $loan->amount->format() }}
+                                ₦{{ fetch_data($loan?->amount?->format() ?? null) }}
                             </td>
                             <td class="px-4 py-4 font-medium text-slate-900 dark:text-white">
-                                ₦{{ $loan->balance->format() }}
+                                ₦{{ fetch_data($loan?->balance?->format() ?? null) }}
                                 @if($loan->status === 'overdue')
                                     <span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-700 ml-2">Overdue</span>
                                 @endif
                             </td>
                             <td class="px-4 py-4 text-right">
-                                <button wire:click="selectLoan('{{ $loan->id }}')" class="px-4 py-2 bg-primary text-white text-xs font-bold rounded-xl hover:bg-primary/90 transition-colors">
+                                <button wire:click="selectLoan('{{ fetch_data($loan?->id ?? null) }}')" class="px-4 py-2 bg-primary text-white text-xs font-bold rounded-xl hover:bg-primary/90 transition-colors">
                                     Add Repayment
                                 </button>
                             </td>
@@ -75,7 +75,7 @@
             </table>
         </div>
         <div class="mt-4">
-            {{ $loans->links() }}
+            {{ fetch_data($loans?->links() ?? null) }}
         </div>
     </div>
 
@@ -118,7 +118,7 @@
                         <select wire:model="collected_by" class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-sm focus:ring-2 focus:ring-primary/40" required>
                             <option value="">Select Staff</option>
                             @foreach($staffs as $staff)
-                                <option value="{{ $staff->id }}">{{ $staff->name }}</option>
+                                <option value="{{ fetch_data($staff?->id ?? null) }}">{{ fetch_data($staff?->name ?? null) }}</option>
                             @endforeach
                         </select>
                         @error('collected_by') <span class="text-xs text-red-500">{{ $message }}</span> @enderror

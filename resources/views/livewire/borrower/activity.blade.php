@@ -17,8 +17,8 @@
                 <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
                     <div class="flex justify-between items-start mb-2">
                         <div>
-                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">{{ $loan->loan_number }}</span>
-                            <h3 class="font-black text-xl text-slate-900">₦{{ $loan->amount->format() }}</h3>
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">{{ fetch_data($loan?->loan_number ?? null) }}</span>
+                            <h3 class="font-black text-xl text-slate-900">₦{{ fetch_data($loan?->amount?->format() ?? null) }}</h3>
                         </div>
                         @php
                             $statusColors = [
@@ -29,13 +29,13 @@
                                 'repaid' => 'bg-slate-100 text-slate-700',
                             ];
                         @endphp
-                        <span class="px-2 py-1 rounded text-xs font-bold uppercase {{ $statusColors[$loan->status] ?? 'bg-gray-100 text-gray-700' }}">
-                            {{ $loan->status }}
+                        <span class="px-2 py-1 rounded text-xs font-bold uppercase {{ fetch_data($statusColors[$loan?->status] ?? 'bg-gray-100 text-gray-700' ?? null) }}">
+                            {{ fetch_data($loan?->status ?? null) }}
                         </span>
                     </div>
                     <div class="flex justify-between items-center text-sm text-slate-500">
-                        <span>{{ $loan->created_at->format('M d, Y') }}</span>
-                        <span>{{ $loan->duration }} Days</span>
+                        <span>{{ fetch_data($loan?->created_at?->format('M d, Y') ?? null) }}</span>
+                        <span>{{ fetch_data($loan?->duration ?? null) }} Days</span>
                     </div>
                 </div>
             @empty
@@ -53,11 +53,11 @@
                             <span class="material-symbols-outlined">arrow_downward</span>
                         </div>
                         <div>
-                            <h3 class="font-bold text-slate-900">₦{{ $repayment->amount->format() }}</h3>
-                            <p class="text-xs text-slate-500">{{ $repayment->paid_at->format('M d, Y') }}</p>
+                            <h3 class="font-bold text-slate-900">₦{{ fetch_data($repayment?->amount?->format() ?? null) }}</h3>
+                            <p class="text-xs text-slate-500">{{ fetch_data($repayment?->paid_at?->format('M d, Y') ?? null) }}</p>
                         </div>
                     </div>
-                    <span class="text-xs font-bold text-slate-400 uppercase">{{ $repayment->payment_method }}</span>
+                    <span class="text-xs font-bold text-slate-400 uppercase">{{ fetch_data($repayment?->payment_method ?? null) }}</span>
                 </div>
             @empty
                 <div class="text-center py-10 text-slate-400">

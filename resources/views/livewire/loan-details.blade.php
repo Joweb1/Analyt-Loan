@@ -51,12 +51,12 @@
         </div>
         <div class="flex gap-3">
             @can('export_and_print')
-                <a href="{{ route('loan.print', $loan->id) }}" target="_blank" class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-white rounded-xl text-sm font-bold shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
+                <a href="{{ fetch_data(route('loan.print', $loan?->id) ?? null) }}" target="_blank" class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-white rounded-xl text-sm font-bold shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
                     <span class="material-symbols-outlined text-lg">print</span>
                     Print
                 </a>
             @endcan
-            <a href="{{ route('loan.edit', $loan->id) }}" class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl text-sm font-bold shadow-lg shadow-primary/30 hover:bg-blue-700 transition-all">
+            <a href="{{ fetch_data(route('loan.edit', $loan?->id) ?? null) }}" class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl text-sm font-bold shadow-lg shadow-primary/30 hover:bg-blue-700 transition-all">
                 <span class="material-symbols-outlined text-lg">edit</span>
                 Edit Loan
             </a>
@@ -73,68 +73,68 @@
                     </div>
                     <div class="flex flex-col items-center text-center">
                         @php
-                            $initials = collect(explode(' ', $loan->borrower->user->name))->map(fn($n) => substr($n, 0, 1))->take(2)->join('');
+                            $initials = collect(explode(' ', $loan?->borrower?->user?->name ?? ''))->map(fn($n) => substr($n, 0, 1))->take(2)->join('');
                             $colors = ['bg-blue-50 text-blue-600', 'bg-purple-50 text-purple-600', 'bg-emerald-50 text-emerald-600', 'bg-rose-50 text-rose-600', 'bg-amber-50 text-amber-600'];
-                            $colorClass = $colors[ord(substr($loan->borrower->user->name, 0, 1)) % count($colors)];
+                            $colorClass = $colors[ord(substr($loan?->borrower?->user?->name ?? ' ', 0, 1)) % count($colors)];
                         @endphp
                         
                         <div class="size-24 rounded-full bg-slate-100 p-1 border-2 border-white dark:border-slate-700 shadow-lg mb-4">
                             @if($loan->borrower->photo_url)
-                                <div class="size-full rounded-full bg-cover bg-center" style="background-image: url('{{ $loan->borrower->photo_url }}')"></div>
+                                <div class="size-full rounded-full bg-cover bg-center" style="background-image: url('{{ fetch_data($loan?->borrower?->photo_url ?? null) }}')"></div>
                             @else
                                 <div class="size-full rounded-full {{ $colorClass }} flex items-center justify-center">
                                     <span class="font-black text-2xl tracking-tighter">{{ $initials }}</span>
                                 </div>
                             @endif
                         </div>
-                        <h3 class="text-xl font-bold text-slate-900 dark:text-white">{{ $loan->borrower->user->name }}</h3>
-                        <p class="text-sm text-slate-500 font-medium mb-1">{{ $loan->borrower->user->email }}</p>
+                        <h3 class="text-xl font-bold text-slate-900 dark:text-white">{{ fetch_data($loan?->borrower?->user?->name ?? null) }}</h3>
+                        <p class="text-sm text-slate-500 font-medium mb-1">{{ fetch_data($loan?->borrower?->user?->email ?? null) }}</p>
                         <div class="flex items-center gap-1 text-xs text-slate-400">
                             <span class="material-symbols-outlined text-sm">location_on</span>
-                            {{ $loan->borrower->address ?? 'Lagos, Nigeria' }}
+                            {{ fetch_data($loan?->borrower?->address ?? 'Lagos, Nigeria' ?? null) }}
                         </div>
                     </div>
                     
                     <div class="mt-8 space-y-4">
                         <div class="flex justify-between items-center py-2 border-b border-slate-50 dark:border-slate-800/50">
                             <span class="text-xs font-bold text-slate-500 uppercase tracking-wide">Phone</span>
-                            <span class="text-sm font-bold text-slate-900 dark:text-white">{{ $loan->borrower->phone ?? 'N/A' }}</span>
+                            <span class="text-sm font-bold text-slate-900 dark:text-white">{{ fetch_data($loan?->borrower?->phone ?? 'N/A' ?? null) }}</span>
                         </div>
                          <div class="flex justify-between items-center py-2 border-b border-slate-50 dark:border-slate-800/50">
                             <span class="text-xs font-bold text-slate-500 uppercase tracking-wide">BVN</span>
-                            <span class="text-sm font-bold text-slate-900 dark:text-white font-mono">{{ $loan->borrower->bvn ?? 'N/A' }}</span>
+                            <span class="text-sm font-bold text-slate-900 dark:text-white font-mono">{{ fetch_data($loan?->borrower?->bvn ?? 'N/A' ?? null) }}</span>
                         </div>
                          <div class="flex justify-between items-center py-2 border-b border-slate-50 dark:border-slate-800/50">
                             <span class="text-xs font-bold text-slate-500 uppercase tracking-wide">NIN</span>
-                            <span class="text-sm font-bold text-slate-900 dark:text-white font-mono">{{ $loan->borrower->national_identity_number ?? 'N/A' }}</span>
+                            <span class="text-sm font-bold text-slate-900 dark:text-white font-mono">{{ fetch_data($loan?->borrower?->national_identity_number ?? 'N/A' ?? null) }}</span>
                         </div>
                          <div class="flex justify-between items-center py-2 border-b border-slate-50 dark:border-slate-800/50">
                             <span class="text-xs font-bold text-slate-500 uppercase tracking-wide">Gender / Age</span>
                             <span class="text-sm font-bold text-slate-900 dark:text-white">
-                                {{ ucfirst($loan->borrower->gender ?? '-') }} / 
-                                {{ $loan->borrower->date_of_birth ? \Carbon\Carbon::parse($loan->borrower->date_of_birth)->age : '-' }}
+                                {{ fetch_data(ucfirst($loan?->borrower?->gender ?? '-') ?? null) }} / 
+                                {{ fetch_data($loan?->borrower?->date_of_birth ? \Carbon\Carbon::parse($loan?->borrower?->date_of_birth)?->age : '-' ?? null) }}
                             </span>
                         </div>
-                        <a href="{{ route('borrower.profile', $loan->borrower->id) }}" class="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 transition-colors text-xs font-bold w-full mt-4">
+                        <a href="{{ fetch_data(route('borrower.profile', $loan?->borrower?->id) ?? null) }}" class="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 transition-colors text-xs font-bold w-full mt-4">
                             <span class="material-symbols-outlined text-sm">account_circle</span> View User Profile
                         </a>
                     </div>
                     
                     <div class="mt-8 grid grid-cols-2 gap-2">
                         @can('communicate_with_customers')
-                            <a href="tel:{{ $loan->borrower->phone }}" class="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors text-xs font-bold">
+                            <a href="tel:{{ fetch_data($loan?->borrower?->phone ?? null) }}" class="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors text-xs font-bold">
                                 <span class="material-symbols-outlined text-sm">call</span> Call
                             </a>
-                            <a href="sms:{{ $loan->borrower->phone }}" class="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-green-50 text-green-600 hover:bg-green-100 transition-colors text-xs font-bold">
+                            <a href="sms:{{ fetch_data($loan?->borrower?->phone ?? null) }}" class="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-green-50 text-green-600 hover:bg-green-100 transition-colors text-xs font-bold">
                                 <span class="material-symbols-outlined text-sm">sms</span> SMS
                             </a>
                         @endcan
                         @can('send_customer_messages')
-                            <button wire:click="$dispatchTo('borrower.message-modal', 'openMessageModal', { borrowerId: '{{ $loan->borrower->id }}' })" class="col-span-2 flex items-center justify-center gap-2 py-2.5 rounded-xl border border-primary/20 text-primary hover:bg-primary/5 transition-colors text-xs font-bold">
+                            <button wire:click="$dispatchTo('borrower.message-modal', 'openMessageModal', { borrowerId: '{{ fetch_data($loan?->borrower?->id ?? null) }}' })" class="col-span-2 flex items-center justify-center gap-2 py-2.5 rounded-xl border border-primary/20 text-primary hover:bg-primary/5 transition-colors text-xs font-bold">
                                 <span class="material-symbols-outlined text-sm">chat_bubble</span> Send Message
                             </button>
                         @endcan
-                        <a href="{{ route('borrower.loans', $loan->borrower->id) }}" class="col-span-2 flex items-center justify-center gap-2 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors text-xs font-bold">
+                        <a href="{{ fetch_data(route('borrower.loans', $loan?->borrower?->id) ?? null) }}" class="col-span-2 flex items-center justify-center gap-2 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors text-xs font-bold">
                             <span class="material-symbols-outlined text-sm">visibility</span> View All Loans
                         </a>
                     </div>
@@ -156,10 +156,10 @@
                     <div class="flex items-center gap-3">
                         <div>
                             <h3 class="text-lg font-bold text-slate-900 dark:text-white">Loan Information</h3>
-                            <p class="text-xs text-slate-500 font-mono mt-0.5">{{ $loan->loan_number }}</p>
+                            <p class="text-xs text-slate-500 font-mono mt-0.5">{{ fetch_data($loan?->loan_number ?? null) }}</p>
                         </div>
-                        <span class="px-2 py-0.5 rounded-lg bg-{{ in_array($loan->status, ['overdue', 'applied', 'verification_pending', 'declined']) ? 'red' : 'green' }}-100 text-{{ in_array($loan->status, ['overdue', 'applied', 'verification_pending', 'declined']) ? 'red' : 'green' }}-700 text-[9px] font-black uppercase tracking-widest border border-{{ in_array($loan->status, ['overdue', 'applied', 'verification_pending', 'declined']) ? 'red' : 'green' }}-200">
-                            {{ str_replace('_', ' ', $loan->status) }}
+                        <span class="px-2 py-0.5 rounded-lg bg-{{ fetch_data(in_array($loan?->status, ['overdue', 'applied', 'verification_pending', 'declined']) ? 'red' : 'green' ?? null) }}-100 text-{{ fetch_data(in_array($loan?->status, ['overdue', 'applied', 'verification_pending', 'declined']) ? 'red' : 'green' ?? null) }}-700 text-[9px] font-black uppercase tracking-widest border border-{{ fetch_data(in_array($loan?->status, ['overdue', 'applied', 'verification_pending', 'declined']) ? 'red' : 'green' ?? null) }}-200">
+                            {{ fetch_data(str_replace('_', ' ', $loan?->status) ?? null) }}
                         </span>
 
                         @if(in_array($loan->status, ['applied', 'verification_pending']))
@@ -196,18 +196,18 @@
                 <div x-show="view === 'card'" class="p-6 grid grid-cols-2 sm:grid-cols-3 gap-y-8 gap-x-4">
                     <div>
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total Loan Amount</p>
-                        <p class="text-lg sm:text-xl font-black text-slate-900 dark:text-white">₦{{ $loan->amount->format() }}</p>
+                        <p class="text-lg sm:text-xl font-black text-slate-900 dark:text-white">₦{{ fetch_data($loan?->amount?->format() ?? null) }}</p>
                     </div>
                      <div>
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Current Balance</p>
-                        <p class="text-lg sm:text-xl font-black text-primary">₦{{ $loan->balance->format() }}</p>
+                        <p class="text-lg sm:text-xl font-black text-primary">₦{{ fetch_data($loan?->balance?->format() ?? null) }}</p>
                     </div>
 
                     <div class="col-span-2 sm:col-span-3 h-px bg-slate-100 dark:bg-slate-800 my-2"></div>
 
                     <div>
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Release Date</p>
-                        <p class="text-sm font-bold text-slate-700 dark:text-slate-300">{{ ($loan->release_date ?? $loan->created_at)->format('M d, Y') }}</p>
+                        <p class="text-sm font-bold text-slate-700 dark:text-slate-300">{{ fetch_data(($loan?->release_date ?? $loan?->created_at)?->format('M d, Y') ?? null) }}</p>
                     </div>
                     <div>
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Maturity Date</p>
@@ -216,34 +216,34 @@
                             $maturityDate = $lastInstallment ? $lastInstallment->due_date : null;
                         @endphp
                         <p class="text-sm font-bold text-slate-700 dark:text-slate-300">
-                            {{ $maturityDate ? $maturityDate->format('M d, Y') : 'N/A' }}
+                            {{ fetch_data($maturityDate ? $maturityDate?->format('M d, Y') : 'N/A' ?? null) }}
                         </p>
                     </div>
                      <div>
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Repayment Cycle</p>
-                        <p class="text-sm font-bold text-slate-700 dark:text-slate-300">{{ ucfirst($loan->repayment_cycle ?? 'Monthly') }}</p>
+                        <p class="text-sm font-bold text-slate-700 dark:text-slate-300">{{ fetch_data(ucfirst($loan?->repayment_cycle ?? 'Monthly') ?? null) }}</p>
                     </div>
                     
                     <div>
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Interest Rate</p>
                         <p class="text-sm font-bold text-slate-700 dark:text-slate-300">
-                            {{ $loan->interest_rate ?? '0' }}{{ $loan->interest_calculation_type === 'percentage' ? '%' : ' (Fixed)' }}
+                            {{ fetch_data($loan?->interest_rate ?? '0' ?? null) }}{{ fetch_data($loan?->interest_calculation_type === 'percentage' ? '%' : ' (Fixed)' ?? null) }}
                         </p>
                     </div>
                     <div>
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total Interest</p>
                         <p class="text-sm font-bold text-blue-600 dark:text-blue-400">
-                            ₦{{ $loan->getTotalExpectedInterest() }}
+                            ₦{{ fetch_data($loan?->getTotalExpectedInterest() ?? null) }}
                         </p>
                     </div>                    <div>
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Total Repayments</p>
-                        <p class="text-sm font-bold text-slate-700 dark:text-slate-300">{{ $loan->num_repayments ?? '1' }} Installments</p>
+                        <p class="text-sm font-bold text-slate-700 dark:text-slate-300">{{ fetch_data($loan?->num_repayments ?? '1' ?? null) }} Installments</p>
                     </div>
                     <div>
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">
                             Fees & Charges
                             @if($loan->insurance_fee_type === 'percentage' && $loan->insurance_fee && !$loan->insurance_fee->isZero())
-                                <span class="text-[9px] lowercase font-medium ml-1">({{ $loan->insurance_fee->getMajorAmount() }}% ins.)</span>
+                                <span class="text-[9px] lowercase font-medium ml-1">({{ fetch_data($loan?->insurance_fee?->getMajorAmount() ?? null) }}% ins.)</span>
                             @endif
                         </p>
                         @php
@@ -254,7 +254,7 @@
                     </div>
                      <div>
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Paid Amount</p>
-                        <p class="text-sm font-bold text-green-600">₦{{ new \App\ValueObjects\Money($loan->repayments()->sum('amount'), $loan->amount->getCurrency()) }}</p>
+                        <p class="text-sm font-bold text-green-600">₦{{ fetch_data(new \App\ValueObjects\Money($loan?->repayments()?->sum('amount'), $loan?->amount?->getCurrency()) ?? null) }}</p>
                     </div>
                 </div>
 
@@ -264,42 +264,42 @@
                         <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
                             <tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/50">
                                 <td class="px-6 py-4 font-medium text-slate-500">Loan Amount</td>
-                                <td class="px-6 py-4 font-bold text-slate-900 dark:text-white text-right">₦{{ $loan->amount }}</td>
+                                <td class="px-6 py-4 font-bold text-slate-900 dark:text-white text-right">₦{{ fetch_data($loan?->amount ?? null) }}</td>
                             </tr>
                             <tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/50">
                                 <td class="px-6 py-4 font-medium text-slate-500">Paid Amount</td>
-                                <td class="px-6 py-4 font-bold text-green-600 text-right">₦{{ new \App\ValueObjects\Money($loan->repayments()->sum('amount'), $loan->amount->getCurrency()) }}</td>
+                                <td class="px-6 py-4 font-bold text-green-600 text-right">₦{{ fetch_data(new \App\ValueObjects\Money($loan?->repayments()?->sum('amount'), $loan?->amount?->getCurrency()) ?? null) }}</td>
                             </tr>
                             <tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/50">
                                 <td class="px-6 py-4 font-medium text-slate-500">Balance</td>
-                                <td class="px-6 py-4 font-bold text-primary text-right">₦{{ $loan->balance }}</td>
+                                <td class="px-6 py-4 font-bold text-primary text-right">₦{{ fetch_data($loan?->balance ?? null) }}</td>
                             </tr>
                             <tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/50">
                                 <td class="px-6 py-4 font-medium text-slate-500">Repayment Cycle</td>
-                                <td class="px-6 py-4 font-bold text-slate-700 dark:text-slate-300 text-right">{{ ucfirst($loan->repayment_cycle ?? 'Monthly') }}</td>
+                                <td class="px-6 py-4 font-bold text-slate-700 dark:text-slate-300 text-right">{{ fetch_data(ucfirst($loan?->repayment_cycle ?? 'Monthly') ?? null) }}</td>
                             </tr>
                             <tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/50">
                                 <td class="px-6 py-4 font-medium text-slate-500">Total Installments</td>
-                                <td class="px-6 py-4 font-bold text-slate-700 dark:text-slate-300 text-right">{{ $loan->num_repayments ?? '1' }}</td>
+                                <td class="px-6 py-4 font-bold text-slate-700 dark:text-slate-300 text-right">{{ fetch_data($loan?->num_repayments ?? '1' ?? null) }}</td>
                             </tr>
                             <tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/50">
                                 <td class="px-6 py-4 font-medium text-slate-500">Interest Rate</td>
                                 <td class="px-6 py-4 font-bold text-slate-700 dark:text-slate-300 text-right">
-                                    {{ $loan->interest_rate ?? '0' }}{{ $loan->interest_calculation_type === 'percentage' ? '%' : ' (Fixed)' }}
+                                    {{ fetch_data($loan?->interest_rate ?? '0' ?? null) }}{{ fetch_data($loan?->interest_calculation_type === 'percentage' ? '%' : ' (Fixed)' ?? null) }}
                                 </td>
                             </tr>
                             <tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/50">
                                 <td class="px-6 py-4 font-medium text-slate-500">Total Expected Interest</td>
-                                <td class="px-6 py-4 font-bold text-blue-600 text-right">₦{{ $loan->getTotalExpectedInterest() }}</td>
+                                <td class="px-6 py-4 font-bold text-blue-600 text-right">₦{{ fetch_data($loan?->getTotalExpectedInterest() ?? null) }}</td>
                             </tr>
                             <tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/50">
                                 <td class="px-6 py-4 font-medium text-slate-500">
                                     Fees & Charges
                                     @if($loan->insurance_fee_type === 'percentage' && $loan->insurance_fee && !$loan->insurance_fee->isZero())
-                                        <span class="text-[10px] text-slate-400 font-medium ml-1">({{ $loan->insurance_fee->getMajorAmount() }}% ins.)</span>
+                                        <span class="text-[10px] text-slate-400 font-medium ml-1">({{ fetch_data($loan?->insurance_fee?->getMajorAmount() ?? null) }}% ins.)</span>
                                     @endif
                                 </td>
-                                <td class="px-6 py-4 font-bold text-slate-700 dark:text-slate-300 text-right">₦{{ $loan->getCalculatedProcessingFee()->add($loan->getCalculatedInsuranceFee()) }}</td>
+                                <td class="px-6 py-4 font-bold text-slate-700 dark:text-slate-300 text-right">₦{{ fetch_data($loan?->getCalculatedProcessingFee()?->add($loan?->getCalculatedInsuranceFee()) ?? null) }}</td>
                             </tr>                        </tbody>
                     </table>
                 </div>
@@ -313,7 +313,7 @@
                             <span class="material-symbols-outlined text-amber-600">payments</span>
                             <h3 class="text-sm font-black text-amber-900 uppercase tracking-wider">Pending Payment Verifications</h3>
                         </div>
-                        <span class="px-2 py-0.5 rounded-full bg-amber-200 text-amber-800 text-[10px] font-black uppercase">{{ $pendingProofs->count() }} Pending</span>
+                        <span class="px-2 py-0.5 rounded-full bg-amber-200 text-amber-800 text-[10px] font-black uppercase">{{ fetch_data($pendingProofs?->count() ?? null) }} Pending</span>
                     </div>
                     <div class="divide-y divide-amber-100">
                         @foreach($pendingProofs as $proof)
@@ -324,13 +324,13 @@
                                     </div>
                                     <div>
                                         <div class="flex items-center gap-2">
-                                            <p class="text-lg font-black text-slate-900">₦{{ $proof->amount }}</p>
-                                            <span class="text-[10px] font-bold text-amber-700 bg-amber-200/50 px-2 py-0.5 rounded uppercase font-mono tracking-tighter">{{ $proof->reference_code }}</span>
+                                            <p class="text-lg font-black text-slate-900">₦{{ fetch_data($proof?->amount ?? null) }}</p>
+                                            <span class="text-[10px] font-bold text-amber-700 bg-amber-200/50 px-2 py-0.5 rounded uppercase font-mono tracking-tighter">{{ fetch_data($proof?->reference_code ?? null) }}</span>
                                         </div>
                                         <div class="flex items-center gap-3 mt-1">
-                                            <p class="text-xs text-slate-500 font-medium">Submitted {{ $proof->created_at->diffForHumans() }}</p>
+                                            <p class="text-xs text-slate-500 font-medium">Submitted {{ fetch_data($proof?->created_at?->diffForHumans() ?? null) }}</p>
                                             @if($proof->receipt_path)
-                                                <a href="{{ $proof->receipt_url }}" target="_blank" class="flex items-center gap-1 text-[10px] font-black text-blue-600 uppercase hover:underline">
+                                                <a href="{{ fetch_data($proof?->receipt_url ?? null) }}" target="_blank" class="flex items-center gap-1 text-[10px] font-black text-blue-600 uppercase hover:underline">
                                                     <span class="material-symbols-outlined text-sm">attachment</span> View Receipt
                                                 </a>
                                             @endif
@@ -338,10 +338,10 @@
                                     </div>
                                 </div>
                                 <div class="flex items-center gap-2 w-full sm:w-auto">
-                                    <button wire:click="declineProof('{{ $proof->id }}')" wire:confirm="Are you sure you want to decline this payment proof?" class="flex-1 sm:flex-none px-4 py-2 bg-white text-red-600 border border-red-100 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-50 transition-all">
+                                    <button wire:click="declineProof('{{ fetch_data($proof?->id ?? null) }}')" wire:confirm="Are you sure you want to decline this payment proof?" class="flex-1 sm:flex-none px-4 py-2 bg-white text-red-600 border border-red-100 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-red-50 transition-all">
                                         Decline
                                     </button>
-                                    <button wire:click="approveProof('{{ $proof->id }}')" wire:confirm="Confirm and record this ₦{{ $proof->amount }} payment?" class="flex-1 sm:flex-none px-6 py-2 bg-green-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-green-600/20 hover:bg-green-700 transition-all">
+                                    <button wire:click="approveProof('{{ fetch_data($proof?->id ?? null) }}')" wire:confirm="Confirm and record this ₦{{ fetch_data($proof?->amount ?? null) }} payment?" class="flex-1 sm:flex-none px-6 py-2 bg-green-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-green-600/20 hover:bg-green-700 transition-all">
                                         Approve & Record
                                     </button>
                                 </div>
@@ -414,10 +414,10 @@
                 <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-[#1a1f2b] sticky top-0 z-10">
                 <div>
                     <h3 class="text-xl font-black text-slate-900 dark:text-white">Loan Repayments</h3>
-                    <p class="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">Manage schedule and history for #{{ $loan->loan_number }}</p>
+                    <p class="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">Manage schedule and history for #{{ fetch_data($loan?->loan_number ?? null) }}</p>
                 </div>
                 <div class="flex items-center gap-3">
-                    <a href="{{ route('repayments.print', $loan->id) }}" target="_blank" class="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-200 transition-all">
+                    <a href="{{ fetch_data(route('repayments.print', $loan?->id) ?? null) }}" target="_blank" class="flex items-center gap-2 px-4 py-2 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-slate-200 transition-all">
                         <span class="material-symbols-outlined text-sm">print</span>
                         Print Statement
                     </a>
@@ -509,7 +509,7 @@
                                     <div class="relative">
                                         <button @click="openStaff = !openStaff" type="button" class="w-full px-4 py-3 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary/20 transition-all font-bold text-left flex items-center justify-between">
                                             @if($collected_by)
-                                                <span class="text-slate-900 dark:text-white">{{ $staffs->firstWhere('id', $collected_by)?->name }}</span>
+                                                <span class="text-slate-900 dark:text-white">{{ fetch_data($staffs?->firstWhere('id', $collected_by)?->name ?? null) }}</span>
                                             @else
                                                 <span class="text-slate-400">Select Staff</span>
                                             @endif
@@ -522,9 +522,9 @@
                                             </div>
                                             <div class="max-h-48 overflow-y-auto py-1 custom-scrollbar">
                                                 @foreach($staffs as $staff)
-                                                    <button @click="$wire.set('collected_by', '{{ $staff->id }}'); openStaff = false" class="w-full px-4 py-2.5 text-left hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-3 transition-colors">
-                                                        <div class="size-6 rounded-full bg-slate-200 bg-cover" style="background-image: url('https://ui-avatars.com/api/?name={{ urlencode($staff->name) }}')"></div>
-                                                        <span class="text-xs font-bold text-slate-700 dark:text-slate-300">{{ $staff->name }}</span>
+                                                    <button @click="$wire.set('collected_by', '{{ fetch_data($staff?->id ?? null) }}'); openStaff = false" class="w-full px-4 py-2.5 text-left hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-3 transition-colors">
+                                                        <div class="size-6 rounded-full bg-slate-200 bg-cover" style="background-image: url('https://ui-avatars.com/api/?name={{ fetch_data(urlencode($staff?->name) ?? null) }}')"></div>
+                                                        <span class="text-xs font-bold text-slate-700 dark:text-slate-300">{{ fetch_data($staff?->name ?? null) }}</span>
                                                     </button>
                                                 @endforeach
                                             </div>
@@ -561,25 +561,25 @@
                                             </div>
                                             <div>
                                                 <div class="flex items-center gap-2">
-                                                    <h5 class="text-lg font-black text-slate-900 dark:text-white">₦{{ $repayment->amount }}</h5>
-                                                    <span class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 text-[9px] font-black uppercase">{{ $repayment->payment_method }}</span>
+                                                    <h5 class="text-lg font-black text-slate-900 dark:text-white">₦{{ fetch_data($repayment?->amount ?? null) }}</h5>
+                                                    <span class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-500 text-[9px] font-black uppercase">{{ fetch_data($repayment?->payment_method ?? null) }}</span>
                                                 </div>
                                                 <p class="text-xs text-slate-500 font-medium mt-1">
-                                                    Collected by <span class="font-bold text-slate-700 dark:text-slate-300">{{ $repayment->collector->name ?? 'System' }}</span> 
-                                                    on <span class="font-bold">{{ $repayment->paid_at->format('M d, Y') }}</span>
+                                                    Collected by <span class="font-bold text-slate-700 dark:text-slate-300">{{ fetch_data($repayment?->collector?->name ?? 'System' ?? null) }}</span> 
+                                                    on <span class="font-bold">{{ fetch_data($repayment?->paid_at?->format('M d, Y') ?? null) }}</span>
                                                 </p>
                                                 <div class="flex flex-wrap gap-4 mt-3">
-                                                    <div class="text-[10px] text-slate-400 font-bold uppercase">P: <span class="text-slate-600 dark:text-slate-300">₦{{ $repayment->principal_amount }}</span></div>
-                                                    <div class="text-[10px] text-slate-400 font-bold uppercase">I: <span class="text-slate-600 dark:text-slate-300">₦{{ $repayment->interest_amount }}</span></div>
+                                                    <div class="text-[10px] text-slate-400 font-bold uppercase">P: <span class="text-slate-600 dark:text-slate-300">₦{{ fetch_data($repayment?->principal_amount ?? null) }}</span></div>
+                                                    <div class="text-[10px] text-slate-400 font-bold uppercase">I: <span class="text-slate-600 dark:text-slate-300">₦{{ fetch_data($repayment?->interest_amount ?? null) }}</span></div>
                                                     @if($repayment->extra_amount->isPositive())
-                                                        <div class="text-[10px] text-emerald-500 font-black uppercase">Extra: <span>₦{{ $repayment->extra_amount }}</span></div>
+                                                        <div class="text-[10px] text-emerald-500 font-black uppercase">Extra: <span>₦{{ fetch_data($repayment?->extra_amount ?? null) }}</span></div>
                                                     @endif
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="flex sm:flex-col justify-end gap-2 shrink-0">
-                                            <button wire:click="editRepayment('{{ $repayment->id }}')" class="px-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[10px] font-black uppercase hover:bg-primary hover:text-white transition-all">Edit</button>
-                                            <button wire:click="deleteRepayment('{{ $repayment->id }}')" wire:confirm="Are you sure you want to delete this repayment?" class="px-4 py-2 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 text-[10px] font-black uppercase hover:bg-red-600 hover:text-white transition-all">Delete</button>
+                                            <button wire:click="editRepayment('{{ fetch_data($repayment?->id ?? null) }}')" class="px-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[10px] font-black uppercase hover:bg-primary hover:text-white transition-all">Edit</button>
+                                            <button wire:click="deleteRepayment('{{ fetch_data($repayment?->id ?? null) }}')" wire:confirm="Are you sure you want to delete this repayment?" class="px-4 py-2 rounded-lg bg-red-50 dark:bg-red-900/20 text-red-600 text-[10px] font-black uppercase hover:bg-red-600 hover:text-white transition-all">Delete</button>
                                         </div>
                                     </div>
                                 </div>
@@ -617,10 +617,10 @@
             <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-[#1a1f2b] sticky top-0 z-10">
                 <div>
                     <h3 class="text-xl font-black text-slate-900 dark:text-white">Repayment Schedule</h3>
-                    <p class="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">Expected installments for #{{ $loan->loan_number }}</p>
+                    <p class="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">Expected installments for #{{ fetch_data($loan?->loan_number ?? null) }}</p>
                 </div>
                 <div class="flex items-center gap-2">
-                    <a href="{{ route('schedule.print', $loan->id) }}" target="_blank" class="flex items-center gap-2 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg text-[10px] font-black uppercase tracking-wider hover:bg-slate-200 dark:hover:bg-slate-700 transition-all">
+                    <a href="{{ fetch_data(route('schedule.print', $loan?->id) ?? null) }}" target="_blank" class="flex items-center gap-2 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg text-[10px] font-black uppercase tracking-wider hover:bg-slate-200 dark:hover:bg-slate-700 transition-all">
                         <span class="material-symbols-outlined text-sm">print</span> Print Schedule
                     </a>
                     <button @click="open = false" class="size-10 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center transition-colors">
@@ -648,9 +648,9 @@
                         <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
                             @foreach($loan->scheduledRepayments as $schedule)
                                 <tr class="group hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
-                                    <td class="px-4 py-4 font-bold text-slate-500">{{ $schedule->installment_number }}</td>
+                                    <td class="px-4 py-4 font-bold text-slate-500">{{ fetch_data($schedule?->installment_number ?? null) }}</td>
                                     <td class="px-4 py-4 font-bold text-slate-900 dark:text-white">
-                                        {{ $schedule->due_date->format('M d, Y') }}
+                                        {{ fetch_data($schedule?->due_date?->format('M d, Y') ?? null) }}
                                         @if($schedule->due_date->isPast() && $schedule->status !== 'paid')
                                             <span class="text-[9px] text-red-500 font-black uppercase ml-1">(Overdue)</span>
                                         @endif
@@ -683,17 +683,17 @@
                                             </div>
                                         </td>
                                     @else
-                                        <td class="px-4 py-4 text-right font-medium text-slate-600 dark:text-slate-300">₦{{ $schedule->principal_amount }}</td>
-                                        <td class="px-4 py-4 text-right font-medium text-slate-600 dark:text-slate-300">₦{{ $schedule->interest_amount }}</td>
+                                        <td class="px-4 py-4 text-right font-medium text-slate-600 dark:text-slate-300">₦{{ fetch_data($schedule?->principal_amount ?? null) }}</td>
+                                        <td class="px-4 py-4 text-right font-medium text-slate-600 dark:text-slate-300">₦{{ fetch_data($schedule?->interest_amount ?? null) }}</td>
                                         <td class="px-4 py-4 text-right font-medium text-slate-600 dark:text-slate-300">
                                             @if($schedule->penalty_amount->isPositive())
-                                                <span class="text-red-500">₦{{ $schedule->penalty_amount }}</span>
+                                                <span class="text-red-500">₦{{ fetch_data($schedule?->penalty_amount ?? null) }}</span>
                                             @else
                                                 -
                                             @endif
                                         </td>
                                         <td class="px-4 py-4 text-right font-black text-slate-900 dark:text-white">
-                                            ₦{{ $schedule->principal_amount->add($schedule->interest_amount)->add($schedule->penalty_amount) }}
+                                            ₦{{ fetch_data($schedule?->principal_amount?->add($schedule?->interest_amount)?->add($schedule?->penalty_amount) ?? null) }}
                                         </td>
                                         <td class="px-4 py-4 text-center">
                                             @php
@@ -704,12 +704,12 @@
                                                     'overdue' => 'bg-red-100 text-red-600',
                                                 ];
                                             @endphp
-                                            <span class="px-2 py-0.5 rounded {{ $statusColors[$schedule->status] ?? 'bg-slate-100 text-slate-500' }} text-[9px] font-black uppercase tracking-wider">
-                                                {{ $schedule->status }}
+                                            <span class="px-2 py-0.5 rounded {{ fetch_data($statusColors[$schedule?->status] ?? 'bg-slate-100 text-slate-500' ?? null) }} text-[9px] font-black uppercase tracking-wider">
+                                                {{ fetch_data($schedule?->status ?? null) }}
                                             </span>
                                         </td>
                                         <td class="px-4 py-4 text-center">
-                                            <button wire:click="editSchedule('{{ $schedule->id }}')" class="text-slate-400 hover:text-primary transition-colors">
+                                            <button wire:click="editSchedule('{{ fetch_data($schedule?->id ?? null) }}')" class="text-slate-400 hover:text-primary transition-colors">
                                                 <span class="material-symbols-outlined text-lg">edit</span>
                                             </button>
                                         </td>
@@ -742,7 +742,7 @@
             <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-[#1a1f2b] sticky top-0 z-10">
                 <div>
                     <h3 class="text-xl font-black text-slate-900 dark:text-white">Loan Fees & Penalties</h3>
-                    <p class="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">Configuration for #{{ $loan->loan_number }}</p>
+                    <p class="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">Configuration for #{{ fetch_data($loan?->loan_number ?? null) }}</p>
                 </div>
                 <div class="flex items-center gap-2">
                     <button @click="open = false" class="size-10 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center transition-colors">
@@ -855,7 +855,7 @@
             <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-[#1a1f2b] sticky top-0 z-10">
                 <div>
                     <h3 class="text-xl font-black text-slate-900 dark:text-white">Loan Discussion</h3>
-                    <p class="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">Staff comments for #{{ $loan->loan_number }}</p>
+                    <p class="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">Staff comments for #{{ fetch_data($loan?->loan_number ?? null) }}</p>
                 </div>
                 <button @click="open = false" class="size-10 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center transition-colors">
                     <span class="material-symbols-outlined text-slate-500">close</span>
@@ -871,15 +871,15 @@
                         @endphp
                         <div class="flex gap-3 {{ $isMe ? 'flex-row-reverse' : '' }}">
                             <div class="shrink-0">
-                                <div class="size-8 rounded-full bg-slate-200 bg-cover border-2 border-white dark:border-slate-800 shadow-sm" style="background-image: url('https://ui-avatars.com/api/?name={{ urlencode($comment->user->name) }}&background=random')"></div>
+                                <div class="size-8 rounded-full bg-slate-200 bg-cover border-2 border-white dark:border-slate-800 shadow-sm" style="background-image: url('https://ui-avatars.com/api/?name={{ fetch_data(urlencode($comment?->user?->name) ?? null) }}&background=random')"></div>
                             </div>
                             <div class="flex flex-col {{ $isMe ? 'items-end' : 'items-start' }} max-w-[80%]">
                                 <div class="flex items-baseline gap-2 mb-1">
-                                    <span class="text-[10px] font-bold text-slate-900 dark:text-white">{{ $comment->user->name }}</span>
-                                    <span class="text-[9px] text-slate-400 font-medium">{{ $comment->created_at->diffForHumans() }}</span>
+                                    <span class="text-[10px] font-bold text-slate-900 dark:text-white">{{ fetch_data($comment?->user?->name ?? null) }}</span>
+                                    <span class="text-[9px] text-slate-400 font-medium">{{ fetch_data($comment?->created_at?->diffForHumans() ?? null) }}</span>
                                 </div>
                                 <div class="px-4 py-3 rounded-2xl text-sm font-medium {{ $isMe ? 'bg-primary text-white rounded-tr-none' : 'bg-white dark:bg-[#1a1f2b] text-slate-700 dark:text-slate-300 border border-slate-100 dark:border-slate-800 shadow-sm rounded-tl-none' }}">
-                                    {{ $comment->body }}
+                                    {{ fetch_data($comment?->body ?? null) }}
                                 </div>
                             </div>
                         </div>
@@ -927,7 +927,7 @@
             <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-[#1a1f2b] sticky top-0 z-10">
                 <div>
                     <h3 class="text-xl font-black text-slate-900 dark:text-white">Collateral Details</h3>
-                    <p class="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">Asset securing Loan #{{ $loan->loan_number }}</p>
+                    <p class="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">Asset securing Loan #{{ fetch_data($loan?->loan_number ?? null) }}</p>
                 </div>
                 <button @click="open = false" class="size-10 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center transition-colors">
                     <span class="material-symbols-outlined text-slate-500">close</span>
@@ -942,7 +942,7 @@
                         <div>
                             <div class="aspect-video rounded-2xl bg-slate-100 dark:bg-slate-800 overflow-hidden border border-slate-200 dark:border-slate-700 relative">
                                 @if($loan->collateral->image_url)
-                                    <img src="{{ $loan->collateral->image_url }}" alt="{{ $loan->collateral->name }}" class="w-full h-full object-cover">
+                                    <img src="{{ fetch_data($loan?->collateral?->image_url ?? null) }}" alt="{{ fetch_data($loan?->collateral?->name ?? null) }}" class="w-full h-full object-cover">
                                 @else
                                     <div class="w-full h-full flex flex-col items-center justify-center text-slate-400">
                                         <span class="material-symbols-outlined text-6xl opacity-50">image</span>
@@ -950,8 +950,8 @@
                                     </div>
                                 @endif
                                 <div class="absolute top-4 right-4">
-                                    <span class="px-3 py-1 rounded-lg bg-white/90 dark:bg-black/50 backdrop-blur-sm text-xs font-black uppercase tracking-wider {{ $loan->collateral->status === 'in_vault' ? 'text-green-600' : 'text-slate-500' }}">
-                                        {{ str_replace('_', ' ', $loan->collateral->status) }}
+                                    <span class="px-3 py-1 rounded-lg bg-white/90 dark:bg-black/50 backdrop-blur-sm text-xs font-black uppercase tracking-wider {{ fetch_data($loan?->collateral?->status === 'in_vault' ? 'text-green-600' : 'text-slate-500' ?? null) }}">
+                                        {{ fetch_data(str_replace('_', ' ', $loan?->collateral?->status) ?? null) }}
                                     </span>
                                 </div>
                             </div>
@@ -976,14 +976,14 @@
                         <!-- Details Section -->
                         <div class="space-y-6">
                             <div>
-                                <h4 class="text-2xl font-black text-slate-900 dark:text-white">{{ $loan->collateral->name }}</h4>
-                                <p class="text-sm text-slate-500 font-medium mt-1">{{ $loan->collateral->description }}</p>
+                                <h4 class="text-2xl font-black text-slate-900 dark:text-white">{{ fetch_data($loan?->collateral?->name ?? null) }}</h4>
+                                <p class="text-sm text-slate-500 font-medium mt-1">{{ fetch_data($loan?->collateral?->description ?? null) }}</p>
                             </div>
 
                             <div class="grid grid-cols-2 gap-4">
                                 <div class="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
                                     <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Asset Value</p>
-                                    <p class="text-lg font-black text-slate-900 dark:text-white">₦{{ $loan->collateral->value }}</p>
+                                    <p class="text-lg font-black text-slate-900 dark:text-white">₦{{ fetch_data($loan?->collateral?->value ?? null) }}</p>
                                 </div>
                                 <div class="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
                                     <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">LTV Ratio</p>
@@ -998,15 +998,15 @@
                             <div class="space-y-3">
                                 <div class="flex justify-between py-2 border-b border-slate-100 dark:border-slate-800">
                                     <span class="text-xs font-bold text-slate-500 uppercase">Type</span>
-                                    <span class="text-sm font-bold text-slate-900 dark:text-white">{{ $loan->collateral->type }}</span>
+                                    <span class="text-sm font-bold text-slate-900 dark:text-white">{{ fetch_data($loan?->collateral?->type ?? null) }}</span>
                                 </div>
                                 <div class="flex justify-between py-2 border-b border-slate-100 dark:border-slate-800">
                                     <span class="text-xs font-bold text-slate-500 uppercase">Condition</span>
-                                    <span class="text-sm font-bold text-slate-900 dark:text-white">{{ $loan->collateral->condition ?? 'N/A' }}</span>
+                                    <span class="text-sm font-bold text-slate-900 dark:text-white">{{ fetch_data($loan?->collateral?->condition ?? 'N/A' ?? null) }}</span>
                                 </div>
                                 <div class="flex justify-between py-2 border-b border-slate-100 dark:border-slate-800">
                                     <span class="text-xs font-bold text-slate-500 uppercase">Registered Date</span>
-                                    <span class="text-sm font-bold text-slate-900 dark:text-white">{{ $loan->collateral->registered_date ? $loan->collateral->registered_date->format('M d, Y') : 'N/A' }}</span>
+                                    <span class="text-sm font-bold text-slate-900 dark:text-white">{{ fetch_data($loan?->collateral?->registered_date ? $loan?->collateral?->registered_date?->format('M d, Y') : 'N/A' ?? null) }}</span>
                                 </div>
                             </div>
                         </div>
@@ -1057,7 +1057,7 @@
             
             <h3 class="text-2xl font-black text-slate-900 dark:text-white mb-2">Delete Loan Record?</h3>
             <p class="text-sm text-slate-500 font-medium mb-8">
-                You are about to permanently delete <strong class="text-slate-900 dark:text-white">Loan #{{ $loan->loan_number }}</strong>. 
+                You are about to permanently delete <strong class="text-slate-900 dark:text-white">Loan #{{ fetch_data($loan?->loan_number ?? null) }}</strong>. 
                 <br>This action cannot be undone. All linked repayment history, comments, and logs will be erased.
             </p>
 

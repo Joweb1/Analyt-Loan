@@ -17,7 +17,7 @@
         </div>
         <div class="flex gap-3">
             @can('export_and_print')
-                <a href="{{ route('savings.print', $user->id) }}" target="_blank" class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-white rounded-xl text-sm font-bold shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
+                <a href="{{ fetch_data(route('savings.print', $user?->id) ?? null) }}" target="_blank" class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-white rounded-xl text-sm font-bold shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
                     <span class="material-symbols-outlined text-lg">print</span>
                     Statement
                 </a>
@@ -37,17 +37,17 @@
                     <div class="size-24 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-4 text-slate-400">
                         <span class="material-symbols-outlined text-4xl">person</span>
                     </div>
-                    <h3 class="text-xl font-bold text-slate-900 dark:text-white">{{ $user->name }}</h3>
-                    <p class="text-sm text-slate-500 font-medium uppercase tracking-widest mt-1">{{ $user->getRoleNames()->first() ?? 'Customer' }}</p>
+                    <h3 class="text-xl font-bold text-slate-900 dark:text-white">{{ fetch_data($user?->name ?? null) }}</h3>
+                    <p class="text-sm text-slate-500 font-medium uppercase tracking-widest mt-1">{{ fetch_data($user?->getRoleNames()?->first() ?? 'Customer' ?? null) }}</p>
                 </div>
                 <div class="p-6 space-y-4">
                     <div class="flex justify-between items-center text-sm">
                         <span class="text-slate-500">Phone Number</span>
-                        <span class="font-bold text-slate-900 dark:text-white">{{ $user->phone }}</span>
+                        <span class="font-bold text-slate-900 dark:text-white">{{ fetch_data($user?->phone ?? null) }}</span>
                     </div>
                     <div class="flex justify-between items-center text-sm">
                         <span class="text-slate-500">Email Address</span>
-                        <span class="font-bold text-slate-900 dark:text-white">{{ $user->email ?? 'N/A' }}</span>
+                        <span class="font-bold text-slate-900 dark:text-white">{{ fetch_data($user?->email ?? 'N/A' ?? null) }}</span>
                     </div>
                 </div>
             </div>
@@ -62,21 +62,21 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <p class="text-[9px] font-bold uppercase opacity-60 mb-1">Regular Balance</p>
-                            <p class="text-xl font-black">₦{{ $savingsAccount->balance->format() }}</p>
+                            <p class="text-xl font-black">₦{{ fetch_data($savingsAccount?->balance?->format() ?? null) }}</p>
                         </div>
                         <div class="border-l border-white/10 pl-4">
                             <p class="text-[9px] font-bold uppercase opacity-60 mb-1">Daily Thrift</p>
-                            <p class="text-xl font-black">₦{{ $savingsAccount->daily_savings_balance->format() }}</p>
+                            <p class="text-xl font-black">₦{{ fetch_data($savingsAccount?->daily_savings_balance?->format() ?? null) }}</p>
                         </div>
                     </div>
                     <div class="pt-4 border-t border-white/10 space-y-3">
                         <div class="flex justify-between items-center">
                             <span class="text-[10px] font-bold uppercase opacity-60">Account Number</span>
-                            <span class="text-xs font-black font-mono tracking-wider">{{ $savingsAccount->account_number }}</span>
+                            <span class="text-xs font-black font-mono tracking-wider">{{ fetch_data($savingsAccount?->account_number ?? null) }}</span>
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-[10px] font-bold uppercase opacity-60">Interest Rate</span>
-                            <span class="text-xs font-black">{{ $savingsAccount->interest_rate }}% P.A</span>
+                            <span class="text-xs font-black">{{ fetch_data($savingsAccount?->interest_rate ?? null) }}% P.A</span>
                         </div>
                     </div>
                 </div>
@@ -114,29 +114,29 @@
                                 <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors">
                                     <td class="px-6 py-4">
                                         <p class="font-bold text-slate-900 dark:text-white text-xs whitespace-nowrap">
-                                            {{ \Carbon\Carbon::parse($trx->transaction_date)->format('M d, Y') }}
+                                            {{ fetch_data(\Carbon\Carbon::parse($trx?->transaction_date)?->format('M d, Y') ?? null) }}
                                         </p>
                                         <p class="text-[10px] text-slate-500 font-medium tracking-tight">
-                                            {{ \Carbon\Carbon::parse($trx->transaction_date)->format('h:i A') }}
+                                            {{ fetch_data(\Carbon\Carbon::parse($trx?->transaction_date)?->format('h:i A') ?? null) }}
                                         </p>
                                     </td>
                                     <td class="px-6 py-4">
-                                        <span class="px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-tight {{ ($trx->type === 'deposit' || $trx->type === 'daily_thrift') ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700' }}">
-                                            {{ str_replace('_', ' ', $trx->type) }}
+                                        <span class="px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-tight {{ fetch_data(($trx?->type === 'deposit' || $trx?->type === 'daily_thrift') ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700' ?? null) }}">
+                                            {{ fetch_data(str_replace('_', ' ', $trx?->type) ?? null) }}
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 font-mono text-[10px] text-slate-500 uppercase">
-                                        {{ $trx->reference }}
+                                        {{ fetch_data($trx?->reference ?? null) }}
                                     </td>
                                     <td class="px-6 py-4 text-right">
-                                        <span class="font-black text-sm {{ ($trx->type === 'deposit' || $trx->type === 'daily_thrift') ? 'text-green-600' : 'text-amber-600' }}">
-                                            {{ ($trx->type === 'deposit' || $trx->type === 'daily_thrift') ? '+' : '-' }}₦{{ $trx->amount->format() }}
+                                        <span class="font-black text-sm {{ fetch_data(($trx?->type === 'deposit' || $trx?->type === 'daily_thrift') ? 'text-green-600' : 'text-amber-600' ?? null) }}">
+                                            {{ fetch_data(($trx?->type === 'deposit' || $trx?->type === 'daily_thrift') ? '+' : '-' ?? null) }}₦{{ fetch_data($trx?->amount?->format() ?? null) }}
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 text-center">
                                         @if(!$trx->repayment_id)
                                             <button 
-                                                wire:click="deleteTransaction('{{ $trx->id }}')" 
+                                                wire:click="deleteTransaction('{{ fetch_data($trx?->id ?? null) }}')" 
                                                 wire:confirm="Are you sure you want to delete this transaction and adjust the balance?"
                                                 class="size-8 rounded-lg flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all"
                                             >
@@ -150,7 +150,7 @@
                                 @if($trx->notes)
                                     <tr class="bg-slate-50/50 dark:bg-slate-800/10">
                                         <td colspan="5" class="px-6 py-2">
-                                            <p class="text-[10px] text-slate-400 italic">Note: {{ $trx->notes }}</p>
+                                            <p class="text-[10px] text-slate-400 italic">Note: {{ fetch_data($trx?->notes ?? null) }}</p>
                                         </td>
                                     </tr>
                                 @endif
@@ -165,7 +165,7 @@
                     </table>
                 </div>
                 <div class="px-6 py-4 border-t border-slate-50 dark:border-slate-800">
-                    {{ $transactions->links() }}
+                    {{ fetch_data($transactions?->links() ?? null) }}
                 </div>
             </div>
         </div>

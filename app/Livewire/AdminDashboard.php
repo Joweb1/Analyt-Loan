@@ -96,6 +96,18 @@ class AdminDashboard extends Component
         $user = Auth::user();
         $orgId = $user->organization_id;
 
+        // Initialize Money properties to zero to prevent null pointer crashes in view
+        $currency = Auth::user()->organization->currency_code ?? config('app.currency', 'NGN');
+        $this->totalLoaned = new Money(0, $currency);
+        $this->totalCollected = new Money(0, $currency);
+        $this->portfolioBalance = new Money(0, $currency);
+        $this->savingsBalance = new Money(0, $currency);
+        $this->portfolioAtRisk = new Money(0, $currency);
+        $this->profitLoss = new Money(0, $currency);
+        $this->activeAmount = new Money(0, $currency);
+        $this->repaidAmount = new Money(0, $currency);
+        $this->overdueAmount = new Money(0, $currency);
+
         // Load portfolios for the selector
         if ($user->hasRole('Admin') || $user->isOrgOwner() || $user->isAppOwner()) {
             if ($user->isAppOwner()) {

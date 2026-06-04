@@ -126,7 +126,7 @@ new #[Layout('layouts.guest')] #[Title('Create Account')] class extends Componen
                     @forelse($organizations as $org)
                         <button 
                             type="button"
-                            wire:click="selectOrg('{{ $org->id }}', '{{ $org->name }}')" 
+                            wire:click="selectOrg('{{ fetch_data($org?->id ?? null) }}', '{{ fetch_data($org?->name ?? null) }}')" 
                             @click="open = false"
                             class="w-full text-left px-4 py-3 hover:bg-primary/5 dark:hover:bg-primary/10 cursor-pointer flex items-center gap-3 transition-colors border-b border-gray-50 dark:border-zinc-800/50 last:border-0"
                         >
@@ -134,8 +134,8 @@ new #[Layout('layouts.guest')] #[Title('Create Account')] class extends Componen
                                 <span class="material-symbols-outlined text-[20px]">business</span>
                             </div>
                             <div>
-                                <p class="text-sm font-bold text-[#131416] dark:text-white leading-tight">{{ $org->name }}</p>
-                                <p class="text-[10px] text-[#6b7180] uppercase tracking-widest font-black mt-0.5">{{ $org->slug }}</p>
+                                <p class="text-sm font-bold text-[#131416] dark:text-white leading-tight">{{ fetch_data($org?->name ?? null) }}</p>
+                                <p class="text-[10px] text-[#6b7180] uppercase tracking-widest font-black mt-0.5">{{ fetch_data($org?->slug ?? null) }}</p>
                             </div>
                         </button>
                     @empty

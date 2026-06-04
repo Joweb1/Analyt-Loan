@@ -18,16 +18,16 @@
                 <div class="bg-white p-5 rounded-2xl border border-slate-100 shadow-sm">
                     <div class="flex justify-between items-start mb-4">
                         <div>
-                            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Loan #{{ $loan->loan_number }}</p>
-                            <h3 class="text-lg font-black text-slate-900">₦{{ number_format($loan->amount) }}</h3>
+                            <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Loan #{{ fetch_data($loan?->loan_number ?? null) }}</p>
+                            <h3 class="text-lg font-black text-slate-900">₦{{ fetch_data(number_format($loan?->amount) ?? null) }}</h3>
                         </div>
                         <span class="text-[10px] font-bold px-2 py-1 rounded uppercase bg-slate-100 text-slate-600">
-                            {{ $loan->status }}
+                            {{ fetch_data($loan?->status ?? null) }}
                         </span>
                     </div>
                     
                     <div class="flex flex-col gap-2">
-                        <a href="{{ route('loan.print', $loan->id) }}" target="_blank" class="flex items-center justify-between p-3 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors group">
+                        <a href="{{ fetch_data(route('loan.print', $loan?->id) ?? null) }}" target="_blank" class="flex items-center justify-between p-3 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors group">
                             <div class="flex items-center gap-3">
                                 <span class="material-symbols-outlined text-slate-400 group-hover:text-brand">download</span>
                                 <span class="text-sm font-medium text-slate-700">Download Contract</span>
@@ -35,7 +35,7 @@
                             <span class="material-symbols-outlined text-slate-300">chevron_right</span>
                         </a>
                         
-                        <a href="{{ route('schedule.print', $loan->id) }}" target="_blank" class="flex items-center justify-between p-3 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors group">
+                        <a href="{{ fetch_data(route('schedule.print', $loan?->id) ?? null) }}" target="_blank" class="flex items-center justify-between p-3 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors group">
                             <div class="flex items-center gap-3">
                                 <span class="material-symbols-outlined text-slate-400 group-hover:text-brand">calendar_month</span>
                                 <span class="text-sm font-medium text-slate-700">Repayment Schedule</span>

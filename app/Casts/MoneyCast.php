@@ -13,10 +13,10 @@ class MoneyCast implements CastsAttributes
      *
      * @param  array<string, mixed>  $attributes
      */
-    public function get(Model $model, string $key, mixed $value, array $attributes): ?Money
+    public function get(Model $model, string $key, mixed $value, array $attributes): Money
     {
         if ($value === null) {
-            return null;
+            return Money::missing();
         }
 
         $currency = $attributes['currency_code']

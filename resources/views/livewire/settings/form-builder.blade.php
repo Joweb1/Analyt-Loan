@@ -48,27 +48,27 @@
                                     <tbody class="divide-y divide-slate-100 dark:divide-zinc-800">
                                         @foreach($configs[$sectionKey] ?? [] as $field)
                                             <tr class="hover:bg-slate-50 dark:hover:bg-zinc-800/20 transition-colors">
-                                                <td class="px-6 py-4 font-bold text-slate-900 dark:text-white">{{ $field->label }}</td>
+                                                <td class="px-6 py-4 font-bold text-slate-900 dark:text-white">{{ fetch_data($field?->label ?? null) }}</td>
                                                 <td class="px-6 py-4">
-                                                    <span class="px-2 py-1 rounded bg-slate-100 dark:bg-zinc-800 text-[10px] font-black uppercase text-slate-500">{{ $field->type }}</span>
+                                                    <span class="px-2 py-1 rounded bg-slate-100 dark:bg-zinc-800 text-[10px] font-black uppercase text-slate-500">{{ fetch_data($field?->type ?? null) }}</span>
                                                 </td>
                                                 <td class="px-6 py-4 text-center">
-                                                    <button wire:click="toggleRequired('{{ $field->id }}')" class="relative inline-flex items-center cursor-pointer">
-                                                        <div class="w-10 h-5 bg-gray-200 rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all {{ $field->is_required ? 'bg-primary' : '' }}">
-                                                            <div class="size-4 bg-white rounded-full transition-all mt-[2px] ml-[2px] {{ $field->is_required ? 'translate-x-5' : '' }}"></div>
+                                                    <button wire:click="toggleRequired('{{ fetch_data($field?->id ?? null) }}')" class="relative inline-flex items-center cursor-pointer">
+                                                        <div class="w-10 h-5 bg-gray-200 rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all {{ fetch_data($field?->is_required ? 'bg-primary' : '' ?? null) }}">
+                                                            <div class="size-4 bg-white rounded-full transition-all mt-[2px] ml-[2px] {{ fetch_data($field?->is_required ? 'translate-x-5' : '' ?? null) }}"></div>
                                                         </div>
                                                     </button>
                                                 </td>
                                                 <td class="px-6 py-4 text-center">
-                                                    <button wire:click="toggleActive('{{ $field->id }}')" class="relative inline-flex items-center cursor-pointer">
-                                                        <div class="w-10 h-5 bg-gray-200 rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all {{ $field->is_active ? 'bg-primary' : '' }}">
-                                                            <div class="size-4 bg-white rounded-full transition-all mt-[2px] ml-[2px] {{ $field->is_active ? 'translate-x-5' : '' }}"></div>
+                                                    <button wire:click="toggleActive('{{ fetch_data($field?->id ?? null) }}')" class="relative inline-flex items-center cursor-pointer">
+                                                        <div class="w-10 h-5 bg-gray-200 rounded-full peer dark:bg-zinc-700 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-4 after:w-4 after:transition-all {{ fetch_data($field?->is_active ? 'bg-primary' : '' ?? null) }}">
+                                                            <div class="size-4 bg-white rounded-full transition-all mt-[2px] ml-[2px] {{ fetch_data($field?->is_active ? 'translate-x-5' : '' ?? null) }}"></div>
                                                         </div>
                                                     </button>
                                                 </td>
                                                 <td class="px-6 py-4 text-right">
                                                     @if(!$field->is_system)
-                                                        <button wire:click="deleteField('{{ $field->id }}')" class="text-red-500 hover:text-red-700 text-[10px] font-black uppercase tracking-widest">Delete</button>
+                                                        <button wire:click="deleteField('{{ fetch_data($field?->id ?? null) }}')" class="text-red-500 hover:text-red-700 text-[10px] font-black uppercase tracking-widest">Delete</button>
                                                     @else
                                                         <span class="text-slate-300 text-[10px] font-black uppercase">System</span>
                                                     @endif

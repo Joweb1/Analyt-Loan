@@ -31,27 +31,27 @@
                     <tr class="hover:bg-background-light/50 dark:hover:bg-zinc-800/50 transition-colors">
                         <td class="px-6 py-5">
                             <div class="flex flex-col">
-                                <p class="text-sm font-bold dark:text-white">{{ $product->name }}</p>
-                                <p class="text-xs text-[#716b80] truncate max-w-xs">{{ $product->description }}</p>
+                                <p class="text-sm font-bold dark:text-white">{{ fetch_data($product?->name ?? null) }}</p>
+                                <p class="text-xs text-[#716b80] truncate max-w-xs">{{ fetch_data($product?->description ?? null) }}</p>
                             </div>
                         </td>
                         <td class="px-6 py-5">
-                            <span class="text-sm font-bold dark:text-white">{{ $product->default_interest_rate }}%</span>
+                            <span class="text-sm font-bold dark:text-white">{{ fetch_data($product?->default_interest_rate ?? null) }}%</span>
                         </td>
                         <td class="px-6 py-5 text-center">
-                            <span class="text-sm font-bold dark:text-white">{{ $product->default_duration }} {{ Str::plural($product->duration_unit, $product->default_duration) }}</span>
+                            <span class="text-sm font-bold dark:text-white">{{ fetch_data($product?->default_duration ?? null) }} {{ fetch_data(Str::plural($product?->duration_unit, $product?->default_duration) ?? null) }}</span>
                         </td>
                         <td class="px-6 py-5 text-right">
                             <span class="px-3 py-1 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 rounded-full text-xs font-bold">
-                                {{ ucfirst($product->repayment_cycle) }}
+                                {{ fetch_data(ucfirst($product?->repayment_cycle) ?? null) }}
                             </span>
                         </td>
                         <td class="px-6 py-5 text-right">
                             <div class="flex items-center justify-end gap-2">
-                                <button wire:click="edit('{{ $product->id }}')" class="p-2 text-[#716b80] hover:text-primary hover:bg-primary/10 rounded-lg transition-colors">
+                                <button wire:click="edit('{{ fetch_data($product?->id ?? null) }}')" class="p-2 text-[#716b80] hover:text-primary hover:bg-primary/10 rounded-lg transition-colors">
                                     <span class="material-symbols-outlined text-[20px]">edit</span>
                                 </button>
-                                <button wire:click="delete('{{ $product->id }}')" class="p-2 text-[#716b80] hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
+                                <button wire:click="delete('{{ fetch_data($product?->id ?? null) }}')" class="p-2 text-[#716b80] hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
                                     <span class="material-symbols-outlined text-[20px]">delete</span>
                                 </button>
                             </div>
@@ -63,7 +63,7 @@
         </div>
         <!-- Pagination -->
         <div class="px-6 py-4 border-t border-[#dfdee3] dark:border-zinc-800">
-            {{ $products->links() }}
+            {{ fetch_data($products?->links() ?? null) }}
         </div>
     </div>
 

@@ -21,14 +21,14 @@
                         </div>
                         <div class="mt-6 relative flex-1 px-4 sm:px-6">
                             @if ($collateral)
-                                <h3 class="text-xl font-bold">{{ $collateral->name }}</h3>
-                                <p class="text-gray-600">{{ $collateral->description }}</p>
-                                <p class="text-gray-800 font-bold">Value: ${{ $collateral->value->format() }}</p>
+                                <h3 class="text-xl font-bold">{{ fetch_data($collateral?->name ?? null) }}</h3>
+                                <p class="text-gray-600">{{ fetch_data($collateral?->description ?? null) }}</p>
+                                <p class="text-gray-800 font-bold">Value: ${{ fetch_data($collateral?->value?->format() ?? null) }}</p>
                                 @if ($collateral->image_path)
-                                    <img src="{{ $collateral->image_url }}" alt="{{ $collateral->name }}" class="mt-4 rounded-md">
+                                    <img src="{{ fetch_data($collateral?->image_url ?? null) }}" alt="{{ fetch_data($collateral?->name ?? null) }}" class="mt-4 rounded-md">
                                 @endif
-                                <p class="text-gray-800 mt-2">Status: {{ $collateral->status }}</p>
-                                <p class="text-gray-800">Tracking Number: {{ $collateral->loan->loan_number ?? 'N/A' }}</p>
+                                <p class="text-gray-800 mt-2">Status: {{ fetch_data($collateral?->status ?? null) }}</p>
+                                <p class="text-gray-800">Tracking Number: {{ fetch_data($collateral?->loan?->loan_number ?? 'N/A' ?? null) }}</p>
                             @else
                                 <p>No collateral selected.</p>
                             @endif

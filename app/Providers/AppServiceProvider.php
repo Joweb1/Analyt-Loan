@@ -29,6 +29,7 @@ use App\Services\Storage\LaravelStorageProvider;
 use App\Services\TenantSession;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
@@ -42,6 +43,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
+        require_once app_path('Support/helpers.php');
         $this->app->singleton(TenantSession::class);
         $this->app->singleton(StorageProvider::class, LaravelStorageProvider::class);
 
@@ -57,6 +59,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        Blade::directive('fetch', function ($expression) {
+            return "<?php echo fetch_data($expression); ?>";
+        });
+
         if ($this->app->isProduction() || config('app.is_production')) {
             URL::forceScheme('https');
 

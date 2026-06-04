@@ -25,7 +25,7 @@
                 $balance = $totalDue->subtract($repaid);
                 if ($balance->getMinorAmount() < 0) $balance = new \App\ValueObjects\Money(0, $currency);
             @endphp
-            <h2 class="text-4xl font-black text-slate-900 mt-2">₦{{ $balance->format() }}</h2>
+            <h2 class="text-4xl font-black text-slate-900 mt-2">₦{{ fetch_data($balance?->format() ?? null) }}</h2>
             @php 
                 $nextSchedule = $activeLoan->scheduledRepayments
                     ->whereIn('status', ['pending', 'overdue', 'partial'])
@@ -33,7 +33,7 @@
                     ->first(); 
             @endphp
             <p class="text-sm text-slate-500 mt-2">
-                Next Payment: {{ $nextSchedule ? $nextSchedule->due_date->format('M d, Y') : ($activeLoan->status === 'approved' ? 'Awaiting Disbursement' : 'N/A') }}
+                Next Payment: {{ fetch_data($nextSchedule ? $nextSchedule?->due_date?->format('M d, Y') : ($activeLoan?->status === 'approved' ? 'Awaiting Disbursement' : 'N/A') ?? null) }}
             </p>
         </div>
 
@@ -47,20 +47,20 @@
             <div class="space-y-4 relative z-10">
                 <div>
                     <span class="opacity-70 text-xs uppercase">Bank Name</span>
-                    <p class="font-bold text-lg">{{ $activeLoan->organization->repayment_bank_name ?? 'Not Configured' }}</p>
+                    <p class="font-bold text-lg">{{ fetch_data($activeLoan?->organization?->repayment_bank_name ?? 'Not Configured' ?? null) }}</p>
                 </div>
                 <div>
                     <span class="opacity-70 text-xs uppercase">Account Number</span>
                     <div class="flex items-center gap-2">
-                        <p class="font-mono font-bold text-2xl tracking-widest">{{ $activeLoan->organization->repayment_account_number ?? '0000000000' }}</p>
-                         <button class="p-1 hover:bg-white/20 rounded" onclick="navigator.clipboard.writeText('{{ $activeLoan->organization->repayment_account_number }}')">
+                        <p class="font-mono font-bold text-2xl tracking-widest">{{ fetch_data($activeLoan?->organization?->repayment_account_number ?? '0000000000' ?? null) }}</p>
+                         <button class="p-1 hover:bg-white/20 rounded" onclick="navigator.clipboard.writeText('{{ fetch_data($activeLoan?->organization?->repayment_account_number ?? null) }}')">
                             <span class="material-symbols-outlined text-sm">content_copy</span>
                         </button>
                     </div>
                 </div>
                  <div>
                     <span class="opacity-70 text-xs uppercase">Account Name</span>
-                    <p class="font-bold">{{ $activeLoan->organization->repayment_account_name ?? 'Organization Account' }}</p>
+                    <p class="font-bold">{{ fetch_data($activeLoan?->organization?->repayment_account_name ?? 'Organization Account' ?? null) }}</p>
                 </div>
             </div>
         </div>
@@ -96,8 +96,8 @@
             @foreach($pendingProofs as $proof)
                 <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex justify-between items-center">
                     <div>
-                        <p class="font-bold text-slate-900">₦{{ $proof->amount->format() }}</p>
-                        <p class="text-xs text-slate-500">{{ $proof->created_at->diffForHumans() }}</p>
+                        <p class="font-bold text-slate-900">₦{{ fetch_data($proof?->amount?->format() ?? null) }}</p>
+                        <p class="text-xs text-slate-500">{{ fetch_data($proof?->created_at?->diffForHumans() ?? null) }}</p>
                     </div>
                     <span class="bg-yellow-100 text-yellow-700 text-xs font-bold px-2 py-1 rounded">Pending</span>
                 </div>

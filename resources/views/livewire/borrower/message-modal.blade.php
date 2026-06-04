@@ -16,7 +16,7 @@
         <div class="px-8 py-6 border-b border-slate-50 dark:border-slate-800/50 flex items-center justify-between bg-gradient-to-r from-primary to-blue-900 text-white">
             <div>
                 <h3 class="text-xl font-black tracking-tight">Direct Message</h3>
-                <p class="text-[10px] font-bold uppercase tracking-widest opacity-70 mt-1">To: {{ $borrower->user->name }}</p>
+                <p class="text-[10px] font-bold uppercase tracking-widest opacity-70 mt-1">To: {{ fetch_data($borrower?->user?->name ?? null) }}</p>
             </div>
             <button @click="open = false" class="size-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors">
                 <span class="material-symbols-outlined">close</span>

@@ -3,13 +3,13 @@
     <div class="flex justify-between items-center">
         <div>
             <p class="text-sm text-slate-500 font-medium">{{ $greeting }},</p>
-            <h1 class="text-2xl font-bold text-slate-900">{{ Auth::user()->first_name }}</h1>
+            <h1 class="text-2xl font-bold text-slate-900">{{ fetch_data(Auth::user()?->first_name ?? null) }}</h1>
         </div>
         @if($organization->logo_path)
-            <img src="{{ $organization->logo_url }}" class="h-10 w-10 object-contain rounded-full border border-slate-200 bg-white" alt="Logo">
+            <img src="{{ fetch_data($organization?->logo_url ?? null) }}" class="h-10 w-10 object-contain rounded-full border border-slate-200 bg-white" alt="Logo">
         @else
              <div class="h-10 w-10 rounded-full bg-brand flex items-center justify-center text-white font-bold">
-                {{ substr($organization->name, 0, 1) }}
+                {{ fetch_data(substr($organization?->name, 0, 1) ?? null) }}
              </div>
         @endif
     </div>
@@ -46,7 +46,7 @@
                         
                         $progress = $totalDue->isPositive() ? ($repaid->getMajorAmount() / $totalDue->getMajorAmount()) * 100 : 0;
                     @endphp
-                    <h2 class="text-4xl font-bold tracking-tight">₦{{ $balance->format() }}</h2>
+                    <h2 class="text-4xl font-bold tracking-tight">₦{{ fetch_data($balance?->format() ?? null) }}</h2>
                     <div class="flex items-center gap-2 mt-2">
                         <div class="h-1.5 flex-1 bg-white/20 rounded-full overflow-hidden">
                             <div class="h-full bg-emerald-400 rounded-full" style="width: {{ $progress }}%"></div>
@@ -62,7 +62,7 @@
             @else
                 <div class="flex flex-col gap-1">
                     <span class="text-xs font-medium text-slate-400 uppercase tracking-wider">Available Limit</span>
-                    <h2 class="text-4xl font-bold tracking-tight">₦{{ $creditLimit->format() }}</h2>
+                    <h2 class="text-4xl font-bold tracking-tight">₦{{ fetch_data($creditLimit?->format() ?? null) }}</h2>
                     <p class="text-sm text-slate-400 mt-1">You are eligible for a new loan.</p>
                     
                     <div class="mt-6 flex gap-3">
@@ -119,7 +119,7 @@
             @forelse($recentAlerts as $alert)
                 <div class="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
                     <div class="flex items-center gap-3">
-                        <div class="size-10 rounded-full {{ $alert->read_at ? 'bg-slate-100 text-slate-400' : 'bg-brand-soft text-brand' }} flex items-center justify-center">
+                        <div class="size-10 rounded-full {{ fetch_data($alert?->read_at ? 'bg-slate-100 text-slate-400' : 'bg-brand-soft text-brand' ?? null) }} flex items-center justify-center">
                             <span class="material-symbols-outlined text-xl">
                                 @if($alert->category === 'loan') monetization_on
                                 @elseif($alert->category === 'repayment') payments
@@ -128,11 +128,11 @@
                             </span>
                         </div>
                         <div>
-                            <p class="text-sm font-bold text-slate-900">{{ $alert->title }}</p>
-                            <p class="text-xs text-slate-500 truncate max-w-[200px]">{{ $alert->message }}</p>
+                            <p class="text-sm font-bold text-slate-900">{{ fetch_data($alert?->title ?? null) }}</p>
+                            <p class="text-xs text-slate-500 truncate max-w-[200px]">{{ fetch_data($alert?->message ?? null) }}</p>
                         </div>
                     </div>
-                    <span class="text-[10px] font-medium text-slate-400">{{ $alert->created_at->format('M d') }}</span>
+                    <span class="text-[10px] font-medium text-slate-400">{{ fetch_data($alert?->created_at?->format('M d') ?? null) }}</span>
                 </div>
             @empty
                  <div class="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm text-center">

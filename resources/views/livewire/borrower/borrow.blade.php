@@ -19,19 +19,19 @@
             <div class="flex flex-col gap-3">
                 @foreach($loanProducts as $product)
                     <button 
-                        wire:click="selectProduct('{{ $product->id }}')" 
-                        class="p-4 rounded-2xl border-2 text-left transition-all {{ $selectedProduct && $selectedProduct->id === $product->id ? 'border-brand bg-brand-soft shadow-sm' : 'border-slate-100 bg-white' }}"
+                        wire:click="selectProduct('{{ fetch_data($product?->id ?? null) }}')" 
+                        class="p-4 rounded-2xl border-2 text-left transition-all {{ fetch_data($selectedProduct && $selectedProduct?->id === $product?->id ? 'border-brand bg-brand-soft shadow-sm' : 'border-slate-100 bg-white' ?? null) }}"
                     >
                         <div class="flex justify-between items-center">
-                            <span class="font-bold text-slate-900">{{ $product->name }}</span>
+                            <span class="font-bold text-slate-900">{{ fetch_data($product?->name ?? null) }}</span>
                             @if($selectedProduct && $selectedProduct->id === $product->id)
                                 <span class="material-symbols-outlined text-brand">check_circle</span>
                             @endif
                         </div>
-                        <p class="text-xs text-slate-500 mt-1">{{ $product->description ?: 'Standard lending product' }}</p>
+                        <p class="text-xs text-slate-500 mt-1">{{ fetch_data($product?->description ?: 'Standard lending product' ?? null) }}</p>
                         <div class="mt-2 flex gap-3">
-                            <span class="text-[10px] font-black uppercase tracking-tighter text-brand bg-white px-2 py-0.5 rounded border border-brand/10">{{ $product->default_interest_rate }}% Rate</span>
-                            <span class="text-[10px] font-black uppercase tracking-tighter text-slate-400 bg-white px-2 py-0.5 rounded border border-slate-100">{{ $product->default_duration }} {{ Str::plural($product->duration_unit, $product->default_duration) }}</span>
+                            <span class="text-[10px] font-black uppercase tracking-tighter text-brand bg-white px-2 py-0.5 rounded border border-brand/10">{{ fetch_data($product?->default_interest_rate ?? null) }}% Rate</span>
+                            <span class="text-[10px] font-black uppercase tracking-tighter text-slate-400 bg-white px-2 py-0.5 rounded border border-slate-100">{{ fetch_data($product?->default_duration ?? null) }} {{ fetch_data(Str::plural($product?->duration_unit, $product?->default_duration) ?? null) }}</span>
                         </div>
                     </button>
                 @endforeach
@@ -81,18 +81,18 @@
         <div class="bg-slate-50 rounded-3xl p-6 border border-slate-100 mb-8">
             <div class="flex justify-between items-center mb-4">
                 <span class="text-slate-500 text-xs font-medium">Interest ({{ $interest_rate }}%)</span>
-                <span class="font-bold text-slate-900 text-sm">₦{{ number_format($this->calculated['interest'], 2) }}</span>
+                <span class="font-bold text-slate-900 text-sm">₦{{ fetch_data(number_format($this?->calculated['interest'], 2) ?? null) }}</span>
             </div>
              <div class="flex justify-between items-center mb-4">
                 <span class="text-slate-500 text-xs font-medium">Total Installments</span>
-                <span class="font-bold text-slate-900 text-sm">{{ $this->calculated['num_installments'] }} payments</span>
+                <span class="font-bold text-slate-900 text-sm">{{ fetch_data($this?->calculated['num_installments'] ?? null) }} payments</span>
             </div>
             <div class="h-px bg-slate-200 my-4"></div>
             <div class="flex justify-between items-center">
                 <span class="text-slate-900 font-bold">Total Repayment</span>
-                <span class="text-xl font-black text-brand">₦{{ number_format($this->calculated['total'], 2) }}</span>
+                <span class="text-xl font-black text-brand">₦{{ fetch_data(number_format($this?->calculated['total'], 2) ?? null) }}</span>
             </div>
-            <p class="text-[10px] font-bold text-slate-400 mt-2 text-right uppercase tracking-wider">₦{{ number_format($this->calculated['installment_amount'], 2) }} per {{ str_replace('ly', '', $repayment_cycle) }}</p>
+            <p class="text-[10px] font-bold text-slate-400 mt-2 text-right uppercase tracking-wider">₦{{ fetch_data(number_format($this?->calculated['installment_amount'], 2) ?? null) }} per {{ str_replace('ly', '', $repayment_cycle) }}</p>
         </div>
 
         <button wire:click="openBreakdown" class="w-full bg-brand text-white font-bold text-lg py-4 rounded-2xl shadow-lg shadow-brand/20 hover:opacity-90 transition-colors">
@@ -118,11 +118,11 @@
                             </div>
                             <div class="flex justify-between text-sm">
                                 <span class="text-slate-500">Interest ({{ $interest_rate }}%)</span>
-                                <span class="font-bold">₦{{ number_format($this->calculated['interest'], 2) }}</span>
+                                <span class="font-bold">₦{{ fetch_data(number_format($this?->calculated['interest'], 2) ?? null) }}</span>
                             </div>
                             <div class="flex justify-between text-sm">
                                 <span class="text-slate-500 font-bold">Total Payable</span>
-                                <span class="font-black text-brand">₦{{ number_format($this->calculated['total'], 2) }}</span>
+                                <span class="font-black text-brand">₦{{ fetch_data(number_format($this?->calculated['total'], 2) ?? null) }}</span>
                             </div>
                             
                             <div class="pt-4 border-t border-slate-100">
@@ -144,7 +144,7 @@
 
                     <div class="pt-6 mt-auto">
                         <div class="bg-brand-soft p-4 rounded-2xl text-[10px] text-brand leading-relaxed mb-4">
-                            By clicking "Confirm & Apply", you agree to the terms of the {{ $selectedProduct->name }} and authorize the repayment schedule above.
+                            By clicking "Confirm & Apply", you agree to the terms of the {{ fetch_data($selectedProduct?->name ?? null) }} and authorize the repayment schedule above.
                         </div>
                         <button wire:click="submitApplication" class="w-full bg-brand text-white font-bold py-4 rounded-xl hover:opacity-90 shadow-lg shadow-brand/20">
                             Confirm & Apply

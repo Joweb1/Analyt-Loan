@@ -105,31 +105,31 @@
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-3">
                                         <div class="size-9 rounded-full bg-primary/10 flex items-center justify-center text-primary text-[10px] font-black uppercase">
-                                            {{ substr($repayment->loan->borrower->user->name, 0, 2) }}
+                                            {{ fetch_data(substr($repayment?->loan?->borrower?->user?->name, 0, 2) ?? null) }}
                                         </div>
                                         <div class="min-w-0">
-                                            <p class="text-sm font-black text-slate-900 dark:text-white truncate">{{ $repayment->loan->borrower->user->name }}</p>
-                                            <p class="text-[10px] font-mono text-slate-400 font-bold uppercase tracking-tighter truncate">{{ $repayment->loan->loan_number }}</p>
+                                            <p class="text-sm font-black text-slate-900 dark:text-white truncate">{{ fetch_data($repayment?->loan?->borrower?->user?->name ?? null) }}</p>
+                                            <p class="text-[10px] font-mono text-slate-400 font-bold uppercase tracking-tighter truncate">{{ fetch_data($repayment?->loan?->loan_number ?? null) }}</p>
                                         </div>
                                     </div>
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="flex flex-col">
-                                        <span class="text-sm font-black text-green-600">₦{{ $repayment->amount->format() }}</span>
-                                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{{ $repayment->payment_method }}</span>
+                                        <span class="text-sm font-black text-green-600">₦{{ fetch_data($repayment?->amount?->format() ?? null) }}</span>
+                                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{{ fetch_data($repayment?->payment_method ?? null) }}</span>
                                     </div>
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="flex items-center gap-2 text-slate-600 dark:text-slate-300">
                                         <span class="material-symbols-outlined text-sm opacity-50">person</span>
-                                        <span class="text-xs font-bold truncate max-w-[120px]">{{ $repayment->collector->name ?? 'System' }}</span>
+                                        <span class="text-xs font-bold truncate max-w-[120px]">{{ fetch_data($repayment?->collector?->name ?? 'System' ?? null) }}</span>
                                     </div>
                                 </td>
                                 <td class="px-6 py-4">
-                                    <span class="text-xs font-bold text-slate-700 dark:text-slate-300">{{ $repayment->paid_at->format('M d, Y') }}</span>
+                                    <span class="text-xs font-bold text-slate-700 dark:text-slate-300">{{ fetch_data($repayment?->paid_at?->format('M d, Y') ?? null) }}</span>
                                 </td>
                                 <td class="px-6 py-4 text-right">
-                                    <a href="{{ route('loan.show', $repayment->loan_id) }}" class="inline-flex items-center justify-center size-9 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-400 hover:text-primary transition-all">
+                                    <a href="{{ fetch_data(route('loan.show', $repayment?->loan_id) ?? null) }}" class="inline-flex items-center justify-center size-9 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-400 hover:text-primary transition-all">
                                         <span class="material-symbols-outlined text-lg">visibility</span>
                                     </a>
                                 </td>
@@ -149,7 +149,7 @@
             </div>
             @if($repayments->hasPages())
                 <div class="px-6 py-4 border-t border-slate-50 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/20">
-                    {{ $repayments->links() }}
+                    {{ fetch_data($repayments?->links() ?? null) }}
                 </div>
             @endif
         </div>

@@ -1,4 +1,4 @@
-<div id="loan-form-container" data-component-id="{{ $this->getId() }}" class="w-full bg-white border-t border-gray-200 pb-64">
+<div id="loan-form-container" data-component-id="{{ fetch_data($this?->getId() ?? null) }}" class="w-full bg-white border-t border-gray-200 pb-64">
     <form wire:submit.prevent="saveLoan" class="space-y-0">
         
         <!-- State Keepers for JS Calculation -->
@@ -50,8 +50,8 @@
                         @if($selectedBorrower)
                             <div class="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-xl">
                                 <div>
-                                    <p class="font-bold text-gray-900">{{ $selectedBorrower->user->name ?? 'Unknown' }}</p>
-                                    <p class="text-xs text-blue-700">{{ $selectedBorrower->phone }}</p>
+                                    <p class="font-bold text-gray-900">{{ fetch_data($selectedBorrower?->user?->name ?? 'Unknown' ?? null) }}</p>
+                                    <p class="text-xs text-blue-700">{{ fetch_data($selectedBorrower?->phone ?? null) }}</p>
                                 </div>
                                 <button type="button" wire:click="resetBorrower" class="p-1 rounded-full text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
@@ -70,11 +70,11 @@
                                 @if(strlen($search) > 1 && count($searchResults) > 0)
                                     <div class="absolute z-[9999] mt-1 w-full bg-white shadow-lg max-h-72 rounded-xl py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
                                         @foreach($searchResults as $result)
-                                            <div wire:click="selectBorrower('{{ $result->id }}')" class="cursor-pointer select-none relative py-3 pl-3 pr-9 hover:bg-blue-50 transition-colors">
+                                            <div wire:click="selectBorrower('{{ fetch_data($result?->id ?? null) }}')" class="cursor-pointer select-none relative py-3 pl-3 pr-9 hover:bg-blue-50 transition-colors">
                                                 <div class="flex items-center">
                                                     <div class="ml-3">
-                                                        <p class="text-sm font-medium text-gray-900">{{ $result->name }}</p>
-                                                        <p class="text-xs text-gray-500">{{ $result->phone }} • {{ $result->borrower->bvn ?? 'No BVN' }}</p>
+                                                        <p class="text-sm font-medium text-gray-900">{{ fetch_data($result?->name ?? null) }}</p>
+                                                        <p class="text-xs text-gray-500">{{ fetch_data($result?->phone ?? null) }} • {{ fetch_data($result?->borrower?->bvn ?? 'No BVN' ?? null) }}</p>
                                                     </div>
                                                 </div>
                                             </div>
@@ -105,8 +105,8 @@
                         </button>
                         <div wire:ignore class="hidden absolute z-[9999] mt-1 w-full bg-white shadow-lg max-h-72 rounded-xl py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm dd-menu">
                             @forelse($loanProducts as $product)
-                                <div onclick="selectOption('loan_product', '{{ $product->name }}')" class="cursor-pointer select-none relative py-3 pl-4 pr-9 hover:bg-blue-50 text-gray-900 hover:text-blue-900">
-                                    <span class="block truncate font-normal">{{ $product->name }}</span>
+                                <div onclick="selectOption('loan_product', '{{ fetch_data($product?->name ?? null) }}')" class="cursor-pointer select-none relative py-3 pl-4 pr-9 hover:bg-blue-50 text-gray-900 hover:text-blue-900">
+                                    <span class="block truncate font-normal">{{ fetch_data($product?->name ?? null) }}</span>
                                     @if($loan_product === $product->name)
                                         <span class="absolute inset-y-0 right-0 flex items-center pr-4 text-blue-700">
                                             <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
@@ -128,7 +128,7 @@
                         <button type="button" onclick="toggleDropdown('dd-officer')" class="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-4 pr-10 flex items-center justify-between text-left focus:outline-none focus:ring-2 focus:ring-blue-700 focus:border-blue-700 sm:text-sm">
                             <span class="block truncate {{ $loan_officer_id ? 'text-gray-900 font-medium' : 'text-gray-500' }}">
                                 @if($loan_officer_id)
-                                    {{ $staffMembers->firstWhere('id', $loan_officer_id)->name ?? 'Select Officer...' }}
+                                    {{ fetch_data($staffMembers?->firstWhere('id', $loan_officer_id)?->name ?? 'Select Officer...' ?? null) }}
                                 @else
                                     Select Officer...
                                 @endif
@@ -139,8 +139,8 @@
                         </button>
                         <div wire:ignore class="hidden absolute z-[9999] mt-1 w-full bg-white shadow-lg max-h-72 rounded-xl py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm dd-menu">
                             @foreach($staffMembers as $staff)
-                                <div onclick="selectOption('loan_officer_id', '{{ $staff->id }}')" class="cursor-pointer select-none relative py-3 pl-4 pr-9 hover:bg-blue-50 text-gray-900 hover:text-blue-900">
-                                    <span class="block truncate font-normal">{{ $staff->name }}</span>
+                                <div onclick="selectOption('loan_officer_id', '{{ fetch_data($staff?->id ?? null) }}')" class="cursor-pointer select-none relative py-3 pl-4 pr-9 hover:bg-blue-50 text-gray-900 hover:text-blue-900">
+                                    <span class="block truncate font-normal">{{ fetch_data($staff?->name ?? null) }}</span>
                                     @if($loan_officer_id == $staff->id)
                                         <span class="absolute inset-y-0 right-0 flex items-center pr-4 text-blue-700">
                                             <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
@@ -160,7 +160,7 @@
                         <button type="button" onclick="toggleDropdown('dd-portfolio')" class="w-full bg-gray-50 border border-gray-200 rounded-xl py-3 pl-4 pr-10 flex items-center justify-between text-left focus:outline-none focus:ring-2 focus:ring-blue-700 focus:border-blue-700 sm:text-sm">
                             <span class="block truncate {{ $portfolio_id ? 'text-gray-900 font-medium' : 'text-gray-500' }}">
                                 @if($portfolio_id)
-                                    {{ $portfolios->firstWhere('id', $portfolio_id)->name ?? 'Select Portfolio...' }}
+                                    {{ fetch_data($portfolios?->firstWhere('id', $portfolio_id)?->name ?? 'Select Portfolio...' ?? null) }}
                                 @else
                                     Select Portfolio...
                                 @endif
@@ -174,8 +174,8 @@
                                 <span class="block truncate font-normal">None (Unassigned)</span>
                             </div>
                             @foreach($portfolios as $portfolio)
-                                <div onclick="selectOption('portfolio_id', '{{ $portfolio->id }}')" class="cursor-pointer select-none relative py-3 pl-4 pr-9 hover:bg-blue-50 text-gray-900 hover:text-blue-900">
-                                    <span class="block truncate font-normal">{{ $portfolio->name }}</span>
+                                <div onclick="selectOption('portfolio_id', '{{ fetch_data($portfolio?->id ?? null) }}')" class="cursor-pointer select-none relative py-3 pl-4 pr-9 hover:bg-blue-50 text-gray-900 hover:text-blue-900">
+                                    <span class="block truncate font-normal">{{ fetch_data($portfolio?->name ?? null) }}</span>
                                     @if($portfolio_id == $portfolio->id)
                                         <span class="absolute inset-y-0 right-0 flex items-center pr-4 text-blue-700">
                                             <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
@@ -196,7 +196,7 @@
                             <span class="block truncate {{ $collateralId ? 'text-gray-900 font-medium' : 'text-gray-500' }}">
                                 @if($collateralId)
                                     @php $selectedColl = $collaterals->firstWhere('id', $collateralId); @endphp
-                                    {{ $selectedColl ? $selectedColl->name . ' - ₦' . $selectedColl->value->format() : 'Select Collateral...' }}
+                                    {{ fetch_data($selectedColl ? $selectedColl?->name . ' - ₦' . $selectedColl?->value?->format() : 'Select Collateral...' ?? null) }}
                                 @else
                                     Select Collateral...
                                 @endif
@@ -207,8 +207,8 @@
                         </button>
                          <div wire:ignore class="hidden absolute z-[9999] mt-1 w-full bg-white shadow-lg max-h-72 rounded-xl py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm dd-menu">
                             @foreach ($collaterals as $collateral)
-                                <div onclick="selectOption('collateralId', '{{ $collateral->id }}')" class="cursor-pointer select-none relative py-3 pl-4 pr-9 hover:bg-blue-50 text-gray-900 hover:text-blue-900">
-                                    <span class="block truncate font-normal">{{ $collateral->name }} - <span class="text-gray-500">₦{{ $collateral->value->format() }}</span></span>
+                                <div onclick="selectOption('collateralId', '{{ fetch_data($collateral?->id ?? null) }}')" class="cursor-pointer select-none relative py-3 pl-4 pr-9 hover:bg-blue-50 text-gray-900 hover:text-blue-900">
+                                    <span class="block truncate font-normal">{{ fetch_data($collateral?->name ?? null) }} - <span class="text-gray-500">₦{{ fetch_data($collateral?->value?->format() ?? null) }}</span></span>
                                     @if($collateralId == $collateral->id)
                                         <span class="absolute inset-y-0 right-0 flex items-center pr-4 text-blue-700">
                                             <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>
@@ -402,16 +402,16 @@
                                     <div class="flex items-center space-x-4">
                                         <div class="flex-shrink-0 w-16 h-16 bg-white rounded-lg border border-blue-200 flex items-center justify-center overflow-hidden shadow-sm">
                                             @if (str_starts_with($attachments->getMimeType(), 'image/'))
-                                                <img src="{{ $attachments->temporaryUrl() }}" class="w-full h-full object-cover">
+                                                <img src="{{ fetch_data($attachments?->temporaryUrl() ?? null) }}" class="w-full h-full object-cover">
                                             @else
                                                 <span class="material-symbols-outlined text-blue-400 text-3xl">
-                                                    {{ str_contains($attachments->getMimeType(), 'pdf') ? 'picture_as_pdf' : 'description' }}
+                                                    {{ fetch_data(str_contains($attachments?->getMimeType(), 'pdf') ? 'picture_as_pdf' : 'description' ?? null) }}
                                                 </span>
                                             @endif
                                         </div>
                                         <div class="flex-1 min-w-0">
-                                            <p class="text-sm font-bold text-gray-900 truncate">{{ $attachments->getClientOriginalName() }}</p>
-                                            <p class="text-xs text-gray-500">{{ number_format($attachments->getSize() / 1024, 1) }} KB</p>
+                                            <p class="text-sm font-bold text-gray-900 truncate">{{ fetch_data($attachments?->getClientOriginalName() ?? null) }}</p>
+                                            <p class="text-xs text-gray-500">{{ fetch_data(number_format($attachments?->getSize() / 1024, 1) ?? null) }} KB</p>
                                         </div>
                                         <button type="button" wire:click="$set('attachments', null)" class="text-gray-400 hover:text-red-500 transition-colors">
                                             <span class="material-symbols-outlined">delete</span>

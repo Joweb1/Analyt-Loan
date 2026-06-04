@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ app(\App\Services\Localization::class)->getDirection() }}" class="light">
+<html lang="{{ fetch_data(str_replace('_', '-', app()?->getLocale()) ?? null) }}" dir="{{ fetch_data(app(\App\Services\Localization::class)?->getDirection() ?? null) }}" class="light">
 <head>
     <meta charset="utf-8"/>
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -102,7 +102,7 @@
     <div class="h-20 flex items-center justify-start px-8 border-b border-transparent shrink-0">
         <div class="flex items-center gap-3">
             @if($org && $org->logo_path)
-                <img src="{{ $org->logo_url }}" class="size-9 object-contain rounded-lg" alt="{{ $org->name }}">
+                <img src="{{ fetch_data($org?->logo_url ?? null) }}" class="size-9 object-contain rounded-lg" alt="{{ fetch_data($org?->name ?? null) }}">
             @else
                 <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white">
                     <span class="material-symbols-outlined text-[20px]">account_balance</span>
@@ -110,7 +110,7 @@
             @endif
             <div id="sidebar-logo-text" class="flex flex-col">
                 <h1 class="text-primary dark:text-white text-base font-bold leading-none tracking-tight">
-                    {{ $org->name ?? 'Analyt' }}
+                    {{ fetch_data($org?->name ?? 'Analyt' ?? null) }}
                 </h1>
                 <span class="text-slate-400 text-[10px] font-medium mt-1 uppercase tracking-wider">
                     {{ $org ? 'Self-Driving Money' : 'Self-Driving Bank' }}
@@ -121,67 +121,67 @@
     <nav id="sidebar-nav" class="flex-1 flex flex-col gap-2 p-4 overflow-y-auto overflow-x-hidden">
         <!-- Dashboard Item -->
         @if(Auth::user()->isAppOwner())
-            <a class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all group {{ request()->routeIs('admin.dashboard') ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400' }}" href="{{ route('admin.dashboard') }}">
-                <span class="material-symbols-outlined group-hover:scale-110 transition-transform {{ request()->routeIs('admin.dashboard') ? 'icon-fill' : '' }}">dashboard</span>
+            <a class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all group {{ fetch_data(request()?->routeIs('admin.dashboard') ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400' ?? null) }}" href="{{ route('admin.dashboard') }}">
+                <span class="material-symbols-outlined group-hover:scale-110 transition-transform {{ fetch_data(request()?->routeIs('admin.dashboard') ? 'icon-fill' : '' ?? null) }}">dashboard</span>
                 <span class="sidebar-nav-text text-sm font-medium">Platform Dashboard</span>
             </a>
 
-            <a class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all group {{ request()->routeIs('admin.organizations') ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400' }}" href="{{ route('admin.organizations') }}">
-                <span class="material-symbols-outlined group-hover:scale-110 transition-transform {{ request()->routeIs('admin.organizations') ? 'icon-fill' : '' }}">hub</span>
+            <a class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all group {{ fetch_data(request()?->routeIs('admin.organizations') ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400' ?? null) }}" href="{{ route('admin.organizations') }}">
+                <span class="material-symbols-outlined group-hover:scale-110 transition-transform {{ fetch_data(request()?->routeIs('admin.organizations') ? 'icon-fill' : '' ?? null) }}">hub</span>
                 <span class="sidebar-nav-text text-sm font-medium">Organizations</span>
             </a>
 
-            <a class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all group {{ request()->routeIs('admin.distribution') ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400' }}" href="{{ route('admin.distribution') }}">
-                <span class="material-symbols-outlined group-hover:scale-110 transition-transform {{ request()->routeIs('admin.distribution') ? 'icon-fill' : '' }}">account_balance_wallet</span>
+            <a class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all group {{ fetch_data(request()?->routeIs('admin.distribution') ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400' ?? null) }}" href="{{ route('admin.distribution') }}">
+                <span class="material-symbols-outlined group-hover:scale-110 transition-transform {{ fetch_data(request()?->routeIs('admin.distribution') ? 'icon-fill' : '' ?? null) }}">account_balance_wallet</span>
                 <span class="sidebar-nav-text text-sm font-medium">Distribution</span>
             </a>
 
-            <a class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all group {{ request()->routeIs('admin.reports') ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400' }}" href="{{ route('admin.reports') }}">
-                <span class="material-symbols-outlined group-hover:scale-110 transition-transform {{ request()->routeIs('admin.reports') ? 'icon-fill' : '' }}">analytics</span>
+            <a class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all group {{ fetch_data(request()?->routeIs('admin.reports') ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400' ?? null) }}" href="{{ route('admin.reports') }}">
+                <span class="material-symbols-outlined group-hover:scale-110 transition-transform {{ fetch_data(request()?->routeIs('admin.reports') ? 'icon-fill' : '' ?? null) }}">analytics</span>
                 <span class="sidebar-nav-text text-sm font-medium">Platform Reports</span>
             </a>
 
-            <a class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all group {{ request()->routeIs('admin.settings') ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400' }}" href="{{ route('admin.settings') }}">
-                <span class="material-symbols-outlined group-hover:scale-110 transition-transform {{ request()->routeIs('admin.settings') ? 'icon-fill' : '' }}">settings_suggest</span>
+            <a class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all group {{ fetch_data(request()?->routeIs('admin.settings') ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400' ?? null) }}" href="{{ route('admin.settings') }}">
+                <span class="material-symbols-outlined group-hover:scale-110 transition-transform {{ fetch_data(request()?->routeIs('admin.settings') ? 'icon-fill' : '' ?? null) }}">settings_suggest</span>
                 <span class="sidebar-nav-text text-sm font-medium">Platform Settings</span>
             </a>
         @else
             @can('manage_loans')
                 @unless(Auth::user()->hasRole('Collection Officer'))
-                    <a class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all group {{ request()->routeIs('records') || request()->routeIs('loan.disbursement-register') ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400' }}" href="{{ route('records') }}">
-                        <span class="material-symbols-outlined group-hover:scale-110 transition-transform {{ request()->routeIs('records') || request()->routeIs('loan.disbursement-register') ? 'icon-fill' : '' }}">menu_book</span>
+                    <a class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all group {{ fetch_data(request()?->routeIs('records') || request()?->routeIs('loan.disbursement-register') ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400' ?? null) }}" href="{{ route('records') }}">
+                        <span class="material-symbols-outlined group-hover:scale-110 transition-transform {{ fetch_data(request()?->routeIs('records') || request()?->routeIs('loan.disbursement-register') ? 'icon-fill' : '' ?? null) }}">menu_book</span>
                         <span class="sidebar-nav-text text-sm font-medium">Records</span>
                     </a>
                 @endunless
             @endcan
 
             @can('view_dashboard')
-                <a class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all group {{ request()->routeIs('dashboard') ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400' }}" href="{{ route('dashboard') }}">
-                    <span class="material-symbols-outlined group-hover:scale-110 transition-transform {{ request()->routeIs('dashboard') ? 'icon-fill' : '' }}">dashboard</span>
+                <a class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all group {{ fetch_data(request()?->routeIs('dashboard') ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400' ?? null) }}" href="{{ route('dashboard') }}">
+                    <span class="material-symbols-outlined group-hover:scale-110 transition-transform {{ fetch_data(request()?->routeIs('dashboard') ? 'icon-fill' : '' ?? null) }}">dashboard</span>
                     <span class="sidebar-nav-text text-sm font-medium">Dashboard</span>
                 </a>
             @endcan
 
             @can('manage_borrowers')
                 @unless(Auth::user()->hasRole('Collection Officer'))
-                    <a class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all group {{ request()->routeIs('customer') || request()->routeIs('customer.create') ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400' }}" href="{{ route('customer') }}">
-                        <span class="material-symbols-outlined group-hover:scale-110 transition-transform {{ request()->routeIs('customer') || request()->routeIs('customer.create') ? 'icon-fill' : '' }}">group</span>
+                    <a class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all group {{ fetch_data(request()?->routeIs('customer') || request()?->routeIs('customer.create') ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400' ?? null) }}" href="{{ route('customer') }}">
+                        <span class="material-symbols-outlined group-hover:scale-110 transition-transform {{ fetch_data(request()?->routeIs('customer') || request()?->routeIs('customer.create') ? 'icon-fill' : '' ?? null) }}">group</span>
                         <span class="sidebar-nav-text text-sm font-medium">Customers</span>
                     </a>
                 @endunless
             @endcan
 
             @can('manage_collections')
-                <a class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all group {{ request()->routeIs('collections') ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400' }}" href="{{ route('collections') }}">
-                    <span class="material-symbols-outlined group-hover:scale-110 transition-transform {{ request()->routeIs('collections') ? 'icon-fill' : '' }}">trending_up</span>
+                <a class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all group {{ fetch_data(request()?->routeIs('collections') ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400' ?? null) }}" href="{{ route('collections') }}">
+                    <span class="material-symbols-outlined group-hover:scale-110 transition-transform {{ fetch_data(request()?->routeIs('collections') ? 'icon-fill' : '' ?? null) }}">trending_up</span>
                     <span class="sidebar-nav-text text-sm font-medium">Collection</span>
                 </a>
             @endcan
 
             @can('manage_loans')
                 @unless(Auth::user()->hasRole('Collection Officer'))
-                    <a class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all group {{ request()->routeIs('loan') || request()->routeIs('loan.*') || request()->routeIs('status-board') || request()->routeIs('loan-application') ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400' }}" href="{{ route('loan') }}">
-                        <span class="material-symbols-outlined group-hover:scale-110 transition-transform {{ request()->routeIs('loan') || request()->routeIs('loan.*') || request()->routeIs('status-board') || request()->routeIs('loan-application') ? 'icon-fill' : '' }}">monetization_on</span>
+                    <a class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all group {{ fetch_data(request()?->routeIs('loan') || request()?->routeIs('loan.*') || request()?->routeIs('status-board') || request()?->routeIs('loan-application') ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400' ?? null) }}" href="{{ route('loan') }}">
+                        <span class="material-symbols-outlined group-hover:scale-110 transition-transform {{ fetch_data(request()?->routeIs('loan') || request()?->routeIs('loan.*') || request()?->routeIs('status-board') || request()?->routeIs('loan-application') ? 'icon-fill' : '' ?? null) }}">monetization_on</span>
                         <span class="sidebar-nav-text text-sm font-medium">Loans</span>
                     </a>
                 @endunless
@@ -189,8 +189,8 @@
 
             @can('manage_vault')
                 @unless(Auth::user()->hasRole('Collection Officer'))
-                    <a class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all group {{ request()->routeIs('vault') || request()->routeIs('collateral.create') ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400' }}" href="{{ route('vault') }}">
-                        <span class="material-symbols-outlined group-hover:scale-110 transition-transform {{ request()->routeIs('vault') || request()->routeIs('collateral.create') ? 'icon-fill' : '' }}">shield</span>
+                    <a class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all group {{ fetch_data(request()?->routeIs('vault') || request()?->routeIs('collateral.create') ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400' ?? null) }}" href="{{ route('vault') }}">
+                        <span class="material-symbols-outlined group-hover:scale-110 transition-transform {{ fetch_data(request()?->routeIs('vault') || request()?->routeIs('collateral.create') ? 'icon-fill' : '' ?? null) }}">shield</span>
                         <span class="sidebar-nav-text text-sm font-medium">Vault</span>
                     </a>
                 @endunless
@@ -198,8 +198,8 @@
 
             @can('view_reports')
                 @unless(Auth::user()->hasRole('Collection Officer'))
-                    <a class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all group {{ request()->routeIs('reports') ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400' }}" href="{{ route('reports') }}">
-                        <span class="material-symbols-outlined group-hover:scale-110 transition-transform {{ request()->routeIs('reports') ? 'icon-fill' : '' }}">bar_chart</span>
+                    <a class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all group {{ fetch_data(request()?->routeIs('reports') ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400' ?? null) }}" href="{{ route('reports') }}">
+                        <span class="material-symbols-outlined group-hover:scale-110 transition-transform {{ fetch_data(request()?->routeIs('reports') ? 'icon-fill' : '' ?? null) }}">bar_chart</span>
                         <span class="sidebar-nav-text text-sm font-medium">Report</span>
                     </a>
                 @endunless
@@ -207,8 +207,8 @@
 
             @can('manage_settings')
                 @unless(Auth::user()->hasRole('Collection Officer'))
-                    <a class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all group {{ request()->routeIs('settings') || request()->routeIs('settings.*') ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400' }}" href="{{ route('settings') }}">
-                        <span class="material-symbols-outlined group-hover:scale-110 transition-transform {{ request()->routeIs('settings') || request()->routeIs('settings.*') ? 'icon-fill' : '' }}">settings</span>
+                    <a class="flex items-center gap-3 px-3 py-3 rounded-xl transition-all group {{ fetch_data(request()?->routeIs('settings') || request()?->routeIs('settings.*') ? 'bg-primary text-white shadow-lg shadow-primary/30' : 'text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400' ?? null) }}" href="{{ route('settings') }}">
+                        <span class="material-symbols-outlined group-hover:scale-110 transition-transform {{ fetch_data(request()?->routeIs('settings') || request()?->routeIs('settings.*') ? 'icon-fill' : '' ?? null) }}">settings</span>
                         <span class="sidebar-nav-text text-sm font-medium">Settings</span>
                     </a>
                 @endunless
@@ -231,7 +231,7 @@
                     <span class="text-[10px] font-black uppercase tracking-widest">System Date</span>
                 </div>
                 <p class="text-xs font-bold text-orange-800 dark:text-orange-300">
-                    {{ now()->format('M d, Y') }}
+                    {{ fetch_data(now()?->format('M d, Y') ?? null) }}
                 </p>
             </div>
         @endif

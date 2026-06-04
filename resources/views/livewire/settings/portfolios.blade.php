@@ -31,27 +31,27 @@
                     <tr class="hover:bg-background-light/50 dark:hover:bg-zinc-800/50 transition-colors">
                         <td class="px-6 py-5">
                             <div class="flex flex-col">
-                                <p class="text-sm font-bold dark:text-white">{{ $portfolio->name }}</p>
-                                <p class="text-xs text-[#716b80] truncate max-w-xs">{{ $portfolio->description }}</p>
+                                <p class="text-sm font-bold dark:text-white">{{ fetch_data($portfolio?->name ?? null) }}</p>
+                                <p class="text-xs text-[#716b80] truncate max-w-xs">{{ fetch_data($portfolio?->description ?? null) }}</p>
                             </div>
                         </td>
                         <td class="px-6 py-5">
                             <div class="flex flex-col gap-1">
-                                <span class="text-xs font-medium text-gray-500">Balance: <b class="text-primary dark:text-white">₦{{ $portfolio->portfolio_balance->format() }}</b></span>
-                                <span class="text-xs font-medium text-gray-500">PAR: <b class="text-red-500">{{ $portfolio->par_percentage }}%</b></span>
-                                <span class="text-xs font-medium text-gray-500">Borrowers: <b class="dark:text-white">{{ $portfolio->borrowers->count() }}</b></span>
+                                <span class="text-xs font-medium text-gray-500">Balance: <b class="text-primary dark:text-white">₦{{ fetch_data($portfolio?->portfolio_balance?->format() ?? null) }}</b></span>
+                                <span class="text-xs font-medium text-gray-500">PAR: <b class="text-red-500">{{ fetch_data($portfolio?->par_percentage ?? null) }}%</b></span>
+                                <span class="text-xs font-medium text-gray-500">Borrowers: <b class="dark:text-white">{{ fetch_data($portfolio?->borrowers?->count() ?? null) }}</b></span>
                             </div>
                         </td>
                         <td class="px-6 py-5 text-center">
                             <div class="flex items-center justify-center -space-x-2">
                                 @foreach($portfolio->staff->take(3) as $member)
-                                    <div class="w-8 h-8 rounded-full bg-primary/10 border-2 border-white dark:border-zinc-900 flex items-center justify-center text-[10px] font-bold text-primary" title="{{ $member->name }}">
-                                        {{ strtoupper(substr($member->name, 0, 2)) }}
+                                    <div class="w-8 h-8 rounded-full bg-primary/10 border-2 border-white dark:border-zinc-900 flex items-center justify-center text-[10px] font-bold text-primary" title="{{ fetch_data($member?->name ?? null) }}">
+                                        {{ fetch_data(strtoupper(substr($member?->name, 0, 2)) ?? null) }}
                                     </div>
                                 @endforeach
                                 @if($portfolio->staff->count() > 3)
                                     <div class="w-8 h-8 rounded-full bg-gray-100 dark:bg-zinc-800 border-2 border-white dark:border-zinc-900 flex items-center justify-center text-[10px] font-bold text-gray-500">
-                                        +{{ $portfolio->staff->count() - 3 }}
+                                        +{{ fetch_data($portfolio?->staff?->count() - 3 ?? null) }}
                                     </div>
                                 @endif
                                 @if($portfolio->staff->isEmpty())
@@ -60,16 +60,16 @@
                             </div>
                         </td>
                         <td class="px-6 py-5 text-right">
-                            <span class="text-sm font-bold {{ $portfolio->profit_loss->getMinorAmount() >= 0 ? 'text-green-600' : 'text-red-600' }}">
-                                ₦{{ $portfolio->profit_loss->format() }}
+                            <span class="text-sm font-bold {{ fetch_data($portfolio?->profit_loss?->getMinorAmount() >= 0 ? 'text-green-600' : 'text-red-600' ?? null) }}">
+                                ₦{{ fetch_data($portfolio?->profit_loss?->format() ?? null) }}
                             </span>
                         </td>
                         <td class="px-6 py-5 text-right">
                             <div class="flex items-center justify-end gap-2">
-                                <button wire:click="edit('{{ $portfolio->id }}')" class="p-2 text-[#716b80] hover:text-primary hover:bg-primary/10 rounded-lg transition-colors">
+                                <button wire:click="edit('{{ fetch_data($portfolio?->id ?? null) }}')" class="p-2 text-[#716b80] hover:text-primary hover:bg-primary/10 rounded-lg transition-colors">
                                     <span class="material-symbols-outlined text-[20px]">edit</span>
                                 </button>
-                                <button wire:click="delete('{{ $portfolio->id }}')" class="p-2 text-[#716b80] hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
+                                <button wire:click="delete('{{ fetch_data($portfolio?->id ?? null) }}')" class="p-2 text-[#716b80] hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
                                     <span class="material-symbols-outlined text-[20px]">delete</span>
                                 </button>
                             </div>
@@ -81,7 +81,7 @@
         </div>
         <!-- Pagination -->
         <div class="px-6 py-4 border-t border-[#dfdee3] dark:border-zinc-800">
-            {{ $portfolios->links() }}
+            {{ fetch_data($portfolios?->links() ?? null) }}
         </div>
     </div>
 
@@ -116,8 +116,8 @@
                             <div class="grid grid-cols-2 gap-2 max-h-32 overflow-y-auto p-2 border rounded-lg dark:border-zinc-700">
                                 @foreach($allStaff as $staff)
                                     <label class="flex items-center gap-2 p-2 hover:bg-gray-50 dark:hover:bg-zinc-800 rounded-md cursor-pointer transition-colors">
-                                        <input type="checkbox" wire:model="staffIds" value="{{ $staff->id }}" class="rounded text-primary border-gray-300">
-                                        <span class="text-xs font-medium dark:text-white">{{ $staff->name }}</span>
+                                        <input type="checkbox" wire:model="staffIds" value="{{ fetch_data($staff?->id ?? null) }}" class="rounded text-primary border-gray-300">
+                                        <span class="text-xs font-medium dark:text-white">{{ fetch_data($staff?->name ?? null) }}</span>
                                     </label>
                                 @endforeach
                             </div>
@@ -131,10 +131,10 @@
                             <div class="grid grid-cols-1 gap-1 max-h-48 overflow-y-auto p-2 border rounded-lg dark:border-zinc-700">
                                 @forelse($availableBorrowers as $borrower)
                                     <label class="flex items-center gap-2 p-2 hover:bg-gray-50 dark:hover:bg-zinc-800 rounded-md cursor-pointer transition-colors">
-                                        <input type="checkbox" wire:model="selectedBorrowerIds" value="{{ $borrower->id }}" class="rounded text-primary border-gray-300">
+                                        <input type="checkbox" wire:model="selectedBorrowerIds" value="{{ fetch_data($borrower?->id ?? null) }}" class="rounded text-primary border-gray-300">
                                         <div class="flex flex-col">
-                                            <span class="text-xs font-bold dark:text-white">{{ $borrower->user->name }}</span>
-                                            <span class="text-[10px] text-gray-500">{{ $borrower->phone }} | ID: {{ $borrower->custom_id }}</span>
+                                            <span class="text-xs font-bold dark:text-white">{{ fetch_data($borrower?->user?->name ?? null) }}</span>
+                                            <span class="text-[10px] text-gray-500">{{ fetch_data($borrower?->phone ?? null) }} | ID: {{ fetch_data($borrower?->custom_id ?? null) }}</span>
                                         </div>
                                     </label>
                                 @empty

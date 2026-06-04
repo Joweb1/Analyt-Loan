@@ -3,11 +3,11 @@
 
     <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 mb-6 flex items-center gap-4">
         <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center text-2xl font-bold text-slate-600">
-            {{ substr($user->first_name, 0, 1) }}
+            {{ fetch_data(substr($user?->first_name, 0, 1) ?? null) }}
         </div>
         <div>
-            <h2 class="font-bold text-xl text-slate-900">{{ $user->name }}</h2>
-            <p class="text-slate-500 text-sm">{{ $user->email }}</p>
+            <h2 class="font-bold text-xl text-slate-900">{{ fetch_data($user?->name ?? null) }}</h2>
+            <p class="text-slate-500 text-sm">{{ fetch_data($user?->email ?? null) }}</p>
         </div>
     </div>
 

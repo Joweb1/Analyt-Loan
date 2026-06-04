@@ -90,7 +90,7 @@
                                 ₦{{ number_format($data['amount'], 0) }}
                             </div>
                             <div class="w-full bg-primary/10 dark:bg-primary/5 rounded-t-lg group-hover:bg-primary/20 transition-colors" 
-                                 style="height: {{ $data['amount'] > 0 ? max(($data['amount'] / collect($platformActivity)->max('amount')) * 100, 5) : 2 }}%">
+                                 style="height: {{ fetch_data($data['amount'] > 0 ? max(($data['amount'] / collect($platformActivity)?->max('amount')) * 100, 5) : 2 ?? null) }}%">
                                 <div class="w-full h-full bg-primary rounded-t-lg opacity-80" style="height: 100%"></div>
                             </div>
                         </div>
@@ -111,18 +111,18 @@
                     <div class="flex items-center gap-4">
                         <div class="w-10 h-10 bg-slate-50 dark:bg-slate-800 rounded-lg flex items-center justify-center shrink-0">
                             @if($org->logo_path)
-                                <img src="{{ $org->logo_url }}" class="w-full h-full object-contain rounded-lg">
+                                <img src="{{ fetch_data($org?->logo_url ?? null) }}" class="w-full h-full object-contain rounded-lg">
                             @else
                                 <span class="material-symbols-outlined text-slate-400">business</span>
                             @endif
                         </div>
                         <div class="flex-1 min-w-0">
-                            <h4 class="text-sm font-bold text-slate-800 dark:text-white truncate">{{ $org->name }}</h4>
-                            <p class="text-[10px] text-slate-500 uppercase tracking-wide">{{ $org->created_at->diffForHumans() }}</p>
+                            <h4 class="text-sm font-bold text-slate-800 dark:text-white truncate">{{ fetch_data($org?->name ?? null) }}</h4>
+                            <p class="text-[10px] text-slate-500 uppercase tracking-wide">{{ fetch_data($org?->created_at?->diffForHumans() ?? null) }}</p>
                         </div>
                         <div class="flex flex-col items-end">
-                            <span class="text-[10px] font-bold {{ $org->kyc_status === 'approved' ? 'text-emerald-500' : 'text-amber-500' }}">
-                                {{ strtoupper($org->kyc_status) }}
+                            <span class="text-[10px] font-bold {{ fetch_data($org?->kyc_status === 'approved' ? 'text-emerald-500' : 'text-amber-500' ?? null) }}">
+                                {{ fetch_data(strtoupper($org?->kyc_status) ?? null) }}
                             </span>
                         </div>
                     </div>

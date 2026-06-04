@@ -146,7 +146,7 @@
                         $uniqueId = 'CUS-'.substr($customer->id, 0, 5);
                     }
                     
-                    $initials = collect(explode(' ', $customer->name))->map(fn($n) => substr($n, 0, 1))->take(2)->join('');
+                    $initials = collect(explode(' ', $customer?->name ?? ''))->map(fn($n) => substr($n, 0, 1))->take(2)->join('');
                     
                     $kycStatus = $profile?->kyc_status ?? 'approved';
                     $kycColor = match($kycStatus) {
@@ -157,7 +157,7 @@
                     };
 
                     $colors = ['bg-blue-50 text-blue-600', 'bg-purple-50 text-purple-600', 'bg-emerald-50 text-emerald-600', 'bg-rose-50 text-rose-600', 'bg-amber-50 text-amber-600'];
-                    $colorClass = $colors[ord(substr($customer->name, 0, 1)) % count($colors)];
+                    $colorClass = $colors[ord(substr($customer?->name ?? ' ', 0, 1)) % count($colors)];
                     
                     $allRoles = $customer->getRoleNames()->toArray();
                 @endphp
@@ -178,19 +178,19 @@
                                 <div class="absolute -bottom-0.5 -right-0.5 size-4 rounded-full border-2 border-white dark:border-[#1a1f2e] bg-{{ $kycColor }}-500 shadow-sm"></div>
                             </div>
                             <div>
-                                <h3 class="text-[#111318] dark:text-white font-bold text-base leading-tight truncate max-w-[110px]">{{ $customer->name }}</h3>
-                                <p class="text-[#606b8a] text-xs truncate max-w-[110px]">{{ $customer->phone ?? 'N/A' }}</p>
+                                <h3 class="text-[#111318] dark:text-white font-bold text-base leading-tight truncate max-w-[110px]">{{ fetch_data($customer?->name ?? null) }}</h3>
+                                <p class="text-[#606b8a] text-xs truncate max-w-[110px]">{{ fetch_data($customer?->phone ?? 'N/A' ?? null) }}</p>
                             </div>
                         </div>
                         
                         <div class="flex flex-col gap-1.5">
                             @if($customer->borrower)
-                                <a href="{{ route('borrower.loans', $customer->borrower->id) }}" class="px-2.5 py-1 rounded-lg bg-primary text-white text-[10px] font-black uppercase tracking-tight shadow-sm hover:bg-blue-700 transition-colors text-center">
+                                <a href="{{ fetch_data(route('borrower.loans', $customer?->borrower?->id) ?? null) }}" class="px-2.5 py-1 rounded-lg bg-primary text-white text-[10px] font-black uppercase tracking-tight shadow-sm hover:bg-blue-700 transition-colors text-center">
                                     Loan
                                 </a>
                             @endif
                             @if(!$isGuarantor)
-                                <a href="{{ route('savings.show', $customer->id) }}" class="px-2.5 py-1 rounded-lg bg-green-600 text-white text-[10px] font-black uppercase tracking-tight shadow-sm hover:bg-green-700 transition-colors text-center">
+                                <a href="{{ fetch_data(route('savings.show', $customer?->id) ?? null) }}" class="px-2.5 py-1 rounded-lg bg-green-600 text-white text-[10px] font-black uppercase tracking-tight shadow-sm hover:bg-green-700 transition-colors text-center">
                                     Savings
                                 </a>
                             @endif
@@ -202,12 +202,12 @@
                             @if($customer->borrower)
                                 <div>
                                     <p class="text-[#606b8a] text-[11px] uppercase tracking-wider font-semibold">Total Debt</p>
-                                    <p class="text-[#111318] dark:text-white text-lg font-bold">₦{{ $customer->borrower->total_debt->format() }}</p>
+                                    <p class="text-[#111318] dark:text-white text-lg font-bold">₦{{ fetch_data($customer?->borrower?->total_debt?->format() ?? null) }}</p>
                                 </div>
                             @elseif($isSaver)
                                 <div>
                                     <p class="text-[#606b8a] text-[11px] uppercase tracking-wider font-semibold">Joined</p>
-                                    <p class="text-[#111318] dark:text-white text-sm font-bold">{{ $customer->created_at->format('M Y') }}</p>
+                                    <p class="text-[#111318] dark:text-white text-sm font-bold">{{ fetch_data($customer?->created_at?->format('M Y') ?? null) }}</p>
                                 </div>
                             @else
                                 <div>
@@ -219,12 +219,12 @@
                             @if(!$isGuarantor)
                                 <div class="text-right">
                                     <p class="text-[#606b8a] text-[11px] uppercase tracking-wider font-semibold">Savings</p>
-                                    <p class="text-green-600 text-lg font-bold">₦{{ $customer->savingsAccount?->balance?->format() ?? '0.00' }}</p>
+                                    <p class="text-green-600 text-lg font-bold">₦{{ fetch_data($customer?->savingsAccount?->balance?->format() ?? '0.00' ?? null) }}</p>
                                 </div>
                             @else
                                 <div class="text-right">
                                     <p class="text-[#606b8a] text-[11px] uppercase tracking-wider font-semibold">Registered</p>
-                                    <p class="text-zinc-400 text-xs font-bold">{{ $customer->created_at->format('d/m/Y') }}</p>
+                                    <p class="text-zinc-400 text-xs font-bold">{{ fetch_data($customer?->created_at?->format('d/m/Y') ?? null) }}</p>
                                 </div>
                             @endif
                         </div>
@@ -233,12 +233,12 @@
                             <div class="flex items-center justify-between pt-2 border-t border-zinc-50 dark:border-zinc-800">
                                 <div>
                                     <p class="text-[#606b8a] text-[11px] uppercase tracking-wider font-semibold mb-1">Score</p>
-                                    <span class="text-sm font-black {{ $profile->trust_score >= 80 ? 'text-emerald-500' : ($profile->trust_score >= 50 ? 'text-amber-500' : 'text-rose-500') }}">
-                                        {{ $profile->trust_score }}%
+                                    <span class="text-sm font-black {{ fetch_data($profile?->trust_score >= 80 ? 'text-emerald-500' : ($profile?->trust_score >= 50 ? 'text-amber-500' : 'text-rose-500') ?? null) }}">
+                                        {{ fetch_data($profile?->trust_score ?? null) }}%
                                     </span>
                                 </div>
                                 <div class="w-24 h-2 bg-zinc-100 dark:bg-zinc-800 rounded-full overflow-hidden">
-                                    <div class="h-full {{ $profile->trust_score >= 80 ? 'bg-emerald-500' : ($profile->trust_score >= 50 ? 'bg-amber-500' : 'bg-rose-500') }}" style="width: {{ $profile->trust_score }}%"></div>
+                                    <div class="h-full {{ fetch_data($profile?->trust_score >= 80 ? 'bg-emerald-500' : ($profile?->trust_score >= 50 ? 'bg-amber-500' : 'bg-rose-500') ?? null) }}" style="width: {{ fetch_data($profile?->trust_score ?? null) }}%"></div>
                                 </div>
                             </div>
                         @endif
@@ -276,7 +276,7 @@
                                 $isGuarantor = $customer->hasRole('Guarantor');
                                 
                                 $profile = $customer->borrower ?? $customer->saver ?? $customer->guarantor;
-                                $initials = collect(explode(' ', $customer->name))->map(fn($n) => substr($n, 0, 1))->take(2)->join('');
+                                $initials = collect(explode(' ', $customer?->name ?? ''))->map(fn($n) => substr($n, 0, 1))->take(2)->join('');
                                 $kycStatus = $profile?->kyc_status ?? 'approved';
                                 $kycColor = match($kycStatus) {
                                     'approved' => 'green',
@@ -289,8 +289,8 @@
                                 <th scope="row" class="px-6 py-4 flex items-center gap-3 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                                     <div class="size-10 rounded-lg bg-slate-100 flex items-center justify-center text-[10px] font-black">{{ $initials }}</div>
                                     <div>
-                                        <div class="text-sm font-semibold">{{ $customer->name }}</div>
-                                        <div class="text-xs text-gray-500">{{ $customer->phone ?? 'N/A' }}</div>
+                                        <div class="text-sm font-semibold">{{ fetch_data($customer?->name ?? null) }}</div>
+                                        <div class="text-xs text-gray-500">{{ fetch_data($customer?->phone ?? 'N/A' ?? null) }}</div>
                                     </div>
                                 </th>
                                 <td class="px-6 py-4">
@@ -308,14 +308,14 @@
                                 </td>
                                 <td class="px-6 py-4">
                                     @if($customer->borrower)
-                                        ₦{{ $customer->borrower->total_debt->format() }}
+                                        ₦{{ fetch_data($customer?->borrower?->total_debt?->format() ?? null) }}
                                     @else
                                         <span class="text-slate-300">—</span>
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 text-green-600 font-bold">
                                     @if(!$isGuarantor)
-                                        ₦{{ $customer->savingsAccount?->balance?->format() ?? '0.00' }}
+                                        ₦{{ fetch_data($customer?->savingsAccount?->balance?->format() ?? '0.00' ?? null) }}
                                     @else
                                         <span class="text-slate-300">—</span>
                                     @endif
@@ -326,10 +326,10 @@
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex gap-2 justify-end">
                                         @if($customer->borrower)
-                                            <a href="{{ route('borrower.loans', $customer->borrower->id) }}" class="px-3 py-1 rounded-lg bg-primary text-white text-[10px] font-black uppercase tracking-tight">Loan</a>
+                                            <a href="{{ fetch_data(route('borrower.loans', $customer?->borrower?->id) ?? null) }}" class="px-3 py-1 rounded-lg bg-primary text-white text-[10px] font-black uppercase tracking-tight">Loan</a>
                                         @endif
                                         @if(!$isGuarantor)
-                                            <a href="{{ route('savings.show', $customer->id) }}" class="px-3 py-1 rounded-lg bg-green-600 text-white text-[10px] font-black uppercase tracking-tight">Savings</a>
+                                            <a href="{{ fetch_data(route('savings.show', $customer?->id) ?? null) }}" class="px-3 py-1 rounded-lg bg-green-600 text-white text-[10px] font-black uppercase tracking-tight">Savings</a>
                                         @endif
                                     </div>
                                 </td>
@@ -343,6 +343,6 @@
 
     <!-- Pagination Footer -->
     <div class="mt-12 pb-24">
-        {{ $customers->links() }}
+        {{ fetch_data($customers?->links() ?? null) }}
     </div>
 </div>

@@ -15,13 +15,13 @@
                     <div class="space-y-3">
                         @foreach($roles as $role)
                             <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-zinc-800/50 rounded-2xl border border-transparent hover:border-primary/10 transition-all group">
-                                <span class="font-bold text-primary dark:text-white">{{ $role->name }}</span>
+                                <span class="font-bold text-primary dark:text-white">{{ fetch_data($role?->name ?? null) }}</span>
                                 <div class="flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <button wire:click="editRole('{{ $role->id }}')" class="p-2 text-primary hover:bg-white dark:hover:bg-zinc-700 rounded-lg transition-colors">
+                                    <button wire:click="editRole('{{ fetch_data($role?->id ?? null) }}')" class="p-2 text-primary hover:bg-white dark:hover:bg-zinc-700 rounded-lg transition-colors">
                                         <span class="material-symbols-outlined text-[20px]">edit</span>
                                     </button>
                                     @unless(in_array($role->name, $systemRoles))
-                                        <button wire:click="deleteRole('{{ $role->id }}')" class="p-2 text-red-500 hover:bg-white dark:hover:bg-zinc-700 rounded-lg transition-colors">
+                                        <button wire:click="deleteRole('{{ fetch_data($role?->id ?? null) }}')" class="p-2 text-red-500 hover:bg-white dark:hover:bg-zinc-700 rounded-lg transition-colors">
                                             <span class="material-symbols-outlined text-[20px]">delete</span>
                                         </button>
                                     @endunless

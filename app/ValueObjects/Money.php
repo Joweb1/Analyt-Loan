@@ -16,10 +16,26 @@ class Money implements JsonSerializable, Wireable
 
     protected string $currency;
 
-    public function __construct(int|string $amount, string $currency = 'NGN')
+    protected bool $isMissing = false;
+
+    public function __construct(int|string $amount, string $currency = 'NGN', bool $isMissing = false)
     {
         $this->amount = (int) $amount;
         $this->currency = $currency;
+        $this->isMissing = $isMissing;
+    }
+
+    /**
+     * Create a 'Missing' Money object that signifies data fetch error.
+     */
+    public static function missing(): self
+    {
+        return new self(0, 'NGN', true);
+    }
+
+    public function isMissing(): bool
+    {
+        return $this->isMissing;
     }
 
     /**
@@ -53,14 +69,14 @@ class Money implements JsonSerializable, Wireable
     {
         $this->ensureSameCurrency($other);
 
-        return new self($this->amount + $other->amount, $this->currency);
+        return new self($this->amount + $other->amount, $this->currency, $this->isMissing || $other->isMissing);
     }
 
     public function subtract(self $other): self
     {
         $this->ensureSameCurrency($other);
 
-        return new self($this->amount - $other->amount, $this->currency);
+        return new self($this->amount - $other->amount, $this->currency, $this->isMissing || $other->isMissing);
     }
 
     public function multiply(float|string $multiplier): self
@@ -71,7 +87,7 @@ class Money implements JsonSerializable, Wireable
         // When multiplying (e.g., for interest), we use bcmath for precision
         $result = bcmul((string) $this->amount, $multiplierStr, 0);
 
-        return new self((int) $result, $this->currency);
+        return new self((int) $result, $this->currency, $this->isMissing);
     }
 
     /**
@@ -81,7 +97,7 @@ class Money implements JsonSerializable, Wireable
     {
         $result = bcdiv((string) $this->amount, (string) $divisor, 0);
 
-        return new self((int) $result, $this->currency);
+        return new self((int) $result, $this->currency, $this->isMissing);
     }
 
     public function isZero(): bool
@@ -101,7 +117,7 @@ class Money implements JsonSerializable, Wireable
 
     public function absolute(): self
     {
-        return new self(abs($this->amount), $this->currency);
+        return new self(abs($this->amount), $this->currency, $this->isMissing);
     }
 
     public function equals(self $other): bool
@@ -118,6 +134,10 @@ class Money implements JsonSerializable, Wireable
 
     public function format(): string
     {
+        if ($this->isMissing) {
+            return 'Error fetching data';
+        }
+
         return number_format($this->getMajorAmount(), 2);
     }
 

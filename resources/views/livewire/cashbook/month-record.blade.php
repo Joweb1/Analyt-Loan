@@ -15,15 +15,15 @@
             <div class="flex items-center space-x-3">
                 <div class="bg-white px-4 py-2 border border-gray-200 rounded-sm shadow-sm">
                     <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block">Month Budget</span>
-                    <span class="text-lg font-black text-gray-900">{{ $totalBudget->format() }}</span>
+                    <span class="text-lg font-black text-gray-900">{{ fetch_data($totalBudget?->format() ?? null) }}</span>
                 </div>
                 <div class="flex items-center bg-white border border-gray-200 rounded-sm shadow-sm pr-2">
-                    <div class="px-4 py-2 border-r border-gray-100 {{ $remainingBudget->isNegative() ? 'text-rose-600' : 'text-amber-600' }}">
+                    <div class="px-4 py-2 border-r border-gray-100 {{ fetch_data($remainingBudget?->isNegative() ? 'text-rose-600' : 'text-amber-600' ?? null) }}">
                         <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest block">Remaining</span>
-                        <span class="text-lg font-black">{{ $remainingBudget->format() }}</span>
+                        <span class="text-lg font-black">{{ fetch_data($remainingBudget?->format() ?? null) }}</span>
                     </div>
                     <button wire:click="openBudgetModal" 
-                        class="ml-2 p-2 text-blue-600 hover:bg-blue-50 rounded-sm transition-colors group {{ !auth()->user()->isAdmin() ? 'opacity-40 pointer-events-none' : '' }}" 
+                        class="ml-2 p-2 text-blue-600 hover:bg-blue-50 rounded-sm transition-colors group {{ fetch_data(!auth()?->user()?->isAdmin() ? 'opacity-40 pointer-events-none' : '' ?? null) }}" 
                         title="Set month budget">
                         <svg class="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
                     </button>
@@ -36,19 +36,19 @@
     <div class="max-w-7xl mx-auto grid grid-cols-2 gap-4 md:grid-cols-5 mb-10">
         <div class="bg-white overflow-hidden shadow-sm border border-gray-200 rounded-sm p-5 transition hover:shadow-md">
             <dt class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Total Inflow</dt>
-            <dd class="text-2xl font-black text-emerald-600">+{{ $stats['total_inflow']->format() }}</dd>
+            <dd class="text-2xl font-black text-emerald-600">+{{ fetch_data($stats['total_inflow']?->format() ?? null) }}</dd>
         </div>
         <div class="bg-white overflow-hidden shadow-sm border border-gray-200 rounded-sm p-5 transition hover:shadow-md">
             <dt class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Total Outflow</dt>
-            <dd class="text-2xl font-black text-rose-600">-{{ $stats['total_outflow']->format() }}</dd>
+            <dd class="text-2xl font-black text-rose-600">-{{ fetch_data($stats['total_outflow']?->format() ?? null) }}</dd>
         </div>
         <div class="bg-white overflow-hidden shadow-sm border border-gray-200 rounded-sm p-5 transition hover:shadow-md">
             <dt class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Live Bank Balance</dt>
-            <dd class="text-2xl font-black text-blue-600">{{ $liveBalance->format() }}</dd>
+            <dd class="text-2xl font-black text-blue-600">{{ fetch_data($liveBalance?->format() ?? null) }}</dd>
         </div>
         <div class="bg-white overflow-hidden shadow-sm border border-gray-200 rounded-sm p-5 transition hover:shadow-md group relative">
             <dt class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Initial Balance</dt>
-            <dd class="text-2xl font-black text-gray-900">{{ $openingBalance->format() }}</dd>
+            <dd class="text-2xl font-black text-gray-900">{{ fetch_data($openingBalance?->format() ?? null) }}</dd>
             @if(auth()->user()->isAdmin())
                 <button wire:click="openBalanceModal" class="absolute top-2 right-2 p-1 text-gray-300 hover:text-blue-600 opacity-0 group-hover:opacity-100 transition-all">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
@@ -70,7 +70,7 @@
                         <span class="mr-3">{{ $week }}</span>
                         <span class="h-px w-24 bg-gray-200"></span>
                     </h2>
-                    <span class="text-xs font-medium text-gray-400 bg-gray-100 px-2 py-1 rounded-sm">{{ $entries->count() }} Records</span>
+                    <span class="text-xs font-medium text-gray-400 bg-gray-100 px-2 py-1 rounded-sm">{{ fetch_data($entries?->count() ?? null) }} Records</span>
                 </div>
 
                 <div x-show="open" x-collapse class="space-y-4">
@@ -79,12 +79,12 @@
                             <div class="p-5 flex flex-col md:flex-row md:items-center justify-between gap-6">
                                 <div class="flex items-center space-x-6">
                                     <div class="flex-shrink-0 text-center border-r border-gray-100 pr-6">
-                                        <span class="block text-2xl font-black text-gray-900">{{ $entry->entry_date->format('d') }}</span>
-                                        <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ $entry->entry_date->format('D') }}</span>
+                                        <span class="block text-2xl font-black text-gray-900">{{ fetch_data($entry?->entry_date?->format('d') ?? null) }}</span>
+                                        <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ fetch_data($entry?->entry_date?->format('D') ?? null) }}</span>
                                     </div>
                                     <div>
                                         <div class="flex items-center space-x-3">
-                                            <h3 class="text-lg font-bold text-gray-900">{{ $entry->entry_date->format('l, jS F') }}</h3>
+                                            <h3 class="text-lg font-bold text-gray-900">{{ fetch_data($entry?->entry_date?->format('l, jS F') ?? null) }}</h3>
                                             @php
                                                 $statusClasses = [
                                                     'verified' => 'bg-emerald-50 text-emerald-700 border-emerald-100',
@@ -94,12 +94,12 @@
                                                 $currentClass = $statusClasses[$entry->status] ?? 'bg-gray-50 text-gray-700 border-gray-200';
                                             @endphp
                                             <span class="px-3 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border {{ $currentClass }}">
-                                                {{ $entry->status }}
+                                                {{ fetch_data($entry?->status ?? null) }}
                                             </span>
                                         </div>
                                         <div class="flex items-center mt-1 space-x-4">
-                                            <span class="text-[11px] text-gray-500 font-medium">Cash in hand: <span class="font-black text-gray-900">{{ $entry->actual_cash_at_hand->format() }}</span></span>
-                                            <span class="text-[11px] text-gray-500 font-medium">Expenses: <span class="font-black text-rose-600">{{ $entry->daily_expense_amount->format() }}</span></span>
+                                            <span class="text-[11px] text-gray-500 font-medium">Cash in hand: <span class="font-black text-gray-900">{{ fetch_data($entry?->actual_cash_at_hand?->format() ?? null) }}</span></span>
+                                            <span class="text-[11px] text-gray-500 font-medium">Expenses: <span class="font-black text-rose-600">{{ fetch_data($entry?->daily_expense_amount?->format() ?? null) }}</span></span>
                                         </div>
                                     </div>
                                 </div>
@@ -108,11 +108,11 @@
                                     <div class="text-right">
                                         <span class="block text-[10px] uppercase font-bold text-gray-400 tracking-widest mb-1">Total Bank Deposit</span>
                                         <span class="text-xl font-black text-blue-600">
-                                            {{ $entry->bank_deposit_amount->format() }}
+                                            {{ fetch_data($entry?->bank_deposit_amount?->format() ?? null) }}
                                         </span>
                                     </div>
                                     <div class="flex items-center gap-4">
-                                        <a href="{{ route('cashbook', ['date' => $entry->entry_date->toDateString()]) }}" 
+                                        <a href="{{ fetch_data(route('cashbook', ['date' => $entry?->entry_date?->toDateString()]) ?? null) }}" 
                                             class="p-2 text-gray-400 hover:text-blue-600 transition-colors bg-gray-50 rounded-sm border border-gray-200"
                                             title="View Daily Record">
                                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
@@ -127,12 +127,12 @@
                                     @if(!$entry->actual_cash_at_hand->equals($entry->expected_cash_at_hand))
                                         <div class="flex items-center space-x-3">
                                             <svg class="w-4 h-4 text-rose-500" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path></svg>
-                                            <span class="text-[10px] font-bold text-rose-700 uppercase">Variance: {{ $entry->actual_cash_at_hand->subtract($entry->expected_cash_at_hand)->format() }}</span>
+                                            <span class="text-[10px] font-bold text-rose-700 uppercase">Variance: {{ fetch_data($entry?->actual_cash_at_hand?->subtract($entry?->expected_cash_at_hand)?->format() ?? null) }}</span>
                                         </div>
                                     @endif
                                     @if($entry->shortfall_report)
                                         <div class="pl-7">
-                                            <p class="text-[10px] text-rose-600 italic font-medium">Report: "{{ $entry->shortfall_report }}"</p>
+                                            <p class="text-[10px] text-rose-600 italic font-medium">Report: "{{ fetch_data($entry?->shortfall_report ?? null) }}"</p>
                                         </div>
                                     @endif
                                 </div>

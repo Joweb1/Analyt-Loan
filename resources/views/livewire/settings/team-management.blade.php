@@ -32,41 +32,41 @@
                         <td class="px-6 py-5">
                             <div class="flex items-center gap-3">
                                 <div class="size-10 rounded-full bg-primary flex items-center justify-center text-white font-bold relative">
-                                    {{ substr($member->name, 0, 1) }}
-                                    <div class="absolute -bottom-0.5 -right-0.5 size-3.5 rounded-full border-2 border-white dark:border-zinc-900 {{ $member->isOnline() ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]' : 'bg-gray-300' }}"></div>
+                                    {{ fetch_data(substr($member?->name, 0, 1) ?? null) }}
+                                    <div class="absolute -bottom-0.5 -right-0.5 size-3.5 rounded-full border-2 border-white dark:border-zinc-900 {{ fetch_data($member?->isOnline() ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]' : 'bg-gray-300' ?? null) }}"></div>
                                 </div>
                                 <div class="flex flex-col">
-                                    <p class="text-sm font-bold dark:text-white">{{ $member->name }}</p>
-                                    <p class="text-xs text-[#716b80]">{{ $member->phone }}</p>
+                                    <p class="text-sm font-bold dark:text-white">{{ fetch_data($member?->name ?? null) }}</p>
+                                    <p class="text-xs text-[#716b80]">{{ fetch_data($member?->phone ?? null) }}</p>
                                 </div>
                             </div>
                         </td>
                         <td class="px-6 py-5">
                             <select 
-                                wire:change="changeRole('{{ $member->id }}', $event.target.value)"
+                                wire:change="changeRole('{{ fetch_data($member?->id ?? null) }}', $event.target.value)"
                                 class="bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 border-none rounded-full text-xs font-bold py-1 px-3 focus:ring-1 focus:ring-blue-500 cursor-pointer"
                             >
                                 @foreach($roles as $r)
-                                    <option value="{{ $r->name }}" {{ $member->hasRole($r->name) ? 'selected' : '' }}>
-                                        {{ $r->name }}
+                                    <option value="{{ fetch_data($r?->name ?? null) }}" {{ fetch_data($member?->hasRole($r?->name) ? 'selected' : '' ?? null) }}>
+                                        {{ fetch_data($r?->name ?? null) }}
                                     </option>
                                 @endforeach
                             </select>
                         </td>
                         <td class="px-6 py-5 text-center">
                             @php $isPushEnabled = $member->pushEnabled(); @endphp
-                            <button wire:click="togglePush('{{ $member->id }}')" class="relative inline-flex h-5 w-10 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none {{ $isPushEnabled ? 'bg-primary' : 'bg-gray-200 dark:bg-zinc-700' }}">
+                            <button wire:click="togglePush('{{ fetch_data($member?->id ?? null) }}')" class="relative inline-flex h-5 w-10 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none {{ $isPushEnabled ? 'bg-primary' : 'bg-gray-200 dark:bg-zinc-700' }}">
                                 <span class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {{ $isPushEnabled ? 'translate-x-5' : 'translate-x-0' }}"></span>
                             </button>
                         </td>
                         <td class="px-6 py-5 text-right">
-                            <p class="text-sm font-bold dark:text-white">{{ $member->assigned_loans_count }} Loans</p>
+                            <p class="text-sm font-bold dark:text-white">{{ fetch_data($member?->assigned_loans_count ?? null) }} Loans</p>
                         </td>
                         <td class="px-6 py-5 text-right">
                             <div class="flex items-center justify-end gap-2">
                                 <button 
-                                    wire:click="removeStaffAccess('{{ $member->id }}')" 
-                                    wire:confirm="Are you sure you want to revoke administrative access for {{ $member->name }}?"
+                                    wire:click="removeStaffAccess('{{ fetch_data($member?->id ?? null) }}')" 
+                                    wire:confirm="Are you sure you want to revoke administrative access for {{ fetch_data($member?->name ?? null) }}?"
                                     class="p-2 text-[#716b80] hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                                     title="Revoke Admin Access"
                                 >
@@ -81,7 +81,7 @@
         </div>
         <!-- Pagination -->
         <div class="px-6 py-4 border-t border-[#dfdee3] dark:border-zinc-800">
-            {{ $members->links() }}
+            {{ fetch_data($members?->links() ?? null) }}
         </div>
     </div>
 
@@ -118,13 +118,13 @@
                             <div class="absolute z-10 w-full mt-2 bg-white dark:bg-zinc-800 border dark:border-zinc-700 rounded-xl shadow-xl overflow-hidden max-h-60 overflow-y-auto">
                                 @foreach($userResults as $res)
                                     <button 
-                                        wire:click="selectUser('{{ $res->id }}', '{{ $res->name }}')" 
+                                        wire:click="selectUser('{{ fetch_data($res?->id ?? null) }}', '{{ fetch_data($res?->name ?? null) }}')" 
                                         class="w-full px-5 py-3 text-left hover:bg-primary/5 dark:hover:bg-zinc-700 border-b dark:border-zinc-700 last:border-0 transition-colors group"
                                     >
                                         <div class="flex justify-between items-center">
                                             <div>
-                                                <p class="text-sm font-bold dark:text-white group-hover:text-primary">{{ $res->name }}</p>
-                                                <p class="text-xs text-gray-500">{{ $res->phone }} | {{ $res->email ?? 'No Email' }}</p>
+                                                <p class="text-sm font-bold dark:text-white group-hover:text-primary">{{ fetch_data($res?->name ?? null) }}</p>
+                                                <p class="text-xs text-gray-500">{{ fetch_data($res?->phone ?? null) }} | {{ fetch_data($res?->email ?? 'No Email' ?? null) }}</p>
                                             </div>
                                             <span class="material-symbols-outlined text-gray-300 text-[20px]">add_circle</span>
                                         </div>
@@ -157,7 +157,7 @@
                         <select wire:model="role" class="w-full rounded-xl border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white h-14 px-4 focus:ring-primary focus:border-primary">
                             <option value="">Select a role</option>
                             @foreach($roles as $r)
-                                <option value="{{ $r->name }}">{{ $r->name }}</option>
+                                <option value="{{ fetch_data($r?->name ?? null) }}">{{ fetch_data($r?->name ?? null) }}</option>
                             @endforeach
                         </select>
                         @error('role') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror

@@ -26,7 +26,7 @@
             <div class="flex items-center gap-4 bg-white p-2 rounded-sm border border-slate-200 shadow-sm">
                 <div class="px-4 py-2 border-r border-slate-100 text-center">
                     <span class="block text-[10px] font-black text-slate-400 uppercase tracking-widest">System Date</span>
-                    <span class="text-sm font-bold text-slate-900">{{ \App\Models\Organization::current()->getSystemTime()->format('l, d F Y') }}</span>
+                    <span class="text-sm font-bold text-slate-900">{{ fetch_data(\App\Models\Organization::current()?->getSystemTime()?->format('l, d F Y') ?? null) }}</span>
                 </div>
                 <div class="px-4 py-2 text-center">
                     <span class="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</span>
@@ -48,7 +48,7 @@
                     <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Weekly Repayments</h3>
                     <span class="material-symbols-outlined text-slate-200 text-sm group-hover:text-emerald-400 transition-colors">payments</span>
                 </div>
-                <p class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">{{ $stats['total_repayments_week']->format() }}</p>
+                <p class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">{{ fetch_data($stats['total_repayments_week']?->format() ?? null) }}</p>
             </div>
 
             {{-- Weekly Due --}}
@@ -57,7 +57,7 @@
                     <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Weekly Due</h3>
                     <span class="material-symbols-outlined text-slate-200 text-sm group-hover:text-amber-400 transition-colors">event_repeat</span>
                 </div>
-                <p class="text-xl sm:text-2xl font-black text-amber-600 tracking-tight">{{ $stats['weekly_due']->format() }}</p>
+                <p class="text-xl sm:text-2xl font-black text-amber-600 tracking-tight">{{ fetch_data($stats['weekly_due']?->format() ?? null) }}</p>
             </div>
 
             {{-- Monthly Due --}}
@@ -66,7 +66,7 @@
                     <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Monthly Due</h3>
                     <span class="material-symbols-outlined text-slate-200 text-sm group-hover:text-purple-400 transition-colors">calendar_month</span>
                 </div>
-                <p class="text-xl sm:text-2xl font-black text-purple-600 tracking-tight">{{ $stats['monthly_due']->format() }}</p>
+                <p class="text-xl sm:text-2xl font-black text-purple-600 tracking-tight">{{ fetch_data($stats['monthly_due']?->format() ?? null) }}</p>
             </div>
 
             {{-- Overdue Amount --}}
@@ -75,7 +75,7 @@
                     <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Overdue Acc.</h3>
                     <span class="material-symbols-outlined text-slate-200 text-sm group-hover:text-rose-400 transition-colors">warning</span>
                 </div>
-                <p class="text-xl sm:text-2xl font-black text-rose-600 tracking-tight">{{ $stats['overdue_amount']->format() }}</p>
+                <p class="text-xl sm:text-2xl font-black text-rose-600 tracking-tight">{{ fetch_data($stats['overdue_amount']?->format() ?? null) }}</p>
             </div>
         </div>
     </div>
@@ -118,11 +118,11 @@
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <span class="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Week's Collection</span>
-                                <p class="text-sm font-black text-slate-900 tracking-tight">₦{{ $group['collected_amount']->format() }}</p>
+                                <p class="text-sm font-black text-slate-900 tracking-tight">₦{{ fetch_data($group['collected_amount']?->format() ?? null) }}</p>
                             </div>
                             <div class="text-right">
                                 <span class="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Overdue</span>
-                                <p class="text-sm font-black text-rose-600 tracking-tight">₦{{ $group['overdue_amount']->format() }}</p>
+                                <p class="text-sm font-black text-rose-600 tracking-tight">₦{{ fetch_data($group['overdue_amount']?->format() ?? null) }}</p>
                             </div>
                         </div>
 
@@ -164,7 +164,7 @@
                         <span class="text-[9px] font-black text-emerald-600 uppercase tracking-widest">Repayment Total</span>
                         <span class="material-symbols-outlined text-emerald-400 group-hover:rotate-12 transition-transform hidden sm:block">trending_up</span>
                     </div>
-                    <p class="text-2xl font-black text-emerald-900 tracking-tight">{{ $stats['total_repayments_week']->format() }}</p>
+                    <p class="text-2xl font-black text-emerald-900 tracking-tight">{{ fetch_data($stats['total_repayments_week']?->format() ?? null) }}</p>
                 </div>
 
                 <div class="bg-blue-50 p-6 rounded-sm border border-blue-100 shadow-sm group hover:shadow-lg transition-all text-center sm:text-left">
@@ -172,7 +172,7 @@
                         <span class="text-[9px] font-black text-blue-600 uppercase tracking-widest">Org Savings Balance</span>
                         <span class="material-symbols-outlined text-blue-400 group-hover:rotate-12 transition-transform hidden sm:block">account_balance_wallet</span>
                     </div>
-                    <p class="text-2xl font-black text-blue-900 tracking-tight">{{ $stats['total_savings_all']->format() }}</p>
+                    <p class="text-2xl font-black text-blue-900 tracking-tight">{{ fetch_data($stats['total_savings_all']?->format() ?? null) }}</p>
                 </div>
             </div>
         </div>

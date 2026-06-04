@@ -54,7 +54,7 @@
         
         @forelse($logs as $log)
             <div class="flex gap-3 group" wire:key="log-{{ $log['id'] }}">
-                <span class="text-gray-600 shrink-0">[{{ \Carbon\Carbon::parse($log['created_at'])->format('H:i:s') }}]</span>
+                <span class="text-gray-600 shrink-0">[{{ fetch_data(\Carbon\Carbon::parse($log['created_at'])?->format('H:i:s') ?? null) }}]</span>
                 <span class="uppercase font-black shrink-0 w-16
                     {{ $log['level'] === 'success' ? 'text-green-400' : ($log['level'] === 'error' ? 'text-red-400' : ($log['level'] === 'warning' ? 'text-yellow-400' : ($log['level'] === 'input' ? 'text-primary' : 'text-blue-400'))) }}">
                     {{ $log['level'] }}

@@ -29,20 +29,20 @@
                     @forelse($customers as $customer)
                         <tr class="border-b border-slate-50 dark:border-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                             <td class="px-4 py-4">
-                                <p class="font-bold text-slate-900 dark:text-white">{{ $customer->name }}</p>
-                                <p class="text-xs text-slate-500">{{ $customer->borrower->custom_id ?? 'No ID' }}</p>
+                                <p class="font-bold text-slate-900 dark:text-white">{{ fetch_data($customer?->name ?? null) }}</p>
+                                <p class="text-xs text-slate-500">{{ fetch_data($customer?->borrower?->custom_id ?? 'No ID' ?? null) }}</p>
                             </td>
                             <td class="px-4 py-4">
-                                {{ $customer->phone }}
+                                {{ fetch_data($customer?->phone ?? null) }}
                             </td>
                             <td class="px-4 py-4 text-slate-500">
-                                {{ $customer->savingsAccount->account_number ?? 'N/A' }}
+                                {{ fetch_data($customer?->savingsAccount?->account_number ?? 'N/A' ?? null) }}
                             </td>
                             <td class="px-4 py-4 font-medium text-slate-900 dark:text-white">
-                                ₦{{ $customer->savingsAccount?->balance?->format() ?? '0.00' }}
+                                ₦{{ fetch_data($customer?->savingsAccount?->balance?->format() ?? '0.00' ?? null) }}
                             </td>
                             <td class="px-4 py-4 text-right">
-                                <button wire:click="selectCustomer('{{ $customer->id }}')" class="px-4 py-2 bg-primary text-white text-xs font-bold rounded-xl hover:bg-primary/90 transition-colors">
+                                <button wire:click="selectCustomer('{{ fetch_data($customer?->id ?? null) }}')" class="px-4 py-2 bg-primary text-white text-xs font-bold rounded-xl hover:bg-primary/90 transition-colors">
                                     Add Deposit
                                 </button>
                             </td>
@@ -58,7 +58,7 @@
             </table>
         </div>
         <div class="mt-4">
-            {{ $customers->links() }}
+            {{ fetch_data($customers?->links() ?? null) }}
         </div>
     </div>
 

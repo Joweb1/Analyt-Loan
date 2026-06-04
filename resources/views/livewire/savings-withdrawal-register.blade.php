@@ -86,7 +86,7 @@
                         <span class="mr-3">{{ $month }}</span>
                         <span class="h-px w-24 bg-gray-200"></span>
                     </h2>
-                    <span class="text-xs font-medium text-gray-400 bg-gray-100 px-2 py-1 rounded-md">{{ $records->count() }} Records</span>
+                    <span class="text-xs font-medium text-gray-400 bg-gray-100 px-2 py-1 rounded-md">{{ fetch_data($records?->count() ?? null) }} Records</span>
                 </div>
 
                 <div x-show="open" x-collapse class="space-y-4">
@@ -99,21 +99,21 @@
                                 <div class="flex items-center space-x-4">
                                     <div class="flex-shrink-0">
                                         <span class="inline-flex items-center justify-center h-10 w-10 rounded-full bg-gray-50 text-gray-400 text-xs font-medium border border-gray-100">
-                                            {{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}
+                                            {{ fetch_data(str_pad($loop?->iteration, 2, '0', STR_PAD_LEFT) ?? null) }}
                                         </span>
                                     </div>
                                     <div>
                                         <div class="flex items-center space-x-2">
-                                            <h3 class="text-xl font-bold text-gray-900">{{ $record->savingsAccount->user->name ?? 'N/A' }}</h3>
-                                            <span class="px-2 py-0.5 rounded-md text-[10px] font-mono bg-gray-100 text-gray-500 uppercase">{{ $record->savingsAccount->user->borrower?->custom_id ?? 'N/A' }}</span>
+                                            <h3 class="text-xl font-bold text-gray-900">{{ fetch_data($record?->savingsAccount?->user?->name ?? 'N/A' ?? null) }}</h3>
+                                            <span class="px-2 py-0.5 rounded-md text-[10px] font-mono bg-gray-100 text-gray-500 uppercase">{{ fetch_data($record?->savingsAccount?->user?->borrower?->custom_id ?? 'N/A' ?? null) }}</span>
                                         </div>
                                         <div class="flex items-center mt-1 space-x-3">
                                             <span class="flex items-center text-xs font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
-                                                Balance: {{ $record->snapshot_balance->format() }}
+                                                Balance: {{ fetch_data($record?->snapshot_balance?->format() ?? null) }}
                                             </span>
                                             <span class="text-xs text-gray-400 flex items-center">
                                                 <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                                {{ $record->transaction_date->format('d M, Y') }}
+                                                {{ fetch_data($record?->transaction_date?->format('d M, Y') ?? null) }}
                                             </span>
                                         </div>
                                     </div>
@@ -122,7 +122,7 @@
                                 <div class="flex items-center justify-between lg:justify-end gap-6">
                                     <div class="text-right">
                                         <span class="block text-[10px] uppercase font-bold text-gray-400 tracking-widest mb-1">Withdrawn Amount</span>
-                                        <span class="text-2xl font-black text-rose-600">{{ $record->amount_withdrawn->format() }}</span>
+                                        <span class="text-2xl font-black text-rose-600">{{ fetch_data($record?->amount_withdrawn?->format() ?? null) }}</span>
                                     </div>
                                     <div class="flex items-center gap-3">
                                         @php
@@ -136,7 +136,7 @@
                                             $currentClass = $statusClasses[$record->status] ?? 'bg-gray-50 text-gray-700 border-gray-100';
                                         @endphp
                                         <span class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border {{ $currentClass }}">
-                                            {{ $record->status }}
+                                            {{ fetch_data($record?->status ?? null) }}
                                         </span>
                                         <svg class="w-5 h-5 text-gray-300 transform transition-transform duration-200" :class="{ 'rotate-180': expanded }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                                     </div>
@@ -153,15 +153,15 @@
                                             <div class="space-y-2">
                                                 <div class="flex justify-between items-center bg-white p-2 rounded border border-gray-100 shadow-sm">
                                                     <span class="text-xs text-gray-500">Ref Number</span>
-                                                    <span class="text-xs font-mono font-bold text-gray-700">{{ $record->reference }}</span>
+                                                    <span class="text-xs font-mono font-bold text-gray-700">{{ fetch_data($record?->reference ?? null) }}</span>
                                                 </div>
                                                 <div class="flex justify-between items-center bg-white p-2 rounded border border-blue-100 shadow-sm">
                                                     <span class="text-xs text-blue-600 font-bold">Loan Adjustment</span>
-                                                    <span class="text-xs font-bold text-blue-700">{{ $record->loan_adjustment_amount->format() }}</span>
+                                                    <span class="text-xs font-bold text-blue-700">{{ fetch_data($record?->loan_adjustment_amount?->format() ?? null) }}</span>
                                                 </div>
                                                 <div class="flex justify-between items-center bg-white p-2 rounded border border-gray-100 shadow-sm">
                                                     <span class="text-xs text-gray-500">Processed By</span>
-                                                    <span class="text-xs font-bold text-gray-700">{{ $record->staff->name ?? 'System' }}</span>
+                                                    <span class="text-xs font-bold text-gray-700">{{ fetch_data($record?->staff?->name ?? 'System' ?? null) }}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -171,11 +171,11 @@
                                             <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Workflow Actions</span>
                                             <div class="flex flex-wrap gap-2">
                                                 @if($record->status === 'pending')
-                                                    <button wire:click="updateStatus('{{ $record->id }}', 'verified')" class="px-3 py-1 bg-blue-600 text-white text-[10px] font-bold uppercase rounded-md shadow hover:bg-blue-700 transition">Verify</button>
+                                                    <button wire:click="updateStatus('{{ fetch_data($record?->id ?? null) }}', 'verified')" class="px-3 py-1 bg-blue-600 text-white text-[10px] font-bold uppercase rounded-md shadow hover:bg-blue-700 transition">Verify</button>
                                                 @endif
                                                 @if(in_array($record->status, ['pending', 'verified', 'processing']))
-                                                    <button wire:click="updateStatus('{{ $record->id }}', 'approved')" class="px-3 py-1 bg-emerald-600 text-white text-[10px] font-bold uppercase rounded-md shadow hover:bg-emerald-700 transition">Approve</button>
-                                                    <button wire:click="updateStatus('{{ $record->id }}', 'rejected')" class="px-3 py-1 bg-rose-600 text-white text-[10px] font-bold uppercase rounded-md shadow hover:bg-rose-700 transition">Reject</button>
+                                                    <button wire:click="updateStatus('{{ fetch_data($record?->id ?? null) }}', 'approved')" class="px-3 py-1 bg-emerald-600 text-white text-[10px] font-bold uppercase rounded-md shadow hover:bg-emerald-700 transition">Approve</button>
+                                                    <button wire:click="updateStatus('{{ fetch_data($record?->id ?? null) }}', 'rejected')" class="px-3 py-1 bg-rose-600 text-white text-[10px] font-bold uppercase rounded-md shadow hover:bg-rose-700 transition">Reject</button>
                                                 @endif
                                             </div>
                                         </div>
@@ -187,10 +187,10 @@
                                         <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Withdrawal Notes & Observations</span>
                                         <div class="relative">
                                             <textarea 
-                                                wire:change="updateNote('{{ $record->id }}', $event.target.value)"
+                                                wire:change="updateNote('{{ fetch_data($record?->id ?? null) }}', $event.target.value)"
                                                 placeholder="Add internal notes about this withdrawal or loan adjustment..."
                                                 class="block w-full rounded border-gray-200 bg-white shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm min-h-[120px] resize-none p-4"
-                                            >{{ $record->notes }}</textarea>
+                                            >{{ fetch_data($record?->notes ?? null) }}</textarea>
                                             <div class="absolute bottom-3 right-3 opacity-20">
                                                 <svg class="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"></path><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd"></path></svg>
                                             </div>
@@ -204,9 +204,9 @@
                                                     <div class="flex items-center text-[10px] text-gray-500 space-x-2">
                                                         <span class="font-bold uppercase">{{ $step['to'] }}</span>
                                                         <span>by</span>
-                                                        <span class="font-bold text-gray-700">{{ \App\Models\User::find($step['user_id'])?->name ?? 'System' }}</span>
+                                                        <span class="font-bold text-gray-700">{{ fetch_data(\App\Models\User::find($step['user_id'])?->name ?? 'System' ?? null) }}</span>
                                                         <span>at</span>
-                                                        <span>{{ \Illuminate\Support\Carbon::parse($step['timestamp'])->format('d M H:i') }}</span>
+                                                        <span>{{ fetch_data(\Illuminate\Support\Carbon::parse($step['timestamp'])?->format('d M H:i') ?? null) }}</span>
                                                     </div>
                                                 @endforeach
                                             </div>
@@ -226,7 +226,7 @@
                                             View Full Record
                                         </button>
                                     </div>
-                                    <span class="text-[10px] text-gray-400 italic">Reference: {{ $record->reference }}</span>
+                                    <span class="text-[10px] text-gray-400 italic">Reference: {{ fetch_data($record?->reference ?? null) }}</span>
                                 </div>
                             </div>
                         </div>

@@ -16,7 +16,7 @@
             <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
                 Customer Information
                 @if($borrower->custom_id)
-                    <span class="ml-2 text-sm text-slate-500 font-mono bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md">{{ $borrower->custom_id }}</span>
+                    <span class="ml-2 text-sm text-slate-500 font-mono bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md">{{ fetch_data($borrower?->custom_id ?? null) }}</span>
                 @endif
             </h2>
         </div>
@@ -41,7 +41,7 @@
                 <div class="relative inline-block mb-6">
                     <div class="size-32 rounded-full border-4 border-slate-50 dark:border-slate-800 shadow-xl overflow-hidden mx-auto">
                         @if($new_photo)
-                            <img src="{{ $new_photo->temporaryUrl() }}" class="size-full object-cover">
+                            <img src="{{ fetch_data($new_photo?->temporaryUrl() ?? null) }}" class="size-full object-cover">
                         @elseif($photo_url)
                             <img src="{{ $photo_url }}" class="size-full object-cover">
                         @else
@@ -66,7 +66,7 @@
                     @else
                         <h3 class="text-2xl font-black text-slate-900 dark:text-white">{{ $name }}</h3>
                     @endif
-                    <p class="text-sm text-slate-500 font-medium uppercase tracking-widest">{{ $borrower->user->getRoleNames()->first() ?? 'Borrower' }}</p>
+                    <p class="text-sm text-slate-500 font-medium uppercase tracking-widest">{{ fetch_data($borrower?->user?->getRoleNames()?->first() ?? 'Borrower' ?? null) }}</p>
                 </div>
 
                 <div class="mt-8 pt-8 border-t border-slate-50 dark:border-slate-800/50 space-y-4">
@@ -121,7 +121,7 @@
                     <div class="grid grid-cols-2 gap-4">
                         <div class="bg-white/10 rounded-xl p-3 text-center">
                             <p class="text-[9px] font-bold uppercase opacity-60">Repayment Score</p>
-                            <p class="text-lg font-black">{{ $borrower->trust_score ?? 0 }}%</p>
+                            <p class="text-lg font-black">{{ fetch_data($borrower?->trust_score ?? 0 ?? null) }}%</p>
                         </div>
                         <div class="bg-white/10 rounded-xl p-3 text-center">
                             <p class="text-[9px] font-bold uppercase opacity-60">Trust Level</p>
@@ -175,7 +175,7 @@
             @elseif($kyc_status === 'rejected')
                 <div class="bg-red-50 dark:bg-red-900/10 rounded-2xl border border-red-100 dark:border-red-900/20 p-6">
                     <h4 class="text-[10px] font-black uppercase tracking-widest text-red-600 mb-2">Rejection History</h4>
-                    <p class="text-xs text-red-700 dark:text-red-400 font-medium leading-relaxed italic">"{{ $borrower->rejection_reason }}"</p>
+                    <p class="text-xs text-red-700 dark:text-red-400 font-medium leading-relaxed italic">"{{ fetch_data($borrower?->rejection_reason ?? null) }}"</p>
                 </div>
             @endif
         </div>
@@ -232,7 +232,7 @@
                             <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-1">Required</p>
                             @error('date_of_birth') <span class="text-[10px] font-bold text-red-500 mt-1 block">{{ $message }}</span> @enderror
                         @else
-                            <p class="text-sm font-black text-slate-900 dark:text-white">{{ $date_of_birth ? \Carbon\Carbon::parse($date_of_birth)->format('M d, Y') : 'N/A' }}</p>
+                            <p class="text-sm font-black text-slate-900 dark:text-white">{{ fetch_data($date_of_birth ? \Carbon\Carbon::parse($date_of_birth)?->format('M d, Y') : 'N/A' ?? null) }}</p>
                         @endif
                     </div>
                     <div>

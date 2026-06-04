@@ -48,27 +48,27 @@
                                 <div class="flex items-center gap-3">
                                     <div class="w-10 h-10 bg-slate-100 dark:bg-slate-800 rounded-lg flex items-center justify-center shrink-0">
                                         @if($org->logo_path)
-                                            <img src="{{ $org->logo_url }}" class="w-full h-full object-contain rounded-lg">
+                                            <img src="{{ fetch_data($org?->logo_url ?? null) }}" class="w-full h-full object-contain rounded-lg">
                                         @else
                                             <span class="material-symbols-outlined text-slate-400">business</span>
                                         @endif
                                     </div>
                                     <div class="min-w-0">
-                                        <h4 class="text-sm font-bold text-slate-800 dark:text-white truncate">{{ $org->name }}</h4>
-                                        <p class="text-xs text-slate-500 truncate">{{ $org->email }}</p>
+                                        <h4 class="text-sm font-bold text-slate-800 dark:text-white truncate">{{ fetch_data($org?->name ?? null) }}</h4>
+                                        <p class="text-xs text-slate-500 truncate">{{ fetch_data($org?->email ?? null) }}</p>
                                     </div>
                                 </div>
                             </td>
                             <td class="px-6 py-4">
                                 <div class="flex flex-col gap-1">
                                     <span class="text-xs font-medium text-slate-600 dark:text-slate-400">
-                                        {{ $org->borrowers_count }} Borrowers
+                                        {{ fetch_data($org?->borrowers_count ?? null) }} Borrowers
                                     </span>
                                     <span class="text-xs font-medium text-slate-600 dark:text-slate-400">
-                                        {{ $org->loans_count }} Loans
+                                        {{ fetch_data($org?->loans_count ?? null) }} Loans
                                     </span>
                                     <span class="text-xs font-medium text-slate-600 dark:text-slate-400">
-                                        {{ $org->staff_count }} Staff
+                                        {{ fetch_data($org?->staff_count ?? null) }} Staff
                                     </span>
                                 </div>
                             </td>
@@ -78,7 +78,7 @@
                                     @elseif($org->kyc_status === 'pending') bg-amber-50 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400
                                     @else bg-rose-50 text-rose-600 dark:bg-rose-500/10 dark:text-rose-400
                                     @endif">
-                                    {{ $org->kyc_status }}
+                                    {{ fetch_data($org?->kyc_status ?? null) }}
                                 </span>
                             </td>
                             <td class="px-6 py-4">
@@ -86,11 +86,11 @@
                                     @if($org->status === 'active') bg-blue-50 text-blue-600 dark:bg-blue-500/10 dark:text-blue-400
                                     @else bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400
                                     @endif">
-                                    {{ $org->status }}
+                                    {{ fetch_data($org?->status ?? null) }}
                                 </span>
                             </td>
                             <td class="px-6 py-4">
-                                <button wire:click="viewDetails('{{ $org->id }}')" class="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-all">
+                                <button wire:click="viewDetails('{{ fetch_data($org?->id ?? null) }}')" class="p-2 text-slate-400 hover:text-primary hover:bg-primary/10 rounded-lg transition-all">
                                     <span class="material-symbols-outlined">visibility</span>
                                 </button>
                             </td>
@@ -100,7 +100,7 @@
             </table>
         </div>
         <div class="px-6 py-4">
-            {{ $organizations->links() }}
+            {{ fetch_data($organizations?->links() ?? null) }}
         </div>
     </div>
 
@@ -114,14 +114,14 @@
                     <div class="flex items-center gap-4">
                         <div class="w-14 h-14 bg-slate-100 dark:bg-slate-800 rounded-2xl flex items-center justify-center">
                             @if($selectedOrg->logo_path)
-                                <img src="{{ $selectedOrg->logo_url }}" class="w-full h-full object-contain rounded-2xl">
+                                <img src="{{ fetch_data($selectedOrg?->logo_url ?? null) }}" class="w-full h-full object-contain rounded-2xl">
                             @else
                                 <span class="material-symbols-outlined text-2xl text-slate-400">business</span>
                             @endif
                         </div>
                         <div>
-                            <h3 class="text-xl font-bold text-slate-800 dark:text-white">{{ $selectedOrg->name }}</h3>
-                            <p class="text-sm text-slate-500 uppercase tracking-widest font-medium">{{ $selectedOrg->rc_number ?? 'RC: N/A' }}</p>
+                            <h3 class="text-xl font-bold text-slate-800 dark:text-white">{{ fetch_data($selectedOrg?->name ?? null) }}</h3>
+                            <p class="text-sm text-slate-500 uppercase tracking-widest font-medium">{{ fetch_data($selectedOrg?->rc_number ?? 'RC: N/A' ?? null) }}</p>
                         </div>
                     </div>
                     <button wire:click="closeModal" class="p-2 text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full">
@@ -137,15 +137,15 @@
                             <div class="flex flex-col gap-3">
                                 <div class="flex items-center gap-3 text-sm text-slate-600 dark:text-slate-300">
                                     <span class="material-symbols-outlined text-primary text-lg">mail</span>
-                                    {{ $selectedOrg->email }}
+                                    {{ fetch_data($selectedOrg?->email ?? null) }}
                                 </div>
                                 <div class="flex items-center gap-3 text-sm text-slate-600 dark:text-slate-300">
                                     <span class="material-symbols-outlined text-primary text-lg">call</span>
-                                    {{ $selectedOrg->phone ?? 'N/A' }}
+                                    {{ fetch_data($selectedOrg?->phone ?? 'N/A' ?? null) }}
                                 </div>
                                 <div class="flex items-center gap-3 text-sm text-slate-600 dark:text-slate-300">
                                     <span class="material-symbols-outlined text-primary text-lg">location_on</span>
-                                    {{ $selectedOrg->address ?? 'N/A' }}
+                                    {{ fetch_data($selectedOrg?->address ?? 'N/A' ?? null) }}
                                 </div>
                             </div>
                         </div>
@@ -154,11 +154,11 @@
                             <div class="grid grid-cols-2 gap-4">
                                 <div class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl">
                                     <p class="text-[10px] font-bold text-slate-400 uppercase">Total Staff</p>
-                                    <p class="text-xl font-bold text-slate-800 dark:text-white">{{ $selectedOrg->staff_count }}</p>
+                                    <p class="text-xl font-bold text-slate-800 dark:text-white">{{ fetch_data($selectedOrg?->staff_count ?? null) }}</p>
                                 </div>
                                 <div class="bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl">
                                     <p class="text-[10px] font-bold text-slate-400 uppercase">Borrowers</p>
-                                    <p class="text-xl font-bold text-slate-800 dark:text-white">{{ $selectedOrg->borrowers_count }}</p>
+                                    <p class="text-xl font-bold text-slate-800 dark:text-white">{{ fetch_data($selectedOrg?->borrowers_count ?? null) }}</p>
                                 </div>
                             </div>
                         </div>
@@ -175,16 +175,16 @@
                                             <span class="material-symbols-outlined text-slate-400">person</span>
                                         </div>
                                         <div>
-                                            <h5 class="text-sm font-bold text-slate-800 dark:text-white">{{ $user->name }}</h5>
-                                            <p class="text-xs text-slate-500">{{ $user->email }}</p>
+                                            <h5 class="text-sm font-bold text-slate-800 dark:text-white">{{ fetch_data($user?->name ?? null) }}</h5>
+                                            <p class="text-xs text-slate-500">{{ fetch_data($user?->email ?? null) }}</p>
                                         </div>
                                     </div>
                                     <div class="flex items-center gap-4">
-                                        <a href="mailto:{{ $user->email }}" class="p-2 text-primary bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 hover:scale-110 transition-transform">
+                                        <a href="mailto:{{ fetch_data($user?->email ?? null) }}" class="p-2 text-primary bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 hover:scale-110 transition-transform">
                                             <span class="material-symbols-outlined text-sm">mail</span>
                                         </a>
                                         @if($user->phone)
-                                        <a href="tel:{{ $user->phone }}" class="p-2 text-emerald-500 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 hover:scale-110 transition-transform">
+                                        <a href="tel:{{ fetch_data($user?->phone ?? null) }}" class="p-2 text-emerald-500 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700 hover:scale-110 transition-transform">
                                             <span class="material-symbols-outlined text-sm">call</span>
                                         </a>
                                         @endif
@@ -199,12 +199,12 @@
                 <div class="p-8 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-100 dark:border-slate-700 flex items-center justify-between gap-4">
                     <div class="flex items-center gap-3">
                         @if($selectedOrg->kyc_status === 'pending')
-                            <button wire:click="approveKyc('{{ $selectedOrg->id }}')" class="px-6 py-2 bg-emerald-500 text-white rounded-xl text-sm font-bold shadow-lg shadow-emerald-500/20 hover:scale-105 active:scale-95 transition-all">
+                            <button wire:click="approveKyc('{{ fetch_data($selectedOrg?->id ?? null) }}')" class="px-6 py-2 bg-emerald-500 text-white rounded-xl text-sm font-bold shadow-lg shadow-emerald-500/20 hover:scale-105 active:scale-95 transition-all">
                                 Approve KYC
                             </button>
                         @endif
-                        <button wire:click="toggleStatus('{{ $selectedOrg->id }}')" class="px-6 py-2 {{ $selectedOrg->status === 'active' ? 'bg-rose-500' : 'bg-blue-500' }} text-white rounded-xl text-sm font-bold shadow-lg transition-all">
-                            {{ $selectedOrg->status === 'active' ? 'Suspend Access' : 'Restore Access' }}
+                        <button wire:click="toggleStatus('{{ fetch_data($selectedOrg?->id ?? null) }}')" class="px-6 py-2 {{ fetch_data($selectedOrg?->status === 'active' ? 'bg-rose-500' : 'bg-blue-500' ?? null) }} text-white rounded-xl text-sm font-bold shadow-lg transition-all">
+                            {{ fetch_data($selectedOrg?->status === 'active' ? 'Suspend Access' : 'Restore Access' ?? null) }}
                         </button>
                     </div>
                     <button wire:click="closeModal" class="px-6 py-2 text-slate-500 font-bold text-sm hover:underline">

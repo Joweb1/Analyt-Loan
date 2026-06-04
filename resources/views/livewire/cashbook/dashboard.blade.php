@@ -60,7 +60,7 @@
                                 class="flex items-center justify-center px-3 py-2 border border-rose-200 text-rose-600 bg-white hover:bg-rose-50 rounded-sm shadow-sm transition-all">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg>
                                 @if(!auth()->user()->isAdmin())
-                                    <span class="ml-2 text-[9px] font-black uppercase">Trial {{ $entry->staff_unlock_count }}/{{ auth()->user()->organization->cashbook_unlock_limit }}</span>
+                                    <span class="ml-2 text-[9px] font-black uppercase">Trial {{ fetch_data($entry?->staff_unlock_count ?? null) }}/{{ fetch_data(auth()?->user()?->organization?->cashbook_unlock_limit ?? null) }}</span>
                                 @endif
                             </button>
                         </div>
@@ -83,19 +83,19 @@
         <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
             <div class="bg-white overflow-hidden shadow-sm border border-gray-200 rounded-sm p-5 transition hover:shadow-md border-l-4 border-l-blue-500">
                 <dt class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Live Account Balance</dt>
-                <dd class="text-2xl font-black text-blue-600">{{ $accountBalance->format() }}</dd>
+                <dd class="text-2xl font-black text-blue-600">{{ fetch_data($accountBalance?->format() ?? null) }}</dd>
             </div>
             <div class="bg-white overflow-hidden shadow-sm border border-gray-200 rounded-sm p-5 transition hover:shadow-md">
                 <dt class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Total Inflow</dt>
-                <dd class="text-2xl font-black text-emerald-600">+{{ $entry->total_inflow->format() }}</dd>
+                <dd class="text-2xl font-black text-emerald-600">+{{ fetch_data($entry?->total_inflow?->format() ?? null) }}</dd>
             </div>
             <div class="bg-white overflow-hidden shadow-sm border border-gray-200 rounded-sm p-5 transition hover:shadow-md">
                 <dt class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Total Outflow</dt>
-                <dd class="text-2xl font-black text-rose-600">-{{ $entry->total_outflow->format() }}</dd>
+                <dd class="text-2xl font-black text-rose-600">-{{ fetch_data($entry?->total_outflow?->format() ?? null) }}</dd>
             </div>
             <div class="bg-white overflow-hidden shadow-sm border border-gray-200 rounded-sm p-5 transition hover:shadow-md">
                 <dt class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Expected Deposit</dt>
-                <dd class="text-2xl font-black text-gray-900">{{ $entry->expected_deposit->format() }}</dd>
+                <dd class="text-2xl font-black text-gray-900">{{ fetch_data($entry?->expected_deposit?->format() ?? null) }}</dd>
             </div>
         </div>
 
@@ -105,12 +105,12 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <dt class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Daily Bank Deposit</dt>
-                        <dd class="text-2xl font-black text-emerald-600">{{ $entry->bank_deposit_amount->format() }}</dd>
+                        <dd class="text-2xl font-black text-emerald-600">{{ fetch_data($entry?->bank_deposit_amount?->format() ?? null) }}</dd>
                     </div>
                     <div class="text-right">
                         <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Expected Transfer</span>
                         <p class="text-xl font-black text-emerald-800">
-                            {{ $entry->expected_bank_transfers->format() }}
+                            {{ fetch_data($entry?->expected_bank_transfers?->format() ?? null) }}
                         </p>
                     </div>
                 </div>
@@ -119,7 +119,7 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <dt class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Physical Cash (Hand)</dt>
-                        <dd class="text-2xl font-black text-gray-900">{{ $entry->actual_cash_at_hand->format() }}</dd>
+                        <dd class="text-2xl font-black text-gray-900">{{ fetch_data($entry?->actual_cash_at_hand?->format() ?? null) }}</dd>
                     </div>
                     @php
                         $cashTarget = $entry->total_inflow->subtract($entry->expected_bank_transfers);
@@ -127,16 +127,16 @@
                     @endphp
                     <div class="text-right">
                         <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Recon Variance</span>
-                        <p class="text-xl font-black {{ $cashVariance->isPositive() ? 'text-rose-600' : ($cashVariance->isNegative() ? 'text-emerald-600' : 'text-gray-900') }}">
-                            {{ $cashVariance->format() }}
+                        <p class="text-xl font-black {{ fetch_data($cashVariance?->isPositive() ? 'text-rose-600' : ($cashVariance?->isNegative() ? 'text-emerald-600' : 'text-gray-900') ?? null) }}">
+                            {{ fetch_data($cashVariance?->format() ?? null) }}
                         </p>
                     </div>
                 </div>
             </div>
-            <div class="bg-white overflow-hidden shadow-sm border border-gray-200 rounded-sm p-6 transition hover:shadow-md border-l-4 {{ $remainingBudget->isNegative() ? 'border-l-rose-500' : 'border-l-amber-500' }}">
+            <div class="bg-white overflow-hidden shadow-sm border border-gray-200 rounded-sm p-6 transition hover:shadow-md border-l-4 {{ fetch_data($remainingBudget?->isNegative() ? 'border-l-rose-500' : 'border-l-amber-500' ?? null) }}">
                 <dt class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Remaining Expense Budget</dt>
-                <dd class="text-2xl font-black {{ $remainingBudget->isNegative() ? 'text-rose-600' : 'text-amber-600' }}">
-                    {{ $remainingBudget->format() }}
+                <dd class="text-2xl font-black {{ fetch_data($remainingBudget?->isNegative() ? 'text-rose-600' : 'text-amber-600' ?? null) }}">
+                    {{ fetch_data($remainingBudget?->format() ?? null) }}
                 </dd>
                 <p class="text-[10px] text-gray-400 font-bold uppercase mt-1 tracking-tighter">Monthly Limit Status</p>
             </div>
@@ -150,9 +150,9 @@
             <div class="px-8 py-5 border-b border-gray-50 bg-gray-50/30 flex items-center justify-between">
                 <div class="flex items-center space-x-4">
                     <div class="bg-white p-2 rounded-sm shadow-sm border border-gray-200">
-                        <span class="text-xs font-black text-gray-900 uppercase tracking-tighter">{{ $entry->entry_date->format('D') }}</span>
+                        <span class="text-xs font-black text-gray-900 uppercase tracking-tighter">{{ fetch_data($entry?->entry_date?->format('D') ?? null) }}</span>
                     </div>
-                    <h3 class="text-lg font-bold text-gray-800 tracking-tight">{{ $entry->entry_date->format('l, d F Y') }}</h3>
+                    <h3 class="text-lg font-bold text-gray-800 tracking-tight">{{ fetch_data($entry?->entry_date?->format('l, d F Y') ?? null) }}</h3>
                 </div>
                 <div class="flex items-center space-x-3">
                     @php
@@ -164,7 +164,7 @@
                         $currentClass = $statusClasses[$entry->status] ?? 'bg-gray-50 text-gray-700 border-gray-200';
                     @endphp
                     <span class="px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest border {{ $currentClass }}">
-                        {{ $entry->status }}
+                        {{ fetch_data($entry?->status ?? null) }}
                     </span>
                 </div>
             </div>
@@ -182,23 +182,23 @@
                         <div class="space-y-1 bg-gray-50/50 p-6 rounded-sm border border-gray-200">
                             <div class="flex items-center justify-between py-1.5 border-b border-gray-200">
                                 <span class="text-[11px] font-medium text-gray-500 uppercase tracking-tight">Loan Repayments</span>
-                                <span class="text-sm font-black text-gray-900 font-mono">{{ $entry->loan_repayments->format() }}</span>
+                                <span class="text-sm font-black text-gray-900 font-mono">{{ fetch_data($entry?->loan_repayments?->format() ?? null) }}</span>
                             </div>
                             <div class="flex items-center justify-between py-1.5 border-b border-gray-200">
                                 <span class="text-[11px] font-medium text-emerald-600 font-bold uppercase tracking-tight">Loan Interest</span>
-                                <span class="text-sm font-black text-emerald-600 font-mono">+{{ $entry->loan_interest->format() }}</span>
+                                <span class="text-sm font-black text-emerald-600 font-mono">+{{ fetch_data($entry?->loan_interest?->format() ?? null) }}</span>
                             </div>
                             <div class="flex items-center justify-between py-1.5 border-b border-gray-200">
                                 <span class="text-[11px] font-medium text-gray-500 uppercase tracking-tight">Savings Deposits</span>
-                                <span class="text-sm font-black text-gray-900 font-mono">{{ $entry->savings_deposits->format() }}</span>
+                                <span class="text-sm font-black text-gray-900 font-mono">{{ fetch_data($entry?->savings_deposits?->format() ?? null) }}</span>
                             </div>
                             <div class="flex items-center justify-between py-1.5 border-b border-gray-200">
                                 <span class="text-[11px] font-medium text-gray-500 uppercase tracking-tight">Daily Savings</span>
-                                <span class="text-sm font-black text-blue-600 font-mono">{{ $entry->daily_savings->format() }}</span>
+                                <span class="text-sm font-black text-blue-600 font-mono">{{ fetch_data($entry?->daily_savings?->format() ?? null) }}</span>
                             </div>
                             <div class="flex items-center justify-between py-1.5">
                                 <span class="text-[11px] font-medium text-gray-500 uppercase tracking-tight">Registration Fees</span>
-                                <span class="text-sm font-black text-gray-900 font-mono">{{ $entry->registration_fees->format() }}</span>
+                                <span class="text-sm font-black text-gray-900 font-mono">{{ fetch_data($entry?->registration_fees?->format() ?? null) }}</span>
                             </div>
                         </div>
 
@@ -226,11 +226,11 @@
                         <div class="space-y-1 bg-gray-50/50 p-6 rounded-sm border border-gray-200">
                             <div class="flex items-center justify-between py-1.5 border-b border-gray-200">
                                 <span class="text-[11px] font-medium text-gray-500 uppercase tracking-tight">Disbursements</span>
-                                <span class="text-sm font-black text-gray-900 font-mono">{{ $entry->loan_disbursements->format() }}</span>
+                                <span class="text-sm font-black text-gray-900 font-mono">{{ fetch_data($entry?->loan_disbursements?->format() ?? null) }}</span>
                             </div>
                             <div class="flex items-center justify-between py-1.5">
                                 <span class="text-[11px] font-medium text-gray-500 uppercase tracking-tight">Withdrawals</span>
-                                <span class="text-sm font-black text-gray-900 font-mono">{{ $entry->savings_withdrawals->format() }}</span>
+                                <span class="text-sm font-black text-gray-900 font-mono">{{ fetch_data($entry?->savings_withdrawals?->format() ?? null) }}</span>
                             </div>
                         </div>
 
@@ -246,12 +246,12 @@
                                 <input type="number" step="0.01" wire:model.blur="manualFields.bank_withdrawals" @if($entry->status === 'verified') disabled @endif
                                     class="block w-full rounded-sm border-gray-200 bg-white p-2.5 shadow-sm focus:ring-rose-500 focus:border-rose-500 text-sm font-black text-rose-600">
                             </div>
-                            <div class="{{ !auth()->user()->isAdmin() ? 'opacity-40 pointer-events-none' : '' }}">
+                            <div class="{{ fetch_data(!auth()?->user()?->isAdmin() ? 'opacity-40 pointer-events-none' : '' ?? null) }}">
                                 <label class="block text-[9px] font-bold text-gray-400 uppercase mb-2 tracking-tighter">Charges</label>
                                 <input type="number" step="0.01" wire:model.blur="manualFields.charges" @if($entry->status === 'verified' || !auth()->user()->isAdmin()) disabled @endif
                                     class="block w-full rounded-sm border-gray-200 bg-white p-2.5 text-xs font-black text-rose-600">
                             </div>
-                            <div class="{{ !auth()->user()->isAdmin() ? 'opacity-40 pointer-events-none' : '' }}">
+                            <div class="{{ fetch_data(!auth()?->user()?->isAdmin() ? 'opacity-40 pointer-events-none' : '' ?? null) }}">
                                 <label class="block text-[9px] font-bold text-gray-400 uppercase mb-2 tracking-tighter">Bonuses</label>
                                 <input type="number" step="0.01" wire:model.blur="manualFields.bonuses" @if($entry->status === 'verified' || !auth()->user()->isAdmin()) disabled @endif
                                     class="block w-full rounded-sm border-gray-200 bg-white p-2.5 text-xs font-black text-rose-600">
@@ -284,7 +284,7 @@
                                 <div>
                                     <label class="block text-[9px] font-black text-amber-800 uppercase tracking-widest mb-3 text-center">Expected Physical Cash</label>
                                     <div class="w-full px-3 py-3 rounded-sm border-amber-200 bg-amber-50/50 text-lg font-black text-amber-700 text-center border shadow-sm h-[52px] flex items-center justify-center">
-                                        {{ $entry->expected_cash_at_hand->format() }}
+                                        {{ fetch_data($entry?->expected_cash_at_hand?->format() ?? null) }}
                                     </div>
                                 </div>
 
@@ -318,8 +318,8 @@
                             <div class="p-6 rounded-sm border {{ $isBalanced ? 'bg-emerald-50 border-emerald-100 text-emerald-800' : ($isShortage ? 'bg-rose-50 border-rose-100 text-rose-800' : 'bg-amber-50 border-amber-100 text-amber-800') }}">
                                 <div class="flex items-center justify-between mb-4">
                                     <span class="text-[10px] font-black uppercase tracking-[0.2em] opacity-60">Vault Variance</span>
-                                    <span class="text-lg font-black {{ $cashVariance->isPositive() ? 'text-rose-600' : ($cashVariance->isNegative() ? 'text-emerald-600' : '') }}">
-                                        {{ $cashVariance->format() }}
+                                    <span class="text-lg font-black {{ fetch_data($cashVariance?->isPositive() ? 'text-rose-600' : ($cashVariance?->isNegative() ? 'text-emerald-600' : '') ?? null) }}">
+                                        {{ fetch_data($cashVariance?->format() ?? null) }}
                                     </span>
                                 </div>
                                 <div class="flex items-center gap-3 mb-2">
@@ -338,9 +338,9 @@
                                     @if($isBalanced)
                                         Today's bank deposit perfectly accounts for all daily inflows.
                                     @elseif($isShortage)
-                                        The bank deposit is missing <span class="font-black underline">{{ $diff->absolute()->format() }}</span> compared to the total inflows received.
+                                        The bank deposit is missing <span class="font-black underline">{{ fetch_data($diff?->absolute()?->format() ?? null) }}</span> compared to the total inflows received.
                                     @else
-                                        There is an excess of <span class="font-black underline">{{ $diff->absolute()->format() }}</span> in the bank deposit account.
+                                        There is an excess of <span class="font-black underline">{{ fetch_data($diff?->absolute()?->format() ?? null) }}</span> in the bank deposit account.
                                     @endif
                                 </p>
                             </div>
@@ -362,7 +362,7 @@
                     </div>
                     <div>
                         <span class="block text-[10px] font-black text-rose-500 uppercase tracking-widest mb-0.5">Shortfall Reconciliation Report</span>
-                        <p class="text-xs font-bold text-rose-800 leading-relaxed italic">"{{ $entry->shortfall_report }}"</p>
+                        <p class="text-xs font-bold text-rose-800 leading-relaxed italic">"{{ fetch_data($entry?->shortfall_report ?? null) }}"</p>
                     </div>
                 </div>
             @endif

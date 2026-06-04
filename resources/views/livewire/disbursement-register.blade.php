@@ -61,7 +61,7 @@
                         <span class="mr-3">{{ $month }}</span>
                         <span class="h-px w-24 bg-gray-200"></span>
                     </h2>
-                    <span class="text-xs font-medium text-gray-400 bg-gray-100 px-2 py-1 rounded-md">{{ $loans->count() }} Records</span>
+                    <span class="text-xs font-medium text-gray-400 bg-gray-100 px-2 py-1 rounded-md">{{ fetch_data($loans?->count() ?? null) }} Records</span>
                 </div>
 
                 <div x-show="open" x-collapse class="space-y-4">
@@ -74,22 +74,22 @@
                                 <div class="flex items-center space-x-4">
                                     <div class="flex-shrink-0">
                                         <span class="inline-flex items-center justify-center h-10 w-10 rounded-full bg-gray-50 text-gray-400 text-xs font-medium border border-gray-100">
-                                            {{ str_pad($loop->iteration, 2, '0', STR_PAD_LEFT) }}
+                                            {{ fetch_data(str_pad($loop?->iteration, 2, '0', STR_PAD_LEFT) ?? null) }}
                                         </span>
                                     </div>
                                     <div>
                                         <div class="flex items-center space-x-2">
-                                            <h3 class="text-xl font-bold text-gray-900">{{ $loan->borrower->user->name }}</h3>
-                                            <span class="px-2 py-0.5 rounded-md text-[10px] font-mono bg-gray-100 text-gray-500 uppercase">{{ $loan->borrower->custom_id }}</span>
+                                            <h3 class="text-xl font-bold text-gray-900">{{ fetch_data($loan?->borrower?->user?->name ?? null) }}</h3>
+                                            <span class="px-2 py-0.5 rounded-md text-[10px] font-mono bg-gray-100 text-gray-500 uppercase">{{ fetch_data($loan?->borrower?->custom_id ?? null) }}</span>
                                         </div>
                                         <div class="flex items-center mt-1 space-x-3">
                                             <span class="flex items-center text-xs font-medium text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
                                                 <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20"><path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z"></path><path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd"></path></svg>
-                                                Savings: {{ $loan->borrower->savingsAccount?->balance->format() ?? 'N/A' }}
+                                                Savings: {{ fetch_data($loan?->borrower?->savingsAccount?->balance?->format() ?? 'N/A' ?? null) }}
                                             </span>
                                             <span class="text-xs text-gray-400 flex items-center">
                                                 <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                                                {{ $loan->loanOfficer?->name }}
+                                                {{ fetch_data($loan?->loanOfficer?->name ?? null) }}
                                             </span>
                                         </div>
                                     </div>
@@ -97,8 +97,8 @@
 
                                 <div class="flex items-center justify-between lg:justify-end gap-6">
                                     <div class="text-right">
-                                        <span class="block text-[10px] uppercase font-bold text-gray-400 tracking-widest mb-1">{{ $loan->loan_product }}</span>
-                                        <span class="text-2xl font-black text-green-600">{{ $loan->amount->format() }}</span>
+                                        <span class="block text-[10px] uppercase font-bold text-gray-400 tracking-widest mb-1">{{ fetch_data($loan?->loan_product ?? null) }}</span>
+                                        <span class="text-2xl font-black text-green-600">{{ fetch_data($loan?->amount?->format() ?? null) }}</span>
                                     </div>
                                     <div class="flex items-center gap-3">
                                         @php
@@ -111,7 +111,7 @@
                                             $currentClass = $statusClasses[$loan->status] ?? 'bg-gray-50 text-gray-700 border-gray-100';
                                         @endphp
                                         <span class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border {{ $currentClass }}">
-                                            {{ $loan->status }}
+                                            {{ fetch_data($loan?->status ?? null) }}
                                         </span>
                                         <svg class="w-5 h-5 text-gray-300 transform transition-transform duration-200" :class="{ 'rotate-180': expanded }" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                                     </div>
@@ -128,20 +128,20 @@
                                             <div class="flex items-center space-x-4">
                                                 <div class="bg-white p-2 rounded shadow-sm border border-gray-200 text-center min-w-[70px]">
                                                     <span class="block text-[10px] text-gray-400 uppercase">Released</span>
-                                                    <span class="block text-sm font-bold text-gray-700">{{ $loan->release_date->format('d M') }}</span>
+                                                    <span class="block text-sm font-bold text-gray-700">{{ fetch_data($loan?->release_date?->format('d M') ?? null) }}</span>
                                                 </div>
                                                 <div class="bg-white p-2 rounded shadow-sm border border-blue-200 text-center min-w-[70px]">
                                                     <span class="block text-[10px] text-blue-400 uppercase">Installment</span>
                                                     <input type="date" 
-                                                        value="{{ $loan->installment_date?->format('Y-m-d') }}"
-                                                        wire:change="updateInstallmentDate('{{ $loan->id }}', $event.target.value)"
+                                                        value="{{ fetch_data($loan?->installment_date?->format('Y-m-d') ?? null) }}"
+                                                        wire:change="updateInstallmentDate('{{ fetch_data($loan?->id ?? null) }}', $event.target.value)"
                                                         class="block w-full text-xs font-bold text-blue-700 bg-transparent border-none focus:ring-0 p-0 text-center">
                                                 </div>
                                             </div>
                                         </div>
                                         <div>
                                             <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Total With Cost</span>
-                                            <span class="text-lg font-bold text-gray-700">{{ $loan->getTotalCost()->format() }}</span>
+                                            <span class="text-lg font-bold text-gray-700">{{ fetch_data($loan?->getTotalCost()?->format() ?? null) }}</span>
                                             <span class="text-xs text-gray-400 block mt-1">Includes interest, fees & administrative costs.</span>
                                         </div>
                                     </div>
@@ -151,10 +151,10 @@
                                         <span class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Register Journal / Notes</span>
                                         <div class="relative">
                                             <textarea 
-                                                wire:change="updateNote('{{ $loan->id }}', $event.target.value)"
+                                                wire:change="updateNote('{{ fetch_data($loan?->id ?? null) }}', $event.target.value)"
                                                 placeholder="Enter private observations or recording notes here..."
                                                 class="block w-full rounded border-gray-200 bg-white shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm min-h-[100px] resize-none p-4"
-                                            >{{ $loan->register_notes }}</textarea>
+                                            >{{ fetch_data($loan?->register_notes ?? null) }}</textarea>
                                             <div class="absolute bottom-3 right-3 opacity-20">
                                                 <svg class="w-8 h-8 text-gray-400" fill="currentColor" viewBox="0 0 20 20"><path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"></path><path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd"></path></svg>
                                             </div>
@@ -173,7 +173,7 @@
                                             View Full Record
                                         </button>
                                     </div>
-                                    <span class="text-[10px] text-gray-400 italic">Last modified: {{ $loan->updated_at->diffForHumans() }}</span>
+                                    <span class="text-[10px] text-gray-400 italic">Last modified: {{ fetch_data($loan?->updated_at?->diffForHumans() ?? null) }}</span>
                                 </div>
                             </div>
                         </div>

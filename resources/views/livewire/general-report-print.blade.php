@@ -19,21 +19,21 @@
         <div class="flex justify-between items-start border-b-4 border-slate-900 pb-6 mb-8">
             <div class="flex items-center gap-6">
                 @if($organization->logo_url)
-                    <img src="{{ $organization->logo_url }}" class="w-20 h-20 object-contain rounded-2xl">
+                    <img src="{{ fetch_data($organization?->logo_url ?? null) }}" class="w-20 h-20 object-contain rounded-2xl">
                 @else
                     <div class="w-20 h-20 bg-slate-100 rounded-2xl flex items-center justify-center text-slate-300">
                         <span class="material-symbols-outlined text-4xl">domain</span>
                     </div>
                 @endif
                 <div>
-                    <h1 class="text-3xl font-black uppercase tracking-tighter leading-none mb-1">{{ $organization->name }}</h1>
+                    <h1 class="text-3xl font-black uppercase tracking-tighter leading-none mb-1">{{ fetch_data($organization?->name ?? null) }}</h1>
                     @if($organization->rc_number)
-                        <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">RC: {{ $organization->rc_number }}</p>
+                        <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-2">RC: {{ fetch_data($organization?->rc_number ?? null) }}</p>
                     @endif
-                    <p class="text-xs font-bold text-slate-600 italic">{{ $organization->tagline ?? 'Professional Lending Services' }}</p>
+                    <p class="text-xs font-bold text-slate-600 italic">{{ fetch_data($organization?->tagline ?? 'Professional Lending Services' ?? null) }}</p>
                     <div class="mt-2 text-[9px] font-medium text-slate-400 space-y-0.5">
-                        <p>{{ $organization->address }}</p>
-                        <p>{{ $organization->phone }} | {{ $organization->email }}</p>
+                        <p>{{ fetch_data($organization?->address ?? null) }}</p>
+                        <p>{{ fetch_data($organization?->phone ?? null) }} | {{ fetch_data($organization?->email ?? null) }}</p>
                     </div>
                 </div>
             </div>
@@ -43,7 +43,7 @@
                 </div>
                 <p class="text-xs font-black text-slate-900">{{ $title }}</p>
                 <p class="text-[10px] font-bold text-slate-500 uppercase tracking-tighter mt-1">
-                    {{ $startDate->format('M d, Y') }} - {{ $endDate->format('M d, Y') }}
+                    {{ fetch_data($startDate?->format('M d, Y') ?? null) }} - {{ fetch_data($endDate?->format('M d, Y') ?? null) }}
                 </p>
             </div>
         </div>
@@ -148,14 +148,14 @@
             <!-- Signature Section -->
             <div class="flex flex-col justify-end text-center">
                 @if($organization->signature_url)
-                    <img src="{{ $organization->signature_url }}" class="w-32 h-16 object-contain mx-auto mb-2 mix-blend-multiply">
+                    <img src="{{ fetch_data($organization?->signature_url ?? null) }}" class="w-32 h-16 object-contain mx-auto mb-2 mix-blend-multiply">
                 @else
                     <div class="h-16 mb-2"></div>
                 @endif
                 <div class="border-t-2 border-slate-900 pt-2">
-                    <p class="text-xs font-black uppercase tracking-tighter">{{ $generatedBy->name }}</p>
-                    <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest">{{ $generatedBy->getRoleNames()->first() ?? 'Authorized Officer' }}</p>
-                    <p class="text-[8px] text-slate-400 mt-1">Generated: {{ now()->format('d/m/Y H:i') }}</p>
+                    <p class="text-xs font-black uppercase tracking-tighter">{{ fetch_data($generatedBy?->name ?? null) }}</p>
+                    <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest">{{ fetch_data($generatedBy?->getRoleNames()?->first() ?? 'Authorized Officer' ?? null) }}</p>
+                    <p class="text-[8px] text-slate-400 mt-1">Generated: {{ fetch_data(now()?->format('d/m/Y H:i') ?? null) }}</p>
                 </div>
             </div>
         </div>
@@ -165,7 +165,7 @@
             <p class="text-[8px] text-slate-400 font-medium italic">
                 This document is a computer-generated financial report from the Analyt Loan Management System. 
                 All data presented is subject to internal audit and verification. 
-                &copy; {{ date('Y') }} {{ $organization->name }}. All rights reserved.
+                &copy; {{ fetch_data(date('Y') }} {{ fetch_data($organization?->name ?? null) ?? null) }}. All rights reserved.
             </p>
         </div>
     </div>

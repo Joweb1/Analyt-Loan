@@ -54,7 +54,7 @@
                                 <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest truncate">{{ $member['custom_id'] }}</span>
                                 <div class="w-1 h-1 rounded-full bg-slate-200"></div>
                                 <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">
-                                    {{ $member['active_loan'] ? $member['active_loan']->repayment_cycle : 'No Active Loan' }}
+                                    {{ fetch_data($member['active_loan'] ? $member['active_loan']?->repayment_cycle : 'No Active Loan' ?? null) }}
                                 </span>
                             </div>
                         </div>
@@ -93,12 +93,12 @@
                                 <div class="grid grid-cols-2 gap-6">
                                     <div>
                                         <span class="block text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1.5">Due Amount</span>
-                                        <span class="text-xl font-black text-rose-600">{{ $member['due_amount']->format() }}</span>
+                                        <span class="text-xl font-black text-rose-600">{{ fetch_data($member['due_amount']?->format() ?? null) }}</span>
                                         <span class="block text-[9px] font-bold text-slate-400 mt-0.5">Next Due: {{ $member['next_due_date'] }}</span>
                                     </div>
                                     <div>
                                         <span class="block text-[9px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1.5">Outstanding</span>
-                                        <span class="text-xl font-black text-slate-900">{{ $member['outstanding_balance']->format() }}</span>
+                                        <span class="text-xl font-black text-slate-900">{{ fetch_data($member['outstanding_balance']?->format() ?? null) }}</span>
                                         <span class="block text-[9px] font-bold text-slate-400 mt-0.5">Last Pay: {{ $member['last_payment_date'] }}</span>
                                     </div>
                                 </div>
@@ -109,7 +109,7 @@
                                         <span class="text-[9px] font-black text-blue-800 uppercase tracking-widest">Savings Balance</span>
                                         <span class="material-symbols-outlined text-xs text-blue-400">account_balance_wallet</span>
                                     </div>
-                                    <p class="text-lg font-black text-blue-900">{{ $member['savings_account'] ? $member['savings_account']->balance->format() : 'N/A' }}</p>
+                                    <p class="text-lg font-black text-blue-900">{{ fetch_data($member['savings_account'] ? $member['savings_account']?->balance?->format() : 'N/A' ?? null) }}</p>
                                 </div>
                             </div>
 
@@ -209,7 +209,7 @@
                                 </a>
                             </div>
                             <div class="flex items-center gap-1.5 text-[9px] font-black text-slate-300 uppercase tracking-widest">
-                                Staff: {{ auth()->user()->name }}
+                                Staff: {{ fetch_data(auth()?->user()?->name ?? null) }}
                             </div>
                         </div>
                     </div>

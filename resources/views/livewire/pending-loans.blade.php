@@ -26,27 +26,27 @@
                 </thead>
                 <tbody class="divide-y divide-gray-100 dark:divide-gray-800">
                     @forelse($loans as $loan)
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors cursor-pointer" onclick="window.location='{{ route('loan.show', $loan->id) }}'">
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors cursor-pointer" onclick="window.location='{{ fetch_data(route('loan.show', $loan?->id) ?? null) }}'">
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-3">
                                 <div class="size-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-sm">
-                                    {{ substr($loan->borrower->user->name ?? 'U', 0, 2) }}
+                                    {{ fetch_data(substr($loan?->borrower?->user?->name ?? 'U', 0, 2) ?? null) }}
                                 </div>
                                 <div>
-                                    <p class="text-sm font-bold text-gray-900 dark:text-white">{{ $loan->borrower->user->name ?? 'Unknown' }}</p>
-                                    <p class="text-xs text-gray-500">{{ $loan->borrower->phone }}</p>
+                                    <p class="text-sm font-bold text-gray-900 dark:text-white">{{ fetch_data($loan?->borrower?->user?->name ?? 'Unknown' ?? null) }}</p>
+                                    <p class="text-xs text-gray-500">{{ fetch_data($loan?->borrower?->phone ?? null) }}</p>
                                 </div>
                             </div>
                         </td>
-                        <td class="px-6 py-4 text-sm text-gray-500 font-mono">{{ $loan->loan_number }}</td>
-                        <td class="px-6 py-4 text-sm font-bold text-gray-900 dark:text-white">₦{{ $loan->amount->format() }}</td>
-                        <td class="px-6 py-4 text-sm text-gray-500">{{ $loan->duration }} {{ $loan->duration_unit }}(s)</td>
+                        <td class="px-6 py-4 text-sm text-gray-500 font-mono">{{ fetch_data($loan?->loan_number ?? null) }}</td>
+                        <td class="px-6 py-4 text-sm font-bold text-gray-900 dark:text-white">₦{{ fetch_data($loan?->amount?->format() ?? null) }}</td>
+                        <td class="px-6 py-4 text-sm text-gray-500">{{ fetch_data($loan?->duration ?? null) }} {{ fetch_data($loan?->duration_unit ?? null) }}(s)</td>
                         <td class="px-6 py-4 text-sm text-gray-500">
-                            {{ $loan->created_at->format('M d, Y') }}
-                            <span class="block text-xs text-gray-400">{{ $loan->created_at->diffForHumans() }}</span>
+                            {{ fetch_data($loan?->created_at?->format('M d, Y') ?? null) }}
+                            <span class="block text-xs text-gray-400">{{ fetch_data($loan?->created_at?->diffForHumans() ?? null) }}</span>
                         </td>
                         <td class="px-6 py-4">
-                            <a href="{{ route('loan.show', $loan->id) }}" class="bg-primary text-white px-5 py-2 rounded-lg text-xs font-bold hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20 inline-block">
+                            <a href="{{ fetch_data(route('loan.show', $loan?->id) ?? null) }}" class="bg-primary text-white px-5 py-2 rounded-lg text-xs font-bold hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20 inline-block">
                                 Review
                             </a>
                         </td>
@@ -67,7 +67,7 @@
         
         <!-- Pagination -->
         <div class="px-6 py-4 border-t border-gray-200 dark:border-gray-800">
-            {{ $loans->links() }}
+            {{ fetch_data($loans?->links() ?? null) }}
         </div>
     </div>
 </div>

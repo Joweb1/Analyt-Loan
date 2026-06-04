@@ -9,7 +9,7 @@
             </div>
             <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
                 Guarantor Information
-                <span class="ml-2 text-sm text-slate-500 font-mono bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md">{{ $guarantor->custom_id }}</span>
+                <span class="ml-2 text-sm text-slate-500 font-mono bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md">{{ fetch_data($guarantor?->custom_id ?? null) }}</span>
             </h2>
         </div>
         <div class="flex gap-3">
@@ -142,17 +142,17 @@
                             @forelse($guaranteedLoans as $loan)
                                 <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors">
                                     <td class="px-6 py-4 font-bold text-slate-900 dark:text-white">
-                                        {{ $loan->borrower->user->name }}
+                                        {{ fetch_data($loan?->borrower?->user?->name ?? null) }}
                                     </td>
                                     <td class="px-6 py-4 font-mono text-xs text-slate-500">
-                                        #{{ $loan->loan_number }}
+                                        #{{ fetch_data($loan?->loan_number ?? null) }}
                                     </td>
                                     <td class="px-6 py-4 text-right font-black text-slate-900 dark:text-white">
-                                        ₦{{ $loan->amount->format() }}
+                                        ₦{{ fetch_data($loan?->amount?->format() ?? null) }}
                                     </td>
                                     <td class="px-6 py-4 text-center">
                                         <span class="px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-tight bg-blue-100 text-blue-700">
-                                            {{ $loan->status }}
+                                            {{ fetch_data($loan?->status ?? null) }}
                                         </span>
                                     </td>
                                 </tr>

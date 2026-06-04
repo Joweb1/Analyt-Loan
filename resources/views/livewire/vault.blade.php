@@ -85,14 +85,14 @@
                                     <div class="flex items-center gap-4">
                                         <div class="size-10 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center text-primary group-hover:scale-105 transition-transform overflow-hidden">
                                             @if($asset->image_path)
-                                                <img src="{{ $asset->image_url }}" class="w-full h-full object-cover">
+                                                <img src="{{ fetch_data($asset?->image_url ?? null) }}" class="w-full h-full object-cover">
                                             @else
                                                 <span class="material-symbols-outlined text-xl">inventory_2</span>
                                             @endif
                                         </div>
                                         <div>
-                                            <p class="font-bold text-[#111318] dark:text-white leading-tight text-sm">{{ $asset->name }}</p>
-                                            <p class="text-[10px] text-[#606e8a]">{{ $asset->type }}</p>
+                                            <p class="font-bold text-[#111318] dark:text-white leading-tight text-sm">{{ fetch_data($asset?->name ?? null) }}</p>
+                                            <p class="text-[10px] text-[#606e8a]">{{ fetch_data($asset?->type ?? null) }}</p>
                                         </div>
                                     </div>
                                 </td>
@@ -100,11 +100,11 @@
                                     <div class="flex items-center gap-2">
                                         @if($asset->loan && $asset->loan->borrower)
                                             <div class="size-6 rounded-full bg-primary/10 flex items-center justify-center text-primary text-[10px] font-bold">
-                                                {{ substr($asset->loan->borrower->user->name, 0, 2) }}
+                                                {{ fetch_data(substr($asset?->loan?->borrower?->user?->name, 0, 2) ?? null) }}
                                             </div>
                                             <div>
-                                                <p class="text-sm font-semibold">{{ $asset->loan->borrower->user->name }}</p>
-                                                <p class="text-[10px] text-[#606e8a]">Loan #{{ $asset->loan->loan_number }}</p>
+                                                <p class="text-sm font-semibold">{{ fetch_data($asset?->loan?->borrower?->user?->name ?? null) }}</p>
+                                                <p class="text-[10px] text-[#606e8a]">Loan #{{ fetch_data($asset?->loan?->loan_number ?? null) }}</p>
                                             </div>
                                         @else
                                             <div class="size-6 rounded-full bg-slate-200 flex items-center justify-center text-slate-500 text-[10px] font-bold">
@@ -115,7 +115,7 @@
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 text-right">
-                                    <span class="text-sm font-bold">₦{{ $asset->value->format() }}</span>
+                                    <span class="text-sm font-bold">₦{{ fetch_data($asset?->value?->format() ?? null) }}</span>
                                 </td>
                                 <td class="px-6 py-4">
                                     @if($asset->status === 'in_vault')
@@ -125,7 +125,7 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4">
-                                    <span class="text-xs font-medium text-[#606e8a]">{{ $asset->condition ?? 'N/A' }}</span>
+                                    <span class="text-xs font-medium text-[#606e8a]">{{ fetch_data($asset?->condition ?? 'N/A' ?? null) }}</span>
                                 </td>
                                 <td class="px-6 py-4 text-right relative" x-data="{ open: false }">
                                     <button @click="open = !open" class="text-[#606e8a] hover:text-primary transition-colors p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800">
@@ -134,14 +134,14 @@
                                     
                                     <div x-show="open" @click.outside="open = false" class="absolute right-0 mt-2 w-48 bg-white dark:bg-[#1a1f2b] rounded-xl shadow-xl border border-slate-100 dark:border-slate-800 z-20 overflow-hidden" style="display: none;">
                                         <div class="py-1">
-                                            <button wire:click="viewAsset('{{ $asset->id }}'); open = false" class="w-full px-4 py-2.5 text-left text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2 transition-colors">
+                                            <button wire:click="viewAsset('{{ fetch_data($asset?->id ?? null) }}'); open = false" class="w-full px-4 py-2.5 text-left text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2 transition-colors">
                                                 <span class="material-symbols-outlined text-base">visibility</span> View Details
                                             </button>
-                                            <a href="{{ route('collateral.create', ['loan_id' => $asset->loan_id]) }}" class="w-full px-4 py-2.5 text-left text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2 transition-colors">
+                                            <a href="{{ fetch_data(route('collateral.create', ['loan_id' => $asset?->loan_id]) ?? null) }}" class="w-full px-4 py-2.5 text-left text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2 transition-colors">
                                                 <span class="material-symbols-outlined text-base">edit</span> Edit Asset
                                             </a>
                                             <div class="border-t border-slate-100 dark:border-slate-800 my-1"></div>
-                                            <button wire:click="deleteAsset('{{ $asset->id }}')" wire:confirm="Are you sure you want to delete this asset?" class="w-full px-4 py-2.5 text-left text-xs font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 transition-colors">
+                                            <button wire:click="deleteAsset('{{ fetch_data($asset?->id ?? null) }}')" wire:confirm="Are you sure you want to delete this asset?" class="w-full px-4 py-2.5 text-left text-xs font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 transition-colors">
                                                 <span class="material-symbols-outlined text-base">delete</span> Delete
                                             </button>
                                         </div>
@@ -162,7 +162,7 @@
                 </table>
             </div>
             <div class="p-4 border-t border-[#dbdee6] dark:border-gray-800">
-                {{ $assets->links() }}
+                {{ fetch_data($assets?->links() ?? null) }}
             </div>
         </div>
     </section>
@@ -189,7 +189,7 @@
                         <h3 class="text-xl font-black text-slate-900 dark:text-white">Asset Details</h3>
                         <p class="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">
                             @if($viewingAsset->loan)
-                                Linked to Loan #{{ $viewingAsset->loan->loan_number }}
+                                Linked to Loan #{{ fetch_data($viewingAsset?->loan?->loan_number ?? null) }}
                             @else
                                 Company Property
                             @endif
@@ -206,7 +206,7 @@
                         <div>
                             <div class="aspect-video rounded-2xl bg-slate-100 dark:bg-slate-800 overflow-hidden border border-slate-200 dark:border-slate-700 relative">
                                 @if($viewingAsset->image_path)
-                                    <img src="{{ $viewingAsset->image_url }}" class="w-full h-full object-cover">
+                                    <img src="{{ fetch_data($viewingAsset?->image_url ?? null) }}" class="w-full h-full object-cover">
                                 @else
                                     <div class="w-full h-full flex flex-col items-center justify-center text-slate-400">
                                         <span class="material-symbols-outlined text-6xl opacity-50">image</span>
@@ -214,43 +214,43 @@
                                     </div>
                                 @endif
                                 <div class="absolute top-4 right-4">
-                                    <span class="px-3 py-1 rounded-lg bg-white/90 dark:bg-black/50 backdrop-blur-sm text-xs font-black uppercase tracking-wider {{ $viewingAsset->status === 'in_vault' ? 'text-green-600' : 'text-slate-500' }}">
-                                        {{ str_replace('_', ' ', $viewingAsset->status) }}
+                                    <span class="px-3 py-1 rounded-lg bg-white/90 dark:bg-black/50 backdrop-blur-sm text-xs font-black uppercase tracking-wider {{ fetch_data($viewingAsset?->status === 'in_vault' ? 'text-green-600' : 'text-slate-500' ?? null) }}">
+                                        {{ fetch_data(str_replace('_', ' ', $viewingAsset?->status) ?? null) }}
                                     </span>
                                 </div>
                             </div>
                         </div>
                         <div class="space-y-6">
                             <div>
-                                <h4 class="text-2xl font-black text-slate-900 dark:text-white">{{ $viewingAsset->name }}</h4>
-                                <p class="text-sm text-slate-500 font-medium mt-1">{{ $viewingAsset->description ?? 'No description provided.' }}</p>
+                                <h4 class="text-2xl font-black text-slate-900 dark:text-white">{{ fetch_data($viewingAsset?->name ?? null) }}</h4>
+                                <p class="text-sm text-slate-500 font-medium mt-1">{{ fetch_data($viewingAsset?->description ?? 'No description provided.' ?? null) }}</p>
                             </div>
                             
                             <div class="grid grid-cols-2 gap-4">
                                 <div class="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
                                     <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Asset Value</p>
-                                    <p class="text-lg font-black text-slate-900 dark:text-white">₦{{ $viewingAsset->value?->format() ?? '0.00' }}</p>
+                                    <p class="text-lg font-black text-slate-900 dark:text-white">₦{{ fetch_data($viewingAsset?->value?->format() ?? '0.00' ?? null) }}</p>
                                 </div>
                                 <div class="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
                                     <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Condition</p>
-                                    <p class="text-lg font-black text-slate-900 dark:text-white">{{ $viewingAsset->condition ?? 'N/A' }}</p>
+                                    <p class="text-lg font-black text-slate-900 dark:text-white">{{ fetch_data($viewingAsset?->condition ?? 'N/A' ?? null) }}</p>
                                 </div>
                             </div>
 
                             <div class="space-y-3">
                                 <div class="flex justify-between py-2 border-b border-slate-100 dark:border-slate-800">
                                     <span class="text-xs font-bold text-slate-500 uppercase">Type</span>
-                                    <span class="text-sm font-bold text-slate-900 dark:text-white">{{ $viewingAsset->type }}</span>
+                                    <span class="text-sm font-bold text-slate-900 dark:text-white">{{ fetch_data($viewingAsset?->type ?? null) }}</span>
                                 </div>
                                 <div class="flex justify-between py-2 border-b border-slate-100 dark:border-slate-800">
                                     <span class="text-xs font-bold text-slate-500 uppercase">Owner</span>
                                     <span class="text-sm font-bold text-slate-900 dark:text-white">
-                                        {{ $viewingAsset->loan ? $viewingAsset->loan->borrower->user->name : 'Company Owned' }}
+                                        {{ fetch_data($viewingAsset?->loan ? $viewingAsset?->loan?->borrower?->user?->name : 'Company Owned' ?? null) }}
                                     </span>
                                 </div>
                                 <div class="flex justify-between py-2 border-b border-slate-100 dark:border-slate-800">
                                     <span class="text-xs font-bold text-slate-500 uppercase">Registered</span>
-                                    <span class="text-sm font-bold text-slate-900 dark:text-white">{{ $viewingAsset->registered_date ? $viewingAsset->registered_date->format('M d, Y') : 'N/A' }}</span>
+                                    <span class="text-sm font-bold text-slate-900 dark:text-white">{{ fetch_data($viewingAsset?->registered_date ? $viewingAsset?->registered_date?->format('M d, Y') : 'N/A' ?? null) }}</span>
                                 </div>
                             </div>
                         </div>
@@ -259,8 +259,8 @@
 
                 <!-- Footer -->
                 <div class="px-6 py-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-[#1a1f2b] flex justify-end gap-3 sticky bottom-0 z-10">
-                    <button wire:click="deleteAsset('{{ $viewingAsset->id }}')" wire:confirm="Are you sure you want to delete this asset?" class="px-5 py-2.5 rounded-xl bg-red-50 text-red-600 font-bold text-xs hover:bg-red-100 transition-all">Delete</button>
-                    <a href="{{ route('collateral.create', ['loan_id' => $viewingAsset->loan_id]) }}" class="px-5 py-2.5 rounded-xl bg-primary text-white font-bold text-xs shadow-lg shadow-primary/30 hover:bg-blue-700 transition-all flex items-center gap-2">
+                    <button wire:click="deleteAsset('{{ fetch_data($viewingAsset?->id ?? null) }}')" wire:confirm="Are you sure you want to delete this asset?" class="px-5 py-2.5 rounded-xl bg-red-50 text-red-600 font-bold text-xs hover:bg-red-100 transition-all">Delete</button>
+                    <a href="{{ fetch_data(route('collateral.create', ['loan_id' => $viewingAsset?->loan_id]) ?? null) }}" class="px-5 py-2.5 rounded-xl bg-primary text-white font-bold text-xs shadow-lg shadow-primary/30 hover:bg-blue-700 transition-all flex items-center gap-2">
                         <span class="material-symbols-outlined text-sm">edit</span> Edit Details
                     </a>
                 </div>

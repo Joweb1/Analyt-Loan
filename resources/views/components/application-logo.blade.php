@@ -1,4 +1,4 @@
-<div {{ $attributes->merge(['class' => 'flex items-center gap-2']) }}>
+<div {{ fetch_data($attributes?->merge(['class' => 'flex items-center gap-2']) ?? null) }}>
     <div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white">
         <span class="material-symbols-outlined text-[20px]">account_balance</span>
     </div>

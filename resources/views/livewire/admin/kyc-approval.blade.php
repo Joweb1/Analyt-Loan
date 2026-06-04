@@ -26,26 +26,26 @@
                         <tr class="border-b border-slate-50 dark:border-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                             <td class="px-4 py-4">
                                 <div class="flex items-center gap-3">
-                                    <div class="size-8 rounded-full bg-slate-200 dark:bg-slate-700 bg-cover bg-center" style="background-image: url('{{ $borrower->photo_url ?? 'https://ui-avatars.com/api/?name='.urlencode($borrower->user->name) }}')"></div>
+                                    <div class="size-8 rounded-full bg-slate-200 dark:bg-slate-700 bg-cover bg-center" style="background-image: url('{{ fetch_data($borrower?->photo_url ?? 'https://ui-avatars.com/api/?name='.urlencode($borrower?->user?->name) ?? null) }}')"></div>
                                     <div>
-                                        <p class="font-bold text-slate-900 dark:text-white">{{ $borrower->user->name }}</p>
-                                        <p class="text-[10px] text-slate-500">{{ $borrower->user->email }}</p>
+                                        <p class="font-bold text-slate-900 dark:text-white">{{ fetch_data($borrower?->user?->name ?? null) }}</p>
+                                        <p class="text-[10px] text-slate-500">{{ fetch_data($borrower?->user?->email ?? null) }}</p>
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-4 py-4">{{ $borrower->phone }}</td>
+                            <td class="px-4 py-4">{{ fetch_data($borrower?->phone ?? null) }}</td>
                             <td class="px-4 py-4">
-                                <p class="text-xs">BVN: <span class="font-mono">{{ $borrower->bvn ?? 'N/A' }}</span></p>
-                                <p class="text-xs">NIN: <span class="font-mono">{{ $borrower->national_identity_number ?? 'N/A' }}</span></p>
+                                <p class="text-xs">BVN: <span class="font-mono">{{ fetch_data($borrower?->bvn ?? 'N/A' ?? null) }}</span></p>
+                                <p class="text-xs">NIN: <span class="font-mono">{{ fetch_data($borrower?->national_identity_number ?? 'N/A' ?? null) }}</span></p>
                             </td>
                             <td class="px-4 py-4 text-xs text-slate-500">
-                                {{ $borrower->created_at->format('M d, Y h:i A') }}
+                                {{ fetch_data($borrower?->created_at?->format('M d, Y h:i A') ?? null) }}
                             </td>
                             <td class="px-4 py-4 text-right">
-                                <button wire:click="approveKyc('{{ $borrower->id }}')" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-xs font-bold rounded-xl transition-colors shadow-sm inline-flex items-center gap-2">
+                                <button wire:click="approveKyc('{{ fetch_data($borrower?->id ?? null) }}')" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-xs font-bold rounded-xl transition-colors shadow-sm inline-flex items-center gap-2">
                                     <span class="material-symbols-outlined text-[14px]">check_circle</span> Approve
                                 </button>
-                                <a href="{{ route('borrower.profile', $borrower->id) }}" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-colors ml-2">
+                                <a href="{{ fetch_data(route('borrower.profile', $borrower?->id) ?? null) }}" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl transition-colors ml-2">
                                     View
                                 </a>
                             </td>
@@ -62,7 +62,7 @@
             </table>
         </div>
         <div class="mt-4">
-            {{ $borrowers->links() }}
+            {{ fetch_data($borrowers?->links() ?? null) }}
         </div>
     </div>
 </div>

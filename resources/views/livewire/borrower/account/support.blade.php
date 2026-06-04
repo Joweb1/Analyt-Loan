@@ -9,47 +9,47 @@
     <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-100 mb-6">
         <div class="flex items-center gap-4 mb-6">
              @if($organization->logo_path)
-                <img src="{{ $organization->logo_url }}" class="h-14 w-14 object-contain rounded-2xl bg-slate-50 p-2" alt="Logo">
+                <img src="{{ fetch_data($organization?->logo_url ?? null) }}" class="h-14 w-14 object-contain rounded-2xl bg-slate-50 p-2" alt="Logo">
             @else
                 <div class="h-14 w-14 rounded-2xl bg-brand flex items-center justify-center text-white font-bold text-xl">
-                    {{ substr($organization->name, 0, 1) }}
+                    {{ fetch_data(substr($organization?->name, 0, 1) ?? null) }}
                 </div>
             @endif
             <div>
-                <h2 class="font-bold text-slate-900">{{ $organization->name }}</h2>
+                <h2 class="font-bold text-slate-900">{{ fetch_data($organization?->name ?? null) }}</h2>
                 <p class="text-xs text-slate-500">Official Support Channel</p>
             </div>
         </div>
 
         <div class="space-y-4">
-            <a href="mailto:{{ $organization->email }}" class="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 hover:bg-slate-100 transition-colors group">
+            <a href="mailto:{{ fetch_data($organization?->email ?? null) }}" class="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 hover:bg-slate-100 transition-colors group">
                 <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-slate-400 group-hover:text-brand shadow-sm">
                     <span class="material-symbols-outlined">mail</span>
                 </div>
                 <div>
                     <p class="text-xs text-slate-400 uppercase font-bold tracking-widest">Email Us</p>
-                    <p class="text-sm font-bold text-slate-700">{{ $organization->email }}</p>
+                    <p class="text-sm font-bold text-slate-700">{{ fetch_data($organization?->email ?? null) }}</p>
                 </div>
             </a>
 
-            <a href="tel:{{ $organization->phone }}" class="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 hover:bg-slate-100 transition-colors group">
+            <a href="tel:{{ fetch_data($organization?->phone ?? null) }}" class="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 hover:bg-slate-100 transition-colors group">
                 <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-slate-400 group-hover:text-brand shadow-sm">
                     <span class="material-symbols-outlined">phone</span>
                 </div>
                 <div>
                     <p class="text-xs text-slate-400 uppercase font-bold tracking-widest">Call Support</p>
-                    <p class="text-sm font-bold text-slate-700">{{ $organization->phone }}</p>
+                    <p class="text-sm font-bold text-slate-700">{{ fetch_data($organization?->phone ?? null) }}</p>
                 </div>
             </a>
 
             @if($organization->website)
-            <a href="{{ $organization->website }}" target="_blank" class="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 hover:bg-slate-100 transition-colors group">
+            <a href="{{ fetch_data($organization?->website ?? null) }}" target="_blank" class="flex items-center gap-4 p-4 rounded-2xl bg-slate-50 hover:bg-slate-100 transition-colors group">
                 <div class="w-10 h-10 rounded-xl bg-white flex items-center justify-center text-slate-400 group-hover:text-brand shadow-sm">
                     <span class="material-symbols-outlined">language</span>
                 </div>
                 <div>
                     <p class="text-xs text-slate-400 uppercase font-bold tracking-widest">Visit Website</p>
-                    <p class="text-sm font-bold text-slate-700">{{ str_replace(['http://', 'https://'], '', $organization->website) }}</p>
+                    <p class="text-sm font-bold text-slate-700">{{ fetch_data(str_replace(['http://', 'https://'], '', $organization?->website) ?? null) }}</p>
                 </div>
             </a>
             @endif

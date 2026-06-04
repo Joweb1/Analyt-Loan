@@ -32,23 +32,23 @@
                         @foreach($proofs as $proof)
                             <tr class="group hover:bg-slate-50 dark:hover:bg-zinc-800/50 transition-colors">
                                 <td class="px-6 py-4 text-sm text-slate-600 dark:text-slate-300">
-                                    {{ $proof->created_at->format('M d, H:i') }}
+                                    {{ fetch_data($proof?->created_at?->format('M d, H:i') ?? null) }}
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="flex flex-col">
-                                        <span class="font-bold text-slate-900 dark:text-white">{{ $proof->borrower->user->name }}</span>
-                                        <span class="text-xs text-slate-500">Loan #{{ $proof->loan->loan_number }}</span>
+                                        <span class="font-bold text-slate-900 dark:text-white">{{ fetch_data($proof?->borrower?->user?->name ?? null) }}</span>
+                                        <span class="text-xs text-slate-500">Loan #{{ fetch_data($proof?->loan?->loan_number ?? null) }}</span>
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 font-bold text-slate-900 dark:text-white">
-                                    ₦{{ $proof->amount->format() }}
+                                    ₦{{ fetch_data($proof?->amount?->format() ?? null) }}
                                 </td>
                                 <td class="px-6 py-4 text-sm font-mono text-slate-500">
-                                    {{ $proof->reference_code }}
+                                    {{ fetch_data($proof?->reference_code ?? null) }}
                                 </td>
                                 <td class="px-6 py-4">
                                     @if($proof->receipt_path)
-                                        <a href="{{ $proof->receipt_url }}" target="_blank" class="flex items-center gap-2 text-blue-600 hover:underline text-sm font-medium">
+                                        <a href="{{ fetch_data($proof?->receipt_url ?? null) }}" target="_blank" class="flex items-center gap-2 text-blue-600 hover:underline text-sm font-medium">
                                             <span class="material-symbols-outlined text-lg">attachment</span>
                                             View Receipt
                                         </a>
@@ -58,10 +58,10 @@
                                 </td>
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex items-center justify-end gap-2">
-                                        <button wire:click="reject('{{ $proof->id }}')" wire:confirm="Are you sure you want to reject this payment?" class="p-2 hover:bg-red-50 text-red-600 rounded-lg transition-colors" title="Reject">
+                                        <button wire:click="reject('{{ fetch_data($proof?->id ?? null) }}')" wire:confirm="Are you sure you want to reject this payment?" class="p-2 hover:bg-red-50 text-red-600 rounded-lg transition-colors" title="Reject">
                                             <span class="material-symbols-outlined">close</span>
                                         </button>
-                                        <button wire:click="approve('{{ $proof->id }}')" wire:confirm="Confirm and record this payment?" class="px-4 py-2 bg-slate-900 text-white text-xs font-bold rounded-lg hover:bg-slate-800 transition-colors flex items-center gap-2 shadow-lg shadow-slate-900/20">
+                                        <button wire:click="approve('{{ fetch_data($proof?->id ?? null) }}')" wire:confirm="Confirm and record this payment?" class="px-4 py-2 bg-slate-900 text-white text-xs font-bold rounded-lg hover:bg-slate-800 transition-colors flex items-center gap-2 shadow-lg shadow-slate-900/20">
                                             <span class="material-symbols-outlined text-sm">check</span>
                                             Approve
                                         </button>
@@ -73,7 +73,7 @@
                 </table>
             </div>
             <div class="p-4 border-t border-slate-100 dark:border-zinc-800">
-                {{ $proofs->links() }}
+                {{ fetch_data($proofs?->links() ?? null) }}
             </div>
         @endif
     </div>

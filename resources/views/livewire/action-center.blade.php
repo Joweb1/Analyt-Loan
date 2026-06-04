@@ -22,7 +22,7 @@
                                     {{ $task['description'] }}
                                 </p>
                                 <p class="text-xs text-gray-400 mt-1">
-                                    {{ $task['date']->diffForHumans() }}
+                                    {{ fetch_data($task['date']?->diffForHumans() ?? null) }}
                                 </p>
                             </div>
                             <div class="flex gap-2">

@@ -62,22 +62,22 @@
                                 <div class="flex items-center gap-4">
                                     <div class="w-10 h-10 bg-white dark:bg-slate-800 rounded-xl flex items-center justify-center border border-slate-100 dark:border-slate-700">
                                         @if($stat->logo_path)
-                                            <img src="{{ $stat->logo_url }}" class="w-full h-full object-contain rounded-xl">
+                                            <img src="{{ fetch_data($stat?->logo_url ?? null) }}" class="w-full h-full object-contain rounded-xl">
                                         @else
                                             <span class="material-symbols-outlined text-slate-400">business</span>
                                         @endif
                                     </div>
                                     <div>
-                                        <h4 class="text-sm font-bold text-slate-800 dark:text-white">{{ $stat->name }}</h4>
-                                        <p class="text-[10px] text-slate-400 uppercase tracking-widest">{{ $stat->rc_number ?? 'RC: N/A' }}</p>
+                                        <h4 class="text-sm font-bold text-slate-800 dark:text-white">{{ fetch_data($stat?->name ?? null) }}</h4>
+                                        <p class="text-[10px] text-slate-400 uppercase tracking-widest">{{ fetch_data($stat?->rc_number ?? 'RC: N/A' ?? null) }}</p>
                                     </div>
                                 </div>
                             </td>
                             <td class="px-8 py-6 font-bold text-slate-700 dark:text-slate-300">
-                                ₦{{ number_format($stat->total_lent, 0) }}
+                                ₦{{ fetch_data(number_format($stat?->total_lent, 0) ?? null) }}
                             </td>
                             <td class="px-8 py-6 font-bold text-emerald-500">
-                                ₦{{ number_format($stat->total_collected, 0) }}
+                                ₦{{ fetch_data(number_format($stat?->total_collected, 0) ?? null) }}
                             </td>
                             <td class="px-8 py-6">
                                 @php
@@ -92,10 +92,10 @@
                             <td class="px-8 py-6">
                                 <div class="flex flex-col gap-1">
                                     <span class="text-[10px] font-bold text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-lg">
-                                        {{ $stat->borrowers_count }} CUSTOMERS
+                                        {{ fetch_data($stat?->borrowers_count ?? null) }} CUSTOMERS
                                     </span>
                                     <span class="text-[10px] font-bold text-primary bg-primary/5 px-2 py-1 rounded-lg uppercase tracking-widest text-center">
-                                        {{ $stat->staff_count }} STAFF
+                                        {{ fetch_data($stat?->staff_count ?? null) }} STAFF
                                     </span>
                                 </div>
                             </td>

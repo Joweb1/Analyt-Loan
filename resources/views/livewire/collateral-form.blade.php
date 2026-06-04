@@ -24,11 +24,11 @@
                 @if(!empty($searchQuery))
                     <div class="bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800 overflow-hidden">
                         @forelse($searchedLoans as $loan)
-                            <button wire:click="selectLoan('{{ $loan->id }}')" class="w-full text-left p-4 hover:bg-white dark:hover:bg-slate-800 border-b border-slate-100 dark:border-slate-800 last:border-0 transition-colors group">
+                            <button wire:click="selectLoan('{{ fetch_data($loan?->id ?? null) }}')" class="w-full text-left p-4 hover:bg-white dark:hover:bg-slate-800 border-b border-slate-100 dark:border-slate-800 last:border-0 transition-colors group">
                                 <div class="flex justify-between items-center">
                                     <div>
-                                        <p class="text-sm font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors">{{ $loan->borrower->user->name }}</p>
-                                        <p class="text-xs text-slate-500 font-medium">Loan #{{ $loan->loan_number }} • {{ $loan->borrower->phone }}</p>
+                                        <p class="text-sm font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors">{{ fetch_data($loan?->borrower?->user?->name ?? null) }}</p>
+                                        <p class="text-xs text-slate-500 font-medium">Loan #{{ fetch_data($loan?->loan_number ?? null) }} • {{ fetch_data($loan?->borrower?->phone ?? null) }}</p>
                                     </div>
                                     <span class="material-symbols-outlined text-slate-300 group-hover:text-primary">chevron_right</span>
                                 </div>
@@ -69,7 +69,7 @@
                 </h2>
                 <p class="text-sm text-slate-500 font-medium">
                     @if($selectedLoan)
-                        For Loan #{{ $selectedLoan->loan_number }} ({{ $selectedLoan->borrower->user->name }})
+                        For Loan #{{ fetch_data($selectedLoan?->loan_number ?? null) }} ({{ fetch_data($selectedLoan?->borrower?->user?->name ?? null) }})
                     @else
                         Registering as Company Asset (Branch Property)
                     @endif
@@ -186,7 +186,7 @@
                             <label for="dropzone-file" class="flex flex-col items-center justify-center w-full h-48 border-2 border-slate-300 dark:border-slate-700 border-dashed rounded-2xl cursor-pointer bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors relative overflow-hidden group">
                                 
                                 @if ($image)
-                                    <img src="{{ $image->temporaryUrl() }}" class="absolute inset-0 w-full h-full object-cover">
+                                    <img src="{{ fetch_data($image?->temporaryUrl() ?? null) }}" class="absolute inset-0 w-full h-full object-cover">
                                     <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                                         <span class="text-white font-bold text-sm">Change Image</span>
                                     </div>

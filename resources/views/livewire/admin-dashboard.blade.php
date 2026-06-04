@@ -11,7 +11,7 @@
                 </div>
                 <div>
                     <h4 class="text-[10px] font-black uppercase tracking-widest">System Date Active</h4>
-                    <p class="text-[11px] text-white/80 font-bold leading-tight">Operating at <b class="text-white">{{ now()->format('l, F d, Y') }}</b>. All metrics reflect this date.</p>
+                    <p class="text-[11px] text-white/80 font-bold leading-tight">Operating at <b class="text-white">{{ fetch_data(now()?->format('l, F d, Y') ?? null) }}</b>. All metrics reflect this date.</p>
                 </div>
             </div>
             <a href="{{ route('settings') }}" class="px-4 py-1.5 bg-white text-orange-600 rounded-sm text-[10px] font-black uppercase tracking-widest hover:bg-orange-50 transition-colors shadow-sm">
@@ -28,7 +28,7 @@
                 <p class="text-xs text-slate-500 font-medium tracking-wide">Live system overview and performance metrics.</p>
                 @if($selectedPortfolioId)
                     <span class="px-2 py-0.5 bg-primary/10 rounded-sm text-[9px] font-black text-primary uppercase tracking-widest border border-primary/20">
-                        Portfolio: {{ collect($portfolios)->firstWhere('id', $selectedPortfolioId)->name ?? 'Unknown' }}
+                        Portfolio: {{ fetch_data(collect($portfolios)?->firstWhere('id', $selectedPortfolioId)?->name ?? 'Unknown' ?? null) }}
                     </span>
                 @endif
             </div>
@@ -50,9 +50,9 @@
                     <div x-show="open" @click.away="open = false" x-cloak
                          class="absolute right-0 mt-2 w-56 bg-white dark:bg-zinc-900 rounded-sm shadow-2xl border border-slate-200 dark:border-zinc-800 z-50 overflow-hidden py-1">
                         @forelse($portfolios as $p)
-                            <button wire:click="$set('selectedPortfolioId', '{{ $p->id }}'); open = false;" 
+                            <button wire:click="$set('selectedPortfolioId', '{{ fetch_data($p?->id ?? null) }}'); open = false;" 
                                     class="w-full text-left px-4 py-2 text-[10px] font-black uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-zinc-800 dark:text-white flex items-center justify-between group transition-colors">
-                                <span>{{ $p->name }}</span>
+                                <span>{{ fetch_data($p?->name ?? null) }}</span>
                                 @if($selectedPortfolioId === $p->id)
                                     <span class="material-symbols-outlined text-primary text-sm">check_circle</span>
                                 @endif
@@ -88,14 +88,14 @@
             <!-- Portfolio Balance -->
             <div class="bg-white dark:bg-[#1a1f2b] overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800 rounded-sm p-4 transition hover:shadow-md border-l-4 border-l-primary">
                 <dt class="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Portfolio Balance</dt>
-                <dd class="text-xl font-black text-primary dark:text-white">₦ {{ $portfolioBalance->format() }}</dd>
+                <dd class="text-xl font-black text-primary dark:text-white">₦ {{ fetch_data($portfolioBalance?->format() ?? null) }}</dd>
                 <p class="text-[8px] font-bold text-slate-400 uppercase mt-1 tracking-tighter">Active Lending Value</p>
             </div>
 
             <!-- Savings Balance -->
             <div class="bg-white dark:bg-[#1a1f2b] overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800 rounded-sm p-4 transition hover:shadow-md border-l-4 border-l-emerald-500">
                 <dt class="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Savings Amount</dt>
-                <dd class="text-xl font-black text-emerald-600">₦ {{ $savingsBalance->format() }}</dd>
+                <dd class="text-xl font-black text-emerald-600">₦ {{ fetch_data($savingsBalance?->format() ?? null) }}</dd>
                 <p class="text-[8px] font-bold text-slate-400 uppercase mt-1 tracking-tighter">Vaulted Security</p>
             </div>
 
@@ -104,15 +104,15 @@
                 <div class="flex justify-between items-start mb-1">
                     <dt class="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">PAR ({{ $parPercentage }}%)</dt>
                 </div>
-                <dd class="text-xl font-black text-rose-600">₦ {{ $portfolioAtRisk->format() }}</dd>
+                <dd class="text-xl font-black text-rose-600">₦ {{ fetch_data($portfolioAtRisk?->format() ?? null) }}</dd>
                 <p class="text-[8px] font-bold text-slate-400 uppercase mt-1 tracking-tighter">Overdue Principal</p>
             </div>
 
             <!-- Profit and Loss (PnL) -->
             <div class="bg-white dark:bg-[#1a1f2b] overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800 rounded-sm p-4 transition hover:shadow-md border-l-4 border-l-slate-900 dark:border-l-white">
                 <dt class="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Profit & Loss (PnL)</dt>
-                <dd class="text-xl font-black {{ $profitLoss->isPositive() ? 'text-green-600' : ($profitLoss->isNegative() ? 'text-rose-600' : 'text-slate-900 dark:text-white') }}">
-                    ₦ {{ $profitLoss->format() }}
+                <dd class="text-xl font-black {{ fetch_data($profitLoss?->isPositive() ? 'text-green-600' : ($profitLoss?->isNegative() ? 'text-rose-600' : 'text-slate-900 dark:text-white') ?? null) }}">
+                    ₦ {{ fetch_data($profitLoss?->format() ?? null) }}
                 </dd>
                 <p class="text-[8px] font-bold text-slate-400 uppercase mt-1 tracking-tighter">Net Performance</p>
             </div>
@@ -126,13 +126,13 @@
             <!-- Total Loaned Card -->
             <a href="{{ route('loan') }}" class="bg-white dark:bg-[#1a1f2b] overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800 rounded-sm p-4 transition hover:shadow-md border-l-4 border-l-blue-500 group">
                 <dt class="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Org. Total Balance</dt>
-                <dd class="text-xl font-black text-blue-600 group-hover:scale-[1.02] transition-transform origin-left">₦ {{ $totalLoaned->format() }}</dd>
+                <dd class="text-xl font-black text-blue-600 group-hover:scale-[1.02] transition-transform origin-left">₦ {{ fetch_data($totalLoaned?->format() ?? null) }}</dd>
             </a>
             
             <!-- Total Collected Card -->
             <a href="{{ route('collections') }}" class="bg-white dark:bg-[#1a1f2b] overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800 rounded-sm p-4 transition hover:shadow-md border-l-4 border-l-emerald-500 group">
                 <dt class="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Total Collected</dt>
-                <dd class="text-xl font-black text-emerald-600 group-hover:scale-[1.02] transition-transform origin-left">₦ {{ $totalCollected->format() }}</dd>
+                <dd class="text-xl font-black text-emerald-600 group-hover:scale-[1.02] transition-transform origin-left">₦ {{ fetch_data($totalCollected?->format() ?? null) }}</dd>
             </a>
 
             <!-- Total Active Loans -->
@@ -192,7 +192,7 @@
             <!-- Live Account Balance -->
             <a href="{{ route('cashbook.month-record') }}" class="bg-white dark:bg-[#1a1f2b] overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800 rounded-sm p-4 transition hover:shadow-md border-l-4 border-l-indigo-600 group">
                 <dt class="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Live Bank Balance</dt>
-                <dd class="text-xl font-black text-indigo-600 group-hover:scale-[1.02] transition-transform origin-left">₦ {{ $accountBalance?->format() ?? '0.00' }}</dd>
+                <dd class="text-xl font-black text-indigo-600 group-hover:scale-[1.02] transition-transform origin-left">₦ {{ fetch_data($accountBalance?->format() ?? '0.00' ?? null) }}</dd>
             </a>
         </div>
     </div>
@@ -212,7 +212,7 @@
                     <p class="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em]">7-Day Recovery Trend</p>
                 </div>
                 <div class="flex flex-col text-right">
-                    <span class="text-2xl font-black text-primary dark:text-white leading-none">₦ {{ number_format(collect($pulseData)->sum('amount')) }}</span>
+                    <span class="text-2xl font-black text-primary dark:text-white leading-none">₦ {{ fetch_data(number_format(collect($pulseData)?->sum('amount')) ?? null) }}</span>
                     <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest mt-1">Total This Week</span>
                 </div>
             </div>
@@ -309,21 +309,21 @@
                         <span class="w-1.5 h-1.5 rounded-full bg-brand-green"></span>
                         <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider">Repaid</span>
                     </div>
-                    <span class="text-sm font-black text-primary dark:text-white">₦ {{ $repaidAmount->format() }}</span>
+                    <span class="text-sm font-black text-primary dark:text-white">₦ {{ fetch_data($repaidAmount?->format() ?? null) }}</span>
                 </div>
                 <div class="flex flex-col gap-1 border-x border-slate-100 dark:border-slate-800 px-4">
                     <div class="flex items-center gap-1.5">
                         <span class="w-1.5 h-1.5 rounded-full bg-brand-blue"></span>
                         <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider">Active</span>
                     </div>
-                    <span class="text-sm font-black text-primary dark:text-white">₦ {{ $activeAmount->format() }}</span>
+                    <span class="text-sm font-black text-primary dark:text-white">₦ {{ fetch_data($activeAmount?->format() ?? null) }}</span>
                 </div>
                 <div class="flex flex-col gap-1 pl-4">
                     <div class="flex items-center gap-1.5">
                         <span class="w-1.5 h-1.5 rounded-full bg-brand-red"></span>
                         <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider">Overdue</span>
                     </div>
-                    <span class="text-sm font-black text-primary dark:text-white">₦ {{ $overdueAmount->format() }}</span>
+                    <span class="text-sm font-black text-primary dark:text-white">₦ {{ fetch_data($overdueAmount?->format() ?? null) }}</span>
                 </div>
             </div>
         </div>

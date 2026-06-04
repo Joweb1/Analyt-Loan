@@ -25,12 +25,12 @@
         <div class="space-y-3">
             @foreach($notifications as $notif)
                 <div 
-                    wire:key="{{ $notif->id }}"
-                    wire:click="markAsRead('{{ $notif->id }}')"
-                    class="bg-white p-4 rounded-2xl border transition-all {{ $notif->read_at ? 'border-slate-100 opacity-70' : 'border-brand/20 shadow-sm' }}"
+                    wire:key="{{ fetch_data($notif?->id ?? null) }}"
+                    wire:click="markAsRead('{{ fetch_data($notif?->id ?? null) }}')"
+                    class="bg-white p-4 rounded-2xl border transition-all {{ fetch_data($notif?->read_at ? 'border-slate-100 opacity-70' : 'border-brand/20 shadow-sm' ?? null) }}"
                 >
                     <div class="flex items-start gap-4">
-                        <div class="size-10 rounded-xl flex items-center justify-center shrink-0 {{ $notif->read_at ? 'bg-slate-100 text-slate-400' : 'bg-brand-soft text-brand' }}">
+                        <div class="size-10 rounded-xl flex items-center justify-center shrink-0 {{ fetch_data($notif?->read_at ? 'bg-slate-100 text-slate-400' : 'bg-brand-soft text-brand' ?? null) }}">
                             <span class="material-symbols-outlined">
                                 @if($notif->category === 'loan') monetization_on
                                 @elseif($notif->category === 'repayment') payments
@@ -41,14 +41,14 @@
                         </div>
                         <div class="flex-1 min-w-0">
                             <div class="flex justify-between items-start mb-1">
-                                <h3 class="text-sm font-bold text-slate-900 truncate pr-4">{{ $notif->title }}</h3>
-                                <span class="text-[10px] font-medium text-slate-400 whitespace-nowrap">{{ $notif->created_at->diffForHumans() }}</span>
+                                <h3 class="text-sm font-bold text-slate-900 truncate pr-4">{{ fetch_data($notif?->title ?? null) }}</h3>
+                                <span class="text-[10px] font-medium text-slate-400 whitespace-nowrap">{{ fetch_data($notif?->created_at?->diffForHumans() ?? null) }}</span>
                             </div>
-                            <p class="text-xs text-slate-500 leading-relaxed">{{ $notif->message }}</p>
+                            <p class="text-xs text-slate-500 leading-relaxed">{{ fetch_data($notif?->message ?? null) }}</p>
                             
                             @if($notif->action_link && !$notif->read_at)
                                 <div class="mt-3">
-                                    <a href="{{ $notif->action_link }}" wire:navigate class="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-brand">
+                                    <a href="{{ fetch_data($notif?->action_link ?? null) }}" wire:navigate class="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-widest text-brand">
                                         Take Action
                                         <span class="material-symbols-outlined text-xs">arrow_forward</span>
                                     </a>
@@ -64,7 +64,7 @@
         </div>
 
         <div class="mt-6">
-            {{ $notifications->links() }}
+            {{ fetch_data($notifications?->links() ?? null) }}
         </div>
     @endif
 </div>

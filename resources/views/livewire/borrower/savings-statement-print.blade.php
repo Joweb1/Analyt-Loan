@@ -3,19 +3,19 @@
     <div class="flex justify-between items-start border-b-2 border-slate-900 pb-8">
         <div class="flex items-center gap-4">
             @if($user->organization && $user->organization->logo_path)
-                <img src="{{ $user->organization->logo_url }}" class="h-16 w-auto" alt="Logo">
+                <img src="{{ fetch_data($user?->organization?->logo_url ?? null) }}" class="h-16 w-auto" alt="Logo">
             @else
                 <div class="size-16 bg-slate-950 rounded flex items-center justify-center text-white font-black text-3xl">A</div>
             @endif
             <div>
-                <h1 class="text-2xl font-black uppercase tracking-tight">{{ $user->organization->name ?? 'Analyt Loan' }}</h1>
-                <p class="text-xs font-bold text-slate-500 uppercase tracking-widest">{{ $user->organization->address ?? 'Nigeria' }}</p>
-                <p class="text-[10px] font-bold text-slate-400 mt-1">{{ $user->organization->email ?? '' }} | {{ $user->organization->phone ?? '' }}</p>
+                <h1 class="text-2xl font-black uppercase tracking-tight">{{ fetch_data($user?->organization?->name ?? 'Analyt Loan' ?? null) }}</h1>
+                <p class="text-xs font-bold text-slate-500 uppercase tracking-widest">{{ fetch_data($user?->organization?->address ?? 'Nigeria' ?? null) }}</p>
+                <p class="text-[10px] font-bold text-slate-400 mt-1">{{ fetch_data($user?->organization?->email ?? '' ?? null) }} | {{ fetch_data($user?->organization?->phone ?? '' ?? null) }}</p>
             </div>
         </div>
         <div class="text-right">
             <h2 class="text-3xl font-black text-slate-900 uppercase">Savings Statement</h2>
-            <p class="text-xs font-bold text-slate-500 uppercase mt-1">Generated on {{ now()->format('M d, Y') }}</p>
+            <p class="text-xs font-bold text-slate-500 uppercase mt-1">Generated on {{ fetch_data(now()?->format('M d, Y') ?? null) }}</p>
         </div>
     </div>
 
@@ -24,9 +24,9 @@
         <div class="space-y-4">
             <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 pb-2">Customer Details</h3>
             <div>
-                <p class="text-lg font-black text-slate-900">{{ $user->name }}</p>
-                <p class="text-sm font-bold text-slate-600">{{ $user->phone }}</p>
-                <p class="text-sm text-slate-500">{{ $user->email }}</p>
+                <p class="text-lg font-black text-slate-900">{{ fetch_data($user?->name ?? null) }}</p>
+                <p class="text-sm font-bold text-slate-600">{{ fetch_data($user?->phone ?? null) }}</p>
+                <p class="text-sm text-slate-500">{{ fetch_data($user?->email ?? null) }}</p>
             </div>
         </div>
         <div class="space-y-4">
@@ -34,19 +34,19 @@
             <div class="grid grid-cols-2 gap-4">
                 <div>
                     <p class="text-[10px] font-bold text-slate-400 uppercase">Account Number</p>
-                    <p class="text-sm font-black text-slate-900">{{ $savingsAccount->account_number }}</p>
+                    <p class="text-sm font-black text-slate-900">{{ fetch_data($savingsAccount?->account_number ?? null) }}</p>
                 </div>
                 <div>
                     <p class="text-[10px] font-bold text-slate-400 uppercase">Account Status</p>
-                    <p class="text-sm font-black text-green-600 uppercase">{{ $savingsAccount->status }}</p>
+                    <p class="text-sm font-black text-green-600 uppercase">{{ fetch_data($savingsAccount?->status ?? null) }}</p>
                 </div>
                 <div>
                     <p class="text-[10px] font-bold text-slate-400 uppercase">Regular Balance</p>
-                    <p class="text-sm font-black text-slate-950">₦{{ $savingsAccount->balance->format() }}</p>
+                    <p class="text-sm font-black text-slate-950">₦{{ fetch_data($savingsAccount?->balance?->format() ?? null) }}</p>
                 </div>
                 <div>
                     <p class="text-[10px] font-bold text-slate-400 uppercase">Daily Savings</p>
-                    <p class="text-sm font-black text-slate-950">₦{{ $savingsAccount->daily_savings_balance->format() }}</p>
+                    <p class="text-sm font-black text-slate-950">₦{{ fetch_data($savingsAccount?->daily_savings_balance?->format() ?? null) }}</p>
                 </div>
             </div>
         </div>
@@ -68,14 +68,14 @@
             <tbody class="divide-y divide-slate-100">
                 @foreach($transactions as $t)
                     <tr>
-                        <td class="py-4 px-2 text-xs font-bold text-slate-900">{{ $t->transaction_date->format('d/m/Y') }}</td>
-                        <td class="py-4 px-2 text-xs font-mono text-slate-500 uppercase">{{ $t->reference }}</td>
-                        <td class="py-4 px-2 text-xs font-black uppercase {{ ($t->type === 'deposit' || $t->type === 'daily_thrift') ? 'text-green-600' : 'text-red-600' }}">
-                            {{ str_replace('_', ' ', $t->type) }}
+                        <td class="py-4 px-2 text-xs font-bold text-slate-900">{{ fetch_data($t?->transaction_date?->format('d/m/Y') ?? null) }}</td>
+                        <td class="py-4 px-2 text-xs font-mono text-slate-500 uppercase">{{ fetch_data($t?->reference ?? null) }}</td>
+                        <td class="py-4 px-2 text-xs font-black uppercase {{ fetch_data(($t?->type === 'deposit' || $t?->type === 'daily_thrift') ? 'text-green-600' : 'text-red-600' ?? null) }}">
+                            {{ fetch_data(str_replace('_', ' ', $t?->type) ?? null) }}
                         </td>
-                        <td class="py-4 px-2 text-xs text-slate-600 italic max-w-xs">{{ $t->notes ?? '-' }}</td>
+                        <td class="py-4 px-2 text-xs text-slate-600 italic max-w-xs">{{ fetch_data($t?->notes ?? '-' ?? null) }}</td>
                         <td class="py-4 px-2 text-right text-xs font-black text-slate-900">
-                            {{ ($t->type === 'deposit' || $t->type === 'daily_thrift') ? '+' : '-' }}₦{{ $t->amount->format() }}
+                            {{ fetch_data(($t?->type === 'deposit' || $t?->type === 'daily_thrift') ? '+' : '-' ?? null) }}₦{{ fetch_data($t?->amount?->format() ?? null) }}
                         </td>
                     </tr>
                 @endforeach
@@ -84,7 +84,7 @@
                 <tr class="border-t-2 border-slate-900 bg-slate-50">
                     <td colspan="4" class="py-4 px-2 text-sm font-black uppercase text-right">Net Liquidity (Total Balance)</td>
                     <td class="py-4 px-2 text-right text-lg font-black text-slate-950">
-                        ₦{{ $savingsAccount->balance->add($savingsAccount->daily_savings_balance)->format() }}
+                        ₦{{ fetch_data($savingsAccount?->balance?->add($savingsAccount?->daily_savings_balance)?->format() ?? null) }}
                     </td>
                 </tr>
             </tfoot>

@@ -50,26 +50,26 @@
                         default => 'slate',
                     };
                 @endphp
-                <div class="p-4 sm:p-6 flex items-start gap-3 sm:gap-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors {{ $n->read_at ? 'opacity-60' : '' }}">
+                <div class="p-4 sm:p-6 flex items-start gap-3 sm:gap-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors {{ fetch_data($n?->read_at ? 'opacity-60' : '' ?? null) }}">
                     <div class="size-9 sm:size-12 rounded-xl bg-{{ $color }}-50 dark:bg-{{ $color }}-900/20 flex items-center justify-center shrink-0 border border-{{ $color }}-100 dark:border-{{ $color }}-800">
                         <span class="material-symbols-outlined text-lg sm:text-2xl text-{{ $color }}-600 dark:text-{{ $color }}-400">{{ $icon }}</span>
                     </div>
                     <div class="flex-1 min-w-0">
                         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-1 sm:gap-2">
-                            <h4 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white truncate pr-2">{{ $n->title }}</h4>
-                            <span class="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase whitespace-nowrap">{{ $n->created_at->diffForHumans() }}</span>
+                            <h4 class="text-sm sm:text-base font-bold text-slate-900 dark:text-white truncate pr-2">{{ fetch_data($n?->title ?? null) }}</h4>
+                            <span class="text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase whitespace-nowrap">{{ fetch_data($n?->created_at?->diffForHumans() ?? null) }}</span>
                         </div>
-                        <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 leading-relaxed line-clamp-3 sm:line-clamp-none">{{ $n->message }}</p>
+                        <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 leading-relaxed line-clamp-3 sm:line-clamp-none">{{ fetch_data($n?->message ?? null) }}</p>
                         
                         <div class="mt-3 flex flex-wrap items-center gap-2 sm:gap-3">
                             @if($n->user)
                                 <div class="flex items-center gap-1.5 bg-slate-50 dark:bg-slate-800/50 px-2 py-1 rounded-lg">
-                                    <div class="size-4 sm:size-5 rounded-full bg-slate-200 bg-cover bg-center border border-white dark:border-slate-700" style="background-image: url('{{ $n->user->borrower->photo_url ?? 'https://ui-avatars.com/api/?name='.urlencode($n->user->name) }}')"></div>
-                                    <span class="text-[9px] sm:text-[10px] font-bold text-slate-600 dark:text-slate-300">{{ $n->user->name }}</span>
+                                    <div class="size-4 sm:size-5 rounded-full bg-slate-200 bg-cover bg-center border border-white dark:border-slate-700" style="background-image: url('{{ fetch_data($n?->user?->borrower?->photo_url ?? 'https://ui-avatars.com/api/?name='.urlencode($n?->user?->name) ?? null) }}')"></div>
+                                    <span class="text-[9px] sm:text-[10px] font-bold text-slate-600 dark:text-slate-300">{{ fetch_data($n?->user?->name ?? null) }}</span>
                                 </div>
                             @endif
                             <span class="text-[9px] sm:text-[10px] font-black uppercase tracking-tighter px-1.5 py-0.5 rounded bg-{{ $color }}-50 dark:bg-{{ $color }}-900/10 text-{{ $color }}-600 dark:text-{{ $color }}-400">
-                                {{ strtoupper($n->category ?? 'system') }}
+                                {{ fetch_data(strtoupper($n?->category ?? 'system') ?? null) }}
                             </span>
                         </div>
                     </div>
@@ -88,6 +88,6 @@
 
     <!-- Pagination -->
     <div class="pb-12 px-2 sm:px-0">
-        {{ $notifications->links() }}
+        {{ fetch_data($notifications?->links() ?? null) }}
     </div>
 </div>

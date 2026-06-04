@@ -99,7 +99,7 @@
                             <select wire:model.live="organization_id" class="w-full px-5 py-4 bg-white dark:bg-zinc-900 border-2 border-zinc-100 dark:border-zinc-700 rounded-2xl focus:border-primary focus:ring-0 transition-all font-medium">
                                 <option value="">Select an Organization</option>
                                 @foreach($organizations as $org)
-                                    <option value="{{ $org->id }}">{{ $org->name }}</option>
+                                    <option value="{{ fetch_data($org?->id ?? null) }}">{{ fetch_data($org?->name ?? null) }}</option>
                                 @endforeach
                             </select>
                             @error('organization_id') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror

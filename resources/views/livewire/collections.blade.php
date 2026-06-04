@@ -166,22 +166,22 @@
                         $daysOverdue = floor($loan->updated_at->diffInDays(now()));
                         $riskColor = $daysOverdue > 30 ? 'red' : ($daysOverdue > 7 ? 'amber' : 'yellow');
                     @endphp
-                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors group cursor-pointer" onclick="window.location='{{ route('loan.show', $loan->id) }}'">
+                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors group cursor-pointer" onclick="window.location='{{ fetch_data(route('loan.show', $loan?->id) ?? null) }}'">
                         <td class="px-6 py-3">
                             <div class="flex items-center gap-3">
-                                <div class="size-8 rounded-full bg-cover bg-center" style="background-image: url('{{ $loan->borrower->photo_url ?? 'https://ui-avatars.com/api/?name='.urlencode($loan->borrower->user->name) }}')"></div>
+                                <div class="size-8 rounded-full bg-cover bg-center" style="background-image: url('{{ fetch_data($loan?->borrower?->photo_url ?? 'https://ui-avatars.com/api/?name='.urlencode($loan?->borrower?->user?->name) ?? null) }}')"></div>
                                 <div>
-                                    <p class="text-xs font-bold">{{ $loan->borrower->user->name }}</p>
-                                    <p class="text-[10px] text-slate-500">{{ $loan->borrower->phone ?? 'N/A' }}</p>
+                                    <p class="text-xs font-bold">{{ fetch_data($loan?->borrower?->user?->name ?? null) }}</p>
+                                    <p class="text-[10px] text-slate-500">{{ fetch_data($loan?->borrower?->phone ?? 'N/A' ?? null) }}</p>
                                 </div>
                             </div>
                         </td>
-                        <td class="px-6 py-3 text-xs font-mono text-slate-500">{{ $loan->loan_number }}</td>
+                        <td class="px-6 py-3 text-xs font-mono text-slate-500">{{ fetch_data($loan?->loan_number ?? null) }}</td>
                         <td class="px-6 py-3">
                             <span class="bg-{{ $riskColor }}-100 text-{{ $riskColor }}-700 text-[10px] font-extrabold px-2 py-0.5 rounded-full border border-{{ $riskColor }}-200">{{ intval($daysOverdue) }} DAYS</span>
                         </td>
                         <td class="px-6 py-3 text-right">
-                            <p class="text-xs font-extrabold">₦{{ $loan->amount->format() }}</p>
+                            <p class="text-xs font-extrabold">₦{{ fetch_data($loan?->amount?->format() ?? null) }}</p>
                         </td>
                         <td class="px-6 py-3">
                             <div class="flex items-center justify-center gap-2">
@@ -209,7 +209,7 @@
             </table>
         </div>
         <div class="px-6 py-4 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-800">
-            {{ $overdueLoans->links() }}
+            {{ fetch_data($overdueLoans?->links() ?? null) }}
         </div>
     </div>
     

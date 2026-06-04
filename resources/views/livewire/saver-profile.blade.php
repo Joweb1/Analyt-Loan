@@ -9,7 +9,7 @@
             </div>
             <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
                 Saver Information
-                <span class="ml-2 text-sm text-slate-500 font-mono bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md">SV-{{ substr($saver->id, 0, 8) }}</span>
+                <span class="ml-2 text-sm text-slate-500 font-mono bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded-md">SV-{{ fetch_data(substr($saver?->id, 0, 8) ?? null) }}</span>
             </h2>
         </div>
         <div class="flex gap-3">
@@ -73,18 +73,18 @@
                 <div class="space-y-4">
                     <div>
                         <p class="text-[9px] font-bold uppercase opacity-60">Current Balance</p>
-                        <p class="text-3xl font-black">₦{{ $account?->balance?->format() ?? '0.00' }}</p>
+                        <p class="text-3xl font-black">₦{{ fetch_data($account?->balance?->format() ?? '0.00' ?? null) }}</p>
                     </div>
                     <div class="pt-4 border-t border-white/10">
                         <div class="flex justify-between items-center">
                             <span class="text-[10px] font-bold uppercase opacity-60">Account Number</span>
-                            <span class="text-xs font-black font-mono tracking-wider">{{ $account->account_number ?? 'N/A' }}</span>
+                            <span class="text-xs font-black font-mono tracking-wider">{{ fetch_data($account?->account_number ?? 'N/A' ?? null) }}</span>
                         </div>
                     </div>
                 </div>
             </div>
             
-            <a href="{{ route('savings.show', $saver->user_id) }}" class="w-full flex items-center justify-center gap-2 py-4 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-sm hover:bg-slate-50 transition-all">
+            <a href="{{ fetch_data(route('savings.show', $saver?->user_id) ?? null) }}" class="w-full flex items-center justify-center gap-2 py-4 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-sm hover:bg-slate-50 transition-all">
                 <span class="material-symbols-outlined">history</span>
                 View Transaction History
             </a>

@@ -88,7 +88,7 @@
                 <div class="px-4 py-2 bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800/50 rounded-xl inline-flex items-center gap-2">
                     <span class="material-symbols-outlined text-blue-600 text-sm">calendar_today</span>
                     <span class="text-[10px] font-black uppercase text-blue-700 dark:text-blue-400 tracking-widest">
-                        {{ \Carbon\Carbon::parse($customStartDate)->format('M d') }} - {{ \Carbon\Carbon::parse($customEndDate)->format('M d, Y') }}
+                        {{ fetch_data(\Carbon\Carbon::parse($customStartDate)?->format('M d') ?? null) }} - {{ fetch_data(\Carbon\Carbon::parse($customEndDate)?->format('M d, Y') ?? null) }}
                     </span>
                 </div>
             @endif

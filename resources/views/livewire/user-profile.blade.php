@@ -25,7 +25,7 @@
                     </div>
                     <!-- Online Status -->
                     <div class="absolute bottom-3 right-0 size-8 rounded-2xl bg-[#050811] flex items-center justify-center shadow-2xl ring-1 ring-white/10" title="Online Status">
-                         <div class="size-4 rounded-full {{ auth()->user()->isOnline() ? 'bg-green-500 shadow-[0_0_12px_rgba(34,197,94,0.8)]' : 'bg-slate-600' }} border-2 border-[#050811]"></div>
+                         <div class="size-4 rounded-full {{ fetch_data(auth()?->user()?->isOnline() ? 'bg-green-500 shadow-[0_0_12px_rgba(34,197,94,0.8)]' : 'bg-slate-600' ?? null) }} border-2 border-[#050811]"></div>
                     </div>
                 </div>
 
@@ -119,7 +119,7 @@
                                 <span class="material-symbols-outlined text-[100px] text-primary">payments</span>
                             </div>
                             <p class="text-sm font-bold text-gray-500 uppercase tracking-wide">Active Loans</p>
-                            <h3 class="text-3xl font-black text-primary dark:text-white mt-1">{{ auth()->user()->borrower?->active_loans_count ?? 0 }}</h3>
+                            <h3 class="text-3xl font-black text-primary dark:text-white mt-1">{{ fetch_data(auth()?->user()?->borrower?->active_loans_count ?? 0 ?? null) }}</h3>
                             <p class="text-xs text-blue-600 mt-2 font-medium flex items-center gap-1">
                                 Current Liabilities
                             </p>
@@ -130,7 +130,7 @@
                                 <span class="material-symbols-outlined text-[100px] text-emerald-600">verified_user</span>
                             </div>
                             <p class="text-sm font-bold text-gray-500 uppercase tracking-wide">Trust Score</p>
-                            <h3 class="text-3xl font-black text-emerald-600 dark:text-white mt-1">{{ auth()->user()->borrower?->trust_score ?? 0 }}</h3>
+                            <h3 class="text-3xl font-black text-emerald-600 dark:text-white mt-1">{{ fetch_data(auth()?->user()?->borrower?->trust_score ?? 0 ?? null) }}</h3>
                             <p class="text-xs text-emerald-600 mt-2 font-medium flex items-center gap-1">
                                 Financial Reliability
                             </p>
@@ -163,9 +163,9 @@
                                     <div class="w-0.5 h-full bg-gray-100 dark:bg-zinc-800 mt-1"></div>
                                 </div>
                                 <div class="pb-6">
-                                    <p class="text-sm font-bold text-gray-900 dark:text-white">{{ $log->title }}</p>
-                                    <p class="text-xs text-gray-500 mt-0.5">{{ $log->message }}</p>
-                                    <p class="text-[10px] text-gray-400 mt-2 font-medium uppercase tracking-wider">{{ $log->created_at->diffForHumans() }}</p>
+                                    <p class="text-sm font-bold text-gray-900 dark:text-white">{{ fetch_data($log?->title ?? null) }}</p>
+                                    <p class="text-xs text-gray-500 mt-0.5">{{ fetch_data($log?->message ?? null) }}</p>
+                                    <p class="text-[10px] text-gray-400 mt-2 font-medium uppercase tracking-wider">{{ fetch_data($log?->created_at?->diffForHumans() ?? null) }}</p>
                                 </div>
                             </div>
                         @empty
@@ -493,12 +493,12 @@
                             
                             <div class="bg-gray-50 dark:bg-zinc-800/50 p-4 rounded-xl border border-gray-100 dark:border-zinc-800/50">
                                 <div class="flex justify-between items-start mb-2">
-                                    <h4 class="text-sm font-bold text-gray-900 dark:text-white">{{ $log->title }}</h4>
+                                    <h4 class="text-sm font-bold text-gray-900 dark:text-white">{{ fetch_data($log?->title ?? null) }}</h4>
                                     <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider bg-white dark:bg-zinc-800 px-2 py-1 rounded border border-gray-100 dark:border-zinc-700">
-                                        {{ $log->created_at->format('M d, H:i') }}
+                                        {{ fetch_data($log?->created_at?->format('M d, H:i') ?? null) }}
                                     </span>
                                 </div>
-                                <p class="text-sm text-gray-600 dark:text-gray-400">{{ $log->message }}</p>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">{{ fetch_data($log?->message ?? null) }}</p>
                             </div>
                         </div>
                     @empty

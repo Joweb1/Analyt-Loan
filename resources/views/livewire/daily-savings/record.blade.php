@@ -47,21 +47,21 @@
             <div class="bg-white p-6 rounded-sm border border-slate-200 shadow-sm">
                 <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Collections: Today</p>
                 <div class="flex items-center justify-between">
-                    <h4 class="text-2xl font-black text-slate-900 tracking-tighter italic">₦{{ $this->summary['today']->format() }}</h4>
+                    <h4 class="text-2xl font-black text-slate-900 tracking-tighter italic">₦{{ fetch_data($this?->summary['today']?->format() ?? null) }}</h4>
                     <span class="material-symbols-outlined text-blue-500">payments</span>
                 </div>
             </div>
             <div class="bg-white p-6 rounded-sm border border-slate-200 shadow-sm">
                 <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Collections: This Week</p>
                 <div class="flex items-center justify-between">
-                    <h4 class="text-2xl font-black text-slate-900 tracking-tighter italic">₦{{ $this->summary['week']->format() }}</h4>
+                    <h4 class="text-2xl font-black text-slate-900 tracking-tighter italic">₦{{ fetch_data($this?->summary['week']?->format() ?? null) }}</h4>
                     <span class="material-symbols-outlined text-emerald-500">account_balance_wallet</span>
                 </div>
             </div>
             <div class="bg-white p-6 rounded-sm border border-slate-200 shadow-sm">
                 <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Collections: This Month</p>
                 <div class="flex items-center justify-between">
-                    <h4 class="text-2xl font-black text-slate-900 tracking-tighter italic">₦{{ $this->summary['month']->format() }}</h4>
+                    <h4 class="text-2xl font-black text-slate-900 tracking-tighter italic">₦{{ fetch_data($this?->summary['month']?->format() ?? null) }}</h4>
                     <span class="material-symbols-outlined text-purple-500">savings</span>
                 </div>
             </div>
@@ -88,7 +88,7 @@
                                 <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">{{ $customer['id_label'] }}</span>
                                 <div class="w-1 h-1 rounded-full bg-slate-300"></div>
                                 <span class="text-[10px] font-black text-blue-600 uppercase tracking-widest">
-                                    Target: {{ $customer['daily_target']->format() }} / Day
+                                    Target: {{ fetch_data($customer['daily_target']?->format() ?? null) }} / Day
                                 </span>
                             </div>
                         </div>
@@ -98,11 +98,11 @@
                     <div class="flex items-center gap-8">
                         <div class="text-right">
                             <span class="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Week Total</span>
-                            <span class="text-sm font-black text-emerald-600">{{ $customer['week_total']->format() }}</span>
+                            <span class="text-sm font-black text-emerald-600">{{ fetch_data($customer['week_total']?->format() ?? null) }}</span>
                         </div>
                         <div class="text-right">
                             <span class="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Savings Balance</span>
-                            <span class="text-sm font-black text-blue-600">{{ $customer['daily_savings_balance']->format() }}</span>
+                            <span class="text-sm font-black text-blue-600">{{ fetch_data($customer['daily_savings_balance']?->format() ?? null) }}</span>
                         </div>
                     </div>
                 </div>
@@ -158,9 +158,9 @@
                                             </button>
                                         </div>
                                     @else
-                                        <div class="w-full px-4 py-3 {{ $recordedAmount->isPositive() ? 'bg-emerald-50/50 border-emerald-100' : 'bg-slate-50/50 border-slate-100' }} border-2 rounded-sm flex items-center justify-between">
-                                            <span class="text-xs font-black {{ $recordedAmount->isPositive() ? 'text-emerald-700' : 'text-slate-300' }}">
-                                                {{ $recordedAmount->isPositive() ? '₦' . $recordedAmount->format() : '0.00' }}
+                                        <div class="w-full px-4 py-3 {{ fetch_data($recordedAmount?->isPositive() ? 'bg-emerald-50/50 border-emerald-100' : 'bg-slate-50/50 border-slate-100' ?? null) }} border-2 rounded-sm flex items-center justify-between">
+                                            <span class="text-xs font-black {{ fetch_data($recordedAmount?->isPositive() ? 'text-emerald-700' : 'text-slate-300' ?? null) }}">
+                                                {{ fetch_data($recordedAmount?->isPositive() ? '₦' . $recordedAmount?->format() : '0.00' ?? null) }}
                                             </span>
                                             
                                             @if($canUnlock)

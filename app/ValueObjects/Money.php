@@ -138,8 +138,8 @@ class Money implements JsonSerializable, Wireable
             return 'Error fetching data';
         }
 
-        // Round UP to nearest whole number for display (e.g. 999.99 -> 1000)
-        return number_format(ceil($this->getMajorAmount()), 0);
+        // Standard rounding to nearest whole number (e.g. 999.99 -> 1000, 0.01 -> 0)
+        return number_format(round($this->getMajorAmount()), 0);
     }
 
     public function formatWithDecimals(int $decimals = 2): string

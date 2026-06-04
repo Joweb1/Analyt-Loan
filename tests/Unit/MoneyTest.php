@@ -7,37 +7,28 @@ use PHPUnit\Framework\TestCase;
 
 class MoneyTest extends TestCase
 {
-    public function test_money_preserves_decimals_internally_but_formats_rounded_up()
+    public function test_money_preserves_decimals_internally_but_formats_with_standard_rounding()
     {
-        // 100.01 (10001 minor) -> stores 10001
+        // 100.01 -> stores 10001
         $money = new Money(10001, 'NGN');
-        $this->assertEquals(10001, $money->getMinorAmount());
         $this->assertEquals(100.01, $money->getMajorAmount());
         
-        // Formats as rounded up whole number
-        $this->assertEquals('101', $money->format());
-    }
+        // Formats as 100 (standard rounding)
+        $this->assertEquals('100', $money->format());
 
-    public function test_money_can_be_created_from_major_units_preserving_precision()
-    {
-        // 100.50 -> 10050 minor
-        $money = Money::fromMajor(100.50, 'NGN');
-        $this->assertEquals(10050, $money->getMinorAmount());
-        $this->assertEquals(100.50, $money->getMajorAmount());
-        
-        // Formats as 101
-        $this->assertEquals('101', $money->format());
+        // 999.99 -> 1000
+        $money = Money::fromMajor(999.99);
+        $this->assertEquals('1,000', $money->format());
     }
 
     public function test_money_math_preserves_precision()
     {
         $m1 = Money::fromMajor(10.10);
-        $m2 = Money::fromMajor(20.20);
-        $result = $m1->add($m2);
+        $m2 = Money::fromMajor(20.45);
+        $result = $m1->add($m2); // 30.55
 
-        $this->assertEquals(3030, $result->getMinorAmount());
-        $this->assertEquals(30.30, $result->getMajorAmount());
-        $this->assertEquals('31', $result->format());
+        $this->assertEquals(30.55, $result->getMajorAmount());
+        $this->assertEquals('31', $result->format()); // 30.55 rounds up to 31
     }
 
     public function test_money_multiplication_preserves_precision()

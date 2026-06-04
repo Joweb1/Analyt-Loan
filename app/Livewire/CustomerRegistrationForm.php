@@ -122,7 +122,12 @@ class CustomerRegistrationForm extends Component
 
     public function mount($type = 'borrower')
     {
-        $this->registration_type = in_array($type, ['borrower', 'saver', 'guarantor']) ? $type : 'borrower';
+        $allowedTypes = ['borrower', 'saver', 'guarantor'];
+        if (Auth::check() && Auth::user()->isAdmin()) {
+            $allowedTypes[] = 'staff';
+        }
+
+        $this->registration_type = in_array($type, $allowedTypes) ? $type : 'borrower';
 
         if (Auth::check() && Auth::user()->organization_id) {
             $this->organization_id = Auth::user()->organization_id;
@@ -134,6 +139,11 @@ class CustomerRegistrationForm extends Component
 
     public function updatedRegistrationType()
     {
+        if ($this->registration_type === 'staff' && ! Auth::user()->isAdmin()) {
+            $this->registration_type = 'borrower';
+            $this->dispatch('custom-alert', ['type' => 'error', 'message' => 'Only administrators can register staff members.']);
+        }
+
         $this->loadConfigs();
         $this->resetValidation();
     }
@@ -173,12 +183,12 @@ class CustomerRegistrationForm extends Component
     protected function getDynamicRules()
     {
         $rules = [
-            'registration_type' => 'required|in:borrower,saver,guarantor',
+            'registration_type' => 'required|in:borrower,saver,guarantor,staff',
             'organization_id' => 'required|exists:organizations,id',
         ];
 
-        // Password is only compulsory for borrowers or if provided
-        if ($this->registration_type === 'borrower') {
+        // Password is only compulsory for borrowers, staff or if provided
+        if (in_array($this->registration_type, ['borrower', 'staff'])) {
             $rules['password'] = 'required|string|confirmed|min:8';
         } else {
             $rules['password'] = 'nullable|string|confirmed|min:4';
@@ -191,7 +201,11 @@ class CustomerRegistrationForm extends Component
             'phone' => 'required|string|max:255',
         ];
 
-        if ($this->registration_type === 'saver' || $this->registration_type === 'guarantor') {
+        if ($this->registration_type === 'staff') {
+            $sharedRules['email'] = 'required|string|email|max:255';
+        }
+
+        if (in_array($this->registration_type, ['saver', 'guarantor', 'staff'])) {
             return array_merge($rules, $sharedRules);
         }
 
@@ -253,6 +267,12 @@ class CustomerRegistrationForm extends Component
 
     public function save()
     {
+        if ($this->registration_type === 'staff' && ! Auth::user()->isAdmin()) {
+            $this->dispatch('custom-alert', ['type' => 'error', 'message' => 'Unauthorized operation. Only administrators can register staff.']);
+
+            return;
+        }
+
         // 1. Sterilization
         $this->name = trim($this->name);
         $this->email = $this->email ? strtolower(trim($this->email)) : null;
@@ -289,6 +309,7 @@ class CustomerRegistrationForm extends Component
                     'name' => $this->name,
                     'email' => $this->email,
                     'phone' => $this->phone,
+                    'type' => $this->registration_type === 'staff' ? 'staff' : $user->type,
                 ]);
             } else {
                 // Determine password
@@ -296,7 +317,7 @@ class CustomerRegistrationForm extends Component
 
                 $user = User::create([
                     'organization_id' => $this->organization_id,
-                    'type' => 'customer',
+                    'type' => $this->registration_type === 'staff' ? 'staff' : 'customer',
                     'name' => $this->name,
                     'email' => $this->email,
                     'phone' => $this->phone,
@@ -307,6 +328,14 @@ class CustomerRegistrationForm extends Component
             $roleName = ucfirst($this->registration_type);
             if (! $user->hasRole($roleName)) {
                 $user->assignRole($roleName);
+            }
+
+            if ($this->registration_type === 'staff') {
+                $this->dispatch('custom-alert', ['type' => 'success', 'message' => 'Staff member registered successfully.']);
+                $this->reset(['name', 'email', 'phone', 'password', 'password_confirmation', 'registration_type']);
+                $this->mount(); // Reset to default state
+
+                return;
             }
 
             if ($this->registration_type === 'saver') {

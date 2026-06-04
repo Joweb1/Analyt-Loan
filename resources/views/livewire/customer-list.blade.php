@@ -52,8 +52,13 @@
                     <a href="{{ route('customer.create', ['type' => 'guarantor']) }}" class="px-4 py-2.5 bg-blue-600 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-zinc-800 transition-all shadow-md shadow-blue-600/10">
                         <span class="material-symbols-outlined text-sm">add</span> Guarantor
                     </a>
+                    @if(auth()->user()->isAdmin())
+                        <a href="{{ route('customer.create', ['type' => 'staff']) }}" class="px-4 py-2.5 bg-purple-600 text-white rounded-xl text-xs font-black uppercase tracking-widest hover:bg-zinc-800 transition-all shadow-md shadow-purple-600/10">
+                            <span class="material-symbols-outlined text-sm">add</span> Staff
+                        </a>
+                    @endif
                 </div>
-            @endif
+@endif
         </div>
     </div>
 

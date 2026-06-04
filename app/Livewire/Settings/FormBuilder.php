@@ -31,6 +31,7 @@ class FormBuilder extends Component
         'borrower' => 'Borrower Form',
         'saver' => 'Saver Form',
         'guarantor' => 'Guarantor Form',
+        'staff' => 'Staff Form',
     ];
 
     // Form Selection
@@ -140,11 +141,24 @@ class FormBuilder extends Component
             ],
         ];
 
+        $staffDefaults = [
+            'identity' => [
+                ['name' => 'name', 'label' => 'Full Name', 'type' => 'text', 'required' => true],
+                ['name' => 'phone', 'label' => 'Phone Number', 'type' => 'text', 'required' => true],
+                ['name' => 'email', 'label' => 'Email Address', 'type' => 'email', 'required' => true],
+                ['name' => 'dob', 'label' => 'Date of Birth', 'type' => 'date', 'required' => false],
+                ['name' => 'gender', 'label' => 'Gender', 'type' => 'select', 'options' => ['male', 'female', 'other'], 'required' => false],
+                ['name' => 'address', 'label' => 'Residential Address', 'type' => 'textarea', 'required' => false],
+            ],
+        ];
+
         $defaults = $borrowerDefaults;
         if ($type === 'saver') {
             $defaults = $saverDefaults;
         } elseif ($type === 'guarantor') {
             $defaults = $guarantorDefaults;
+        } elseif ($type === 'staff') {
+            $defaults = $staffDefaults;
         }
 
         $order = 0;

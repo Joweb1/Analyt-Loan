@@ -161,7 +161,7 @@
                             <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 px-1">Expense Budget Amount ({{ config('app.currency', 'NGN') }})</label>
                             <div class="relative group">
                                 <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                    <span class="text-gray-400 font-black">$</span>
+                                    <span class="text-gray-400 font-black">₦</span>
                                 </div>
                                 <input type="number" step="0.01" wire:model="newBudgetAmount"
                                     class="w-full pl-10 pr-4 py-4 rounded-sm border-gray-200 bg-gray-50 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 text-2xl font-black text-gray-900 transition-all">
@@ -196,7 +196,7 @@
                             <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 px-1">Month Opening Balance Snapshot ({{ config('app.currency', 'NGN') }})</label>
                             <div class="relative group">
                                 <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                    <span class="text-gray-400 font-black">$</span>
+                                    <span class="text-gray-400 font-black">₦</span>
                                 </div>
                                 <input type="number" step="0.01" wire:model="newOpeningBalanceAmount"
                                     class="w-full pl-10 pr-4 py-4 rounded-sm border-gray-200 bg-gray-50 focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 text-2xl font-black text-gray-900 transition-all">

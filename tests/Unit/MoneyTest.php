@@ -12,7 +12,7 @@ class MoneyTest extends TestCase
         // 100.01 -> stores 10001
         $money = new Money(10001, 'NGN');
         $this->assertEquals(100.01, $money->getMajorAmount());
-        
+
         // Formats as 100 (standard rounding)
         $this->assertEquals('100', $money->format());
 

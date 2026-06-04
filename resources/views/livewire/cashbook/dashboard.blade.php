@@ -274,7 +274,7 @@
                                     <label class="block text-[9px] font-black text-blue-800 uppercase tracking-widest mb-3 text-center">Physical Cash Count</label>
                                     <div class="relative group">
                                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <span class="text-blue-400 font-black text-xs">$</span>
+                                            <span class="text-blue-400 font-black text-xs">₦</span>
                                         </div>
                                         <input type="number" step="0.01" wire:model.blur="manualFields.actual_cash_at_hand" @if($entry->status === 'verified') disabled @endif
                                             class="w-full pl-8 pr-3 py-3 rounded-sm border-blue-200 bg-white shadow-md focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 text-lg font-black text-blue-900 transition-all text-center">
@@ -292,7 +292,7 @@
                                     <label class="block text-[9px] font-black text-emerald-800 uppercase tracking-widest mb-3 text-center">Total Bank Deposit</label>
                                     <div class="relative group max-w-md mx-auto">
                                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                            <span class="text-emerald-400 font-black text-xs">$</span>
+                                            <span class="text-emerald-400 font-black text-xs">₦</span>
                                         </div>
                                         <input type="number" step="0.01" wire:model.blur="manualFields.bank_deposit_amount" @if($entry->status === 'verified') disabled @endif
                                             class="w-full pl-8 pr-3 py-3 rounded-sm border-emerald-200 bg-white shadow-md focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 text-lg font-black text-emerald-700 transition-all text-center">

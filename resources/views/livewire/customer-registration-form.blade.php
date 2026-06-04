@@ -3,6 +3,7 @@
         'borrower' => 'Borrower',
         'saver' => 'Saver',
         'guarantor' => 'Guarantor',
+        'staff' => 'Staff',
     ];
     $currentLabel = $typeLabels[$registration_type] ?? 'Borrower';
 @endphp
@@ -86,6 +87,21 @@
                                 </div>
                             </div>
                         </label>
+
+                        @if(auth()->user()->isAdmin())
+                            <label class="relative flex items-center p-4 cursor-pointer rounded-2xl border-2 transition-all {{ $registration_type === 'staff' ? 'border-primary bg-primary/5' : 'border-zinc-100 dark:border-zinc-700 hover:bg-zinc-100 dark:hover:bg-zinc-700/50' }}">
+                                <input type="radio" wire:model.live="registration_type" value="staff" class="sr-only">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center text-purple-600">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-sm {{ $registration_type === 'staff' ? 'text-purple-600' : 'text-zinc-600 dark:text-zinc-300' }}">Staff</p>
+                                        <p class="text-[10px] text-zinc-400">Internal Team</p>
+                                    </div>
+                                </div>
+                            </label>
+                        @endif
                     </div>
                     @error('registration_type') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                 </div>

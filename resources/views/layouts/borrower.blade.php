@@ -51,27 +51,27 @@
     @if(!str_contains(request()->route()->getName(), 'onboarding'))
     <nav class="fixed bottom-0 w-full bg-white border-t border-slate-100 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-50 pb-safe">
         <div class="flex justify-around items-center h-16">
-            <a href="{{ fetch_data(route('borrower.home') }}" wire:navigate class="flex flex-col items-center gap-1 w-full h-full justify-center transition-colors {{ request()?->routeIs('borrower.home') ? 'text-brand' : 'text-slate-400 hover:text-slate-600' ?? null) }}">
+            <a href="{{ fetch_data(route('borrower.home') ?? null) }}" wire:navigate class="flex flex-col items-center gap-1 w-full h-full justify-center transition-colors {{ fetch_data(request()?->routeIs('borrower.home') ? 'text-brand' : 'text-slate-400 hover:text-slate-600' ?? null) }}">
                 <span class="material-symbols-outlined text-2xl {{ fetch_data(request()?->routeIs('borrower.home') ? 'icon-fill' : '' ?? null) }}">home</span>
                 <span class="text-[10px] font-medium">Home</span>
             </a>
             
-            <a href="{{ fetch_data(route('borrower.borrow') }}" wire:navigate class="flex flex-col items-center gap-1 w-full h-full justify-center transition-colors {{ request()?->routeIs('borrower.borrow') ? 'text-brand' : 'text-slate-400 hover:text-slate-600' ?? null) }}">
+            <a href="{{ fetch_data(route('borrower.borrow') ?? null) }}" wire:navigate class="flex flex-col items-center gap-1 w-full h-full justify-center transition-colors {{ fetch_data(request()?->routeIs('borrower.borrow') ? 'text-brand' : 'text-slate-400 hover:text-slate-600' ?? null) }}">
                 <span class="material-symbols-outlined text-2xl {{ fetch_data(request()?->routeIs('borrower.borrow') ? 'icon-fill' : '' ?? null) }}">payments</span>
                 <span class="text-[10px] font-medium">Borrow</span>
             </a>
 
-            <a href="{{ fetch_data(route('borrower.repayment') }}" wire:navigate class="flex flex-col items-center gap-1 w-full h-full justify-center transition-colors {{ request()?->routeIs('borrower.repayment') ? 'text-brand' : 'text-slate-400 hover:text-slate-600' ?? null) }}">
+            <a href="{{ fetch_data(route('borrower.repayment') ?? null) }}" wire:navigate class="flex flex-col items-center gap-1 w-full h-full justify-center transition-colors {{ fetch_data(request()?->routeIs('borrower.repayment') ? 'text-brand' : 'text-slate-400 hover:text-slate-600' ?? null) }}">
                 <span class="material-symbols-outlined text-2xl {{ fetch_data(request()?->routeIs('borrower.repayment') ? 'icon-fill' : '' ?? null) }}">account_balance_wallet</span>
                 <span class="text-[10px] font-medium">Repay</span>
             </a>
 
-            <a href="{{ fetch_data(route('borrower.activity') }}" wire:navigate class="flex flex-col items-center gap-1 w-full h-full justify-center transition-colors {{ request()?->routeIs('borrower.activity') ? 'text-brand' : 'text-slate-400 hover:text-slate-600' ?? null) }}">
+            <a href="{{ fetch_data(route('borrower.activity') ?? null) }}" wire:navigate class="flex flex-col items-center gap-1 w-full h-full justify-center transition-colors {{ fetch_data(request()?->routeIs('borrower.activity') ? 'text-brand' : 'text-slate-400 hover:text-slate-600' ?? null) }}">
                 <span class="material-symbols-outlined text-2xl {{ fetch_data(request()?->routeIs('borrower.activity') ? 'icon-fill' : '' ?? null) }}">history</span>
                 <span class="text-[10px] font-medium">Activity</span>
             </a>
 
-            <a href="{{ fetch_data(route('borrower.account') }}" wire:navigate class="flex flex-col items-center gap-1 w-full h-full justify-center transition-colors {{ request()?->routeIs('borrower.account') ? 'text-brand' : 'text-slate-400 hover:text-slate-600' ?? null) }}">
+            <a href="{{ fetch_data(route('borrower.account') ?? null) }}" wire:navigate class="flex flex-col items-center gap-1 w-full h-full justify-center transition-colors {{ fetch_data(request()?->routeIs('borrower.account') ? 'text-brand' : 'text-slate-400 hover:text-slate-600' ?? null) }}">
                 <span class="material-symbols-outlined text-2xl {{ fetch_data(request()?->routeIs('borrower.account') ? 'icon-fill' : '' ?? null) }}">person</span>
                 <span class="text-[10px] font-medium">Account</span>
             </a>

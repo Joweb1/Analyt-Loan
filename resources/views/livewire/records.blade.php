@@ -12,11 +12,11 @@
                     <h3 class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-1">Total Savings</h3>
                     <p class="text-2xl font-black text-slate-900 dark:text-white tracking-tight italic">₦{{ fetch_data($savingsBalance?->format() ?? null) }}</p>
                 </div>
-                <div class="relative" x-data="{ open: false }">
+                <div class="relative" x-data="{ open: false }" wire:key="savings-filter">
                     <button @click="open = !open" class="size-9 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-primary hover:bg-primary/10 transition-all shadow-sm">
                         <span class="material-symbols-outlined text-xl">tune</span>
                     </button>
-                    <div x-show="open" @click.away="open = false" 
+                    <div x-show="open" @click.away="open = false" x-cloak
                          x-transition:enter="transition ease-out duration-200"
                          x-transition:enter-start="opacity-0 translate-y-1 scale-95"
                          x-transition:enter-end="opacity-100 translate-y-0 scale-100"
@@ -57,11 +57,11 @@
                     <h3 class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-1">Total Daily Thrift</h3>
                     <p class="text-2xl font-black text-indigo-600 tracking-tight italic">₦{{ fetch_data($thriftBalance?->format() ?? null) }}</p>
                 </div>
-                <div class="relative" x-data="{ open: false }">
+                <div class="relative" x-data="{ open: false }" wire:key="thrift-filter">
                     <button @click="open = !open" class="size-9 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 hover:text-primary hover:bg-primary/10 transition-all shadow-sm">
                         <span class="material-symbols-outlined text-xl">tune</span>
                     </button>
-                    <div x-show="open" @click.away="open = false" 
+                    <div x-show="open" @click.away="open = false" x-cloak
                          x-transition:enter="transition ease-out duration-200"
                          x-transition:enter-start="opacity-0 translate-y-1 scale-95"
                          x-transition:enter-end="opacity-100 translate-y-0 scale-100"

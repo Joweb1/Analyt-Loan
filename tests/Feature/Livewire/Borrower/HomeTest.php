@@ -9,13 +9,14 @@ use App\Models\User;
 use App\ValueObjects\Money;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class HomeTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function it_renders_successfully_and_calculates_credit_limit_as_money()
     {
         $organization = Organization::factory()->create(['currency_code' => 'NGN']);

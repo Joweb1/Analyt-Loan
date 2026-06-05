@@ -55,6 +55,8 @@ class RoleSeeder extends Seeder
             'communicate_with_customers',
             'export_and_print',
             'access_minimal_staff_routes',
+            'record_cashbook',
+            'view_live_balance',
         ];
 
         foreach ($permissions as $p) {
@@ -80,6 +82,8 @@ class RoleSeeder extends Seeder
             'enter_collections',
             'enter_savings',
             'access_minimal_staff_routes',
+            'record_cashbook',
+            'view_live_balance',
         ]);
 
         // 4. Granular Staff Roles (Required by routes)

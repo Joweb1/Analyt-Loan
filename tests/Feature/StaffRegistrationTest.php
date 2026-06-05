@@ -8,13 +8,14 @@ use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class StaffRegistrationTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function admin_can_register_staff_member()
     {
         $this->seed(RoleSeeder::class);
@@ -47,7 +48,7 @@ class StaffRegistrationTest extends TestCase
         $this->assertTrue($staff->hasRole('Staff'));
     }
 
-    /** @test */
+    #[Test]
     public function non_admin_cannot_register_staff_member()
     {
         $this->seed(RoleSeeder::class);

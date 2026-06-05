@@ -10,8 +10,6 @@ use App\Services\TenantSession;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
-use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class AccessControlTest extends TestCase
@@ -43,11 +41,7 @@ class AccessControlTest extends TestCase
         ]);
         $this->admin->assignRole('Admin');
 
-        // Setup Staff with record_cashbook permission
-        Permission::firstOrCreate(['name' => 'record_cashbook']);
-        $staffRole = Role::firstOrCreate(['name' => 'Staff']);
-        $staffRole->syncPermissions(['record_cashbook', 'view_dashboard']);
-
+        // Setup Staff
         $this->staff = User::factory()->create([
             'organization_id' => $this->organization->id,
             'type' => 'staff',

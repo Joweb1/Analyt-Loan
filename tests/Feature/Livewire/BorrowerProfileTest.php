@@ -6,12 +6,12 @@ use App\Livewire\BorrowerProfile;
 use App\Models\Borrower;
 use App\Models\Organization;
 use App\Models\User;
+use App\Services\TenantSession;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
-use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class BorrowerProfileTest extends TestCase
@@ -28,12 +28,15 @@ class BorrowerProfileTest extends TestCase
     {
         parent::setUp();
 
-        Role::findOrCreate('Admin');
+        $this->seed(RoleSeeder::class);
         $this->organization = Organization::factory()->create();
-        $this->admin = User::factory()->create(['organization_id' => $this->organization->id]);
+        app(TenantSession::class)->setTenantId($this->organization->id);
+
+        $this->admin = User::factory()->create([
+            'organization_id' => $this->organization->id,
+            'type' => 'admin',
+        ]);
         $this->admin->assignRole('Admin');
-        $this->admin->givePermissionTo(Permission::findOrCreate('manage_borrowers'));
-        $this->admin->givePermissionTo(Permission::findOrCreate('edit_borrowers'));
 
         $user = User::factory()->create(['organization_id' => $this->organization->id]);
         $this->borrower = Borrower::factory()->create([

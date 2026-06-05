@@ -5,6 +5,7 @@ namespace App\Livewire;
 use App\Models\Organization;
 use App\Models\SavingsTransaction;
 use App\ValueObjects\Money;
+use Livewire\Attributes\Computed;
 use Livewire\Component;
 
 /**
@@ -30,12 +31,14 @@ class Records extends Component
         // Default values
     }
 
-    public function getSavingsBalanceProperty()
+    #[Computed]
+    public function savingsBalance()
     {
         return $this->calculateBalance('deposit', $this->savingsPeriod, $this->customSavingsStart, $this->customSavingsEnd);
     }
 
-    public function getThriftBalanceProperty()
+    #[Computed]
+    public function thriftBalance()
     {
         return $this->calculateBalance('daily_thrift', $this->thriftPeriod, $this->customThriftStart, $this->customThriftEnd);
     }

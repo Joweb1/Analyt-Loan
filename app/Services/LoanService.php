@@ -194,7 +194,7 @@ class LoanService
         $loan->save();
 
         // Record Disbursement Transaction
-        \App\Services\TransactionService::record(
+        TransactionService::record(
             type: 'loan_disbursement',
             amount: $loan->amount,
             reference: 'DISB-'.$loan->loan_number,

@@ -49,8 +49,8 @@ class TransactionService
         $date = $date ?: $org->getSystemTime()->toDateString();
         $orgId = $org->id;
 
-        if (!$reference) {
-            $prefix = match($type) {
+        if (! $reference) {
+            $prefix = match ($type) {
                 'registration_fee' => 'REG',
                 'deposit' => 'DEP',
                 'withdrawal' => 'WIT',
@@ -63,7 +63,7 @@ class TransactionService
                 'bonus' => 'BON',
                 default => 'TRX'
             };
-            $reference = $prefix . '-' . strtoupper(Str::random(8));
+            $reference = $prefix.'-'.strtoupper(Str::random(8));
         }
 
         return Transaction::create([

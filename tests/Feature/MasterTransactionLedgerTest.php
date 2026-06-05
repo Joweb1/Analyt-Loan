@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Livewire\CustomerRegistrationForm;
 use App\Models\Borrower;
 use App\Models\Loan;
 use App\Models\Organization;
@@ -11,9 +12,12 @@ use App\Models\SavingsTransaction;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Services\LoanService;
-use App\ValueObjects\Money;
+use App\Services\TenantSession;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Livewire;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class MasterTransactionLedgerTest extends TestCase
@@ -23,20 +27,20 @@ class MasterTransactionLedgerTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->seed(\Database\Seeders\RoleSeeder::class);
+        $this->seed(RoleSeeder::class);
     }
 
-    /** @test */
+    #[Test]
     public function it_records_registration_fee_when_saver_is_created()
     {
         $org = Organization::factory()->create(['kyc_status' => 'approved']);
-        app(\App\Services\TenantSession::class)->setTenantId($org->id);
-        
+        app(TenantSession::class)->setTenantId($org->id);
+
         $admin = User::factory()->create(['organization_id' => $org->id, 'type' => 'admin']);
         $admin->assignRole('Admin');
 
-        \Livewire\Livewire::actingAs($admin)
-            ->test(\App\Livewire\CustomerRegistrationForm::class)
+        Livewire::actingAs($admin)
+            ->test(CustomerRegistrationForm::class)
             ->set('organization_id', $org->id)
             ->set('registration_type', 'saver')
             ->set('name', 'John Saver')
@@ -55,22 +59,22 @@ class MasterTransactionLedgerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function it_records_loan_disbursement_transaction()
     {
         $org = Organization::factory()->create();
-        app(\App\Services\TenantSession::class)->setTenantId($org->id);
-        
+        app(TenantSession::class)->setTenantId($org->id);
+
         $admin = User::factory()->create(['organization_id' => $org->id, 'type' => 'admin']);
-        
+
         $user = User::factory()->create(['organization_id' => $org->id]);
         $borrower = Borrower::factory()->create(['user_id' => $user->id, 'organization_id' => $org->id]);
-        
+
         $loan = Loan::factory()->create([
             'organization_id' => $org->id,
             'borrower_id' => $borrower->id,
             'amount' => 5000,
-            'status' => 'approved'
+            'status' => 'approved',
         ]);
 
         Auth::login($admin);
@@ -84,26 +88,26 @@ class MasterTransactionLedgerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function it_records_repayment_transaction_via_observer()
     {
         $org = Organization::factory()->create();
-        app(\App\Services\TenantSession::class)->setTenantId($org->id);
-        
+        app(TenantSession::class)->setTenantId($org->id);
+
         $admin = User::factory()->create(['organization_id' => $org->id, 'type' => 'admin']);
-        
+
         $user = User::factory()->create(['organization_id' => $org->id]);
         $borrower = Borrower::factory()->create(['user_id' => $user->id, 'organization_id' => $org->id]);
-        
+
         $loan = Loan::factory()->create([
             'organization_id' => $org->id,
             'borrower_id' => $borrower->id,
             'amount' => 5000,
-            'status' => 'active'
+            'status' => 'active',
         ]);
 
         Auth::login($admin);
-        
+
         Repayment::create([
             'loan_id' => $loan->id,
             'organization_id' => $org->id,
@@ -121,18 +125,18 @@ class MasterTransactionLedgerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function it_records_savings_deposit_transaction_via_observer()
     {
         $org = Organization::factory()->create();
-        app(\App\Services\TenantSession::class)->setTenantId($org->id);
-        
+        app(TenantSession::class)->setTenantId($org->id);
+
         $admin = User::factory()->create(['organization_id' => $org->id, 'type' => 'admin']);
-        
+
         $user = User::factory()->create(['organization_id' => $org->id]);
         $account = SavingsAccount::factory()->create([
             'user_id' => $user->id,
-            'organization_id' => $org->id
+            'organization_id' => $org->id,
         ]);
 
         Auth::login($admin);
@@ -144,7 +148,7 @@ class MasterTransactionLedgerTest extends TestCase
             'payment_method' => 'bank_transfer',
             'transaction_date' => now(),
             'staff_id' => $admin->id,
-            'reference' => 'DEP-123'
+            'reference' => 'DEP-123',
         ]);
 
         $this->assertDatabaseHas('transactions', [
@@ -156,23 +160,23 @@ class MasterTransactionLedgerTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function it_does_not_duplicate_transactions_for_extra_repayment_savings()
     {
         $org = Organization::factory()->create();
-        app(\App\Services\TenantSession::class)->setTenantId($org->id);
-        
+        app(TenantSession::class)->setTenantId($org->id);
+
         $admin = User::factory()->create(['organization_id' => $org->id, 'type' => 'admin']);
-        
+
         $user = User::factory()->create(['organization_id' => $org->id]);
         $borrower = Borrower::factory()->create(['user_id' => $user->id, 'organization_id' => $org->id]);
         $account = SavingsAccount::factory()->create(['user_id' => $user->id, 'organization_id' => $org->id]);
-        
+
         $loan = Loan::factory()->create([
             'organization_id' => $org->id,
             'borrower_id' => $borrower->id,
             'amount' => 5000,
-            'status' => 'active'
+            'status' => 'active',
         ]);
 
         Auth::login($admin);
@@ -197,7 +201,7 @@ class MasterTransactionLedgerTest extends TestCase
             'payment_method' => 'cash',
             'transaction_date' => now(),
             'staff_id' => $admin->id,
-            'reference' => 'REP-EXTRA'
+            'reference' => 'REP-EXTRA',
         ]);
 
         // Total transactions should be 1 (the repayment itself)

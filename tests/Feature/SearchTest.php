@@ -12,13 +12,14 @@ use App\Models\Organization;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class SearchTest extends TestCase
 {
     use RefreshDatabase;
 
-    /** @test */
+    #[Test]
     public function it_can_search_customers_by_name_case_insensitively()
     {
         $org = Organization::factory()->create();
@@ -42,7 +43,7 @@ class SearchTest extends TestCase
             ->assertDontSee('Jane Smith');
     }
 
-    /** @test */
+    #[Test]
     public function it_can_search_customers_by_borrower_id()
     {
         $org = Organization::factory()->create();
@@ -65,7 +66,7 @@ class SearchTest extends TestCase
             ->assertSee('John Doe');
     }
 
-    /** @test */
+    #[Test]
     public function it_can_search_loans_by_phone_in_collection_entry()
     {
         $org = Organization::factory()->create();
@@ -97,7 +98,7 @@ class SearchTest extends TestCase
             ->assertDontSee('LOAN-2');
     }
 
-    /** @test */
+    #[Test]
     public function it_resets_pagination_on_search()
     {
         $org = Organization::factory()->create();
@@ -118,7 +119,7 @@ class SearchTest extends TestCase
         // because if it didn't reset, it would be on page 2 of 1 (empty).
     }
 
-    /** @test */
+    #[Test]
     public function it_can_search_collateral_in_vault()
     {
         $org = Organization::factory()->create();

@@ -1,6 +1,6 @@
-<div class="min-h-screen bg-gray-50 py-10 px-4 sm:px-6 lg:px-8">
+<div class="min-h-screen bg-background-light py-10 px-4 sm:px-6 lg:px-8">
     {{-- Fixed Back Button --}}
-    <a href="{{ route('records') }}" class="fixed top-24 right-4 z-40 pl-3 pr-5 py-2 bg-white/30 backdrop-blur-md border border-white/20 rounded-full text-slate-900 hover:bg-white/50 transition-all duration-200 shadow-xl group flex items-center gap-2">
+    <a href="{{ route('records') }}" class="fixed top-24 right-4 z-40 pl-3 pr-5 py-2 bg-white/30 dark:bg-slate-800/30 backdrop-blur-md border border-white/20 dark:border-slate-700/50 rounded-full text-primary dark:text-white hover:bg-white/50 dark:hover:bg-slate-800/50 transition-all duration-200 shadow-xl group flex items-center gap-2">
         <svg class="w-4 h-4 group-hover:-translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
         <span class="text-[10px] font-black uppercase tracking-widest">Go Back</span>
     </a>
@@ -9,8 +9,8 @@
     <div class="max-w-7xl mx-auto mb-10">
         <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
             <div>
-                <h1 class="text-3xl font-black text-slate-900 tracking-tighter uppercase italic">Collection Ledger</h1>
-                <p class="mt-2 text-sm text-slate-500 font-medium">Premium digital workspace for daily repayment and savings management.</p>
+                <h1 class="text-3xl font-black text-primary dark:text-white tracking-tighter uppercase italic">Collection Ledger</h1>
+                <p class="mt-2 text-sm text-slate-500 dark:text-slate-400 font-medium">Premium digital workspace for daily repayment and savings management.</p>
                 <div class="mt-4 flex items-center gap-4">
                     {{-- Week Selector --}}
                     <div class="relative group">
@@ -18,19 +18,19 @@
                             <span class="material-symbols-outlined text-slate-400 text-sm">calendar_view_week</span>
                         </div>
                         <input type="date" wire:model.live="selectedDate" 
-                            class="block w-full pl-9 pr-4 py-1.5 bg-indigo-50 border border-indigo-100 text-indigo-600 rounded-full text-[10px] font-black uppercase tracking-widest focus:outline-none focus:ring-4 focus:ring-indigo-500/5 transition-all shadow-sm">
+                            class="block w-full pl-9 pr-4 py-1.5 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800/50 text-indigo-600 dark:text-indigo-400 rounded-full text-[10px] font-black uppercase tracking-widest focus:outline-none focus:ring-4 focus:ring-indigo-500/5 transition-all shadow-sm">
                     </div>
-                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">Viewing: {{ $currentWeekInfo }}</span>
+                    <span class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest italic">Viewing: {{ $currentWeekInfo }}</span>
                 </div>
             </div>
-            <div class="flex items-center gap-4 bg-white p-2 rounded-sm border border-slate-200 shadow-sm">
-                <div class="px-4 py-2 border-r border-slate-100 text-center">
-                    <span class="block text-[10px] font-black text-slate-400 uppercase tracking-widest">System Date</span>
-                    <span class="text-sm font-bold text-slate-900">{{ fetch_data(\App\Models\Organization::current()?->getSystemTime()?->format('l, d F Y') ?? null) }}</span>
+            <div class="flex items-center gap-4 bg-surface p-2 rounded-sm border border-border-main shadow-sm">
+                <div class="px-4 py-2 border-r border-border-main text-center">
+                    <span class="block text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">System Date</span>
+                    <span class="text-sm font-bold text-primary dark:text-white">{{ fetch_data(\App\Models\Organization::current()?->getSystemTime()?->format('l, d F Y') ?? null) }}</span>
                 </div>
                 <div class="px-4 py-2 text-center">
-                    <span class="block text-[10px] font-black text-slate-400 uppercase tracking-widest">Status</span>
-                    <span class="inline-flex items-center gap-1.5 text-[10px] font-black text-emerald-600 uppercase tracking-widest">
+                    <span class="block text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Status</span>
+                    <span class="inline-flex items-center gap-1.5 text-[10px] font-black text-emerald-600 dark:text-emerald-500 uppercase tracking-widest">
                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                         Operational
                     </span>
@@ -43,39 +43,39 @@
     <div class="max-w-7xl mx-auto mb-12">
         <div class="flex flex-wrap gap-6">
             {{-- Total Repayments Week --}}
-            <div class="flex-1 min-w-[240px] bg-white p-6 rounded-sm border border-slate-200 shadow-sm group hover:border-emerald-200 transition-colors">
+            <div class="flex-1 min-w-[240px] bg-surface p-6 rounded-sm border border-border-main shadow-sm group hover:border-emerald-200 dark:hover:border-emerald-900/50 transition-colors">
                 <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Weekly Repayments</h3>
-                    <span class="material-symbols-outlined text-slate-200 text-sm group-hover:text-emerald-400 transition-colors">payments</span>
+                    <h3 class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">Weekly Repayments</h3>
+                    <span class="material-symbols-outlined text-slate-200 dark:text-slate-800 text-sm group-hover:text-emerald-400 transition-colors">payments</span>
                 </div>
-                <p class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">{{ fetch_data($stats['total_repayments_week']?->format() ?? null) }}</p>
+                <p class="text-xl sm:text-2xl font-black text-primary dark:text-white tracking-tight">{{ fetch_data($stats['total_repayments_week']?->format() ?? null) }}</p>
             </div>
 
             {{-- Weekly Due --}}
-            <div class="flex-1 min-w-[240px] bg-white p-6 rounded-sm border border-slate-200 shadow-sm group hover:border-amber-200 transition-colors">
+            <div class="flex-1 min-w-[240px] bg-surface p-6 rounded-sm border border-border-main shadow-sm group hover:border-amber-200 dark:hover:border-amber-900/50 transition-colors">
                 <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Weekly Due</h3>
-                    <span class="material-symbols-outlined text-slate-200 text-sm group-hover:text-amber-400 transition-colors">event_repeat</span>
+                    <h3 class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">Weekly Due</h3>
+                    <span class="material-symbols-outlined text-slate-200 dark:text-slate-800 text-sm group-hover:text-amber-400 transition-colors">event_repeat</span>
                 </div>
-                <p class="text-xl sm:text-2xl font-black text-amber-600 tracking-tight">{{ fetch_data($stats['weekly_due']?->format() ?? null) }}</p>
+                <p class="text-xl sm:text-2xl font-black text-amber-600 dark:text-amber-500 tracking-tight">{{ fetch_data($stats['weekly_due']?->format() ?? null) }}</p>
             </div>
 
             {{-- Monthly Due --}}
-            <div class="flex-1 min-w-[240px] bg-white p-6 rounded-sm border border-slate-200 shadow-sm group hover:border-purple-200 transition-colors">
+            <div class="flex-1 min-w-[240px] bg-surface p-6 rounded-sm border border-border-main shadow-sm group hover:border-purple-200 dark:hover:border-purple-900/50 transition-colors">
                 <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Monthly Due</h3>
-                    <span class="material-symbols-outlined text-slate-200 text-sm group-hover:text-purple-400 transition-colors">calendar_month</span>
+                    <h3 class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">Monthly Due</h3>
+                    <span class="material-symbols-outlined text-slate-200 dark:text-slate-800 text-sm group-hover:text-purple-400 transition-colors">calendar_month</span>
                 </div>
-                <p class="text-xl sm:text-2xl font-black text-purple-600 tracking-tight">{{ fetch_data($stats['monthly_due']?->format() ?? null) }}</p>
+                <p class="text-xl sm:text-2xl font-black text-purple-600 dark:text-purple-500 tracking-tight">{{ fetch_data($stats['monthly_due']?->format() ?? null) }}</p>
             </div>
 
             {{-- Overdue Amount --}}
-            <div class="flex-1 min-w-[240px] bg-white p-6 rounded-sm border border-slate-200 shadow-sm group hover:border-rose-200 transition-colors">
+            <div class="flex-1 min-w-[240px] bg-surface p-6 rounded-sm border border-border-main shadow-sm group hover:border-rose-200 dark:hover:border-rose-900/50 transition-colors">
                 <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Overdue Acc.</h3>
-                    <span class="material-symbols-outlined text-slate-200 text-sm group-hover:text-rose-400 transition-colors">warning</span>
+                    <h3 class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">Overdue Acc.</h3>
+                    <span class="material-symbols-outlined text-slate-200 dark:text-slate-800 text-sm group-hover:text-rose-400 transition-colors">warning</span>
                 </div>
-                <p class="text-xl sm:text-2xl font-black text-rose-600 tracking-tight">{{ fetch_data($stats['overdue_amount']?->format() ?? null) }}</p>
+                <p class="text-xl sm:text-2xl font-black text-rose-600 dark:text-rose-500 tracking-tight">{{ fetch_data($stats['overdue_amount']?->format() ?? null) }}</p>
             </div>
         </div>
     </div>
@@ -83,17 +83,17 @@
     {{-- Collection Group Cards --}}
     <div class="max-w-7xl mx-auto">
         <div class="flex items-center justify-between mb-8">
-            <h2 class="text-xl font-black text-slate-900 tracking-tight uppercase">Collection Groups</h2>
+            <h2 class="text-xl font-black text-primary dark:text-white tracking-tight uppercase">Collection Groups</h2>
             <div class="flex items-center gap-2">
-                <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">Notebook View</span>
-                <span class="material-symbols-outlined text-slate-300">menu_book</span>
+                <span class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest italic">Notebook View</span>
+                <span class="material-symbols-outlined text-slate-300 dark:text-slate-700">menu_book</span>
             </div>
         </div>
 
         <div class="grid grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-8">
             @foreach($groups as $group)
                 <a href="{{ route('ledger.group', ['group' => $group['name']]) }}" 
-                   class="group block bg-white rounded-sm border border-slate-200 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden relative">
+                   class="group block bg-surface rounded-sm border border-border-main shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden relative">
                     
                     {{-- Passed Day Indicator --}}
                     @if($group['is_passed'] && $group['unpaid_indicator'] > 0)
@@ -103,12 +103,12 @@
                     @endif
 
                     {{-- Card Header --}}
-                    <div class="px-6 py-5 border-b border-slate-50 flex items-center justify-between {{ isset($group['is_monthly']) ? 'bg-indigo-50/30' : ($group['is_passed'] ? 'bg-slate-100/50' : 'bg-slate-50/30') }}">
+                    <div class="px-6 py-5 border-b border-border-main flex items-center justify-between {{ isset($group['is_monthly']) ? 'bg-indigo-50/30 dark:bg-indigo-900/10' : ($group['is_passed'] ? 'bg-background-light/50' : 'bg-background-light/30') }}">
                         <div>
-                            <h3 class="text-lg font-black text-slate-900 tracking-tight uppercase">{{ $group['name'] }}</h3>
-                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">{{ $group['members_count'] }} Members</span>
+                            <h3 class="text-lg font-black text-primary dark:text-white tracking-tight uppercase">{{ $group['name'] }}</h3>
+                            <span class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">{{ $group['members_count'] }} Members</span>
                         </div>
-                        <div class="w-12 h-12 rounded-sm border border-slate-200 bg-white flex items-center justify-center text-slate-400 group-hover:text-indigo-600 group-hover:border-indigo-100 transition-colors">
+                        <div class="w-12 h-12 rounded-sm border border-border-main bg-surface flex items-center justify-center text-slate-400 group-hover:text-indigo-600 group-hover:border-indigo-100 transition-colors">
                             <span class="material-symbols-outlined text-2xl">arrow_forward</span>
                         </div>
                     </div>
@@ -117,27 +117,27 @@
                     <div class="p-6 space-y-6">
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <span class="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Week's Collection</span>
-                                <p class="text-sm font-black text-slate-900 tracking-tight">₦{{ fetch_data($group['collected_amount']?->format() ?? null) }}</p>
+                                <span class="block text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Week's Collection</span>
+                                <p class="text-sm font-black text-primary dark:text-white tracking-tight">₦{{ fetch_data($group['collected_amount']?->format() ?? null) }}</p>
                             </div>
                             <div class="text-right">
-                                <span class="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Overdue</span>
-                                <p class="text-sm font-black text-rose-600 tracking-tight">₦{{ fetch_data($group['overdue_amount']?->format() ?? null) }}</p>
+                                <span class="block text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Total Overdue</span>
+                                <p class="text-sm font-black text-rose-600 dark:text-rose-500 tracking-tight">₦{{ fetch_data($group['overdue_amount']?->format() ?? null) }}</p>
                             </div>
                         </div>
 
                         <div>
                             <div class="flex items-center justify-between mb-2">
-                                <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Week's Coverage</span>
-                                <span class="text-[10px] font-black text-slate-900 uppercase tracking-widest">{{ $group['performance'] }}%</span>
+                                <span class="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Week's Coverage</span>
+                                <span class="text-[10px] font-black text-primary dark:text-white uppercase tracking-widest">{{ $group['performance'] }}%</span>
                             </div>
-                            <div class="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                            <div class="h-1.5 w-full bg-background-light rounded-full overflow-hidden">
                                 <div class="h-full {{ $group['performance'] > 80 ? 'bg-emerald-500' : ($group['performance'] > 50 ? 'bg-amber-500' : 'bg-rose-500') }}" 
                                      style="width: {{ $group['performance'] }}%"></div>
                             </div>
                         </div>
 
-                        <div class="pt-4 border-t border-slate-50 flex items-center justify-between">
+                        <div class="pt-4 border-t border-border-main flex items-center justify-between">
                             <div class="flex items-center gap-1">
                                 <span class="material-symbols-outlined text-sm {{ $group['unpaid_indicator'] > 0 ? 'text-rose-500' : 'text-emerald-500' }}">
                                     {{ $group['unpaid_indicator'] > 0 ? 'pending_actions' : 'check_circle' }}
@@ -146,7 +146,7 @@
                                     {{ $group['unpaid_indicator'] }} Yet to Pay
                                 </span>
                             </div>
-                            <span class="text-[10px] font-black text-slate-300 uppercase tracking-widest italic group-hover:text-indigo-400 transition-colors">
+                            <span class="text-[10px] font-black text-slate-300 dark:text-slate-700 uppercase tracking-widest italic group-hover:text-indigo-400 transition-colors">
                                 {{ $group['members_count'] - $group['unpaid_indicator'] }} Members Paid
                             </span>
                         </div>
@@ -156,23 +156,23 @@
         </div>
 
         {{-- Week Summary Row --}}
-        <div class="mt-12 pt-12 border-t border-slate-200">
-            <h2 class="text-xl font-black text-slate-900 tracking-tight uppercase mb-8">Week Performance Summary</h2>
+        <div class="mt-12 pt-12 border-t border-border-main">
+            <h2 class="text-xl font-black text-primary dark:text-white tracking-tight uppercase mb-8">Week Performance Summary</h2>
             <div class="grid grid-cols-2 gap-8">
-                <div class="bg-emerald-50 p-6 rounded-sm border border-emerald-100 shadow-sm group hover:shadow-lg transition-all text-center sm:text-left">
+                <div class="bg-emerald-50 dark:bg-emerald-900/10 p-6 rounded-sm border border-emerald-100 dark:border-emerald-900/30 shadow-sm group hover:shadow-lg transition-all text-center sm:text-left">
                     <div class="flex items-center justify-between mb-3">
-                        <span class="text-[9px] font-black text-emerald-600 uppercase tracking-widest">Repayment Total</span>
+                        <span class="text-[9px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">Repayment Total</span>
                         <span class="material-symbols-outlined text-emerald-400 group-hover:rotate-12 transition-transform hidden sm:block">trending_up</span>
                     </div>
-                    <p class="text-2xl font-black text-emerald-900 tracking-tight">{{ fetch_data($stats['total_repayments_week']?->format() ?? null) }}</p>
+                    <p class="text-2xl font-black text-emerald-900 dark:text-emerald-100 tracking-tight">{{ fetch_data($stats['total_repayments_week']?->format() ?? null) }}</p>
                 </div>
 
-                <div class="bg-blue-50 p-6 rounded-sm border border-blue-100 shadow-sm group hover:shadow-lg transition-all text-center sm:text-left">
+                <div class="bg-blue-50 dark:bg-blue-900/10 p-6 rounded-sm border border-blue-100 dark:border-blue-900/30 shadow-sm group hover:shadow-lg transition-all text-center sm:text-left">
                     <div class="flex items-center justify-between mb-3">
-                        <span class="text-[9px] font-black text-blue-600 uppercase tracking-widest">Org Savings Balance</span>
+                        <span class="text-[9px] font-black text-blue-600 dark:text-blue-400 uppercase tracking-widest">Org Savings Balance</span>
                         <span class="material-symbols-outlined text-blue-400 group-hover:rotate-12 transition-transform hidden sm:block">account_balance_wallet</span>
                     </div>
-                    <p class="text-2xl font-black text-blue-900 tracking-tight">{{ fetch_data($stats['total_savings_all']?->format() ?? null) }}</p>
+                    <p class="text-2xl font-black text-blue-900 dark:text-blue-100 tracking-tight">{{ fetch_data($stats['total_savings_all']?->format() ?? null) }}</p>
                 </div>
             </div>
         </div>

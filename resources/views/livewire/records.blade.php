@@ -100,73 +100,73 @@
     <div class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-3">
         {{-- Loan Disbursement Record --}}
         <a href="{{ route('loan.disbursement-register') }}" 
-           class="group flex items-center gap-3 bg-white p-3 rounded-lg border border-slate-200 hover:border-emerald-500/50 hover:shadow-md transition-all duration-200">
-            <div class="w-10 h-10 bg-emerald-50 rounded flex items-center justify-center text-emerald-600 group-hover:bg-emerald-600 group-hover:text-white transition-colors duration-200">
+           class="group flex items-center gap-3 bg-surface p-3 rounded-lg border border-border-main hover:border-emerald-500/50 hover:shadow-md transition-all duration-200">
+            <div class="w-10 h-10 bg-emerald-50 dark:bg-emerald-900/20 rounded flex items-center justify-center text-emerald-600 dark:text-emerald-400 group-hover:bg-emerald-600 group-hover:text-white transition-colors duration-200">
                 <span class="material-symbols-outlined text-xl">payments</span>
             </div>
             <div>
-                <h3 class="text-xs font-bold text-slate-800">Loan Disbursement</h3>
-                <span class="text-[9px] text-emerald-600 font-black uppercase tracking-wider">Active Register</span>
+                <h3 class="text-xs font-bold text-slate-800 dark:text-white">Loan Disbursement</h3>
+                <span class="text-[9px] text-emerald-600 dark:text-emerald-500 font-black uppercase tracking-wider">Active Register</span>
             </div>
         </a>
 
         {{-- Cash Book --}}
         <a href="{{ route('cashbook') }}" 
-           class="group flex items-center gap-3 bg-white p-3 rounded-lg border border-slate-200 hover:border-amber-500/50 hover:shadow-md transition-all duration-200">
-            <div class="w-10 h-10 bg-amber-50 rounded flex items-center justify-center text-amber-600 group-hover:bg-amber-600 group-hover:text-white transition-colors duration-200">
+           class="group flex items-center gap-3 bg-surface p-3 rounded-lg border border-border-main hover:border-amber-500/50 hover:shadow-md transition-all duration-200">
+            <div class="w-10 h-10 bg-amber-50 dark:bg-amber-900/20 rounded flex items-center justify-center text-amber-600 dark:text-amber-400 group-hover:bg-amber-600 group-hover:text-white transition-colors duration-200">
                 <span class="material-symbols-outlined text-xl">account_balance_wallet</span>
             </div>
             <div>
-                <h3 class="text-xs font-bold text-slate-800">Cash Book</h3>
-                <span class="text-[9px] text-amber-600 font-black uppercase tracking-wider tracking-wider">Financial Ledger</span>
+                <h3 class="text-xs font-bold text-slate-800 dark:text-white">Cash Book</h3>
+                <span class="text-[9px] text-amber-600 dark:text-amber-500 font-black uppercase tracking-wider tracking-wider">Financial Ledger</span>
             </div>
         </a>
 
         {{-- Daily Savings Record --}}
         <a href="{{ route('daily-savings.record') }}" 
-           class="group flex items-center gap-3 bg-white p-3 rounded-lg border border-slate-200 hover:border-blue-500/50 hover:shadow-md transition-all duration-200">
-            <div class="w-10 h-10 bg-blue-50 rounded flex items-center justify-center text-blue-600 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-200">
+           class="group flex items-center gap-3 bg-surface p-3 rounded-lg border border-border-main hover:border-blue-500/50 hover:shadow-md transition-all duration-200">
+            <div class="w-10 h-10 bg-blue-50 dark:bg-blue-900/20 rounded flex items-center justify-center text-blue-600 dark:text-blue-400 group-hover:bg-blue-600 group-hover:text-white transition-colors duration-200">
                 <span class="material-symbols-outlined text-xl">event_repeat</span>
             </div>
             <div>
-                <h3 class="text-xs font-bold text-slate-800">Daily Savings</h3>
-                <span class="text-[9px] text-blue-600 font-black uppercase tracking-wider">High Frequency</span>
+                <h3 class="text-xs font-bold text-slate-800 dark:text-white">Daily Savings</h3>
+                <span class="text-[9px] text-blue-600 dark:text-blue-500 font-black uppercase tracking-wider">High Frequency</span>
             </div>
         </a>
 
         {{-- Repayment/Savings Record --}}
         <a href="{{ route('ledger.dashboard') }}" 
-           class="group flex items-center gap-3 bg-white p-3 rounded-lg border border-slate-200 hover:border-indigo-500/50 hover:shadow-md transition-all duration-200">
-            <div class="w-10 h-10 bg-indigo-50 rounded flex items-center justify-center text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-200">
+           class="group flex items-center gap-3 bg-surface p-3 rounded-lg border border-border-main hover:border-indigo-500/50 hover:shadow-md transition-all duration-200">
+            <div class="w-10 h-10 bg-indigo-50 dark:bg-indigo-900/20 rounded flex items-center justify-center text-indigo-600 dark:text-indigo-400 group-hover:bg-indigo-600 group-hover:text-white transition-colors duration-200">
                 <span class="material-symbols-outlined text-xl">receipt_long</span>
             </div>
             <div>
-                <h3 class="text-xs font-bold text-slate-800">Repayment/Savings</h3>
-                <span class="text-[9px] text-indigo-600 font-black uppercase tracking-wider">Collection Ledger</span>
+                <h3 class="text-xs font-bold text-slate-800 dark:text-white">Repayment/Savings</h3>
+                <span class="text-[9px] text-indigo-600 dark:text-indigo-500 font-black uppercase tracking-wider">Collection Ledger</span>
             </div>
         </a>
 
         {{-- Savings Withdrawal --}}
         <a href="{{ route('savings.withdrawals') }}" 
-           class="group flex items-center gap-3 bg-white p-3 rounded-lg border border-slate-200 hover:border-rose-500/50 hover:shadow-md transition-all duration-200">
-            <div class="w-10 h-10 bg-rose-50 rounded flex items-center justify-center text-rose-600 group-hover:bg-rose-600 group-hover:text-white transition-colors duration-200">
+           class="group flex items-center gap-3 bg-surface p-3 rounded-lg border border-border-main hover:border-rose-500/50 hover:shadow-md transition-all duration-200">
+            <div class="w-10 h-10 bg-rose-50 dark:bg-rose-900/20 rounded flex items-center justify-center text-rose-600 dark:text-rose-400 group-hover:bg-rose-600 group-hover:text-white transition-colors duration-200">
                 <span class="material-symbols-outlined text-xl">outbox</span>
             </div>
             <div>
-                <h3 class="text-xs font-bold text-slate-800">Savings Withdrawal</h3>
-                <span class="text-[9px] text-rose-600 font-black uppercase tracking-wider">Active Register</span>
+                <h3 class="text-xs font-bold text-slate-800 dark:text-white">Savings Withdrawal</h3>
+                <span class="text-[9px] text-rose-600 dark:text-rose-500 font-black uppercase tracking-widest">Active Register</span>
             </div>
         </a>
 
         {{-- Transactions Hub --}}
         <a href="{{ route('transactions') }}" 
-           class="group flex items-center gap-3 bg-white p-3 rounded-lg border border-slate-200 hover:border-primary/50 hover:shadow-md transition-all duration-200">
-            <div class="w-10 h-10 bg-primary/5 rounded flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-colors duration-200">
+           class="group flex items-center gap-3 bg-surface p-3 rounded-lg border border-border-main hover:border-primary/50 hover:shadow-md transition-all duration-200">
+            <div class="w-10 h-10 bg-primary/5 dark:bg-primary/20 rounded flex items-center justify-center text-primary dark:text-primary-light group-hover:bg-primary group-hover:text-white transition-colors duration-200">
                 <span class="material-symbols-outlined text-xl">receipt_long</span>
             </div>
             <div class="flex flex-col">
-                <h3 class="text-xs font-bold text-slate-800">Transaction History</h3>
-                <span class="text-[9px] text-slate-400 font-black uppercase tracking-wider">Master Ledger</span>
+                <h3 class="text-xs font-bold text-slate-800 dark:text-white">Transaction History</h3>
+                <span class="text-[9px] text-slate-400 dark:text-slate-500 font-black uppercase tracking-wider">Master Ledger</span>
             </div>
         </a>
     </div>

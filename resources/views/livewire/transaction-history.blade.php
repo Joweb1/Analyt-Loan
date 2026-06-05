@@ -25,8 +25,8 @@
             <div class="flex flex-wrap items-center gap-6">
                 {{-- Period Selector --}}
                 <div class="flex flex-col gap-2">
-                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Select Period</label>
-                    <select wire:model.live="period" class="bg-slate-50 dark:bg-zinc-800 border-none rounded-xl text-xs font-black px-5 py-3.5 outline-none focus:ring-4 focus:ring-primary/10 transition-all min-w-[180px]">
+                    <label class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest px-1">Select Period</label>
+                    <select wire:model.live="period" class="bg-background-light dark:bg-zinc-800 border-none rounded-xl text-xs font-black px-5 py-3.5 outline-none focus:ring-4 focus:ring-primary/10 transition-all min-w-[180px] text-primary dark:text-white">
                         <option value="today">Today</option>
                         <option value="this_week">This Week</option>
                         <option value="this_month">This Month</option>
@@ -39,8 +39,8 @@
 
                 {{-- Type Selector --}}
                 <div class="flex flex-col gap-2">
-                    <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Transaction Type</label>
-                    <select wire:model.live="type" class="bg-slate-50 dark:bg-zinc-800 border-none rounded-xl text-xs font-black px-5 py-3.5 outline-none focus:ring-4 focus:ring-primary/10 transition-all min-w-[180px]">
+                    <label class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest px-1">Transaction Type</label>
+                    <select wire:model.live="type" class="bg-background-light dark:bg-zinc-800 border-none rounded-xl text-xs font-black px-5 py-3.5 outline-none focus:ring-4 focus:ring-primary/10 transition-all min-w-[180px] text-primary dark:text-white">
                         @foreach($types as $val => $label)
                             <option value="{{ $val }}">{{ $label }}</option>
                         @endforeach
@@ -49,11 +49,11 @@
 
                 @if($period === 'custom')
                     <div class="flex flex-col gap-2 animate-in fade-in slide-in-from-left-4">
-                        <label class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Date Range</label>
+                        <label class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest px-1">Date Range</label>
                         <div class="flex items-center gap-2">
-                            <input type="date" wire:model.live="customStart" class="bg-slate-50 dark:bg-zinc-800 border-none rounded-xl text-xs font-black px-4 py-3 focus:ring-4 focus:ring-primary/10 transition-all">
-                            <span class="text-slate-300">to</span>
-                            <input type="date" wire:model.live="customEnd" class="bg-slate-50 dark:bg-zinc-800 border-none rounded-xl text-xs font-black px-4 py-3 focus:ring-4 focus:ring-primary/10 transition-all">
+                            <input type="date" wire:model.live="customStart" class="bg-background-light dark:bg-zinc-800 border-none rounded-xl text-xs font-black px-4 py-3 focus:ring-4 focus:ring-primary/10 transition-all text-primary dark:text-white">
+                            <span class="text-slate-300 dark:text-slate-600">to</span>
+                            <input type="date" wire:model.live="customEnd" class="bg-background-light dark:bg-zinc-800 border-none rounded-xl text-xs font-black px-4 py-3 focus:ring-4 focus:ring-primary/10 transition-all text-primary dark:text-white">
                         </div>
                     </div>
                 @endif

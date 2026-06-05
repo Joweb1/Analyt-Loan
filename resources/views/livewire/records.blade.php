@@ -6,7 +6,7 @@
 
     <div class="mb-8 px-2 flex flex-wrap gap-4">
         {{-- Total Savings Balance Card --}}
-        <div class="flex-1 min-w-[280px] bg-white dark:bg-[#1a1f2b] p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm relative group overflow-hidden">
+        <div class="flex-1 min-w-[280px] bg-white dark:bg-[#1a1f2b] p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm relative group">
             <div class="flex justify-between items-start mb-4">
                 <div>
                     <h3 class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-1">Total Savings</h3>
@@ -45,13 +45,13 @@
                     <input type="date" wire:model.live="customSavingsEnd" class="flex-1 text-[10px] p-2 bg-slate-50 dark:bg-slate-800 border-none rounded-lg font-bold">
                 </div>
             @endif
-            <div class="absolute -right-4 -bottom-4 opacity-[0.03] group-hover:opacity-[0.06] transition-opacity">
+            <div class="absolute -right-4 -bottom-4 opacity-[0.03] group-hover:opacity-[0.06] transition-opacity overflow-hidden size-32 pointer-events-none rounded-2xl">
                 <span class="material-symbols-outlined text-[100px]">account_balance_wallet</span>
             </div>
         </div>
 
         {{-- Total Daily Savings (Thrift) Card --}}
-        <div class="flex-1 min-w-[280px] bg-white dark:bg-[#1a1f2b] p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm relative group overflow-hidden">
+        <div class="flex-1 min-w-[280px] bg-white dark:bg-[#1a1f2b] p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm relative group">
             <div class="flex justify-between items-start mb-4">
                 <div>
                     <h3 class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-1">Total Daily Thrift</h3>
@@ -90,11 +90,12 @@
                     <input type="date" wire:model.live="customThriftEnd" class="flex-1 text-[10px] p-2 bg-slate-50 dark:bg-slate-800 border-none rounded-lg font-bold">
                 </div>
             @endif
-            <div class="absolute -right-4 -bottom-4 opacity-[0.03] group-hover:opacity-[0.06] transition-opacity">
+            <div class="absolute -right-4 -bottom-4 opacity-[0.03] group-hover:opacity-[0.06] transition-opacity overflow-hidden size-32 pointer-events-none rounded-2xl">
                 <span class="material-symbols-outlined text-[100px]">savings</span>
             </div>
         </div>
     </div>
+
 
     <div class="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-3">
         {{-- Loan Disbursement Record --}}

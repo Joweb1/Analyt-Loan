@@ -6,7 +6,7 @@
         </div>
     </div>
 
-    <div class="bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-slate-100 dark:border-zinc-800 overflow-hidden">
+    <div class="bg-white dark:bg-zinc-900 rounded-xl shadow-sm border border-border-main overflow-hidden">
         @if($proofs->isEmpty())
             <div class="p-12 text-center">
                 <div class="w-16 h-16 bg-slate-50 dark:bg-zinc-800 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -19,7 +19,7 @@
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr class="border-b border-slate-100 dark:border-zinc-800 text-xs uppercase text-slate-500 bg-slate-50 dark:bg-zinc-800/50">
+                        <tr class="border-b border-border-main text-xs uppercase text-slate-500 bg-slate-50 dark:bg-zinc-800/50">
                             <th class="px-6 py-4 font-bold">Date</th>
                             <th class="px-6 py-4 font-bold">Borrower</th>
                             <th class="px-6 py-4 font-bold">Amount</th>
@@ -72,7 +72,7 @@
                     </tbody>
                 </table>
             </div>
-            <div class="p-4 border-t border-slate-100 dark:border-zinc-800">
+            <div class="p-4 border-t border-border-main">
                 {{ fetch_data($proofs?->links() ?? null) }}
             </div>
         @endif

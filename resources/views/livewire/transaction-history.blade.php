@@ -13,7 +13,7 @@
             </div>
             
             <div class="flex flex-wrap items-center gap-3">
-                <button onclick="window.print()" class="px-6 py-3 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-sm hover:bg-slate-50 transition-all flex items-center gap-2">
+                <button onclick="window.print()" class="px-6 py-3 bg-surface border border-border-main text-slate-700 dark:text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-sm hover:bg-slate-50 transition-all flex items-center gap-2">
                     <span class="material-symbols-outlined text-lg">print</span>
                     Print Ledger
                 </button>
@@ -21,7 +21,7 @@
         </div>
 
         {{-- Filter Bar --}}
-        <div class="bg-white dark:bg-[#1a1f2b] rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 p-6 mb-8">
+        <div class="bg-surface rounded-2xl shadow-sm border border-border-main p-6 mb-8">
             <div class="flex flex-wrap items-center gap-6">
                 {{-- Period Selector --}}
                 <div class="flex flex-col gap-2">
@@ -61,10 +61,10 @@
         </div>
 
         {{-- Transactions Table --}}
-        <div class="bg-white dark:bg-[#1a1f2b] rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden mb-12">
+        <div class="bg-surface rounded-2xl border border-border-main shadow-sm overflow-hidden mb-12">
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-sm print:text-[10px]">
-                    <thead class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-100 dark:border-slate-800">
+                    <thead class="bg-slate-50 dark:bg-slate-800/50 border-b border-border-main">
                         <tr>
                             <th class="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Date & Ref</th>
                             <th class="px-6 py-5 text-[10px] font-black text-slate-400 uppercase tracking-widest">Type</th>
@@ -134,7 +134,7 @@
                 </table>
             </div>
             @if($transactions->hasPages())
-                <div class="px-6 py-5 bg-slate-50/50 dark:bg-slate-800/20 border-t border-slate-100 dark:border-slate-800">
+                <div class="px-6 py-5 bg-slate-50/50 dark:bg-slate-800/20 border-t border-border-main">
                     {{ fetch_data($transactions?->links() ?? null) }}
                 </div>
             @endif

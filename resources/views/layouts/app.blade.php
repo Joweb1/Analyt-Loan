@@ -8,6 +8,14 @@
     <x-page-title :title="$title ?? null" />
     <x-favicon />
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script>
+        // On page load or when changing themes, best to add inline in `head` to avoid FOUC
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark')
+        } else {
+            document.documentElement.classList.remove('dark')
+        }
+    </script>
     <style>
         /* Custom scrollbar for webkit */
         ::-webkit-scrollbar {
@@ -66,7 +74,7 @@
         }
     </style>
 </head>
-<body class="bg-background-light dark:bg-background-dark font-display text-primary h-screen flex overflow-hidden selection:bg-primary/10">
+<body class="bg-background-light font-display text-primary h-screen flex overflow-hidden selection:bg-primary/10 transition-colors duration-300">
 <!-- Immediate State Script -->
 <script>
     (function() {
@@ -95,7 +103,7 @@
 </style>
 
 <!-- Sidebar -->
-<aside id="sidebar" wire:ignore.self data-expanded="false" class="bg-white dark:bg-[#1a1f2b] h-full flex flex-col border-slate-100 dark:border-slate-800 shadow-soft overflow-hidden">
+<aside id="sidebar" wire:ignore.self data-expanded="false" class="bg-surface h-full flex flex-col border-border-main shadow-soft overflow-hidden transition-all duration-300">
     @php
         $org = \App\Models\Organization::current();
     @endphp
@@ -214,6 +222,14 @@
                 @endunless
             @endcan
         @endif
+
+        <button onclick="toggleTheme()" class="flex items-center gap-3 px-3 py-3 rounded-xl text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400 transition-all group hover:text-primary shrink-0">
+            <span class="material-symbols-outlined group-hover:scale-110 transition-transform block dark:hidden">dark_mode</span>
+            <span class="material-symbols-outlined group-hover:scale-110 transition-transform hidden dark:block">light_mode</span>
+            <span class="sidebar-nav-text text-sm font-medium dark:hidden">Dark Mode</span>
+            <span class="sidebar-nav-text text-sm font-medium hidden dark:block">Light Mode</span>
+        </button>
+
         <button id="hideSidebarBtn" class="flex items-center gap-3 px-3 py-3 rounded-xl text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 dark:text-slate-400 transition-all group hover:text-primary mt-auto shrink-0">
             <span class="material-symbols-outlined group-hover:scale-110 transition-transform">arrow_back_ios</span>
             <span class="sidebar-nav-text text-sm font-medium">Collapse</span>
@@ -277,6 +293,16 @@
 <x-custom-alert />
 @stack('scripts')
 <script>
+    function toggleTheme() {
+        if (document.documentElement.classList.contains('dark')) {
+            document.documentElement.classList.remove('dark');
+            localStorage.setItem('theme', 'light');
+        } else {
+            document.documentElement.classList.add('dark');
+            localStorage.setItem('theme', 'dark');
+        }
+    }
+
     document.addEventListener('keydown', function(e) {
         if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
             e.preventDefault();

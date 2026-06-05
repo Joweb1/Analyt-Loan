@@ -6,13 +6,13 @@
                 <h2 class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Add Collateral</h2>
                 <p class="text-sm text-slate-500 font-medium">Link a new asset to a loan or register as company property.</p>
             </div>
-            <a href="{{ route('vault') }}" class="px-4 py-2 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 transition-all flex items-center gap-2">
+            <a href="{{ route('vault') }}" class="px-4 py-2 bg-surface border border-border-main rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 transition-all flex items-center gap-2">
                 <span class="material-symbols-outlined text-lg">arrow_back</span>
                 Back to Vault
             </a>
         </div>
 
-        <div class="bg-white dark:bg-[#1a1f2b] rounded-3xl p-8 shadow-sm border border-slate-100 dark:border-slate-800 space-y-8">
+        <div class="bg-surface rounded-3xl p-8 shadow-sm border border-border-main space-y-8">
             <!-- Search Section -->
             <div class="space-y-4">
                 <label class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider">Find Loan Profile</label>
@@ -22,9 +22,9 @@
                 </div>
 
                 @if(!empty($searchQuery))
-                    <div class="bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800 overflow-hidden">
+                    <div class="bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-border-main overflow-hidden">
                         @forelse($searchedLoans as $loan)
-                            <button wire:click="selectLoan('{{ fetch_data($loan?->id ?? null) }}')" class="w-full text-left p-4 hover:bg-white dark:hover:bg-slate-800 border-b border-slate-100 dark:border-slate-800 last:border-0 transition-colors group">
+                            <button wire:click="selectLoan('{{ fetch_data($loan?->id ?? null) }}')" class="w-full text-left p-4 hover:bg-white dark:hover:bg-slate-800 border-b border-border-main last:border-0 transition-colors group">
                                 <div class="flex justify-between items-center">
                                     <div>
                                         <p class="text-sm font-bold text-slate-900 dark:text-white group-hover:text-primary transition-colors">{{ fetch_data($loan?->borrower?->user?->name ?? null) }}</p>
@@ -43,9 +43,9 @@
             </div>
 
             <div class="relative flex py-2 items-center">
-                <div class="flex-grow border-t border-slate-100 dark:border-slate-800"></div>
+                <div class="flex-grow border-t border-border-main"></div>
                 <span class="flex-shrink-0 mx-4 text-slate-300 text-xs font-bold uppercase">OR</span>
-                <div class="flex-grow border-t border-slate-100 dark:border-slate-800"></div>
+                <div class="flex-grow border-t border-border-main"></div>
             </div>
 
             <!-- Branch Asset Option -->
@@ -75,14 +75,14 @@
                     @endif
                 </p>
             </div>
-            <button onclick="history.back()" class="px-4 py-2 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 transition-all flex items-center gap-2">
+            <button onclick="history.back()" class="px-4 py-2 bg-surface border border-border-main rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-50 transition-all flex items-center gap-2">
                 <span class="material-symbols-outlined text-lg">arrow_back</span>
                 Return
             </button>
         </div>
 
         <!-- Form Card -->
-        <div class="bg-white dark:bg-[#1a1f2b] rounded-3xl p-8 shadow-sm border border-slate-100 dark:border-slate-800">
+        <div class="bg-surface rounded-3xl p-8 shadow-sm border border-border-main">
             <form wire:submit.prevent="save" class="space-y-8">
                 <!-- Asset Info -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -100,7 +100,7 @@
                                 <span class="material-symbols-outlined text-lg text-slate-500">unfold_more</span>
                             </button>
                             
-                            <div x-show="open" @click.outside="open = false" class="absolute z-20 mt-2 w-full bg-white dark:bg-[#1a1f2b] rounded-xl border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden" style="display: none;">
+                            <div x-show="open" @click.outside="open = false" class="absolute z-20 mt-2 w-full bg-surface rounded-xl border border-border-main shadow-xl overflow-hidden" style="display: none;">
                                 <div class="max-h-48 overflow-y-auto py-1 custom-scrollbar">
                                     @foreach(['Vehicle', 'Real Estate', 'Jewelry', 'Electronics', 'Investment', 'Other'] as $option)
                                         <button @click="$wire.set('type', '{{ $option }}'); open = false" type="button" class="w-full px-4 py-2.5 text-left hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center justify-between transition-colors group">
@@ -127,7 +127,7 @@
                                 <span class="material-symbols-outlined text-lg text-slate-500">unfold_more</span>
                             </button>
 
-                            <div x-show="open" @click.outside="open = false" class="absolute z-20 mt-2 w-full bg-white dark:bg-[#1a1f2b] rounded-xl border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden" style="display: none;">
+                            <div x-show="open" @click.outside="open = false" class="absolute z-20 mt-2 w-full bg-surface rounded-xl border border-border-main shadow-xl overflow-hidden" style="display: none;">
                                 <div class="max-h-48 overflow-y-auto py-1 custom-scrollbar">
                                     @foreach(['New', 'Like New', 'Good', 'Fair', 'Poor'] as $option)
                                         <button @click="$wire.set('condition', '{{ $option }}'); open = false" type="button" class="w-full px-4 py-2.5 text-left hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center justify-between transition-colors group">
@@ -153,7 +153,7 @@
                                 <span class="material-symbols-outlined text-lg text-slate-500">unfold_more</span>
                             </button>
 
-                            <div x-show="open" @click.outside="open = false" class="absolute z-20 mt-2 w-full bg-white dark:bg-[#1a1f2b] rounded-xl border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden" style="display: none;">
+                            <div x-show="open" @click.outside="open = false" class="absolute z-20 mt-2 w-full bg-surface rounded-xl border border-border-main shadow-xl overflow-hidden" style="display: none;">
                                 <div class="py-1">
                                     <button @click="$wire.set('status', 'in_vault'); open = false" type="button" class="w-full px-4 py-2.5 text-left hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center justify-between transition-colors group">
                                         <div class="flex items-center gap-2">

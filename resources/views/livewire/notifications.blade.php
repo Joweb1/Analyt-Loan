@@ -12,7 +12,7 @@
             <p class="text-xs sm:text-sm text-slate-500 mt-1">Audit log of actions across the platform</p>
         </div>
         <div class="flex">
-            <button wire:click="markAllAsRead" class="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-white rounded-xl text-xs font-bold shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-all active:scale-95">
+            <button wire:click="markAllAsRead" class="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2.5 bg-surface border border-border-main text-slate-700 dark:text-white rounded-xl text-xs font-bold shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-all active:scale-95">
                 <span class="material-symbols-outlined text-sm">done_all</span>
                 Mark all as read
             </button>
@@ -24,14 +24,14 @@
         @foreach(['all' => 'All Activity', 'loan' => 'Loans', 'borrower' => 'Customers', 'collateral' => 'Collateral', 'payment' => 'Payments'] as $val => $label)
             <button 
                 wire:click="$set('filter', '{{ $val }}')"
-                class="px-4 py-2 rounded-full text-[10px] sm:text-xs font-bold whitespace-nowrap transition-all border {{ $filter === $val ? 'bg-primary text-white border-primary shadow-md shadow-primary/20' : 'bg-white dark:bg-[#1a1f2b] text-slate-500 border-slate-200 dark:border-slate-800 hover:border-primary/50' }}">
+                class="px-4 py-2 rounded-full text-[10px] sm:text-xs font-bold whitespace-nowrap transition-all border {{ $filter === $val ? 'bg-primary text-white border-primary shadow-md shadow-primary/20' : 'bg-surface text-slate-500 border-border-main hover:border-primary/50' }}">
                 {{ $label }}
             </button>
         @endforeach
     </div>
 
     <!-- Activity List -->
-    <div class="bg-white dark:bg-[#1a1f2b] rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+    <div class="bg-surface rounded-2xl border border-border-main shadow-sm overflow-hidden">
         <div class="divide-y divide-slate-100 dark:divide-slate-800">
             @forelse($notifications as $n)
                 @php

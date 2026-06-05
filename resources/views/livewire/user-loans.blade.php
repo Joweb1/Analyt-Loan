@@ -26,7 +26,7 @@
     <div class="flex flex-wrap gap-8 px-1 lg:px-2 pb-8 items-start">
         <!-- Left Column: Customer Summary Card (Borrowed from LoanDetails) -->
         <div class="w-full lg:w-[380px] shrink-0 space-y-6">
-            <div class="bg-white dark:bg-[#1a1f2b] rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden group hover:shadow-md transition-all duration-300">
+            <div class="bg-surface rounded-2xl border border-border-main shadow-sm overflow-hidden group hover:shadow-md transition-all duration-300">
                 <div class="p-6 relative">
                     <div class="absolute top-4 right-4">
                         <span class="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[10px] font-black uppercase tracking-wider">Borrower</span>
@@ -97,7 +97,7 @@
                         @endcan
                     </div>
                 </div>
-                <div class="bg-slate-50 dark:bg-slate-800/50 p-4 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center">
+                <div class="bg-slate-50 dark:bg-slate-800/50 p-4 border-t border-border-main flex justify-between items-center">
                     <span class="text-xs font-bold text-slate-500 uppercase">Profile Status</span>
                     <span class="flex items-center gap-1 text-[10px] font-black uppercase text-green-600 bg-green-100 px-2 py-0.5 rounded-full">
                         <span class="material-symbols-outlined text-xs">verified</span> Verified
@@ -130,7 +130,7 @@
                             default => 'yellow'
                         };
                     @endphp
-                    <div class="bg-white dark:bg-[#1a1f2b] p-5 rounded-none border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-xl transition-all duration-300 group cursor-pointer border-l-4 border-l-{{ $statusColor }}-500" onclick="window.location='{{ fetch_data(route('loan.show', $loan?->id) ?? null) }}'">
+                    <div class="bg-surface p-5 rounded-none border border-border-main shadow-sm hover:shadow-xl transition-all duration-300 group cursor-pointer border-l-4 border-l-{{ $statusColor }}-500" onclick="window.location='{{ fetch_data(route('loan.show', $loan?->id) ?? null) }}'">
                         <div class="flex justify-between items-start mb-4">
                             <div>
                                 <span class="px-2 py-0.5 rounded-lg bg-{{ $statusColor }}-100 text-{{ $statusColor }}-700 text-[9px] font-black uppercase tracking-widest border border-{{ $statusColor }}-200">
@@ -168,7 +168,7 @@
                         </div>
                     </div>
                 @empty
-                    <div class="col-span-full py-20 flex flex-col items-center justify-center text-slate-400 bg-slate-50 dark:bg-slate-800/20 rounded-3xl border-2 border-dashed border-slate-100 dark:border-slate-800">
+                    <div class="col-span-full py-20 flex flex-col items-center justify-center text-slate-400 bg-slate-50 dark:bg-slate-800/20 rounded-3xl border-2 border-dashed border-border-main">
                         <span class="material-symbols-outlined text-5xl mb-4 opacity-30">contract</span>
                         <p class="text-lg font-bold">No loan records found</p>
                         <p class="text-sm">This customer hasn't applied for any loans yet.</p>

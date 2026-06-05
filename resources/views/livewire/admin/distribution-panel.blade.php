@@ -89,7 +89,7 @@
     <!-- Contact Modal -->
     <div x-show="contactModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4" x-cloak>
         <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="contactModal = false"></div>
-        <div class="relative w-full max-w-2xl bg-white dark:bg-[#1a1f2b] rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in duration-200">
+        <div class="relative w-full max-w-2xl bg-surface rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in duration-200">
             <!-- Modal Header -->
             <div class="p-8 border-b border-slate-50 dark:border-slate-800 flex items-center justify-between">
                 <div class="flex items-center gap-4">

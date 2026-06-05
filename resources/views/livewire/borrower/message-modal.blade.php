@@ -11,7 +11,7 @@
     
     <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="open = false"></div>
     
-    <div class="relative bg-white dark:bg-[#1a1f2b] w-full max-w-lg rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden border border-slate-100 dark:border-slate-800">
+    <div class="relative bg-surface w-full max-w-lg rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden border border-border-main">
         <!-- Modal Header -->
         <div class="px-8 py-6 border-b border-slate-50 dark:border-slate-800/50 flex items-center justify-between bg-gradient-to-r from-primary to-blue-900 text-white">
             <div>
@@ -28,7 +28,7 @@
             <div class="space-y-6">
                 <div>
                     <label class="block text-[10px] font-black text-slate-500 uppercase mb-2 px-1 tracking-wider">Message Title</label>
-                    <input wire:model="title" type="text" class="w-full px-5 py-4 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all font-bold text-slate-900 dark:text-white placeholder:text-slate-400" placeholder="E.g. Important Update Regarding Your Loan">
+                    <input wire:model="title" type="text" class="w-full px-5 py-4 bg-slate-50 dark:bg-slate-800/50 border border-border-main rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all font-bold text-slate-900 dark:text-white placeholder:text-slate-400" placeholder="E.g. Important Update Regarding Your Loan">
                     @error('title') <span class="text-[10px] font-bold text-red-500 mt-2 block">{{ $message }}</span> @enderror
                 </div>
 
@@ -38,7 +38,7 @@
                         @foreach(['low' => 'Low', 'medium' => 'Normal', 'high' => 'High', 'critical' => 'Urgent'] as $val => $label)
                             <button wire:click="$set('priority', '{{ $val }}')" 
                                     class="py-2.5 rounded-xl text-[10px] font-black uppercase tracking-tighter border-2 transition-all
-                                    {{ $priority === $val ? 'bg-primary border-primary text-white shadow-lg shadow-primary/20' : 'bg-white dark:bg-slate-800 border-slate-100 dark:border-slate-800 text-slate-400 hover:border-slate-200' }}">
+                                    {{ $priority === $val ? 'bg-primary border-primary text-white shadow-lg shadow-primary/20' : 'bg-white dark:bg-slate-800 border-border-main text-slate-400 hover:border-slate-200' }}">
                                 {{ $label }}
                             </button>
                         @endforeach
@@ -47,7 +47,7 @@
 
                 <div>
                     <label class="block text-[10px] font-black text-slate-500 uppercase mb-2 px-1 tracking-wider">Your Message</label>
-                    <textarea wire:model="message" rows="5" class="w-full px-5 py-4 bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800 rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all text-sm font-medium text-slate-700 dark:text-slate-300 placeholder:text-slate-400" placeholder="Type your message here..."></textarea>
+                    <textarea wire:model="message" rows="5" class="w-full px-5 py-4 bg-slate-50 dark:bg-slate-800/50 border border-border-main rounded-2xl focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all text-sm font-medium text-slate-700 dark:text-slate-300 placeholder:text-slate-400" placeholder="Type your message here..."></textarea>
                     @error('message') <span class="text-[10px] font-bold text-red-500 mt-2 block">{{ $message }}</span> @enderror
                 </div>
             </div>

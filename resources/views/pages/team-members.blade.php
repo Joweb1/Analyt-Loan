@@ -235,7 +235,7 @@
                     </div>
                 </div>
                 <!-- Permissions Preview Section -->
-                <div class="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-5 border border-slate-100 dark:border-slate-800">
+                <div class="bg-slate-50 dark:bg-slate-800/50 rounded-xl p-5 border border-border-main">
                     <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4 px-1">Permissions Preview</h3>
                     <div class="space-y-4">
                         <!-- Permission Item 1 -->

@@ -80,7 +80,7 @@
                             </div>
 
                             <!-- Add Field Form -->
-                            <div class="p-8 bg-slate-50 dark:bg-zinc-800/30 rounded-[2rem] border border-slate-100 dark:border-zinc-800">
+                            <div class="p-8 bg-slate-50 dark:bg-zinc-800/30 rounded-[2rem] border border-border-main">
                                 <h4 class="text-xs font-black text-primary dark:text-white mb-6 uppercase tracking-[0.2em]">Add Custom Field to {{ $sectionLabel }}</h4>
                                 <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                                     <div class="md:col-span-1">

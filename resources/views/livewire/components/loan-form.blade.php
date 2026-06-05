@@ -436,7 +436,7 @@
         <!-- Guarantor Section -->
         <div class="mb-8 relative" x-data>
             <div class="absolute inset-0 bg-gradient-to-r from-teal-500/10 to-emerald-500/10 rounded-3xl transform -skew-y-1"></div>
-            <div class="relative bg-white dark:bg-[#1a1f2b] rounded-2xl shadow-xl border border-teal-100 dark:border-teal-900/50 p-6 md:p-10">
+            <div class="relative bg-surface rounded-2xl shadow-xl border border-teal-100 dark:border-teal-900/50 p-6 md:p-10">
                 <div class="flex items-start justify-between mb-8 relative z-10">
                     <div>
                         <h3 class="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">

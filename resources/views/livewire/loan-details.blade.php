@@ -51,7 +51,7 @@
         </div>
         <div class="flex flex-wrap gap-3">
             @can('export_and_print')
-                <a href="{{ fetch_data(route('loan.print', $loan?->id) ?? null) }}" target="_blank" class="flex-1 min-w-[120px] flex items-center justify-center gap-2 px-4 py-2 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-white rounded-xl text-sm font-bold shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
+                <a href="{{ fetch_data(route('loan.print', $loan?->id) ?? null) }}" target="_blank" class="flex-1 min-w-[120px] flex items-center justify-center gap-2 px-4 py-2 bg-surface border border-border-main text-slate-700 dark:text-white rounded-xl text-sm font-bold shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
                     <span class="material-symbols-outlined text-lg">print</span>
                     Print
                 </a>
@@ -66,7 +66,7 @@
     <div class="flex flex-wrap md:flex-nowrap gap-8 px-1 lg:px-2 pb-8 items-start">
         <!-- Left Column: Customer Card -->
         <div class="w-full md:w-[320px] lg:w-[380px] shrink-0 space-y-6">
-            <div class="bg-white dark:bg-[#1a1f2b] rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden group hover:shadow-md transition-all duration-300">
+            <div class="bg-surface rounded-2xl border border-border-main shadow-sm overflow-hidden group hover:shadow-md transition-all duration-300">
                 <div class="p-6 relative">
                     <div class="absolute top-4 right-4">
                         <span class="px-2 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[10px] font-black uppercase tracking-wider">Borrower</span>
@@ -139,7 +139,7 @@
                         </a>
                     </div>
                 </div>
-                <div class="bg-slate-50 dark:bg-slate-800/50 p-4 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center">
+                <div class="bg-slate-50 dark:bg-slate-800/50 p-4 border-t border-border-main flex justify-between items-center">
                     <span class="text-xs font-bold text-slate-500 uppercase">Profile Status</span>
                     <span class="flex items-center gap-1 text-[10px] font-black uppercase text-green-600 bg-green-100 px-2 py-0.5 rounded-full">
                         <span class="material-symbols-outlined text-xs">verified</span> Verified
@@ -151,8 +151,8 @@
         <!-- Right Column: Loan Details & Actions -->
         <div class="md:col-span-2 space-y-8">
             <!-- Loan Card -->
-             <div class="bg-white dark:bg-[#1a1f2b] rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden" x-data="{ view: 'card' }">
-                <div class="px-6 py-5 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+             <div class="bg-surface rounded-2xl border border-border-main shadow-sm overflow-hidden" x-data="{ view: 'card' }">
+                <div class="px-6 py-5 border-b border-border-main flex items-center justify-between">
                     <div class="flex items-center gap-3">
                         <div>
                             <h3 class="text-lg font-bold text-slate-900 dark:text-white">Loan Information</h3>
@@ -267,7 +267,7 @@
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         @if(!empty($loan->attachments))
                             @foreach($loan->attachment_urls as $url)
-                                <div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-800">
+                                <div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-border-main">
                                     <div class="flex items-center gap-3 overflow-hidden">
                                         <div class="size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
                                             <span class="material-symbols-outlined text-base">description</span>
@@ -277,13 +277,13 @@
                                             <p class="text-[8px] text-slate-400 font-bold uppercase">FILE</p>
                                         </div>
                                     </div>
-                                    <a href="{{ fetch_data($url ?? null) }}" target="_blank" class="px-3 py-1 text-[9px] font-black bg-white dark:bg-[#1a1f2b] text-primary border border-slate-200 dark:border-slate-800 rounded-md shadow-sm hover:bg-primary hover:text-white transition-all">
+                                    <a href="{{ fetch_data($url ?? null) }}" target="_blank" class="px-3 py-1 text-[9px] font-black bg-surface text-primary border border-border-main rounded-md shadow-sm hover:bg-primary hover:text-white transition-all">
                                         View
                                     </a>
                                 </div>
                             @endforeach
                         @else
-                            <div class="col-span-full py-4 bg-slate-50/50 dark:bg-slate-800/30 rounded-xl border border-dashed border-slate-100 dark:border-slate-800 flex items-center justify-center gap-2 text-slate-300">
+                            <div class="col-span-full py-4 bg-slate-50/50 dark:bg-slate-800/30 rounded-xl border border-dashed border-border-main flex items-center justify-center gap-2 text-slate-300">
                                 <span class="material-symbols-outlined text-sm">no_sim</span>
                                 <p class="text-[9px] font-bold uppercase tracking-widest">No documents attached</p>
                             </div>
@@ -387,37 +387,37 @@
             <!-- Action Card -->
             @if(!in_array($loan->status, ['applied', 'verification_pending', 'declined']))
             <div class="flex flex-wrap gap-4">
-                <button wire:click="openRepaymentsModal" class="flex-1 min-w-[120px] flex flex-col items-center justify-center gap-2 p-4 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm hover:shadow-md hover:border-primary/50 hover:text-primary transition-all group h-32">
+                <button wire:click="openRepaymentsModal" class="flex-1 min-w-[120px] flex flex-col items-center justify-center gap-2 p-4 bg-surface border border-border-main rounded-2xl shadow-sm hover:shadow-md hover:border-primary/50 hover:text-primary transition-all group h-32">
                     <div class="size-10 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
                         <span class="material-symbols-outlined text-2xl">payments</span>
                     </div>
                     <span class="text-xs font-bold text-slate-600 dark:text-slate-300 group-hover:text-primary">Repayments</span>
                 </button>
-                 <button wire:click="openScheduleModal" class="flex-1 min-w-[120px] flex flex-col items-center justify-center gap-2 p-4 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm hover:shadow-md hover:border-primary/50 hover:text-primary transition-all group h-32">
+                 <button wire:click="openScheduleModal" class="flex-1 min-w-[120px] flex flex-col items-center justify-center gap-2 p-4 bg-surface border border-border-main rounded-2xl shadow-sm hover:shadow-md hover:border-primary/50 hover:text-primary transition-all group h-32">
                     <div class="size-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 group-hover:bg-purple-600 group-hover:text-white transition-colors">
                         <span class="material-symbols-outlined text-2xl">calendar_month</span>
                     </div>
                     <span class="text-xs font-bold text-slate-600 dark:text-slate-300 group-hover:text-primary">Schedule</span>
                 </button>
-                 <button wire:click="openCollateralModal" class="flex-1 min-w-[120px] flex flex-col items-center justify-center gap-2 p-4 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm hover:shadow-md hover:border-primary/50 hover:text-primary transition-all group h-32">
+                 <button wire:click="openCollateralModal" class="flex-1 min-w-[120px] flex flex-col items-center justify-center gap-2 p-4 bg-surface border border-border-main rounded-2xl shadow-sm hover:shadow-md hover:border-primary/50 hover:text-primary transition-all group h-32">
                     <div class="size-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 group-hover:bg-amber-600 group-hover:text-white transition-colors">
                         <span class="material-symbols-outlined text-2xl">inventory_2</span>
                     </div>
                     <span class="text-xs font-bold text-slate-600 dark:text-slate-300 group-hover:text-primary">Collateral</span>
                 </button>
-                 <button wire:click="openFeesModal" class="flex-1 min-w-[120px] flex flex-col items-center justify-center gap-2 p-4 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm hover:shadow-md hover:border-primary/50 hover:text-primary transition-all group h-32">
+                 <button wire:click="openFeesModal" class="flex-1 min-w-[120px] flex flex-col items-center justify-center gap-2 p-4 bg-surface border border-border-main rounded-2xl shadow-sm hover:shadow-md hover:border-primary/50 hover:text-primary transition-all group h-32">
                     <div class="size-10 rounded-full bg-red-100 flex items-center justify-center text-red-600 group-hover:bg-red-600 group-hover:text-white transition-colors">
                         <span class="material-symbols-outlined text-2xl">receipt_long</span>
                     </div>
                     <span class="text-xs font-bold text-slate-600 dark:text-slate-300 group-hover:text-primary">Fees</span>
                 </button>
-                 <button wire:click="openCommentsModal" class="flex-1 min-w-[120px] flex flex-col items-center justify-center gap-2 p-4 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm hover:shadow-md hover:border-primary/50 hover:text-primary transition-all group h-32">
+                 <button wire:click="openCommentsModal" class="flex-1 min-w-[120px] flex flex-col items-center justify-center gap-2 p-4 bg-surface border border-border-main rounded-2xl shadow-sm hover:shadow-md hover:border-primary/50 hover:text-primary transition-all group h-32">
                     <div class="size-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 group-hover:bg-slate-800 group-hover:text-white transition-colors">
                         <span class="material-symbols-outlined text-2xl">comment</span>
                     </div>
                     <span class="text-xs font-bold text-slate-600 dark:text-slate-300 group-hover:text-primary">Comments</span>
                 </button>
-                 <button wire:click="$set('showDeleteModal', true)" class="flex-1 min-w-[120px] flex flex-col items-center justify-center gap-2 p-4 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm hover:shadow-md hover:border-red-500/50 hover:text-red-500 transition-all group h-32">
+                 <button wire:click="$set('showDeleteModal', true)" class="flex-1 min-w-[120px] flex flex-col items-center justify-center gap-2 p-4 bg-surface border border-border-main rounded-2xl shadow-sm hover:shadow-md hover:border-red-500/50 hover:text-red-500 transition-all group h-32">
                     <div class="size-10 rounded-full bg-red-50 flex items-center justify-center text-red-500 group-hover:bg-red-500 group-hover:text-white transition-colors">
                         <span class="material-symbols-outlined text-2xl">delete</span>
                     </div>
@@ -442,9 +442,9 @@
         
         <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="open = false"></div>
         
-        <div class="relative bg-white dark:bg-[#1a1f2b] w-full h-full sm:h-auto sm:max-w-6xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden">
+        <div class="relative bg-surface w-full h-full sm:h-auto sm:max-w-6xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden">
             <!-- Modal Header -->
-                <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-[#1a1f2b] sticky top-0 z-10">
+                <div class="px-6 py-4 border-b border-border-main flex items-center justify-between bg-surface sticky top-0 z-10">
                 <div>
                     <h3 class="text-xl font-black text-slate-900 dark:text-white">Loan Repayments</h3>
                     <p class="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">Manage schedule and history for #{{ fetch_data($loan?->loan_number ?? null) }}</p>
@@ -473,7 +473,7 @@
                     $remainingBalance = $loan->balance;
                 @endphp
 
-                <div class="flex justify-between items-center mb-8 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
+                <div class="flex justify-between items-center mb-8 bg-slate-50 dark:bg-slate-800/50 p-4 rounded-2xl border border-border-main">
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-8">
                         <div>
                             <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Total Payable</p>
@@ -499,14 +499,14 @@
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
                     <!-- Add Repayment Form -->
                     <div class="lg:col-span-1" x-show="showForm" x-collapse>
-                        <div class="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 h-full">
+                        <div class="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-2xl border border-border-main h-full">
                             <h4 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider mb-6 flex items-center gap-2">
                                 <span class="material-symbols-outlined text-primary text-lg">add_circle</span>
                                 {{ $editingRepaymentId ? 'Edit' : 'New' }} Repayment Record
                             </h4>
                             
                             <div class="space-y-4">
-                                <div class="p-3 bg-white dark:bg-[#1a1f2b] rounded-xl border border-slate-100 dark:border-slate-800 mb-4">
+                                <div class="p-3 bg-surface rounded-xl border border-border-main mb-4">
                                     <div class="flex justify-between text-[10px] font-black uppercase text-slate-400 mb-2">
                                         <span>Standard Split</span>
                                     </div>
@@ -525,13 +525,13 @@
 
                                 <div>
                                     <label class="block text-[10px] font-black text-slate-500 uppercase mb-1 px-1">Actual Amount Paid</label>
-                                    <input wire:model="amount" type="number" class="w-full px-4 py-3 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary/20 transition-all font-black text-lg text-primary">
+                                    <input wire:model="amount" type="number" class="w-full px-4 py-3 bg-surface border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary/20 transition-all font-black text-lg text-primary">
                                     @error('amount') <span class="text-[10px] font-bold text-red-500 mt-1 block">{{ $message }}</span> @enderror
                                 </div>
                                 
                                 <div>
                                     <label class="block text-[10px] font-black text-slate-500 uppercase mb-1 px-1">Payment Method</label>
-                                    <select wire:model="payment_method" class="w-full px-4 py-3 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary/20 transition-all font-bold text-slate-900 dark:text-white">
+                                    <select wire:model="payment_method" class="w-full px-4 py-3 bg-surface border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary/20 transition-all font-bold text-slate-900 dark:text-white">
                                         <option value="Cash">Cash</option>
                                         <option value="Bank Transfer">Bank Transfer</option>
                                     </select>
@@ -540,7 +540,7 @@
                                 <div x-data="{ openStaff: false, search: '' }">
                                     <label class="block text-[10px] font-black text-slate-500 uppercase mb-1 px-1">Collected By</label>
                                     <div class="relative">
-                                        <button @click="openStaff = !openStaff" type="button" class="w-full px-4 py-3 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary/20 transition-all font-bold text-left flex items-center justify-between">
+                                        <button @click="openStaff = !openStaff" type="button" class="w-full px-4 py-3 bg-surface border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary/20 transition-all font-bold text-left flex items-center justify-between">
                                             @if($collected_by)
                                                 <span class="text-slate-900 dark:text-white">{{ fetch_data($staffs?->firstWhere('id', $collected_by)?->name ?? null) }}</span>
                                             @else
@@ -549,8 +549,8 @@
                                             <span class="material-symbols-outlined text-slate-400">unfold_more</span>
                                         </button>
                                         
-                                        <div x-show="openStaff" @click.outside="openStaff = false" class="absolute z-20 mt-2 w-full bg-white dark:bg-[#1a1f2b] rounded-xl border border-slate-200 dark:border-slate-800 shadow-xl overflow-hidden" style="display: none;">
-                                            <div class="p-2 border-b border-slate-100 dark:border-slate-800">
+                                        <div x-show="openStaff" @click.outside="openStaff = false" class="absolute z-20 mt-2 w-full bg-surface rounded-xl border border-border-main shadow-xl overflow-hidden" style="display: none;">
+                                            <div class="p-2 border-b border-border-main">
                                                 <input x-model="search" type="text" placeholder="Search staff..." class="w-full px-3 py-2 bg-slate-50 dark:bg-slate-800 border-none rounded-lg text-xs font-bold focus:ring-0">
                                             </div>
                                             <div class="max-h-48 overflow-y-auto py-1 custom-scrollbar">
@@ -568,7 +568,7 @@
 
                                 <div>
                                     <label class="block text-[10px] font-black text-slate-500 uppercase mb-1 px-1">Collection Date</label>
-                                    <input wire:model="paid_at" type="date" class="w-full px-4 py-3 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary/20 transition-all font-bold text-slate-900 dark:text-white">
+                                    <input wire:model="paid_at" type="date" class="w-full px-4 py-3 bg-surface border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary/20 transition-all font-bold text-slate-900 dark:text-white">
                                 </div>
 
                                 <button wire:click="{{ $editingRepaymentId ? 'saveRepayment' : 'addRepayment' }}" class="w-full py-4 bg-primary text-white rounded-xl font-black uppercase tracking-widest text-xs shadow-lg shadow-primary/30 hover:scale-[1.02] active:scale-95 transition-all">
@@ -586,7 +586,7 @@
 
                         <div class="space-y-4">
                             @forelse($loan->repayments as $repayment)
-                                <div class="bg-white dark:bg-[#1a1f2b] p-5 rounded-2xl border border-slate-100 dark:border-slate-800 hover:shadow-md transition-all group">
+                                <div class="bg-surface p-5 rounded-2xl border border-border-main hover:shadow-md transition-all group">
                                     <div class="flex flex-col sm:flex-row justify-between gap-4">
                                         <div class="flex items-start gap-4">
                                             <div class="size-12 rounded-xl bg-green-50 dark:bg-green-900/20 flex items-center justify-center shrink-0">
@@ -617,7 +617,7 @@
                                     </div>
                                 </div>
                             @empty
-                                <div class="py-12 flex flex-col items-center justify-center text-slate-400 bg-slate-50 dark:bg-slate-800/20 rounded-3xl border-2 border-dashed border-slate-100 dark:border-slate-800">
+                                <div class="py-12 flex flex-col items-center justify-center text-slate-400 bg-slate-50 dark:bg-slate-800/20 rounded-3xl border-2 border-dashed border-border-main">
                                     <span class="material-symbols-outlined text-4xl mb-2 opacity-50">payments</span>
                                     <p class="text-sm font-bold">No repayment records found</p>
                                     <p class="text-xs">Click 'Add Repayment' to record a payment</p>
@@ -645,9 +645,9 @@
         
         <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="open = false"></div>
         
-        <div class="relative bg-white dark:bg-[#1a1f2b] w-full h-full sm:h-auto sm:max-w-6xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden">
+        <div class="relative bg-surface w-full h-full sm:h-auto sm:max-w-6xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden">
             <!-- Modal Header -->
-            <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-[#1a1f2b] sticky top-0 z-10">
+            <div class="px-6 py-4 border-b border-border-main flex items-center justify-between bg-surface sticky top-0 z-10">
                 <div>
                     <h3 class="text-xl font-black text-slate-900 dark:text-white">Repayment Schedule</h3>
                     <p class="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">Expected installments for #{{ fetch_data($loan?->loan_number ?? null) }}</p>
@@ -770,9 +770,9 @@
         
         <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="open = false"></div>
         
-        <div class="relative bg-white dark:bg-[#1a1f2b] w-full h-full sm:h-auto sm:max-w-2xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden">
+        <div class="relative bg-surface w-full h-full sm:h-auto sm:max-w-2xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden">
             <!-- Modal Header -->
-            <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-[#1a1f2b] sticky top-0 z-10">
+            <div class="px-6 py-4 border-b border-border-main flex items-center justify-between bg-surface sticky top-0 z-10">
                 <div>
                     <h3 class="text-xl font-black text-slate-900 dark:text-white">Loan Fees & Penalties</h3>
                     <p class="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">Configuration for #{{ fetch_data($loan?->loan_number ?? null) }}</p>
@@ -788,7 +788,7 @@
             <div class="flex-1 overflow-y-auto p-6 custom-scrollbar">
                 <div class="space-y-6">
                     <!-- Standard Fees -->
-                    <div class="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-2xl border border-slate-100 dark:border-slate-800">
+                    <div class="bg-slate-50 dark:bg-slate-800/50 p-6 rounded-2xl border border-border-main">
                         <h4 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider mb-4 flex items-center gap-2">
                             <span class="material-symbols-outlined text-primary">payments</span>
                             Standard Fees
@@ -796,12 +796,12 @@
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-[10px] font-black text-slate-500 uppercase mb-1 px-1">Processing Fee (₦)</label>
-                                <input wire:model="feeProcessing" type="number" class="w-full px-4 py-3 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary/20 transition-all font-bold text-slate-900 dark:text-white">
+                                <input wire:model="feeProcessing" type="number" class="w-full px-4 py-3 bg-surface border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary/20 transition-all font-bold text-slate-900 dark:text-white">
                                 @error('feeProcessing') <span class="text-[10px] font-bold text-red-500 mt-1 block">{{ $message }}</span> @enderror
                             </div>
                             <div>
                                 <label class="block text-[10px] font-black text-slate-500 uppercase mb-1 px-1">Insurance Fee (₦)</label>
-                                <input wire:model="feeInsurance" type="number" class="w-full px-4 py-3 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary/20 transition-all font-bold text-slate-900 dark:text-white">
+                                <input wire:model="feeInsurance" type="number" class="w-full px-4 py-3 bg-surface border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-primary/20 transition-all font-bold text-slate-900 dark:text-white">
                                 @error('feeInsurance') <span class="text-[10px] font-bold text-red-500 mt-1 block">{{ $message }}</span> @enderror
                             </div>
                         </div>
@@ -826,19 +826,19 @@
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div class="col-span-2 sm:col-span-1">
                                     <label class="block text-[10px] font-black text-slate-500 uppercase mb-1 px-1">Penalty Amount/Rate</label>
-                                    <input wire:model="feePenaltyValue" type="number" class="w-full px-4 py-3 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-red-500/20 transition-all font-bold text-slate-900 dark:text-white">
+                                    <input wire:model="feePenaltyValue" type="number" class="w-full px-4 py-3 bg-surface border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-red-500/20 transition-all font-bold text-slate-900 dark:text-white">
                                     @error('feePenaltyValue') <span class="text-[10px] font-bold text-red-500 mt-1 block">{{ $message }}</span> @enderror
                                 </div>
                                 <div class="col-span-2 sm:col-span-1">
                                     <label class="block text-[10px] font-black text-slate-500 uppercase mb-1 px-1">Type</label>
-                                    <select wire:model="feePenaltyType" class="w-full px-4 py-3 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-red-500/20 transition-all font-bold text-slate-900 dark:text-white">
+                                    <select wire:model="feePenaltyType" class="w-full px-4 py-3 bg-surface border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-red-500/20 transition-all font-bold text-slate-900 dark:text-white">
                                         <option value="fixed">Fixed Amount (₦)</option>
                                         <option value="percentage">Percentage (%)</option>
                                     </select>
                                 </div>
                                 <div class="col-span-2">
                                     <label class="block text-[10px] font-black text-slate-500 uppercase mb-1 px-1">Frequency (Increase By)</label>
-                                    <select wire:model="feePenaltyFrequency" class="w-full px-4 py-3 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-red-500/20 transition-all font-bold text-slate-900 dark:text-white">
+                                    <select wire:model="feePenaltyFrequency" class="w-full px-4 py-3 bg-surface border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-red-500/20 transition-all font-bold text-slate-900 dark:text-white">
                                         <option value="one_time">One Time (Flat)</option>
                                         <option value="daily">Daily Increase</option>
                                         <option value="weekly">Weekly Increase</option>
@@ -862,7 +862,7 @@
             </div>
 
             <!-- Modal Footer -->
-            <div class="px-6 py-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-[#1a1f2b] flex justify-end gap-3 sticky bottom-0 z-10">
+            <div class="px-6 py-4 border-t border-border-main bg-slate-50 dark:bg-[#1a1f2b] flex justify-end gap-3 sticky bottom-0 z-10">
                 <button @click="open = false" class="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-bold text-xs hover:bg-white transition-all">Cancel</button>
                 <button wire:click="saveFees" class="px-5 py-2.5 rounded-xl bg-primary text-white font-bold text-xs shadow-lg shadow-primary/30 hover:bg-blue-700 transition-all">Save Changes</button>
             </div>
@@ -883,9 +883,9 @@
         
         <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="open = false"></div>
         
-        <div class="relative bg-white dark:bg-[#1a1f2b] w-full h-full sm:h-auto sm:max-w-2xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden">
+        <div class="relative bg-surface w-full h-full sm:h-auto sm:max-w-2xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden">
             <!-- Modal Header -->
-            <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-[#1a1f2b] sticky top-0 z-10">
+            <div class="px-6 py-4 border-b border-border-main flex items-center justify-between bg-surface sticky top-0 z-10">
                 <div>
                     <h3 class="text-xl font-black text-slate-900 dark:text-white">Loan Discussion</h3>
                     <p class="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">Staff comments for #{{ fetch_data($loan?->loan_number ?? null) }}</p>
@@ -911,7 +911,7 @@
                                     <span class="text-[10px] font-bold text-slate-900 dark:text-white">{{ fetch_data($comment?->user?->name ?? null) }}</span>
                                     <span class="text-[9px] text-slate-400 font-medium">{{ fetch_data($comment?->created_at?->diffForHumans() ?? null) }}</span>
                                 </div>
-                                <div class="px-4 py-3 rounded-2xl text-sm font-medium {{ $isMe ? 'bg-primary text-white rounded-tr-none' : 'bg-white dark:bg-[#1a1f2b] text-slate-700 dark:text-slate-300 border border-slate-100 dark:border-slate-800 shadow-sm rounded-tl-none' }}">
+                                <div class="px-4 py-3 rounded-2xl text-sm font-medium {{ $isMe ? 'bg-primary text-white rounded-tr-none' : 'bg-surface text-slate-700 dark:text-slate-300 border border-border-main shadow-sm rounded-tl-none' }}">
                                     {{ fetch_data($comment?->body ?? null) }}
                                 </div>
                             </div>
@@ -927,7 +927,7 @@
             </div>
 
             <!-- Modal Footer (Input) -->
-            <div class="p-4 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-[#1a1f2b] sticky bottom-0 z-10">
+            <div class="p-4 border-t border-border-main bg-surface sticky bottom-0 z-10">
                 <form wire:submit.prevent="postComment" class="flex flex-col gap-3">
                     <div class="flex justify-end">
                         <button type="submit" class="flex items-center gap-2 px-6 py-2 bg-primary text-white rounded-xl text-sm font-bold shadow-lg shadow-primary/30 hover:bg-blue-700 transition-all">
@@ -955,9 +955,9 @@
         
         <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="open = false"></div>
         
-        <div class="relative bg-white dark:bg-[#1a1f2b] w-full h-full sm:h-auto sm:max-w-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden">
+        <div class="relative bg-surface w-full h-full sm:h-auto sm:max-w-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden">
             <!-- Modal Header -->
-            <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-[#1a1f2b] sticky top-0 z-10">
+            <div class="px-6 py-4 border-b border-border-main flex items-center justify-between bg-surface sticky top-0 z-10">
                 <div>
                     <h3 class="text-xl font-black text-slate-900 dark:text-white">Collateral Details</h3>
                     <p class="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">Asset securing Loan #{{ fetch_data($loan?->loan_number ?? null) }}</p>
@@ -994,7 +994,7 @@
                                     <h5 class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-wider mb-3">Documents</h5>
                                     <div class="space-y-2">
                                         @foreach($loan->collateral->documents as $doc)
-                                            <div class="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
+                                            <div class="flex items-center gap-3 p-3 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-border-main">
                                                 <div class="size-8 rounded-lg bg-red-100 flex items-center justify-center text-red-600">
                                                     <span class="material-symbols-outlined text-lg">description</span>
                                                 </div>
@@ -1014,11 +1014,11 @@
                             </div>
 
                             <div class="grid grid-cols-2 gap-4">
-                                <div class="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
+                                <div class="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-border-main">
                                     <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Asset Value</p>
                                     <p class="text-lg font-black text-slate-900 dark:text-white">₦{{ fetch_data($loan?->collateral?->value ?? null) }}</p>
                                 </div>
-                                <div class="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
+                                <div class="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-border-main">
                                     <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">LTV Ratio</p>
                                     @php
                                         $ltv = $loan->collateral->value->getMajorAmount() > 0 ? ($loan->amount->getMajorAmount() / $loan->collateral->value->getMajorAmount()) * 100 : 0;
@@ -1029,15 +1029,15 @@
                             </div>
 
                             <div class="space-y-3">
-                                <div class="flex justify-between py-2 border-b border-slate-100 dark:border-slate-800">
+                                <div class="flex justify-between py-2 border-b border-border-main">
                                     <span class="text-xs font-bold text-slate-500 uppercase">Type</span>
                                     <span class="text-sm font-bold text-slate-900 dark:text-white">{{ fetch_data($loan?->collateral?->type ?? null) }}</span>
                                 </div>
-                                <div class="flex justify-between py-2 border-b border-slate-100 dark:border-slate-800">
+                                <div class="flex justify-between py-2 border-b border-border-main">
                                     <span class="text-xs font-bold text-slate-500 uppercase">Condition</span>
                                     <span class="text-sm font-bold text-slate-900 dark:text-white">{{ fetch_data($loan?->collateral?->condition ?? 'N/A' ?? null) }}</span>
                                 </div>
-                                <div class="flex justify-between py-2 border-b border-slate-100 dark:border-slate-800">
+                                <div class="flex justify-between py-2 border-b border-border-main">
                                     <span class="text-xs font-bold text-slate-500 uppercase">Registered Date</span>
                                     <span class="text-sm font-bold text-slate-900 dark:text-white">{{ fetch_data($loan?->collateral?->registered_date ? $loan?->collateral?->registered_date?->format('M d, Y') : 'N/A' ?? null) }}</span>
                                 </div>
@@ -1061,7 +1061,7 @@
 
             <!-- Modal Footer -->
             @if($loan->collateral)
-            <div class="px-6 py-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-[#1a1f2b] flex justify-end gap-3 sticky bottom-0 z-10">
+            <div class="px-6 py-4 border-t border-border-main bg-slate-50 dark:bg-[#1a1f2b] flex justify-end gap-3 sticky bottom-0 z-10">
                 <button wire:click="deleteCollateral" wire:confirm="Are you sure you want to delete this collateral record?" class="px-5 py-2.5 rounded-xl bg-red-50 text-red-600 font-bold text-xs hover:bg-red-100 transition-all">Delete Asset</button>
                 <button wire:click="goToAddCollateral" class="px-5 py-2.5 rounded-xl bg-slate-200 text-slate-700 font-bold text-xs hover:bg-slate-300 transition-all">Edit Details</button>
             </div>
@@ -1083,7 +1083,7 @@
         
         <div class="absolute inset-0 bg-red-900/80 backdrop-blur-sm" @click="open = false"></div>
         
-        <div class="relative bg-white dark:bg-[#1a1f2b] w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden text-center p-8">
+        <div class="relative bg-surface w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden text-center p-8">
             <div class="size-20 rounded-full bg-red-100 mx-auto flex items-center justify-center mb-6 animate-pulse">
                 <span class="material-symbols-outlined text-5xl text-red-600">warning</span>
             </div>

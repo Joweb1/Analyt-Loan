@@ -1,6 +1,6 @@
 <div>
     <div class="flex items-center gap-4 mb-6">
-        <a href="{{ route('dashboard') }}" class="size-10 flex items-center justify-center bg-white dark:bg-[#1a1f2b] rounded-xl border border-slate-100 dark:border-slate-800 text-slate-500 hover:text-primary transition-colors">
+        <a href="{{ route('dashboard') }}" class="size-10 flex items-center justify-center bg-surface rounded-xl border border-border-main text-slate-500 hover:text-primary transition-colors">
             <span class="material-symbols-outlined">arrow_back</span>
         </a>
         <div>
@@ -9,7 +9,7 @@
         </div>
     </div>
 
-    <div class="bg-white dark:bg-[#1a1f2b] rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 p-6">
+    <div class="bg-surface rounded-2xl shadow-sm border border-border-main p-6">
         <div class="overflow-x-auto">
             <table class="w-full text-left text-sm whitespace-nowrap">
                 <thead class="text-xs text-slate-500 uppercase bg-slate-50 dark:bg-slate-800 dark:text-slate-400">

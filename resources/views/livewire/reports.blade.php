@@ -23,7 +23,7 @@
             </div>
 
             <!-- Expected Interest (Lifetime) -->
-            <div class="bg-white dark:bg-zinc-900 p-8 rounded-[2.5rem] border border-slate-100 dark:border-zinc-800 shadow-sm relative group hover:border-blue-500/50 transition-colors">
+            <div class="bg-white dark:bg-zinc-900 p-8 rounded-[2.5rem] border border-border-main shadow-sm relative group hover:border-blue-500/50 transition-colors">
                 <div class="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-4">
                     <div class="flex items-center gap-4">
                         <div class="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center text-blue-500">
@@ -64,7 +64,7 @@
                     </button>
                     
                     <div x-show="open" @click.away="open = false" x-cloak 
-                        class="absolute left-0 md:right-0 md:left-auto mt-3 w-72 bg-white dark:bg-zinc-900 p-6 rounded-3xl shadow-2xl border border-slate-100 dark:border-zinc-800 z-50">
+                        class="absolute left-0 md:right-0 md:left-auto mt-3 w-72 bg-white dark:bg-zinc-900 p-6 rounded-3xl shadow-2xl border border-border-main z-50">
                         <h4 class="text-xs font-black uppercase tracking-widest mb-4">Select Range</h4>
                         <div class="space-y-4">
                             <div>
@@ -97,7 +97,7 @@
         <!-- Filtered Metrics Grid -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
             <!-- Disbursed -->
-            <div class="bg-white dark:bg-zinc-900 p-6 rounded-3xl border border-slate-100 dark:border-zinc-800 shadow-sm group hover:border-primary/50 transition-colors">
+            <div class="bg-white dark:bg-zinc-900 p-6 rounded-3xl border border-border-main shadow-sm group hover:border-primary/50 transition-colors">
                 <div class="flex items-center gap-3 mb-4">
                     <div class="w-10 h-10 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
                         <span class="material-symbols-outlined">payments</span>
@@ -108,7 +108,7 @@
             </div>
 
             <!-- Collected -->
-            <div class="bg-white dark:bg-zinc-900 p-6 rounded-3xl border border-slate-100 dark:border-zinc-800 shadow-sm group hover:border-green-500/50 transition-colors">
+            <div class="bg-white dark:bg-zinc-900 p-6 rounded-3xl border border-border-main shadow-sm group hover:border-green-500/50 transition-colors">
                 <div class="flex items-center gap-3 mb-4">
                     <div class="w-10 h-10 rounded-2xl bg-green-500/10 flex items-center justify-center text-green-500">
                         <span class="material-symbols-outlined">account_balance_wallet</span>
@@ -119,7 +119,7 @@
             </div>
 
             <!-- Net Savings -->
-            <div class="bg-white dark:bg-zinc-900 p-6 rounded-3xl border border-slate-100 dark:border-zinc-800 shadow-sm group hover:border-emerald-500/50 transition-colors">
+            <div class="bg-white dark:bg-zinc-900 p-6 rounded-3xl border border-border-main shadow-sm group hover:border-emerald-500/50 transition-colors">
                 <div class="flex items-center gap-3 mb-4">
                     <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500">
                         <span class="material-symbols-outlined">savings</span>
@@ -132,7 +132,7 @@
             </div>
 
             <!-- Total Loans -->
-            <div class="bg-white dark:bg-zinc-900 p-6 rounded-3xl border border-slate-100 dark:border-zinc-800 shadow-sm group hover:border-orange-500/50 transition-colors">
+            <div class="bg-white dark:bg-zinc-900 p-6 rounded-3xl border border-border-main shadow-sm group hover:border-orange-500/50 transition-colors">
                 <div class="flex items-center gap-3 mb-4">
                     <div class="w-10 h-10 rounded-2xl bg-orange-500/10 flex items-center justify-center text-orange-500">
                         <span class="material-symbols-outlined">description</span>
@@ -143,7 +143,7 @@
             </div>
 
             <!-- New Customers -->
-            <div class="bg-white dark:bg-zinc-900 p-6 rounded-3xl border border-slate-100 dark:border-zinc-800 shadow-sm group hover:border-purple-500/50 transition-colors">
+            <div class="bg-white dark:bg-zinc-900 p-6 rounded-3xl border border-border-main shadow-sm group hover:border-purple-500/50 transition-colors">
                 <div class="flex items-center gap-3 mb-4">
                     <div class="w-10 h-10 rounded-2xl bg-purple-500/10 flex items-center justify-center text-purple-500">
                         <span class="material-symbols-outlined">group_add</span>
@@ -154,7 +154,7 @@
             </div>
 
             <!-- Risk (PAR) -->
-            <div class="bg-white dark:bg-zinc-900 p-6 rounded-3xl border border-slate-100 dark:border-zinc-800 shadow-sm group hover:border-red-500/50 transition-colors">
+            <div class="bg-white dark:bg-zinc-900 p-6 rounded-3xl border border-border-main shadow-sm group hover:border-red-500/50 transition-colors">
                 <div class="flex items-center gap-3 mb-4">
                     <div class="w-10 h-10 rounded-2xl bg-red-500/10 flex items-center justify-center text-red-500">
                         <span class="material-symbols-outlined">warning</span>
@@ -165,7 +165,7 @@
             </div>
 
             <!-- Profit (PnL) -->
-            <div class="bg-white dark:bg-zinc-900 p-6 rounded-3xl border border-slate-100 dark:border-zinc-800 shadow-sm group hover:border-indigo-500/50 transition-colors">
+            <div class="bg-white dark:bg-zinc-900 p-6 rounded-3xl border border-border-main shadow-sm group hover:border-indigo-500/50 transition-colors">
                 <div class="flex items-center gap-3 mb-4">
                     <div class="w-10 h-10 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-500">
                         <span class="material-symbols-outlined">analytics</span>
@@ -179,7 +179,7 @@
         <!-- Charts Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
             <!-- Disbursed vs Collected -->
-            <div class="bg-white dark:bg-zinc-900 p-8 rounded-[2.5rem] border border-slate-100 dark:border-zinc-800 shadow-sm">
+            <div class="bg-white dark:bg-zinc-900 p-8 rounded-[2.5rem] border border-border-main shadow-sm">
                 <h3 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest mb-8 flex items-center gap-2">
                     <span class="w-2 h-2 rounded-full bg-primary"></span>
                     Cash Flow Analysis
@@ -190,7 +190,7 @@
             </div>
 
             <!-- Interest Analysis -->
-            <div class="bg-white dark:bg-zinc-900 p-8 rounded-[2.5rem] border border-slate-100 dark:border-zinc-800 shadow-sm">
+            <div class="bg-white dark:bg-zinc-900 p-8 rounded-[2.5rem] border border-border-main shadow-sm">
                 <h3 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest mb-8 flex items-center gap-2">
                     <span class="w-2 h-2 rounded-full bg-blue-500"></span>
                     Interest Performance
@@ -201,7 +201,7 @@
             </div>
 
             <!-- Savings & Customers -->
-            <div class="bg-white dark:bg-zinc-900 p-8 rounded-[2.5rem] border border-slate-100 dark:border-zinc-800 shadow-sm">
+            <div class="bg-white dark:bg-zinc-900 p-8 rounded-[2.5rem] border border-border-main shadow-sm">
                 <h3 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest mb-8 flex items-center gap-2">
                     <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
                     Vault & Customer Growth
@@ -212,7 +212,7 @@
             </div>
 
             <!-- Loan Volume -->
-            <div class="bg-white dark:bg-zinc-900 p-8 rounded-[2.5rem] border border-slate-100 dark:border-zinc-800 shadow-sm">
+            <div class="bg-white dark:bg-zinc-900 p-8 rounded-[2.5rem] border border-border-main shadow-sm">
                 <h3 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest mb-8 flex items-center gap-2">
                     <span class="w-2 h-2 rounded-full bg-purple-500"></span>
                     Loan Volume Count
@@ -226,7 +226,7 @@
         <!-- Lower Section: Print & Export -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
             <!-- Printable Reports Section -->
-            <div class="bg-white dark:bg-zinc-900 rounded-[2.5rem] p-10 border border-slate-100 dark:border-zinc-800 shadow-sm group">
+            <div class="bg-white dark:bg-zinc-900 rounded-[2.5rem] p-10 border border-border-main shadow-sm group">
                 <div class="flex items-center gap-3 mb-8">
                     <div class="w-10 h-10 rounded-2xl bg-green-500/10 flex items-center justify-center text-green-600">
                         <span class="material-symbols-outlined">print</span>

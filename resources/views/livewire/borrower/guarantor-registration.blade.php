@@ -11,7 +11,7 @@
             </div>
         @else
             @foreach($configs as $sectionKey => $fields)
-                <div class="bg-white dark:bg-[#1a1f2b] rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 p-8">
+                <div class="bg-surface rounded-2xl shadow-sm border border-border-main p-8">
                     <h2 class="text-xl font-bold text-slate-900 dark:text-white mb-6 capitalize">{{ str_replace('_', ' ', $sectionKey) }}</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         @foreach($fields as $field)

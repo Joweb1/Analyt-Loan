@@ -14,9 +14,11 @@ export default {
     theme: {
         extend: {
             colors: {
-                "primary": "#0f1729",
-                "background-light": "#f6f7f8",
-                "background-dark": "#14171e",
+                "primary": "var(--primary)",
+                "background-light": "var(--background)",
+                "background-dark": "var(--background)",
+                "surface": "var(--surface)",
+                "border-main": "var(--border)",
                 "brand-blue": "#3B82F6",
                 "brand-green": "#10B981",
                 "brand-red": "#EF4444",

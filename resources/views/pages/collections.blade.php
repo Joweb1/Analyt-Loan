@@ -4,7 +4,7 @@
         <div>
             <h2 class="text-2xl font-extrabold text-primary dark:text-white mb-6">Collections Overview</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="bg-white dark:bg-background-dark p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden group">
+                <div class="bg-white dark:bg-background-dark p-6 rounded-xl border border-border-main shadow-sm relative overflow-hidden group">
                     <div class="flex justify-between items-start mb-4">
                         <p class="text-sm font-bold text-slate-500 uppercase tracking-wider">Total Overdue</p>
                         <span class="bg-red-50 text-red-600 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-tighter">+5.2% vs LW</span>
@@ -14,7 +14,7 @@
                         <span class="material-symbols-outlined text-sm">warning</span> 412 Active overdue accounts
                     </div>
                 </div>
-                <div class="bg-white dark:bg-background-dark p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden group">
+                <div class="bg-white dark:bg-background-dark p-6 rounded-xl border border-border-main shadow-sm relative overflow-hidden group">
                     <div class="flex justify-between items-start mb-4">
                         <p class="text-sm font-bold text-slate-500 uppercase tracking-wider">Collected Today</p>
                         <span class="bg-green-50 text-green-600 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-tighter">On Target</span>
@@ -24,7 +24,7 @@
                         <span class="material-symbols-outlined text-sm">check_circle</span> 18 Transactions processed
                     </div>
                 </div>
-                <div class="bg-white dark:bg-background-dark p-6 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden group">
+                <div class="bg-white dark:bg-background-dark p-6 rounded-xl border border-border-main shadow-sm relative overflow-hidden group">
                     <div class="flex justify-between items-start mb-4">
                         <p class="text-sm font-bold text-slate-500 uppercase tracking-wider">Recovery Rate</p>
                         <span class="bg-blue-50 text-blue-600 text-[10px] font-bold px-2 py-1 rounded uppercase tracking-tighter">+2.1% Peak</span>
@@ -56,8 +56,8 @@
             </div>
         </div>
         <!-- Overdue Loans Table -->
-        <div class="bg-white dark:bg-background-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-            <div class="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+        <div class="bg-white dark:bg-background-dark rounded-xl border border-border-main shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-border-main flex items-center justify-between">
                 <div>
                     <h3 class="text-lg font-bold">Overdue Accounts</h3>
                     <p class="text-sm text-slate-500">Requires immediate manual intervention</p>
@@ -183,7 +183,7 @@
                     </tbody>
                 </table>
             </div>
-            <div class="px-6 py-4 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center">
+            <div class="px-6 py-4 bg-slate-50 dark:bg-slate-900/50 border-t border-border-main flex justify-between items-center">
                 <p class="text-xs text-slate-500 font-medium">Showing 3 of 412 entries</p>
                 <div class="flex gap-1">
                     <button class="size-8 flex items-center justify-center rounded border border-slate-200 bg-white text-slate-400 pointer-events-none">

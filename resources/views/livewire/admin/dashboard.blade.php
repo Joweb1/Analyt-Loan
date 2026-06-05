@@ -7,7 +7,7 @@
 
     <!-- Stats Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div class="bg-white dark:bg-[#1a1f2b] p-6 rounded-2xl shadow-soft border border-slate-100 dark:border-slate-800">
+        <div class="bg-surface p-6 rounded-2xl shadow-soft border border-border-main">
             <div class="flex items-center gap-4">
                 <div class="w-12 h-12 bg-blue-50 dark:bg-blue-900/20 rounded-xl flex items-center justify-center text-blue-600 dark:text-blue-400">
                     <span class="material-symbols-outlined">hub</span>
@@ -29,7 +29,7 @@
             </div>
         </div>
 
-        <div class="bg-white dark:bg-[#1a1f2b] p-6 rounded-2xl shadow-soft border border-slate-100 dark:border-slate-800">
+        <div class="bg-surface p-6 rounded-2xl shadow-soft border border-border-main">
             <div class="flex items-center gap-4">
                 <div class="w-12 h-12 bg-indigo-50 dark:bg-indigo-900/20 rounded-xl flex items-center justify-center text-indigo-600 dark:text-indigo-400">
                     <span class="material-symbols-outlined">account_balance_wallet</span>
@@ -42,7 +42,7 @@
             <p class="mt-4 text-xs text-slate-400 italic">Cumulative across all tenants</p>
         </div>
 
-        <div class="bg-white dark:bg-[#1a1f2b] p-6 rounded-2xl shadow-soft border border-slate-100 dark:border-slate-800">
+        <div class="bg-surface p-6 rounded-2xl shadow-soft border border-border-main">
             <div class="flex items-center gap-4">
                 <div class="w-12 h-12 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl flex items-center justify-center text-emerald-600 dark:text-emerald-400">
                     <span class="material-symbols-outlined">payments</span>
@@ -60,7 +60,7 @@
             </div>
         </div>
 
-        <div class="bg-white dark:bg-[#1a1f2b] p-6 rounded-2xl shadow-soft border border-slate-100 dark:border-slate-800">
+        <div class="bg-surface p-6 rounded-2xl shadow-soft border border-border-main">
             <div class="flex items-center gap-4">
                 <div class="w-12 h-12 bg-purple-50 dark:bg-purple-900/20 rounded-xl flex items-center justify-center text-purple-600 dark:text-purple-400">
                     <span class="material-symbols-outlined">groups</span>
@@ -77,7 +77,7 @@
     <!-- Charts & Lists -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <!-- Activity Chart (Mocked with simple bars for now) -->
-        <div class="lg:col-span-2 bg-white dark:bg-[#1a1f2b] p-8 rounded-2xl shadow-soft border border-slate-100 dark:border-slate-800">
+        <div class="lg:col-span-2 bg-surface p-8 rounded-2xl shadow-soft border border-border-main">
             <div class="flex items-center justify-between mb-8">
                 <h3 class="text-lg font-bold text-slate-800 dark:text-white">Platform Repayments Trend</h3>
                 <span class="text-xs font-medium text-slate-400">Last 7 Days</span>
@@ -101,7 +101,7 @@
         </div>
 
         <!-- Recent Organizations -->
-        <div class="bg-white dark:bg-[#1a1f2b] p-8 rounded-2xl shadow-soft border border-slate-100 dark:border-slate-800">
+        <div class="bg-surface p-8 rounded-2xl shadow-soft border border-border-main">
             <div class="flex items-center justify-between mb-8">
                 <h3 class="text-lg font-bold text-slate-800 dark:text-white">New Onboardings</h3>
                 <a href="{{ route('admin.organizations') }}" class="text-xs font-bold text-primary hover:underline">View All</a>
@@ -133,7 +133,7 @@
 
     <!-- System Health & Platform Alerts -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div class="bg-white dark:bg-[#1a1f2b] p-8 rounded-3xl shadow-soft border border-slate-100 dark:border-slate-800 h-fit">
+        <div class="bg-surface p-8 rounded-3xl shadow-soft border border-border-main h-fit">
             <h3 class="text-lg font-bold text-slate-800 dark:text-white mb-8">Platform Health & Critical Alerts</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="flex items-center gap-4 p-4 {{ $dbStatus === 'online' ? 'bg-emerald-50 dark:bg-emerald-500/10 border-emerald-100 dark:border-emerald-500/20' : 'bg-rose-50 dark:bg-rose-500/10 border-rose-100 dark:border-rose-500/20' }} rounded-2xl border">

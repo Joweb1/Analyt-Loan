@@ -2,7 +2,7 @@
     <!-- Header Section -->
     <div class="flex flex-col gap-4 pt-6 lg:flex-row lg:items-center lg:justify-between">
         <div class="flex items-center gap-3 md:gap-4">
-             <a href="{{ route('collections') }}" class="size-11 flex items-center justify-center bg-white dark:bg-[#1a1f2b] rounded-2xl border border-slate-100 dark:border-slate-800 text-slate-500 hover:text-primary transition-colors shrink-0 shadow-sm">
+             <a href="{{ route('collections') }}" class="size-11 flex items-center justify-center bg-surface rounded-2xl border border-border-main text-slate-500 hover:text-primary transition-colors shrink-0 shadow-sm">
                 <span class="material-symbols-outlined text-2xl">arrow_back</span>
             </a>
             <div class="min-w-0">
@@ -30,7 +30,7 @@
             </div>
 
             @can('export_and_print')
-                <button wire:click="export" class="flex items-center justify-center gap-2 px-5 py-3 bg-white dark:bg-[#1a1f2b] border-2 border-slate-900 dark:border-blue-900 text-slate-900 dark:text-white rounded-2xl text-[10px] font-black shadow-sm hover:bg-slate-900 hover:text-white dark:hover:bg-blue-900 transition-all uppercase tracking-widest h-[52px]">
+                <button wire:click="export" class="flex items-center justify-center gap-2 px-5 py-3 bg-surface border-2 border-slate-900 dark:border-blue-900 text-slate-900 dark:text-white rounded-2xl text-[10px] font-black shadow-sm hover:bg-slate-900 hover:text-white dark:hover:bg-blue-900 transition-all uppercase tracking-widest h-[52px]">
                     <span class="material-symbols-outlined text-sm">download</span>
                     <span>Export CSV</span>
                 </button>
@@ -48,7 +48,7 @@
             <span class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                 <span class="material-symbols-outlined text-slate-400 text-xl group-focus-within:text-primary transition-colors">search</span>
             </span>
-            <input wire:model.live.debounce.300ms="search" type="text" placeholder="Search Borrower or Loan ID..." class="w-full pl-12 pr-4 py-4 bg-white dark:bg-[#1a1f2b] border-none rounded-2xl shadow-sm focus:ring-2 focus:ring-primary/20 transition-all text-sm font-bold placeholder-slate-400 h-[52px]">
+            <input wire:model.live.debounce.300ms="search" type="text" placeholder="Search Borrower or Loan ID..." class="w-full pl-12 pr-4 py-4 bg-surface border-none rounded-2xl shadow-sm focus:ring-2 focus:ring-primary/20 transition-all text-sm font-bold placeholder-slate-400 h-[52px]">
         </div>
 
         <div class="flex items-center gap-3 min-w-[200px]">
@@ -56,7 +56,7 @@
                 <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <span class="material-symbols-outlined text-slate-400 text-lg">calendar_month</span>
                 </span>
-                <select wire:model.live="dateRange" class="w-full pl-10 pr-10 py-4 bg-white dark:bg-[#1a1f2b] border-none rounded-2xl shadow-sm text-xs font-bold focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer appearance-none h-[52px]">
+                <select wire:model.live="dateRange" class="w-full pl-10 pr-10 py-4 bg-surface border-none rounded-2xl shadow-sm text-xs font-bold focus:ring-2 focus:ring-primary/20 transition-all cursor-pointer appearance-none h-[52px]">
                     <option value="all">All Time</option>
                     <option value="today">Today</option>
                     <option value="yesterday">Yesterday</option>
@@ -80,20 +80,20 @@
 
         @if($dateRange === 'custom')
             <div class="flex items-center gap-2 animate-in fade-in zoom-in-95 duration-200 w-full md:w-auto">
-                <input wire:model.live="customStartDate" type="date" class="flex-1 md:w-36 px-3 py-4 bg-white dark:bg-[#1a1f2b] border-none rounded-2xl shadow-sm text-[10px] font-bold focus:ring-2 focus:ring-primary/20 h-[52px]">
+                <input wire:model.live="customStartDate" type="date" class="flex-1 md:w-36 px-3 py-4 bg-surface border-none rounded-2xl shadow-sm text-[10px] font-bold focus:ring-2 focus:ring-primary/20 h-[52px]">
                 <span class="text-slate-400 font-bold text-[10px] uppercase">To</span>
-                <input wire:model.live="customEndDate" type="date" class="flex-1 md:w-36 px-3 py-4 bg-white dark:bg-[#1a1f2b] border-none rounded-2xl shadow-sm text-[10px] font-bold focus:ring-2 focus:ring-primary/20 h-[52px]">
+                <input wire:model.live="customEndDate" type="date" class="flex-1 md:w-36 px-3 py-4 bg-surface border-none rounded-2xl shadow-sm text-[10px] font-bold focus:ring-2 focus:ring-primary/20 h-[52px]">
             </div>
         @endif
     </div>
 
     <!-- Main List Section -->
     <div class="px-0">
-        <div class="bg-white dark:bg-[#1a1f2b] rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm overflow-hidden">
+        <div class="bg-surface rounded-3xl border border-border-main shadow-sm overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full text-left min-w-[700px]">
                     <thead>
-                        <tr class="bg-slate-50 dark:bg-slate-900/50 text-slate-500 text-[10px] font-black uppercase tracking-widest border-b border-slate-100 dark:border-slate-800">
+                        <tr class="bg-slate-50 dark:bg-slate-900/50 text-slate-500 text-[10px] font-black uppercase tracking-widest border-b border-border-main">
                             <th class="px-6 py-5">Borrower / Loan</th>
                             <th class="px-6 py-5">Amount / Method</th>
                             <th class="px-6 py-5">Recorded By</th>

@@ -1,6 +1,6 @@
 <div>
     <div class="flex items-center gap-4 mb-6">
-        <a href="{{ route('collections') }}" class="size-10 flex items-center justify-center bg-white dark:bg-[#1a1f2b] rounded-xl border border-slate-100 dark:border-slate-800 text-slate-500 hover:text-primary transition-colors">
+        <a href="{{ route('collections') }}" class="size-10 flex items-center justify-center bg-surface rounded-xl border border-border-main text-slate-500 hover:text-primary transition-colors">
             <span class="material-symbols-outlined">arrow_back</span>
         </a>
         <h1 class="text-2xl font-bold text-slate-900 dark:text-white">Collection Entry</h1>
@@ -20,7 +20,7 @@
         </div>
     </div>
 
-    <div class="bg-white dark:bg-[#1a1f2b] rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 p-6 mb-6">
+    <div class="bg-surface rounded-2xl shadow-sm border border-border-main p-6 mb-6">
         <div class="flex flex-wrap items-center gap-4 mb-4">
             <div class="shrink-0">
                 <x-portfolio-filter :portfolios="$portfolios" :portfolioId="$portfolioId" />
@@ -84,7 +84,7 @@
     <!-- Repayment Modal -->
     @if($showRepaymentModal)
         <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm">
-            <div class="bg-white dark:bg-[#1a1f2b] rounded-3xl p-6 w-full max-w-md shadow-2xl">
+            <div class="bg-surface rounded-3xl p-6 w-full max-w-md shadow-2xl">
                 <div class="flex justify-between items-center mb-6">
                     <h3 class="text-lg font-bold text-slate-900 dark:text-white">Add Repayment</h3>
                     <button wire:click="$set('showRepaymentModal', false)" class="text-slate-400 hover:text-slate-600 dark:hover:text-white">
@@ -126,7 +126,7 @@
                         @error('collected_by') <span class="text-xs text-red-500">{{ $message }}</span> @enderror
                     </div>
 
-                    <div class="pt-4 flex justify-end gap-3 border-t border-slate-100 dark:border-slate-800">
+                    <div class="pt-4 flex justify-end gap-3 border-t border-border-main">
                         <button type="button" wire:click="$set('showRepaymentModal', false)" class="px-4 py-2 text-sm font-bold text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200">
                             Cancel
                         </button>

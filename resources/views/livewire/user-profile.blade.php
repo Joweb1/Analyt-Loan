@@ -342,7 +342,7 @@
                                     </div>
                                 </a>
                             @else
-                                <div class="p-4 bg-slate-50/50 dark:bg-zinc-800/20 rounded-2xl border-2 border-dashed border-slate-100 dark:border-zinc-800 opacity-50 flex items-center gap-4">
+                                <div class="p-4 bg-slate-50/50 dark:bg-zinc-800/20 rounded-2xl border-2 border-dashed border-border-main opacity-50 flex items-center gap-4">
                                      <div class="size-12 rounded-xl bg-slate-100 dark:bg-zinc-800 flex items-center justify-center text-slate-300">
                                         <span class="material-symbols-outlined">error</span>
                                     </div>
@@ -365,7 +365,7 @@
                                     </div>
                                 </a>
                             @else
-                                <div class="p-4 bg-slate-50/50 dark:bg-zinc-800/20 rounded-2xl border-2 border-dashed border-slate-100 dark:border-zinc-800 opacity-50 flex items-center gap-4">
+                                <div class="p-4 bg-slate-50/50 dark:bg-zinc-800/20 rounded-2xl border-2 border-dashed border-border-main opacity-50 flex items-center gap-4">
                                      <div class="size-12 rounded-xl bg-slate-100 dark:bg-zinc-800 flex items-center justify-center text-slate-300">
                                         <span class="material-symbols-outlined">error</span>
                                     </div>
@@ -388,7 +388,7 @@
                                     </div>
                                 </a>
                             @else
-                                <div class="p-4 bg-slate-50/50 dark:bg-zinc-800/20 rounded-2xl border-2 border-dashed border-slate-100 dark:border-zinc-800 opacity-50 flex items-center gap-4">
+                                <div class="p-4 bg-slate-50/50 dark:bg-zinc-800/20 rounded-2xl border-2 border-dashed border-border-main opacity-50 flex items-center gap-4">
                                      <div class="size-12 rounded-xl bg-slate-100 dark:bg-zinc-800 flex items-center justify-center text-slate-300">
                                         <span class="material-symbols-outlined">error</span>
                                     </div>
@@ -399,7 +399,7 @@
                     </div>
                 </div>
 
-                <div class="mt-12 p-6 bg-slate-50 dark:bg-zinc-800/50 rounded-3xl border border-slate-100 dark:border-zinc-800">
+                <div class="mt-12 p-6 bg-slate-50 dark:bg-zinc-800/50 rounded-3xl border border-border-main">
                     <h4 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider mb-2 flex items-center gap-2">
                         <span class="material-symbols-outlined text-primary">info</span>
                         Need to update documents?

@@ -17,7 +17,7 @@
         </div>
         <div class="flex flex-wrap gap-3">
             @can('export_and_print')
-                <a href="{{ fetch_data(route('savings.print', $user?->id) ?? null) }}" target="_blank" class="flex-1 min-w-[120px] flex items-center justify-center gap-2 px-4 py-2 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-white rounded-xl text-sm font-bold shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
+                <a href="{{ fetch_data(route('savings.print', $user?->id) ?? null) }}" target="_blank" class="flex-1 min-w-[120px] flex items-center justify-center gap-2 px-4 py-2 bg-surface border border-border-main text-slate-700 dark:text-white rounded-xl text-sm font-bold shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
                     <span class="material-symbols-outlined text-lg">print</span>
                     Statement
                 </a>
@@ -32,7 +32,7 @@
     <div class="flex flex-wrap md:flex-nowrap gap-8 px-1 lg:px-2 pb-8 items-start">
         <!-- Left Column: Customer Summary & Account Summary -->
         <div class="w-full md:w-[320px] lg:w-[380px] shrink-0 space-y-6">
-            <div class="bg-white dark:bg-[#1a1f2b] rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden group hover:shadow-md transition-all duration-300">
+            <div class="bg-surface rounded-2xl border border-border-main shadow-sm overflow-hidden group hover:shadow-md transition-all duration-300">
                 <div class="p-8 text-center border-b border-slate-50 dark:border-slate-800">
                     <div class="size-24 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-4 text-slate-400 border-2 border-white dark:border-slate-700 shadow-lg">
                         <span class="material-symbols-outlined text-4xl">person</span>
@@ -85,7 +85,7 @@
                 </div>
             </div>
 
-            <button wire:click="openTransactionModal('withdrawal')" class="w-full flex items-center justify-center gap-2 py-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-sm hover:shadow-md transition-all">
+            <button wire:click="openTransactionModal('withdrawal')" class="w-full flex items-center justify-center gap-2 py-4 bg-white dark:bg-slate-800 border border-border-main text-slate-700 dark:text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-sm hover:shadow-md transition-all">
                 <span class="material-symbols-outlined">payments</span>
                 Withdraw Funds
             </button>
@@ -93,7 +93,7 @@
 
         <!-- Right Column: Transactions Table -->
         <div class="flex-1 min-w-0 space-y-6">
-            <div class="bg-white dark:bg-[#1a1f2b] rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+            <div class="bg-surface rounded-2xl border border-border-main shadow-sm overflow-hidden">
                 <div class="px-6 py-4 border-b border-slate-50 dark:border-slate-800 flex items-center justify-between">
                     <h3 class="font-bold text-slate-900 dark:text-white">Recent Transactions</h3>
                     <div class="flex items-center gap-2">

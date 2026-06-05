@@ -34,7 +34,7 @@
             </div>
         </div>
 
-        <div class="flex flex-wrap items-center gap-3 bg-white dark:bg-[#1a1f2e] p-1.5 rounded-sm shadow-sm border border-slate-200 dark:border-slate-800">
+        <div class="flex flex-wrap items-center gap-3 bg-white dark:bg-[#1a1f2e] p-1.5 rounded-sm shadow-sm border border-border-main">
             <!-- View Toggle -->
             <div class="flex items-center gap-1 bg-slate-100 dark:bg-slate-900 p-1 rounded-sm">
                 <button wire:click="$set('selectedPortfolioId', null)" 
@@ -86,21 +86,21 @@
         <!-- Portfolio Specific Metrics Grid -->
         <div class="flex flex-wrap gap-4 mb-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <!-- Portfolio Balance -->
-            <div class="flex-1 min-w-[240px] bg-white dark:bg-[#1a1f2b] overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800 rounded-sm p-4 transition hover:shadow-md border-l-4 border-l-primary">
+            <div class="flex-1 min-w-[240px] bg-surface overflow-hidden shadow-sm border border-border-main rounded-sm p-4 transition hover:shadow-md border-l-4 border-l-primary">
                 <dt class="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Portfolio Balance</dt>
                 <dd class="text-xl font-black text-primary dark:text-white">₦ {{ fetch_data($portfolioBalance?->format() ?? null) }}</dd>
                 <p class="text-[8px] font-bold text-slate-400 uppercase mt-1 tracking-tighter">Active Lending Value</p>
             </div>
 
             <!-- Savings Balance -->
-            <div class="flex-1 min-w-[240px] bg-white dark:bg-[#1a1f2b] overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800 rounded-sm p-4 transition hover:shadow-md border-l-4 border-l-emerald-500">
+            <div class="flex-1 min-w-[240px] bg-surface overflow-hidden shadow-sm border border-border-main rounded-sm p-4 transition hover:shadow-md border-l-4 border-l-emerald-500">
                 <dt class="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Savings Amount</dt>
                 <dd class="text-xl font-black text-emerald-600">₦ {{ fetch_data($savingsBalance?->format() ?? null) }}</dd>
                 <p class="text-[8px] font-bold text-slate-400 uppercase mt-1 tracking-tighter">Vaulted Security</p>
             </div>
 
             <!-- Portfolio at Risk (PAR) -->
-            <div class="flex-1 min-w-[240px] bg-white dark:bg-[#1a1f2b] overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800 rounded-sm p-4 transition hover:shadow-md border-l-4 border-l-rose-500">
+            <div class="flex-1 min-w-[240px] bg-surface overflow-hidden shadow-sm border border-border-main rounded-sm p-4 transition hover:shadow-md border-l-4 border-l-rose-500">
                 <div class="flex justify-between items-start mb-1">
                     <dt class="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">PAR ({{ $parPercentage }}%)</dt>
                 </div>
@@ -109,7 +109,7 @@
             </div>
 
             <!-- Profit and Loss (PnL) -->
-            <div class="flex-1 min-w-[240px] bg-white dark:bg-[#1a1f2b] overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800 rounded-sm p-4 transition hover:shadow-md border-l-4 border-l-slate-900 dark:border-l-white">
+            <div class="flex-1 min-w-[240px] bg-surface overflow-hidden shadow-sm border border-border-main rounded-sm p-4 transition hover:shadow-md border-l-4 border-l-slate-900 dark:border-l-white">
                 <dt class="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Profit & Loss (PnL)</dt>
                 <dd class="text-xl font-black {{ fetch_data($profitLoss?->isPositive() ? 'text-green-600' : ($profitLoss?->isNegative() ? 'text-rose-600' : 'text-slate-900 dark:text-white') ?? null) }}">
                     ₦ {{ fetch_data($profitLoss?->format() ?? null) }}
@@ -124,25 +124,25 @@
         {{-- Row 1: Global Totals --}}
         <div class="flex flex-wrap gap-4">
             <!-- Total Loaned Card -->
-            <a href="{{ route('loan') }}" class="flex-1 min-w-[240px] bg-white dark:bg-[#1a1f2b] overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800 rounded-sm p-4 transition hover:shadow-md border-l-4 border-l-blue-500 group">
+            <a href="{{ route('loan') }}" class="flex-1 min-w-[240px] bg-surface overflow-hidden shadow-sm border border-border-main rounded-sm p-4 transition hover:shadow-md border-l-4 border-l-blue-500 group">
                 <dt class="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Org. Total Balance</dt>
                 <dd class="text-xl font-black text-blue-600 group-hover:scale-[1.02] transition-transform origin-left">₦ {{ fetch_data($totalLoaned?->format() ?? null) }}</dd>
             </a>
             
             <!-- Total Collected Card -->
-            <a href="{{ route('collections') }}" class="flex-1 min-w-[240px] bg-white dark:bg-[#1a1f2b] overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800 rounded-sm p-4 transition hover:shadow-md border-l-4 border-l-emerald-500 group">
+            <a href="{{ route('collections') }}" class="flex-1 min-w-[240px] bg-surface overflow-hidden shadow-sm border border-border-main rounded-sm p-4 transition hover:shadow-md border-l-4 border-l-emerald-500 group">
                 <dt class="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Total Collected</dt>
                 <dd class="text-xl font-black text-emerald-600 group-hover:scale-[1.02] transition-transform origin-left">₦ {{ fetch_data($totalCollected?->format() ?? null) }}</dd>
             </a>
 
             <!-- Total Active Loans -->
-            <a href="{{ route('status-board') }}" class="flex-1 min-w-[240px] bg-white dark:bg-[#1a1f2b] overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800 rounded-sm p-4 transition hover:shadow-md border-l-4 border-l-orange-500 group">
+            <a href="{{ route('status-board') }}" class="flex-1 min-w-[240px] bg-surface overflow-hidden shadow-sm border border-border-main rounded-sm p-4 transition hover:shadow-md border-l-4 border-l-orange-500 group">
                 <dt class="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Active Loans</dt>
                 <dd class="text-xl font-black text-orange-600 group-hover:scale-[1.02] transition-transform origin-left">{{ number_format($activeLoansCount) }}</dd>
             </a>
 
             <!-- Total Customers -->
-            <a href="{{ route('customer') }}" class="flex-1 min-w-[240px] bg-white dark:bg-[#1a1f2b] overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800 rounded-sm p-4 transition hover:shadow-md border-l-4 border-l-purple-500 group relative">
+            <a href="{{ route('customer') }}" class="flex-1 min-w-[240px] bg-surface overflow-hidden shadow-sm border border-border-main rounded-sm p-4 transition hover:shadow-md border-l-4 border-l-purple-500 group relative">
                 <div class="flex flex-col h-full justify-between">
                     <div>
                         <dt class="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Total Customers</dt>
@@ -172,26 +172,26 @@
         {{-- Row 2: Detailed Stats --}}
         <div class="flex flex-wrap gap-4">
             <!-- Fully Paid Loans -->
-            <a href="{{ route('status-board') }}" class="flex-1 min-w-[240px] bg-white dark:bg-[#1a1f2b] overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800 rounded-sm p-4 transition hover:shadow-md border-l-4 border-l-green-600 group">
+            <a href="{{ route('status-board') }}" class="flex-1 min-w-[240px] bg-surface overflow-hidden shadow-sm border border-border-main rounded-sm p-4 transition hover:shadow-md border-l-4 border-l-green-600 group">
                 <dt class="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Paid Loans</dt>
                 <dd class="text-xl font-black text-green-700 dark:text-green-500 group-hover:scale-[1.02] transition-transform origin-left">{{ number_format($paidLoansCount) }}</dd>
             </a>
 
             <!-- Defaulted Loans -->
-            <a href="{{ route('status-board') }}" class="flex-1 min-w-[240px] bg-white dark:bg-[#1a1f2b] overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800 rounded-sm p-4 transition hover:shadow-md border-l-4 border-l-rose-600 group">
+            <a href="{{ route('status-board') }}" class="flex-1 min-w-[240px] bg-surface overflow-hidden shadow-sm border border-border-main rounded-sm p-4 transition hover:shadow-md border-l-4 border-l-rose-600 group">
                 <dt class="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Defaulted Loans</dt>
                 <dd class="text-xl font-black text-rose-600 group-hover:scale-[1.02] transition-transform origin-left">{{ number_format($defaultedLoansCount) }}</dd>
             </a>
 
             <!-- Pending Apps -->
-            <a href="{{ route('loans.pending') }}" class="flex-1 min-w-[240px] bg-white dark:bg-[#1a1f2b] overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800 rounded-sm p-4 transition hover:shadow-md border-l-4 border-l-blue-400 group">
+            <a href="{{ route('loans.pending') }}" class="flex-1 min-w-[240px] bg-surface overflow-hidden shadow-sm border border-border-main rounded-sm p-4 transition hover:shadow-md border-l-4 border-l-blue-400 group">
                 <dt class="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Pending Apps</dt>
                 <dd class="text-xl font-black text-blue-500 group-hover:scale-[1.02] transition-transform origin-left">{{ number_format($pendingApplicationsCount) }}</dd>
             </a>
 
             @can('view_live_balance')
                 <!-- Live Account Balance -->
-                <a href="{{ route('cashbook.month-record') }}" class="flex-1 min-w-[240px] bg-white dark:bg-[#1a1f2b] overflow-hidden shadow-sm border border-slate-200 dark:border-slate-800 rounded-sm p-4 transition hover:shadow-md border-l-4 border-l-indigo-600 group">
+                <a href="{{ route('cashbook.month-record') }}" class="flex-1 min-w-[240px] bg-surface overflow-hidden shadow-sm border border-border-main rounded-sm p-4 transition hover:shadow-md border-l-4 border-l-indigo-600 group">
                     <dt class="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Live Bank Balance</dt>
                     <dd class="text-xl font-black text-indigo-600 group-hover:scale-[1.02] transition-transform origin-left">₦ {{ fetch_data($accountBalance?->format() ?? '0.00' ?? null) }}</dd>
                 </a>
@@ -201,7 +201,7 @@
     <!-- Main Section: Chart & Inbox -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Collections Pulse Chart -->
-        <div class="lg:col-span-2 bg-white dark:bg-[#1a1f2b] rounded-sm p-6 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col min-h-[420px]" x-data="{ activePoint: null }">
+        <div class="lg:col-span-2 bg-surface rounded-sm p-6 border border-border-main shadow-sm flex flex-col min-h-[420px]" x-data="{ activePoint: null }">
             <div class="flex items-center justify-between mb-8">
                 <div>
                     <h3 class="text-lg font-bold text-slate-800 dark:text-white tracking-tight flex items-center gap-2">
@@ -305,7 +305,7 @@
             </div>
 
             <!-- Portfolio Composition Cards -->
-            <div class="grid grid-cols-3 gap-4 mt-10 pt-6 border-t border-slate-100 dark:border-slate-800">
+            <div class="grid grid-cols-3 gap-4 mt-10 pt-6 border-t border-border-main">
                 <div class="flex flex-col gap-1">
                     <div class="flex items-center gap-1.5">
                         <span class="w-1.5 h-1.5 rounded-full bg-brand-green"></span>
@@ -313,7 +313,7 @@
                     </div>
                     <span class="text-sm font-black text-primary dark:text-white">₦ {{ fetch_data($repaidAmount?->format() ?? null) }}</span>
                 </div>
-                <div class="flex flex-col gap-1 border-x border-slate-100 dark:border-slate-800 px-4">
+                <div class="flex flex-col gap-1 border-x border-border-main px-4">
                     <div class="flex items-center gap-1.5">
                         <span class="w-1.5 h-1.5 rounded-full bg-brand-blue"></span>
                         <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider">Active</span>
@@ -330,7 +330,7 @@
             </div>
         </div>
         <!-- Action Inbox -->
-        <div class="lg:col-span-1 bg-white dark:bg-[#1a1f2b] rounded-sm p-6 border border-slate-200 dark:border-slate-800 shadow-sm flex flex-col h-full">
+        <div class="lg:col-span-1 bg-surface rounded-sm p-6 border border-border-main shadow-sm flex flex-col h-full">
             <div class="flex items-center justify-between mb-6">
                 <h3 class="text-lg font-bold text-slate-800 dark:text-white tracking-tight">Action Inbox</h3>
                 <span class="px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-black uppercase tracking-widest rounded-full">{{ count($actionItems) }} Pending</span>
@@ -359,7 +359,7 @@
                     </div>
                 @endforelse
             </div>
-            <div class="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+            <div class="mt-4 pt-4 border-t border-border-main">
                 <a href="{{ route('actions') }}" class="w-full inline-block text-center py-2 text-[10px] font-black uppercase tracking-widest text-primary dark:text-white bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-sm transition-colors border border-slate-200 dark:border-slate-700">
                     View all tasks
                 </a>

@@ -32,7 +32,7 @@
                 </div>
 
                 <!-- Add/Edit Form -->
-                <div class="bg-slate-50 dark:bg-zinc-800/30 p-8 rounded-[2rem] border border-slate-100 dark:border-zinc-800">
+                <div class="bg-slate-50 dark:bg-zinc-800/30 p-8 rounded-[2rem] border border-border-main">
                     <h3 class="text-sm font-black uppercase tracking-widest text-primary dark:text-white mb-8">{{ $editingRoleId ? 'Edit' : 'Create New' }} Role</h3>
                     <form wire:submit.prevent="saveRole" class="space-y-6">
                         <div>
@@ -51,7 +51,7 @@
                             <label class="block text-[10px] font-black text-gray-500 uppercase tracking-widest mb-4 px-1">Assign Permissions</label>
                             <div class="grid grid-cols-1 gap-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
                                 @foreach($allPermissions as $perm)
-                                    <label class="flex items-center gap-3 p-3 bg-white dark:bg-zinc-900 rounded-xl border border-slate-100 dark:border-zinc-800 cursor-pointer hover:border-primary/20 transition-all">
+                                    <label class="flex items-center gap-3 p-3 bg-white dark:bg-zinc-900 rounded-xl border border-border-main cursor-pointer hover:border-primary/20 transition-all">
                                         <input type="checkbox" wire:model="selectedPermissions" value="{{ $perm }}" class="rounded-md border-gray-300 text-primary focus:ring-primary size-5">
                                         <span class="text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-tight">{{ str_replace('_', ' ', $perm) }}</span>
                                     </label>

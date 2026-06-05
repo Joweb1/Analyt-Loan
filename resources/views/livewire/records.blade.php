@@ -6,7 +6,7 @@
 
     <div class="mb-8 px-2 flex flex-wrap gap-4">
         {{-- Total Savings Balance Card --}}
-        <div class="flex-1 min-w-[280px] bg-white dark:bg-[#1a1f2b] p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm relative group">
+        <div class="flex-1 min-w-[280px] bg-surface p-6 rounded-2xl border border-border-main shadow-sm relative group">
             <div class="flex justify-between items-start mb-4">
                 <div>
                     <h3 class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-1">Total Savings</h3>
@@ -20,7 +20,7 @@
                          x-transition:enter="transition ease-out duration-200"
                          x-transition:enter-start="opacity-0 translate-y-1 scale-95"
                          x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-                         class="absolute right-0 mt-3 w-52 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl z-50 p-2 overflow-hidden">
+                         class="absolute right-0 mt-3 w-52 bg-surface border border-border-main rounded-2xl shadow-2xl z-50 p-2 overflow-hidden">
                         <div class="px-3 py-2 border-b border-slate-50 dark:border-slate-800 mb-1">
                             <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Select View Period</span>
                         </div>
@@ -51,7 +51,7 @@
         </div>
 
         {{-- Total Daily Savings (Thrift) Card --}}
-        <div class="flex-1 min-w-[280px] bg-white dark:bg-[#1a1f2b] p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm relative group">
+        <div class="flex-1 min-w-[280px] bg-surface p-6 rounded-2xl border border-border-main shadow-sm relative group">
             <div class="flex justify-between items-start mb-4">
                 <div>
                     <h3 class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-1">Total Daily Thrift</h3>
@@ -65,7 +65,7 @@
                          x-transition:enter="transition ease-out duration-200"
                          x-transition:enter-start="opacity-0 translate-y-1 scale-95"
                          x-transition:enter-end="opacity-100 translate-y-0 scale-100"
-                         class="absolute right-0 mt-3 w-52 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl z-50 p-2 overflow-hidden">
+                         class="absolute right-0 mt-3 w-52 bg-surface border border-border-main rounded-2xl shadow-2xl z-50 p-2 overflow-hidden">
                         <div class="px-3 py-2 border-b border-slate-50 dark:border-slate-800 mb-1">
                             <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Select View Period</span>
                         </div>

@@ -164,7 +164,7 @@
         </div>
 
         <!-- Collections Pulse Chart -->
-        <div class="bg-white dark:bg-[#1a1f2b] rounded-2xl p-6 shadow-soft flex flex-col min-h-[420px]" x-data="{ activePoint: null }">
+        <div class="bg-surface rounded-2xl p-6 shadow-soft flex flex-col min-h-[420px]" x-data="{ activePoint: null }">
             <div class="flex items-center justify-between mb-8">
                 <div>
                     <h3 class="text-primary dark:text-white text-lg font-black tracking-tight flex items-center gap-2">
@@ -273,7 +273,7 @@
             </div>
 
             <!-- Portfolio Composition Cards -->
-            <div class="grid grid-cols-3 gap-4 mt-10 pt-6 border-t border-slate-100 dark:border-slate-800">
+            <div class="grid grid-cols-3 gap-4 mt-10 pt-6 border-t border-border-main">
                 <div class="flex flex-col gap-1">
                     <div class="flex items-center gap-1.5">
                         <span class="w-2 h-2 rounded-full bg-brand-green"></span>
@@ -281,7 +281,7 @@
                     </div>
                     <span class="text-sm font-black text-primary dark:text-white">₦ {{ fetch_data($repaidAmount?->format() ?? '0.00' ?? null) }}</span>
                 </div>
-                <div class="flex flex-col gap-1 border-x border-slate-100 dark:border-slate-800 px-4">
+                <div class="flex flex-col gap-1 border-x border-border-main px-4">
                     <div class="flex items-center gap-1.5">
                         <span class="w-2 h-2 rounded-full bg-brand-blue"></span>
                         <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider">Active</span>

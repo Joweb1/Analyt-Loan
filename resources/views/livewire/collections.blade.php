@@ -50,7 +50,7 @@
 
             <!-- Custom Date Filter Dropdown -->
             <div x-data="{ open: false, selected: @entangle('filter') }" class="relative flex-1 sm:flex-none">
-                <button @click="open = !open" @click.outside="open = false" type="button" class="flex items-center justify-between gap-2 w-full sm:w-40 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 py-2 pl-4 pr-3 rounded-xl text-xs font-bold shadow-sm hover:border-primary/50 transition-colors">
+                <button @click="open = !open" @click.outside="open = false" type="button" class="flex items-center justify-between gap-2 w-full sm:w-40 bg-surface border border-border-main text-slate-700 dark:text-slate-300 py-2 pl-4 pr-3 rounded-xl text-xs font-bold shadow-sm hover:border-primary/50 transition-colors">
                     <span x-text="selected.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())"></span>
                     <span class="material-symbols-outlined text-sm text-slate-400" :class="{ 'rotate-180': open }">expand_more</span>
                 </button>
@@ -62,7 +62,7 @@
                     x-transition:leave="transition ease-in duration-75"
                     x-transition:leave-start="transform opacity-100 scale-100"
                     x-transition:leave-end="transform opacity-0 scale-95"
-                    class="absolute right-0 z-20 mt-2 w-40 origin-top-right rounded-xl bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-800 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" 
+                    class="absolute right-0 z-20 mt-2 w-40 origin-top-right rounded-xl bg-surface border border-border-main shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none" 
                     style="display: none;">
                     <div class="py-1">
                         @foreach(['today' => 'Today', 'yesterday' => 'Yesterday', 'this_week' => 'This Week', 'last_week' => 'Last Week', 'this_month' => 'This Month', 'last_month' => 'Last Month', 'this_year' => 'This Year', 'last_year' => 'Last Year'] as $val => $label)
@@ -83,7 +83,7 @@
         <!-- Summary Stats -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             <!-- Total Overdue Card -->
-            <div class="bg-white dark:bg-background-dark p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden group">
+            <div class="bg-white dark:bg-background-dark p-4 rounded-xl border border-border-main shadow-sm relative overflow-hidden group">
                 <div class="flex justify-between items-start mb-2">
                     <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Overdue</p>
                 </div>
@@ -94,7 +94,7 @@
             </div>
 
             <!-- Collected Card -->
-            <div class="bg-white dark:bg-background-dark p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden group">
+            <div class="bg-white dark:bg-background-dark p-4 rounded-xl border border-border-main shadow-sm relative overflow-hidden group">
                 <div class="flex justify-between items-start mb-2">
                     <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Collected {{ str_replace('_', ' ', ucfirst($filter)) }}</p>
                     <span class="{{ $stats['collected']['change'] >= 0 ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-600' }} text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-tighter">
@@ -108,7 +108,7 @@
             </div>
 
             <!-- Recovery Rate Card -->
-            <div class="bg-white dark:bg-background-dark p-4 rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm relative overflow-hidden group">
+            <div class="bg-white dark:bg-background-dark p-4 rounded-xl border border-border-main shadow-sm relative overflow-hidden group">
                 <div class="flex justify-between items-start mb-2">
                     <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Recovery Rate</p>
                     <span class="{{ $stats['recovery']['change'] >= 0 ? 'bg-blue-50 text-blue-600' : 'bg-red-50 text-red-600' }} text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-tighter">
@@ -142,8 +142,8 @@
     </div>
 
     <!-- Overdue Loans Table -->
-    <div class="bg-white dark:bg-background-dark rounded-xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-        <div class="px-4 py-3 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+    <div class="bg-white dark:bg-background-dark rounded-xl border border-border-main shadow-sm overflow-hidden">
+        <div class="px-4 py-3 border-b border-border-main flex items-center justify-between">
             <div>
                 <h3 class="text-base font-bold">Overdue Accounts</h3>
                 <p class="text-xs text-slate-500">Requires immediate manual intervention</p>
@@ -208,7 +208,7 @@
                 </tbody>
             </table>
         </div>
-        <div class="px-6 py-4 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-800">
+        <div class="px-6 py-4 bg-slate-50 dark:bg-slate-900/50 border-t border-border-main">
             {{ fetch_data($overdueLoans?->links() ?? null) }}
         </div>
     </div>

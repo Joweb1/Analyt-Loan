@@ -4,7 +4,7 @@
         <p class="text-slate-500 dark:text-slate-400">Configure global platform behavior and appearance.</p>
     </div>
 
-    <div class="bg-white dark:bg-[#1a1f2b] rounded-3xl shadow-soft border border-slate-100 dark:border-slate-800 overflow-hidden">
+    <div class="bg-surface rounded-3xl shadow-soft border border-border-main overflow-hidden">
         <div class="p-8 border-b border-slate-50 dark:border-slate-800">
             <h3 class="text-lg font-bold text-slate-800 dark:text-white">General Configuration</h3>
         </div>

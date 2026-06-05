@@ -28,7 +28,7 @@
         
         <div class="flex flex-wrap items-center gap-4">
             <!-- Cool Toggle Switch for Filters -->
-            <div class="flex items-center gap-3 px-4 py-2 bg-white dark:bg-[#1a1f2b] rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm">
+            <div class="flex items-center gap-3 px-4 py-2 bg-surface rounded-xl border border-border-main shadow-sm">
                 <span class="text-[10px] font-black uppercase tracking-widest text-slate-500">Filters</span>
                 <button 
                     type="button" 
@@ -65,7 +65,7 @@
     <div x-show="filtersVisible" x-collapse x-cloak>
         <div class="animate-in fade-in slide-in-from-top-4 duration-500">
             <!-- Row 2: Filters & View Toggle -->
-            <div class="flex flex-wrap items-center justify-between gap-4 mb-6 p-4 bg-white dark:bg-[#1a1f2b] rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm">
+            <div class="flex flex-wrap items-center justify-between gap-4 mb-6 p-4 bg-surface rounded-xl border border-border-main shadow-sm">
                 <div class="flex flex-wrap items-center gap-3">
                     <div class="flex items-center gap-2">
                         <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">Show:</span>
@@ -102,7 +102,7 @@
                 <span class="absolute inset-y-0 left-0 pl-6 flex items-center pointer-events-none transition-colors group-focus-within:text-primary">
                     <span class="material-symbols-outlined text-slate-400 text-[24px]">search</span>
                 </span>
-                <input wire:model.live.debounce.300ms="search" type="text" placeholder="Search by name, email, phone or ID..." class="block w-full pl-16 pr-6 py-4 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-800 rounded-xl text-sm font-medium focus:border-primary/30 focus:ring-4 focus:ring-primary/5 transition-all shadow-sm">
+                <input wire:model.live.debounce.300ms="search" type="text" placeholder="Search by name, email, phone or ID..." class="block w-full pl-16 pr-6 py-4 bg-surface border border-border-main rounded-xl text-sm font-medium focus:border-primary/30 focus:ring-4 focus:ring-primary/5 transition-all shadow-sm">
                 <div class="absolute inset-y-0 right-4 flex items-center">
                     <div class="px-3 py-1 bg-slate-100 dark:bg-zinc-800 rounded-lg text-[10px] font-black text-slate-400 uppercase tracking-[0.1em] border border-slate-200 dark:border-slate-700">Enter to Search</div>
                 </div>

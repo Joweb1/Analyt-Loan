@@ -5,13 +5,13 @@
     <input 
         wire:model.live.debounce.300ms="query" 
         @keydown.escape="open = false; $wire.set('query', '')"
-        class="block w-full pl-12 pr-4 py-3.5 bg-white dark:bg-[#1a1f2b] dark:text-white border-none rounded-2xl text-sm shadow-xl focus:ring-2 focus:ring-primary/40 placeholder-slate-400 transition-all font-medium" 
+        class="block w-full pl-12 pr-4 py-3.5 bg-surface dark:text-white border-none rounded-2xl text-sm shadow-xl focus:ring-2 focus:ring-primary/40 placeholder-slate-400 transition-all font-medium" 
         placeholder="Universal search (ID, Name, Phone, Collateral...)" 
         type="text"
     />
     
     @if(strlen($query) >= 2)
-        <div class="absolute mt-3 w-full bg-white dark:bg-[#1a1f2b] rounded-3xl shadow-2xl border border-slate-100 dark:border-slate-800 z-[100] overflow-hidden animate-in fade-in slide-in-from-top-4 duration-200">
+        <div class="absolute mt-3 w-full bg-surface rounded-3xl shadow-2xl border border-border-main z-[100] overflow-hidden animate-in fade-in slide-in-from-top-4 duration-200">
             <div class="p-3">
                 <div class="flex items-center justify-between px-3 py-2 border-b border-slate-50 dark:border-slate-800/50 mb-2">
                     <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Search Results</span>

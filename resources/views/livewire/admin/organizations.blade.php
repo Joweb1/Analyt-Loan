@@ -8,7 +8,7 @@
     </div>
 
     <!-- Filters -->
-    <div class="bg-white dark:bg-[#1a1f2b] p-4 rounded-2xl shadow-soft border border-slate-100 dark:border-slate-800 flex flex-wrap gap-4">
+    <div class="bg-surface p-4 rounded-2xl shadow-soft border border-border-main flex flex-wrap gap-4">
         <div class="flex-1 min-w-[200px]">
             <div class="relative">
                 <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
@@ -29,7 +29,7 @@
     </div>
 
     <!-- Organizations Table -->
-    <div class="bg-white dark:bg-[#1a1f2b] rounded-2xl shadow-soft border border-slate-100 dark:border-slate-800 overflow-hidden">
+    <div class="bg-surface rounded-2xl shadow-soft border border-border-main overflow-hidden">
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
@@ -108,7 +108,7 @@
     @if($showDetailsModal && $selectedOrg)
         <div class="fixed inset-0 z-[100] flex items-center justify-center p-4">
             <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" wire:click="closeModal"></div>
-            <div class="relative w-full max-w-2xl bg-white dark:bg-[#1a1f2b] rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in duration-200">
+            <div class="relative w-full max-w-2xl bg-surface rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in duration-200">
                 <!-- Modal Header -->
                 <div class="p-8 border-b border-slate-50 dark:border-slate-800 flex items-center justify-between">
                     <div class="flex items-center gap-4">

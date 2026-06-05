@@ -15,7 +15,7 @@
     <!-- Health Cards Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <!-- Total Loaned Card -->
-        <div class="md:col-span-1 bg-white dark:bg-[#1a1f2b] rounded-2xl p-6 shadow-soft hover:shadow-lg transition-all duration-300 border border-transparent hover:border-brand-blue/10 relative overflow-hidden group">
+        <div class="md:col-span-1 bg-surface rounded-2xl p-6 shadow-soft hover:shadow-lg transition-all duration-300 border border-transparent hover:border-brand-blue/10 relative overflow-hidden group">
             <div class="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
                 <span class="material-symbols-outlined text-[80px] text-brand-blue">account_balance_wallet</span>
             </div>
@@ -35,7 +35,7 @@
             </div>
         </div>
         <!-- Total Collected Card -->
-        <div class="md:col-span-1 bg-white dark:bg-[#1a1f2b] rounded-2xl p-6 shadow-soft hover:shadow-lg transition-all duration-300 border border-transparent hover:border-brand-green/10 relative overflow-hidden group">
+        <div class="md:col-span-1 bg-surface rounded-2xl p-6 shadow-soft hover:shadow-lg transition-all duration-300 border border-transparent hover:border-brand-green/10 relative overflow-hidden group">
             <div class="absolute top-0 right-0 p-6 opacity-5 group-hover:opacity-10 transition-opacity">
                 <span class="material-symbols-outlined text-[80px] text-brand-green">savings</span>
             </div>
@@ -57,7 +57,7 @@
         <!-- Stats Grid -->
         <div class="md:col-span-2 grid grid-cols-2 gap-4">
             <!-- Total Customers -->
-            <div class="bg-white dark:bg-[#1a1f2b] rounded-xl p-4 shadow-soft hover:shadow-lg transition-all duration-300 border border-transparent hover:border-brand-purple/10 relative overflow-hidden group">
+            <div class="bg-surface rounded-xl p-4 shadow-soft hover:shadow-lg transition-all duration-300 border border-transparent hover:border-brand-purple/10 relative overflow-hidden group">
                 <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
                     <span class="material-symbols-outlined text-[60px] text-brand-purple">groups</span>
                 </div>
@@ -75,7 +75,7 @@
                 </div>
             </div>
             <!-- Total Active Loans -->
-            <div class="bg-white dark:bg-[#1a1f2b] rounded-xl p-4 shadow-soft hover:shadow-lg transition-all duration-300 border border-transparent hover:border-brand-orange/10 relative overflow-hidden group">
+            <div class="bg-surface rounded-xl p-4 shadow-soft hover:shadow-lg transition-all duration-300 border border-transparent hover:border-brand-orange/10 relative overflow-hidden group">
                 <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
                     <span class="material-symbols-outlined text-[60px] text-brand-orange">donut_large</span>
                 </div>
@@ -93,7 +93,7 @@
                 </div>
             </div>
             <!-- Fully Paid Loans -->
-            <div class="bg-white dark:bg-[#1a1f2b] rounded-xl p-4 shadow-soft hover:shadow-lg transition-all duration-300 border border-transparent hover:border-brand-green/10 relative overflow-hidden group">
+            <div class="bg-surface rounded-xl p-4 shadow-soft hover:shadow-lg transition-all duration-300 border border-transparent hover:border-brand-green/10 relative overflow-hidden group">
                 <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
                     <span class="material-symbols-outlined text-[60px] text-brand-green">check_circle</span>
                 </div>
@@ -111,7 +111,7 @@
                 </div>
             </div>
             <!-- Risk/Default Loans -->
-            <div class="bg-white dark:bg-[#1a1f2b] rounded-xl p-4 shadow-soft hover:shadow-lg transition-all duration-300 border border-transparent hover:border-brand-red/10 relative overflow-hidden group">
+            <div class="bg-surface rounded-xl p-4 shadow-soft hover:shadow-lg transition-all duration-300 border border-transparent hover:border-brand-red/10 relative overflow-hidden group">
                 <div class="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
                     <span class="material-symbols-outlined text-[60px] text-brand-red">cancel</span>
                 </div>
@@ -133,7 +133,7 @@
     <!-- Main Section: Chart & Inbox -->
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Collections Pulse Chart -->
-        <div class="lg:col-span-2 bg-white dark:bg-[#1a1f2b] rounded-2xl p-6 shadow-soft flex flex-col">
+        <div class="lg:col-span-2 bg-surface rounded-2xl p-6 shadow-soft flex flex-col">
             <div class="flex items-center justify-between mb-6">
                 <div>
                     <h3 class="text-primary dark:text-white text-lg font-bold">Collections Pulse</h3>
@@ -175,7 +175,7 @@
             </div>
         </div>
         <!-- Action Inbox -->
-        <div class="lg:col-span-1 bg-white dark:bg-[#1a1f2b] rounded-2xl p-6 shadow-soft flex flex-col h-full">
+        <div class="lg:col-span-1 bg-surface rounded-2xl p-6 shadow-soft flex flex-col h-full">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-primary dark:text-white text-lg font-bold">Action Inbox</h3>
                 <span class="bg-primary/10 text-primary text-xs font-bold px-2 py-1 rounded-md">3 Pending</span>

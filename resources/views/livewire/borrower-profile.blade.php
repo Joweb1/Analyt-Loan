@@ -21,7 +21,7 @@
             </h2>
         </div>
         <div class="flex gap-3">
-             <button wire:click="toggleEdit" class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-white rounded-xl text-sm font-bold shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
+             <button wire:click="toggleEdit" class="flex items-center gap-2 px-4 py-2 bg-surface border border-border-main text-slate-700 dark:text-white rounded-xl text-sm font-bold shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
                 <span class="material-symbols-outlined text-lg">{{ $isEditing ? 'close' : 'edit' }}</span>
                 {{ $isEditing ? 'Cancel Edit' : 'Edit Profile' }}
             </button>
@@ -37,7 +37,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 px-1 lg:px-2 pb-8">
         <!-- Left Column: Photo & Basic Info -->
         <div class="lg:col-span-1 space-y-6">
-            <div class="bg-white dark:bg-[#1a1f2b] rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden p-8 text-center">
+            <div class="bg-surface rounded-2xl border border-border-main shadow-sm overflow-hidden p-8 text-center">
                 <div class="relative inline-block mb-6">
                     <div class="size-32 rounded-full border-4 border-slate-50 dark:border-slate-800 shadow-xl overflow-hidden mx-auto">
                         @if($new_photo)
@@ -142,7 +142,7 @@
 
             <!-- KYC Decision (Only if pending) -->
             @if($kyc_status === 'pending')
-                <div class="bg-white dark:bg-[#1a1f2b] rounded-2xl border border-yellow-200 dark:border-yellow-900/30 shadow-sm p-6 space-y-4">
+                <div class="bg-surface rounded-2xl border border-yellow-200 dark:border-yellow-900/30 shadow-sm p-6 space-y-4">
                     <h4 class="text-sm font-black uppercase tracking-widest text-yellow-600 flex items-center gap-2">
                         <span class="material-symbols-outlined text-lg">pending_actions</span>
                         KYC DECISION
@@ -182,8 +182,8 @@
 
         <!-- Right Column: Detailed Info & KYC -->
         <div class="lg:col-span-2 space-y-8">
-            <div class="bg-white dark:bg-[#1a1f2b] rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-                <div class="px-6 py-5 border-b border-slate-100 dark:border-slate-800">
+            <div class="bg-surface rounded-2xl border border-border-main shadow-sm overflow-hidden">
+                <div class="px-6 py-5 border-b border-border-main">
                     <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
                         <span class="material-symbols-outlined text-primary">fingerprint</span>
                         Identification & KYC Data
@@ -309,8 +309,8 @@
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-[#1a1f2b] rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-                <div class="px-6 py-5 border-b border-slate-100 dark:border-slate-800">
+            <div class="bg-surface rounded-2xl border border-border-main shadow-sm overflow-hidden">
+                <div class="px-6 py-5 border-b border-border-main">
                     <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
                         <span class="material-symbols-outlined text-primary">account_balance</span>
                         Disbursement Bank Details
@@ -339,8 +339,8 @@
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-[#1a1f2b] rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-                <div class="px-6 py-5 border-b border-slate-100 dark:border-slate-800">
+            <div class="bg-surface rounded-2xl border border-border-main shadow-sm overflow-hidden">
+                <div class="px-6 py-5 border-b border-border-main">
                     <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
                         <span class="material-symbols-outlined text-primary">folder_open</span>
                         Uploaded Documents
@@ -359,7 +359,7 @@
                                     </div>
                                 </a>
                             @else
-                                <div class="aspect-square rounded-xl bg-slate-50 dark:bg-zinc-800/50 flex flex-col items-center justify-center text-slate-300 border-2 border-dashed border-slate-200 dark:border-slate-800">
+                                <div class="aspect-square rounded-xl bg-slate-50 dark:bg-zinc-800/50 flex flex-col items-center justify-center text-slate-300 border-2 border-dashed border-border-main">
                                     <span class="material-symbols-outlined text-3xl">no_photography</span>
                                     <span class="text-[9px] font-bold uppercase mt-2">Not Uploaded</span>
                                 </div>
@@ -380,7 +380,7 @@
                                     </div>
                                 </a>
                             @else
-                                <div class="flex items-center gap-4 p-4 bg-slate-50/50 dark:bg-zinc-800/30 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-800 opacity-50">
+                                <div class="flex items-center gap-4 p-4 bg-slate-50/50 dark:bg-zinc-800/30 rounded-2xl border-2 border-dashed border-border-main opacity-50">
                                     <div class="size-12 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-300">
                                         <span class="material-symbols-outlined text-2xl">error</span>
                                     </div>
@@ -403,7 +403,7 @@
                                     </div>
                                 </a>
                             @else
-                                <div class="flex items-center gap-4 p-4 bg-slate-50/50 dark:bg-zinc-800/30 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-800 opacity-50">
+                                <div class="flex items-center gap-4 p-4 bg-slate-50/50 dark:bg-zinc-800/30 rounded-2xl border-2 border-dashed border-border-main opacity-50">
                                     <div class="size-12 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-300">
                                         <span class="material-symbols-outlined text-2xl">error</span>
                                     </div>
@@ -426,7 +426,7 @@
                                     </div>
                                 </a>
                             @else
-                                <div class="flex items-center gap-4 p-4 bg-slate-50/50 dark:bg-zinc-800/30 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-800 opacity-50">
+                                <div class="flex items-center gap-4 p-4 bg-slate-50/50 dark:bg-zinc-800/30 rounded-2xl border-2 border-dashed border-border-main opacity-50">
                                     <div class="size-12 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-300">
                                         <span class="material-symbols-outlined text-2xl">error</span>
                                     </div>
@@ -438,8 +438,8 @@
                 </div>
             </div>
 
-            <div class="bg-white dark:bg-[#1a1f2b] rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
-                <div class="px-6 py-5 border-b border-slate-100 dark:border-slate-800">
+            <div class="bg-surface rounded-2xl border border-border-main shadow-sm overflow-hidden">
+                <div class="px-6 py-5 border-b border-border-main">
                     <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
                         <span class="material-symbols-outlined text-primary">work</span>
                         Employment & Income

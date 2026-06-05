@@ -33,10 +33,10 @@
                 <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <span class="material-symbols-outlined text-slate-400 text-sm">search</span>
                 </span>
-                <input wire:model.live.debounce.300ms="search" type="text" placeholder="Search ID, Name, Phone, BVN, NIN..." class="w-full pl-9 pr-4 py-2.5 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold focus:ring-2 focus:ring-primary/20 transition-all">
+                <input wire:model.live.debounce.300ms="search" type="text" placeholder="Search ID, Name, Phone, BVN, NIN..." class="w-full pl-9 pr-4 py-2.5 bg-surface border border-border-main rounded-xl text-xs font-bold focus:ring-2 focus:ring-primary/20 transition-all">
             </div>
             
-            <select wire:model.live="statusFilter" class="bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold py-2.5 px-4 focus:ring-2 focus:ring-primary/20 min-w-max">
+            <select wire:model.live="statusFilter" class="bg-surface border border-border-main rounded-xl text-xs font-bold py-2.5 px-4 focus:ring-2 focus:ring-primary/20 min-w-max">
                 <option value="">All Statuses</option>
                 <option value="applied">Applied</option>
                 <option value="verification_pending">Verification</option>
@@ -47,14 +47,14 @@
                 <option value="declined">Declined</option>
             </select>
 
-            <select wire:model.live="riskFilter" class="bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold py-2.5 px-4 focus:ring-2 focus:ring-primary/20 min-w-max">
+            <select wire:model.live="riskFilter" class="bg-surface border border-border-main rounded-xl text-xs font-bold py-2.5 px-4 focus:ring-2 focus:ring-primary/20 min-w-max">
                 <option value="">All Risks</option>
                 <option value="low">Low Risk</option>
                 <option value="medium">Medium Risk</option>
                 <option value="high">High Risk</option>
             </select>
 
-            <select wire:model.live="dateFilter" class="bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-800 rounded-xl text-xs font-bold py-2.5 px-4 focus:ring-2 focus:ring-primary/20 min-w-max">
+            <select wire:model.live="dateFilter" class="bg-surface border border-border-main rounded-xl text-xs font-bold py-2.5 px-4 focus:ring-2 focus:ring-primary/20 min-w-max">
                 <option value="">Any Time</option>
                 <option value="today">Today</option>
                 <option value="week">This Week</option>
@@ -170,7 +170,7 @@
                 </div>
                 <div class="flex flex-col gap-4 overflow-y-auto pb-8 h-full custom-scrollbar opacity-75">
                     @foreach($declined as $loan)
-                        <div class="bg-white dark:bg-[#1c2433] p-4 shadow-sm border border-slate-200 dark:border-slate-800 hover:shadow-md transition-all group cursor-pointer border-l-4 border-l-slate-400" onclick="window.location='{{ fetch_data(route('loan.show', $loan?->id) ?? null) }}'">
+                        <div class="bg-white dark:bg-[#1c2433] p-4 shadow-sm border border-border-main hover:shadow-md transition-all group cursor-pointer border-l-4 border-l-slate-400" onclick="window.location='{{ fetch_data(route('loan.show', $loan?->id) ?? null) }}'">
                             <div class="flex justify-between items-start mb-3">
                                 <span class="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-1 rounded-lg uppercase">DECLINED</span>
                                 <span class="material-symbols-outlined text-gray-300 group-hover:text-red-500 text-lg transition-colors">block</span>
@@ -212,10 +212,10 @@
 
     <!-- List View -->
     <div x-show="view === 'list'" id="list-view" class="flex-1 flex flex-col overflow-hidden" style="display: none;">
-        <div class="overflow-x-auto bg-white dark:bg-[#1a1f2b] rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+        <div class="overflow-x-auto bg-surface rounded-2xl border border-border-main shadow-sm">
             <table class="w-full text-left border-collapse">
                 <thead>
-                    <tr class="bg-slate-50 dark:bg-slate-900/50 text-slate-500 text-[10px] font-black uppercase tracking-widest border-b border-slate-100 dark:border-slate-800">
+                    <tr class="bg-slate-50 dark:bg-slate-900/50 text-slate-500 text-[10px] font-black uppercase tracking-widest border-b border-border-main">
                         <th class="px-6 py-4">Loan ID</th>
                         <th class="px-6 py-4">Borrower Details</th>
                         <th class="px-6 py-4">Identification</th>

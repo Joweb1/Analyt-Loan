@@ -132,7 +132,7 @@
                                         <span class="material-symbols-outlined">more_vert</span>
                                     </button>
                                     
-                                    <div x-show="open" @click.outside="open = false" class="absolute right-0 mt-2 w-48 bg-white dark:bg-[#1a1f2b] rounded-xl shadow-xl border border-slate-100 dark:border-slate-800 z-20 overflow-hidden" style="display: none;">
+                                    <div x-show="open" @click.outside="open = false" class="absolute right-0 mt-2 w-48 bg-surface rounded-xl shadow-xl border border-border-main z-20 overflow-hidden" style="display: none;">
                                         <div class="py-1">
                                             <button wire:click="viewAsset('{{ fetch_data($asset?->id ?? null) }}'); open = false" class="w-full px-4 py-2.5 text-left text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2 transition-colors">
                                                 <span class="material-symbols-outlined text-base">visibility</span> View Details
@@ -140,7 +140,7 @@
                                             <a href="{{ fetch_data(route('collateral.create', ['loan_id' => $asset?->loan_id]) ?? null) }}" class="w-full px-4 py-2.5 text-left text-xs font-bold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 flex items-center gap-2 transition-colors">
                                                 <span class="material-symbols-outlined text-base">edit</span> Edit Asset
                                             </a>
-                                            <div class="border-t border-slate-100 dark:border-slate-800 my-1"></div>
+                                            <div class="border-t border-border-main my-1"></div>
                                             <button wire:click="deleteAsset('{{ fetch_data($asset?->id ?? null) }}')" wire:confirm="Are you sure you want to delete this asset?" class="w-full px-4 py-2.5 text-left text-xs font-bold text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 transition-colors">
                                                 <span class="material-symbols-outlined text-base">delete</span> Delete
                                             </button>
@@ -181,10 +181,10 @@
         
         <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" @click="open = false"></div>
         
-        <div class="relative bg-white dark:bg-[#1a1f2b] w-full h-full sm:h-auto sm:max-w-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden">
+        <div class="relative bg-surface w-full h-full sm:h-auto sm:max-w-3xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden">
             @if($viewingAsset)
                 <!-- Header -->
-                <div class="px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-[#1a1f2b] sticky top-0 z-10">
+                <div class="px-6 py-4 border-b border-border-main flex items-center justify-between bg-surface sticky top-0 z-10">
                     <div>
                         <h3 class="text-xl font-black text-slate-900 dark:text-white">Asset Details</h3>
                         <p class="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">
@@ -227,28 +227,28 @@
                             </div>
                             
                             <div class="grid grid-cols-2 gap-4">
-                                <div class="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
+                                <div class="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-border-main">
                                     <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Asset Value</p>
                                     <p class="text-lg font-black text-slate-900 dark:text-white">₦{{ fetch_data($viewingAsset?->value?->format() ?? '0.00' ?? null) }}</p>
                                 </div>
-                                <div class="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-800">
+                                <div class="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl border border-border-main">
                                     <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Condition</p>
                                     <p class="text-lg font-black text-slate-900 dark:text-white">{{ fetch_data($viewingAsset?->condition ?? 'N/A' ?? null) }}</p>
                                 </div>
                             </div>
 
                             <div class="space-y-3">
-                                <div class="flex justify-between py-2 border-b border-slate-100 dark:border-slate-800">
+                                <div class="flex justify-between py-2 border-b border-border-main">
                                     <span class="text-xs font-bold text-slate-500 uppercase">Type</span>
                                     <span class="text-sm font-bold text-slate-900 dark:text-white">{{ fetch_data($viewingAsset?->type ?? null) }}</span>
                                 </div>
-                                <div class="flex justify-between py-2 border-b border-slate-100 dark:border-slate-800">
+                                <div class="flex justify-between py-2 border-b border-border-main">
                                     <span class="text-xs font-bold text-slate-500 uppercase">Owner</span>
                                     <span class="text-sm font-bold text-slate-900 dark:text-white">
                                         {{ fetch_data($viewingAsset?->loan ? $viewingAsset?->loan?->borrower?->user?->name : 'Company Owned' ?? null) }}
                                     </span>
                                 </div>
-                                <div class="flex justify-between py-2 border-b border-slate-100 dark:border-slate-800">
+                                <div class="flex justify-between py-2 border-b border-border-main">
                                     <span class="text-xs font-bold text-slate-500 uppercase">Registered</span>
                                     <span class="text-sm font-bold text-slate-900 dark:text-white">{{ fetch_data($viewingAsset?->registered_date ? $viewingAsset?->registered_date?->format('M d, Y') : 'N/A' ?? null) }}</span>
                                 </div>
@@ -258,7 +258,7 @@
                 </div>
 
                 <!-- Footer -->
-                <div class="px-6 py-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-[#1a1f2b] flex justify-end gap-3 sticky bottom-0 z-10">
+                <div class="px-6 py-4 border-t border-border-main bg-slate-50 dark:bg-[#1a1f2b] flex justify-end gap-3 sticky bottom-0 z-10">
                     <button wire:click="deleteAsset('{{ fetch_data($viewingAsset?->id ?? null) }}')" wire:confirm="Are you sure you want to delete this asset?" class="px-5 py-2.5 rounded-xl bg-red-50 text-red-600 font-bold text-xs hover:bg-red-100 transition-all">Delete</button>
                     <a href="{{ fetch_data(route('collateral.create', ['loan_id' => $viewingAsset?->loan_id]) ?? null) }}" class="px-5 py-2.5 rounded-xl bg-primary text-white font-bold text-xs shadow-lg shadow-primary/30 hover:bg-blue-700 transition-all flex items-center gap-2">
                         <span class="material-symbols-outlined text-sm">edit</span> Edit Details

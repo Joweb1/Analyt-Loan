@@ -17,7 +17,7 @@
             <span class="material-symbols-outlined absolute -bottom-4 -right-4 text-9xl opacity-10 rotate-12">account_balance</span>
         </div>
 
-        <div class="bg-white dark:bg-[#1a1f2b] p-8 rounded-3xl shadow-soft border border-slate-100 dark:border-slate-800">
+        <div class="bg-surface p-8 rounded-3xl shadow-soft border border-border-main">
             <p class="text-sm font-medium text-slate-400 uppercase tracking-wider mb-2">Total Collection</p>
             <h3 class="text-3xl font-black text-slate-800 dark:text-white">₦{{ number_format($totals['collected'], 0) }}</h3>
             <div class="mt-4 flex items-center gap-2">
@@ -28,7 +28,7 @@
             </div>
         </div>
 
-        <div class="bg-white dark:bg-[#1a1f2b] p-8 rounded-3xl shadow-soft border border-slate-100 dark:border-slate-800">
+        <div class="bg-surface p-8 rounded-3xl shadow-soft border border-border-main">
             <p class="text-sm font-medium text-slate-400 uppercase tracking-wider mb-2">Platform Entities</p>
             <h3 class="text-3xl font-black text-slate-800 dark:text-white">{{ $totals['organizations'] }}</h3>
             <p class="mt-4 text-xs text-slate-400">Active organizations managing loans</p>
@@ -36,7 +36,7 @@
     </div>
 
     <!-- Organization Performance Table -->
-    <div class="bg-white dark:bg-[#1a1f2b] rounded-3xl shadow-soft border border-slate-100 dark:border-slate-800 overflow-hidden">
+    <div class="bg-surface rounded-3xl shadow-soft border border-border-main overflow-hidden">
         <div class="p-8 border-b border-slate-50 dark:border-slate-800 flex items-center justify-between">
             <h3 class="text-lg font-bold text-slate-800 dark:text-white">Lender Performance League</h3>
             <button class="flex items-center gap-2 text-xs font-bold text-primary px-4 py-2 bg-primary/5 rounded-xl hover:bg-primary/10 transition-all">

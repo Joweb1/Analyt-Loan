@@ -1,4 +1,25 @@
 <div class="min-h-screen bg-background-light py-8 px-4 sm:px-6 md:px-8">
+    @php
+        $cashTarget = $entry->total_inflow->subtract($entry->expected_bank_transfers);
+        $cashVariance = $cashTarget->subtract($entry->actual_cash_at_hand);
+        
+        $diff = $entry->daily_net;
+        $isBalanced = $diff->isZero();
+        $isShortage = $diff->isNegative();
+        $isSurplus = $diff->isPositive();
+
+        $currentClass = match($entry->status) {
+            'verified' => 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400 border-emerald-100 dark:border-emerald-800/50',
+            'pending' => 'bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 border-amber-100 dark:border-amber-800/50',
+            'discrepancy' => 'bg-rose-50 dark:bg-rose-900/20 text-rose-700 dark:text-rose-400 border-rose-100 dark:border-rose-800/50',
+            default => 'bg-slate-50 dark:bg-slate-800/50 text-slate-700 dark:text-slate-400 border-border-main'
+        };
+
+        $canUnlock = auth()->user()->isAdmin() || 
+                     ($entry->status === 'verified' && 
+                      auth()->user()->organization->allow_staff_cashbook_unlock && 
+                      $entry->staff_unlock_count < auth()->user()->organization->cashbook_unlock_limit);
+    @endphp
     {{-- Fixed Back Button --}}
     <a href="{{ route('records') }}" class="fixed top-24 right-4 z-40 pl-3 pr-5 py-2 bg-white/30 dark:bg-slate-800/30 backdrop-blur-md border border-white/20 dark:border-slate-700/50 rounded-full text-primary dark:text-white hover:bg-white/50 dark:hover:bg-slate-800/50 transition-all duration-200 shadow-xl group flex items-center gap-2">
         <svg class="w-4 h-4 group-hover:-translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>

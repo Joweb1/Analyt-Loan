@@ -94,12 +94,14 @@
     {{-- Stats Summary Area --}}
     <div class="max-w-7xl mx-auto space-y-4 mb-10">
         <div class="flex flex-wrap gap-4">
-            @can('view_live_balance')
-                <div class="flex-1 min-w-[240px] bg-surface overflow-hidden shadow-sm border border-border-main rounded-sm p-5 transition hover:shadow-md border-l-4 border-l-blue-500">
-                    <dt class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Live Account Balance</dt>
-                    <dd class="text-2xl font-black text-blue-600 dark:text-blue-400">{{ fetch_data($accountBalance?->format() ?? null) }}</dd>
-                </div>
-            @endcan
+            @if(auth()->user()->organization?->live_balance_visibility_enabled)
+                @can('view_live_balance')
+                    <div class="flex-1 min-w-[240px] bg-surface overflow-hidden shadow-sm border border-border-main rounded-sm p-5 transition hover:shadow-md border-l-4 border-l-blue-500">
+                        <dt class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Live Account Balance</dt>
+                        <dd class="text-2xl font-black text-blue-600 dark:text-blue-400">{{ fetch_data($accountBalance?->format() ?? null) }}</dd>
+                    </div>
+                @endcan
+            @endif
             <div class="flex-1 min-w-[240px] bg-surface overflow-hidden shadow-sm border border-border-main rounded-sm p-5 transition hover:shadow-md">
                 <dt class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Total Inflow</dt>
                 <dd class="text-2xl font-black text-emerald-600 dark:text-emerald-500">+{{ fetch_data($entry?->total_inflow?->format() ?? null) }}</dd>

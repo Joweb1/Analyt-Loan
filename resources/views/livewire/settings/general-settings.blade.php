@@ -240,6 +240,21 @@
                             </div>
                             <p class="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">Max trials per record for non-admins</p>
                         </div>
+
+                        <!-- Live Bank Balance Toggle -->
+                        <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-zinc-800/50 rounded-xl border border-gray-100 dark:border-zinc-800">
+                            <div class="flex flex-col gap-1">
+                                <span class="text-sm font-bold text-primary dark:text-white">Live Bank Balance Visibility</span>
+                                <span class="text-[10px] text-gray-500">Enable or disable the live account balance metrics across the application dashboards.</span>
+                            </div>
+                            <button 
+                                type="button" 
+                                @click="$wire.set('live_balance_visibility_enabled', !@js($live_balance_visibility_enabled))"
+                                class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none {{ $live_balance_visibility_enabled ? 'bg-primary' : 'bg-gray-200 dark:bg-zinc-700' }}"
+                            >
+                                <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {{ $live_balance_visibility_enabled ? 'translate-x-5' : 'translate-x-0' }}"></span>
+                            </button>
+                        </div>
                     </div>
                 </div>
 

@@ -45,6 +45,7 @@ class RolesManagement extends Component
         'access_org_notifications',
         'communicate_with_customers',
         'export_and_print',
+        'view_live_balance',
     ];
 
     public function mount()

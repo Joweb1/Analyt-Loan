@@ -42,12 +42,14 @@
             <dt class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Total Outflow</dt>
             <dd class="text-2xl font-black text-rose-600 dark:text-rose-500">-{{ fetch_data($stats['total_outflow']?->format() ?? null) }}</dd>
         </div>
-        @can('view_live_balance')
-            <div class="flex-1 min-w-[200px] bg-surface overflow-hidden shadow-sm border border-border-main rounded-sm p-5 transition hover:shadow-md">
-                <dt class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Live Bank Balance</dt>
-                <dd class="text-2xl font-black text-blue-600 dark:text-blue-400">{{ fetch_data($liveBalance?->format() ?? null) }}</dd>
-            </div>
-        @endcan
+        @if(auth()->user()->organization?->live_balance_visibility_enabled)
+            @can('view_live_balance')
+                <div class="flex-1 min-w-[200px] bg-surface overflow-hidden shadow-sm border border-border-main rounded-sm p-5 transition hover:shadow-md">
+                    <dt class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Live Bank Balance</dt>
+                    <dd class="text-2xl font-black text-blue-600 dark:text-blue-400">{{ fetch_data($liveBalance?->format() ?? null) }}</dd>
+                </div>
+            @endcan
+        @endif
         <div class="flex-1 min-w-[200px] bg-surface overflow-hidden shadow-sm border border-border-main rounded-sm p-5 transition hover:shadow-md group relative">
             <dt class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Initial Balance</dt>
             <dd class="text-2xl font-black text-primary dark:text-white">{{ fetch_data($openingBalance?->format() ?? null) }}</dd>

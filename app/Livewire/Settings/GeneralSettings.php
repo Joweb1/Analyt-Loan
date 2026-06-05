@@ -68,6 +68,8 @@ class GeneralSettings extends Component
 
     public $allow_staff_cashbook_unlock = true;
 
+    public $live_balance_visibility_enabled = true;
+
     public $thrift_cycle_days = 6;
 
     public $default_customer_password;
@@ -104,6 +106,7 @@ class GeneralSettings extends Component
             $this->allow_flexible_repayments = $this->organization->allow_flexible_repayments;
             $this->cashbook_unlock_limit = $this->organization->cashbook_unlock_limit ?? 3;
             $this->allow_staff_cashbook_unlock = $this->organization->allow_staff_cashbook_unlock ?? true;
+            $this->live_balance_visibility_enabled = $this->organization->live_balance_visibility_enabled ?? true;
             $this->thrift_cycle_days = $this->organization->thrift_cycle_days ?? 6;
             $this->default_customer_password = $this->organization->default_customer_password;
 
@@ -126,6 +129,7 @@ class GeneralSettings extends Component
             'interest_calculation_type' => 'required|in:fixed,percentage',
             'cashbook_unlock_limit' => 'required|integer|min:0',
             'allow_staff_cashbook_unlock' => 'required|boolean',
+            'live_balance_visibility_enabled' => 'required|boolean',
             'thrift_cycle_days' => 'required|integer|in:5,6',
             'system_date' => 'required|date',
             'timezone' => 'required|string',
@@ -154,6 +158,7 @@ class GeneralSettings extends Component
             'allow_flexible_repayments' => $this->allow_flexible_repayments,
             'cashbook_unlock_limit' => $this->cashbook_unlock_limit,
             'allow_staff_cashbook_unlock' => $this->allow_staff_cashbook_unlock,
+            'live_balance_visibility_enabled' => $this->live_balance_visibility_enabled,
             'default_customer_password' => $this->default_customer_password,
             'system_date' => $newSystemDate,
             'timezone' => $this->timezone,

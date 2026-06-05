@@ -189,13 +189,15 @@
                 <dd class="text-xl font-black text-blue-500 group-hover:scale-[1.02] transition-transform origin-left">{{ number_format($pendingApplicationsCount) }}</dd>
             </a>
 
-            @can('view_live_balance')
-                <!-- Live Account Balance -->
-                <a href="{{ route('cashbook.month-record') }}" class="flex-1 min-w-[240px] bg-surface overflow-hidden shadow-sm border border-border-main rounded-sm p-4 transition hover:shadow-md border-l-4 border-l-indigo-600 group">
-                    <dt class="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Live Bank Balance</dt>
-                    <dd class="text-xl font-black text-indigo-600 group-hover:scale-[1.02] transition-transform origin-left">₦ {{ fetch_data($accountBalance?->format() ?? '0.00' ?? null) }}</dd>
-                </a>
-            @endcan
+            @if($org?->live_balance_visibility_enabled)
+                @can('view_live_balance')
+                    <!-- Live Account Balance -->
+                    <a href="{{ route('cashbook.month-record') }}" class="flex-1 min-w-[240px] bg-surface overflow-hidden shadow-sm border border-border-main rounded-sm p-4 transition hover:shadow-md border-l-4 border-l-indigo-600 group">
+                        <dt class="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Live Bank Balance</dt>
+                        <dd class="text-xl font-black text-indigo-600 group-hover:scale-[1.02] transition-transform origin-left">₦ {{ fetch_data($accountBalance?->format() ?? '0.00' ?? null) }}</dd>
+                    </a>
+                @endcan
+            @endif
         </div>
     </div>
     <!-- Main Section: Chart & Inbox -->

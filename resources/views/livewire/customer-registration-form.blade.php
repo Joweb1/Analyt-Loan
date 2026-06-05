@@ -235,8 +235,20 @@
 
                 {{-- Account Password Section --}}
                 <div class="space-y-8 pt-8 border-t border-zinc-100 dark:border-zinc-800">
-                    <h3 class="text-lg font-bold text-primary dark:text-white border-b border-zinc-200 dark:border-zinc-700 pb-2">Set Account Password</h3>
+                    <h3 class="text-lg font-bold text-primary dark:text-white border-b border-zinc-200 dark:border-zinc-700 pb-2">Account Security @if($registration_type === 'staff')& Team Role @endif</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        @if($registration_type === 'staff')
+                            <div class="flex flex-col gap-2 md:col-span-2">
+                                <label class="text-xs font-bold text-zinc-500 uppercase tracking-widest px-1">Assign Team Role <span class="text-red-500">*</span></label>
+                                <select wire:model="staff_role" class="w-full px-5 py-4 bg-zinc-50 dark:bg-zinc-800/50 border-2 border-zinc-100 dark:border-zinc-800 rounded-2xl focus:border-primary focus:ring-0 transition-all font-bold">
+                                    @foreach($availableRoles as $role)
+                                        <option value="{{ $role }}">{{ $role }}</option>
+                                    @endforeach
+                                </select>
+                                <p class="text-[10px] text-zinc-400 font-bold uppercase px-1 italic">* This determines the permissions and dashboard access for the team member.</p>
+                            </div>
+                        @endif
+
                         <!-- Password -->
                         <div class="flex flex-col gap-2">
                             <label class="text-xs font-bold text-zinc-500 uppercase tracking-widest px-1">

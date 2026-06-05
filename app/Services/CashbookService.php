@@ -254,6 +254,9 @@ class CashbookService
             $entry->audit_hash = hash('sha256', $entry->toJson());
             $entry->save();
 
+            // Record Manual Outflows as System Transactions
+            $this->recordManualOutflows($entry);
+
             return true;
         }
 
@@ -261,5 +264,55 @@ class CashbookService
         $entry->save();
 
         return false;
+    }
+
+    protected function recordManualOutflows(CashbookEntry $entry): void
+    {
+        $org = $entry->organization;
+        $date = $entry->entry_date->toDateString();
+
+        // 1. Daily Expenses
+        if ($entry->daily_expense_amount->getMinorAmount() > 0) {
+            TransactionService::record(
+                type: 'charge',
+                amount: $entry->daily_expense_amount,
+                notes: "Daily Operating Expenses for {$date}",
+                date: $date,
+                related: $entry
+            );
+        }
+
+        // 2. Bank Withdrawals
+        if ($entry->bank_withdrawals->getMinorAmount() > 0) {
+            TransactionService::record(
+                type: 'withdrawal',
+                amount: $entry->bank_withdrawals,
+                notes: "Manual Bank Withdrawal for {$date}",
+                date: $date,
+                related: $entry
+            );
+        }
+
+        // 3. System Charges
+        if ($entry->charges->getMinorAmount() > 0) {
+            TransactionService::record(
+                type: 'charge',
+                amount: $entry->charges,
+                notes: "Manual System Charges for {$date}",
+                date: $date,
+                related: $entry
+            );
+        }
+
+        // 4. Bonuses
+        if ($entry->bonuses->getMinorAmount() > 0) {
+            TransactionService::record(
+                type: 'bonus',
+                amount: $entry->bonuses,
+                notes: "System Bonuses/Payouts for {$date}",
+                date: $date,
+                related: $entry
+            );
+        }
     }
 }

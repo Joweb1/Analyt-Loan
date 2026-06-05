@@ -49,23 +49,23 @@
             </div>
             <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Loan Management</h2>
         </div>
-        <div class="flex gap-3">
+        <div class="flex flex-wrap gap-3">
             @can('export_and_print')
-                <a href="{{ fetch_data(route('loan.print', $loan?->id) ?? null) }}" target="_blank" class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-white rounded-xl text-sm font-bold shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
+                <a href="{{ fetch_data(route('loan.print', $loan?->id) ?? null) }}" target="_blank" class="flex-1 min-w-[120px] flex items-center justify-center gap-2 px-4 py-2 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-white rounded-xl text-sm font-bold shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
                     <span class="material-symbols-outlined text-lg">print</span>
                     Print
                 </a>
             @endcan
-            <a href="{{ fetch_data(route('loan.edit', $loan?->id) ?? null) }}" class="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-xl text-sm font-bold shadow-lg shadow-primary/30 hover:bg-blue-700 transition-all">
+            <a href="{{ fetch_data(route('loan.edit', $loan?->id) ?? null) }}" class="flex-1 min-w-[140px] flex items-center justify-center gap-2 px-4 py-2 bg-primary text-white rounded-xl text-sm font-bold shadow-lg shadow-primary/30 hover:bg-blue-700 transition-all">
                 <span class="material-symbols-outlined text-lg">edit</span>
                 Edit Loan
             </a>
         </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 px-1 lg:px-2 pb-8">
+    <div class="flex flex-wrap md:flex-nowrap gap-8 px-1 lg:px-2 pb-8 items-start">
         <!-- Left Column: Customer Card -->
-        <div class="md:col-span-1 space-y-6">
+        <div class="w-full md:w-[320px] lg:w-[380px] shrink-0 space-y-6">
             <div class="bg-white dark:bg-[#1a1f2b] rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden group hover:shadow-md transition-all duration-300">
                 <div class="p-6 relative">
                     <div class="absolute top-4 right-4">
@@ -258,6 +258,39 @@
                     </div>
                 </div>
 
+                {{-- Loan Documents Sub-section --}}
+                <div class="px-6 pb-6 border-t border-slate-50 dark:border-slate-800/50 pt-6">
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="material-symbols-outlined text-primary text-lg">folder_open</span>
+                        <h4 class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Application Documents</h4>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        @if(!empty($loan->attachments))
+                            @foreach($loan->attachment_urls as $url)
+                                <div class="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-800">
+                                    <div class="flex items-center gap-3 overflow-hidden">
+                                        <div class="size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                                            <span class="material-symbols-outlined text-base">description</span>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-[11px] font-bold text-slate-700 dark:text-slate-300 truncate">Document {{ $loop->iteration }}</p>
+                                            <p class="text-[8px] text-slate-400 font-bold uppercase">FILE</p>
+                                        </div>
+                                    </div>
+                                    <a href="{{ fetch_data($url ?? null) }}" target="_blank" class="px-3 py-1 text-[9px] font-black bg-white dark:bg-[#1a1f2b] text-primary border border-slate-200 dark:border-slate-800 rounded-md shadow-sm hover:bg-primary hover:text-white transition-all">
+                                        View
+                                    </a>
+                                </div>
+                            @endforeach
+                        @else
+                            <div class="col-span-full py-4 bg-slate-50/50 dark:bg-slate-800/30 rounded-xl border border-dashed border-slate-100 dark:border-slate-800 flex items-center justify-center gap-2 text-slate-300">
+                                <span class="material-symbols-outlined text-sm">no_sim</span>
+                                <p class="text-[9px] font-bold uppercase tracking-widest">No documents attached</p>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+
                 <!-- List View (Table) -->
                 <div x-show="view === 'list'" class="p-0">
                     <table class="w-full text-sm text-left">
@@ -353,38 +386,38 @@
 
             <!-- Action Card -->
             @if(!in_array($loan->status, ['applied', 'verification_pending', 'declined']))
-            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
-                <button wire:click="openRepaymentsModal" class="flex flex-col items-center justify-center gap-2 p-4 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm hover:shadow-md hover:border-primary/50 hover:text-primary transition-all group h-32">
+            <div class="flex flex-wrap gap-4">
+                <button wire:click="openRepaymentsModal" class="flex-1 min-w-[120px] flex flex-col items-center justify-center gap-2 p-4 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm hover:shadow-md hover:border-primary/50 hover:text-primary transition-all group h-32">
                     <div class="size-10 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary group-hover:text-white transition-colors">
                         <span class="material-symbols-outlined text-2xl">payments</span>
                     </div>
                     <span class="text-xs font-bold text-slate-600 dark:text-slate-300 group-hover:text-primary">Repayments</span>
                 </button>
-                 <button wire:click="openScheduleModal" class="flex flex-col items-center justify-center gap-2 p-4 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm hover:shadow-md hover:border-primary/50 hover:text-primary transition-all group h-32">
+                 <button wire:click="openScheduleModal" class="flex-1 min-w-[120px] flex flex-col items-center justify-center gap-2 p-4 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm hover:shadow-md hover:border-primary/50 hover:text-primary transition-all group h-32">
                     <div class="size-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 group-hover:bg-purple-600 group-hover:text-white transition-colors">
                         <span class="material-symbols-outlined text-2xl">calendar_month</span>
                     </div>
                     <span class="text-xs font-bold text-slate-600 dark:text-slate-300 group-hover:text-primary">Schedule</span>
                 </button>
-                 <button wire:click="openCollateralModal" class="flex flex-col items-center justify-center gap-2 p-4 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm hover:shadow-md hover:border-primary/50 hover:text-primary transition-all group h-32">
+                 <button wire:click="openCollateralModal" class="flex-1 min-w-[120px] flex flex-col items-center justify-center gap-2 p-4 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm hover:shadow-md hover:border-primary/50 hover:text-primary transition-all group h-32">
                     <div class="size-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-600 group-hover:bg-amber-600 group-hover:text-white transition-colors">
                         <span class="material-symbols-outlined text-2xl">inventory_2</span>
                     </div>
                     <span class="text-xs font-bold text-slate-600 dark:text-slate-300 group-hover:text-primary">Collateral</span>
                 </button>
-                 <button wire:click="openFeesModal" class="flex flex-col items-center justify-center gap-2 p-4 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm hover:shadow-md hover:border-primary/50 hover:text-primary transition-all group h-32">
+                 <button wire:click="openFeesModal" class="flex-1 min-w-[120px] flex flex-col items-center justify-center gap-2 p-4 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm hover:shadow-md hover:border-primary/50 hover:text-primary transition-all group h-32">
                     <div class="size-10 rounded-full bg-red-100 flex items-center justify-center text-red-600 group-hover:bg-red-600 group-hover:text-white transition-colors">
                         <span class="material-symbols-outlined text-2xl">receipt_long</span>
                     </div>
                     <span class="text-xs font-bold text-slate-600 dark:text-slate-300 group-hover:text-primary">Fees</span>
                 </button>
-                 <button wire:click="openCommentsModal" class="flex flex-col items-center justify-center gap-2 p-4 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm hover:shadow-md hover:border-primary/50 hover:text-primary transition-all group h-32">
+                 <button wire:click="openCommentsModal" class="flex-1 min-w-[120px] flex flex-col items-center justify-center gap-2 p-4 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm hover:shadow-md hover:border-primary/50 hover:text-primary transition-all group h-32">
                     <div class="size-10 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 group-hover:bg-slate-800 group-hover:text-white transition-colors">
                         <span class="material-symbols-outlined text-2xl">comment</span>
                     </div>
                     <span class="text-xs font-bold text-slate-600 dark:text-slate-300 group-hover:text-primary">Comments</span>
                 </button>
-                 <button wire:click="$set('showDeleteModal', true)" class="flex flex-col items-center justify-center gap-2 p-4 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm hover:shadow-md hover:border-red-500/50 hover:text-red-500 transition-all group h-32">
+                 <button wire:click="$set('showDeleteModal', true)" class="flex-1 min-w-[120px] flex flex-col items-center justify-center gap-2 p-4 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm hover:shadow-md hover:border-red-500/50 hover:text-red-500 transition-all group h-32">
                     <div class="size-10 rounded-full bg-red-50 flex items-center justify-center text-red-500 group-hover:bg-red-500 group-hover:text-white transition-colors">
                         <span class="material-symbols-outlined text-2xl">delete</span>
                     </div>

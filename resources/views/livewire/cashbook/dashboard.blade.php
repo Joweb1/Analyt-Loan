@@ -81,10 +81,12 @@
     <div class="max-w-7xl mx-auto space-y-4 mb-10">
         {{-- Row 1: System Ledger Totals --}}
         <div class="flex flex-wrap gap-4">
-            <div class="flex-1 min-w-[240px] bg-white overflow-hidden shadow-sm border border-gray-200 rounded-sm p-5 transition hover:shadow-md border-l-4 border-l-blue-500">
-                <dt class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Live Account Balance</dt>
-                <dd class="text-2xl font-black text-blue-600">{{ fetch_data($accountBalance?->format() ?? null) }}</dd>
-            </div>
+            @can('view_live_balance')
+                <div class="flex-1 min-w-[240px] bg-white overflow-hidden shadow-sm border border-gray-200 rounded-sm p-5 transition hover:shadow-md border-l-4 border-l-blue-500">
+                    <dt class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Live Account Balance</dt>
+                    <dd class="text-2xl font-black text-blue-600">{{ fetch_data($accountBalance?->format() ?? null) }}</dd>
+                </div>
+            @endcan
             <div class="flex-1 min-w-[240px] bg-white overflow-hidden shadow-sm border border-gray-200 rounded-sm p-5 transition hover:shadow-md">
                 <dt class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Total Inflow</dt>
                 <dd class="text-2xl font-black text-emerald-600">+{{ fetch_data($entry?->total_inflow?->format() ?? null) }}</dd>
@@ -187,6 +189,14 @@
                             <div class="flex items-center justify-between py-1.5 border-b border-gray-200">
                                 <span class="text-[11px] font-medium text-emerald-600 font-bold uppercase tracking-tight">Loan Interest</span>
                                 <span class="text-sm font-black text-emerald-600 font-mono">+{{ fetch_data($entry?->loan_interest?->format() ?? null) }}</span>
+                            </div>
+                            <div class="flex items-center justify-between py-1.5 border-b border-gray-200">
+                                <span class="text-[11px] font-medium text-gray-500 uppercase tracking-tight">Processing Fees</span>
+                                <span class="text-sm font-black text-gray-900 font-mono">{{ fetch_data($entry?->loan_processing_fees?->format() ?? null) }}</span>
+                            </div>
+                            <div class="flex items-center justify-between py-1.5 border-b border-gray-200">
+                                <span class="text-[11px] font-medium text-gray-500 uppercase tracking-tight">Insurance Fees</span>
+                                <span class="text-sm font-black text-gray-900 font-mono">{{ fetch_data($entry?->insurance_fees?->format() ?? null) }}</span>
                             </div>
                             <div class="flex items-center justify-between py-1.5 border-b border-gray-200">
                                 <span class="text-[11px] font-medium text-gray-500 uppercase tracking-tight">Savings Deposits</span>

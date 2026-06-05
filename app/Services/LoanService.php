@@ -193,6 +193,17 @@ class LoanService
         $loan->status = 'active';
         $loan->save();
 
+        // Record Disbursement Transaction
+        \App\Services\TransactionService::record(
+            type: 'loan_disbursement',
+            amount: $loan->amount,
+            reference: 'DISB-'.$loan->loan_number,
+            paymentMethod: 'bank_transfer', // Default for disbursement
+            user: $loan->borrower->user,
+            related: $loan,
+            notes: "Loan disbursed to {$loan->borrower->user->name}"
+        );
+
         return $loan;
     }
 

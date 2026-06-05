@@ -14,6 +14,7 @@ use App\Models\Loan;
 use App\Models\Organization;
 use App\Models\PaymentProof;
 use App\Models\Repayment;
+use App\Models\SavingsTransaction;
 use App\Models\SystemNotification;
 use App\Models\User;
 use App\Observers\BorrowerObserver;
@@ -23,6 +24,7 @@ use App\Observers\LoanObserver;
 use App\Observers\OrganizationObserver;
 use App\Observers\PaymentProofObserver;
 use App\Observers\RepaymentObserver;
+use App\Observers\SavingsTransactionObserver;
 use App\Observers\SystemNotificationObserver;
 use App\Observers\UserObserver;
 use App\Services\Storage\LaravelStorageProvider;
@@ -101,6 +103,7 @@ class AppServiceProvider extends ServiceProvider
         Organization::observe(OrganizationObserver::class);
         User::observe(UserObserver::class);
         PaymentProof::observe(PaymentProofObserver::class);
+        SavingsTransaction::observe(SavingsTransactionObserver::class);
 
         Event::listen(
             LoanRepaymentReceived::class,

@@ -42,10 +42,12 @@
             <dt class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Total Outflow</dt>
             <dd class="text-2xl font-black text-rose-600">-{{ fetch_data($stats['total_outflow']?->format() ?? null) }}</dd>
         </div>
-        <div class="flex-1 min-w-[200px] bg-white overflow-hidden shadow-sm border border-gray-200 rounded-sm p-5 transition hover:shadow-md">
-            <dt class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Live Bank Balance</dt>
-            <dd class="text-2xl font-black text-blue-600">{{ fetch_data($liveBalance?->format() ?? null) }}</dd>
-        </div>
+        @can('view_live_balance')
+            <div class="flex-1 min-w-[200px] bg-white overflow-hidden shadow-sm border border-gray-200 rounded-sm p-5 transition hover:shadow-md">
+                <dt class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Live Bank Balance</dt>
+                <dd class="text-2xl font-black text-blue-600">{{ fetch_data($liveBalance?->format() ?? null) }}</dd>
+            </div>
+        @endcan
         <div class="flex-1 min-w-[200px] bg-white overflow-hidden shadow-sm border border-gray-200 rounded-sm p-5 transition hover:shadow-md group relative">
             <dt class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1">Initial Balance</dt>
             <dd class="text-2xl font-black text-gray-900">{{ fetch_data($openingBalance?->format() ?? null) }}</dd>

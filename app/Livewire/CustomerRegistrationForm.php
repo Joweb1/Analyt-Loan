@@ -10,7 +10,9 @@ use App\Models\Organization;
 use App\Models\Portfolio;
 use App\Models\Saver;
 use App\Models\User;
+use App\Services\TransactionService;
 use App\Traits\SterilizesPhone;
+use App\ValueObjects\Money;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -18,8 +20,10 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\On;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithFileUploads;
+use Spatie\Permission\Models\Role;
 
 class CustomerRegistrationForm extends Component
 {
@@ -100,6 +104,7 @@ class CustomerRegistrationForm extends Component
 
     public $guarantor_type; // 'internal' or 'external'
 
+    #[Url]
     public $registration_type = 'borrower';
 
     #[On('guarantorSelected')]
@@ -117,8 +122,11 @@ class CustomerRegistrationForm extends Component
     // Custom Fields Data
     public $customData = [];
 
-    // Dynamic Configs
+    public $availableRoles = [];
+
     public $configs = [];
+
+    public $staff_role = 'Staff';
 
     public function mount($type = 'borrower')
     {
@@ -135,6 +143,22 @@ class CustomerRegistrationForm extends Component
 
         $this->is_employed = 'Yes';
         $this->loadConfigs();
+        $this->loadRoles();
+    }
+
+    public function loadRoles()
+    {
+        if (Auth::check() && Auth::user()->isAdmin()) {
+            // Staff and non-Admin/non-Borrower roles
+            $this->availableRoles = Role::where('name', '!=', 'Borrower')
+                ->where('name', '!=', 'Admin')
+                ->pluck('name')
+                ->toArray();
+
+            if (empty($this->availableRoles)) {
+                $this->availableRoles = ['Staff'];
+            }
+        }
     }
 
     public function updatedRegistrationType()
@@ -325,7 +349,7 @@ class CustomerRegistrationForm extends Component
                 ]);
             }
 
-            $roleName = ucfirst($this->registration_type);
+            $roleName = $this->registration_type === 'staff' ? $this->staff_role : ucfirst($this->registration_type);
             if (! $user->hasRole($roleName)) {
                 $user->assignRole($roleName);
             }
@@ -339,7 +363,7 @@ class CustomerRegistrationForm extends Component
             }
 
             if ($this->registration_type === 'saver') {
-                Saver::firstOrCreate(
+                $saver = Saver::firstOrCreate(
                     ['user_id' => $user->id],
                     [
                         'organization_id' => $this->organization_id,
@@ -351,6 +375,16 @@ class CustomerRegistrationForm extends Component
                     ]
                 );
 
+                // Record Registration Fee (₦1,000)
+                TransactionService::record(
+                    type: 'registration_fee',
+                    amount: new Money(100000, $org->currency_code ?? 'NGN'),
+                    user: $user,
+                    related: $saver,
+                    paymentMethod: 'cash',
+                    notes: 'Saver Registration Fee'
+                );
+
                 $this->dispatch('custom-alert', ['type' => 'success', 'message' => 'Saver registered successfully.']);
                 $this->reset(['name', 'email', 'phone', 'password', 'password_confirmation']);
 
@@ -358,15 +392,23 @@ class CustomerRegistrationForm extends Component
             }
 
             if ($this->registration_type === 'guarantor') {
-                Guarantor::firstOrCreate(
+                $guarantor = Guarantor::firstOrCreate(
                     ['email' => $this->email, 'organization_id' => $this->organization_id],
                     [
                         'user_id' => $user->id,
                         'portfolio_id' => $this->portfolio_id,
                         'name' => $this->name,
                         'phone' => $this->phone,
-                        'address' => $this->address,
                     ]
+                );
+
+                TransactionService::record(
+                    type: 'registration_fee',
+                    amount: new Money(100000, $org->currency_code ?? 'NGN'),
+                    user: $user,
+                    related: $guarantor,
+                    paymentMethod: 'cash',
+                    notes: 'Guarantor Registration Fee'
                 );
 
                 $this->dispatch('custom-alert', ['type' => 'success', 'message' => 'Guarantor registered successfully.']);
@@ -477,7 +519,19 @@ class CustomerRegistrationForm extends Component
             }
             $borrower->custom_data = $this->customData;
 
+            $isNewBorrower = ! $borrower->exists;
             $borrower->save();
+
+            if ($isNewBorrower) {
+                // Record Registration Fee Transaction (1,000 Naira = 100,000 minor units)
+                TransactionService::record(
+                    type: 'registration_fee',
+                    amount: new Money(100000, $org->currency_code ?? 'NGN'),
+                    user: $user,
+                    related: $borrower,
+                    notes: 'Initial registration fee'
+                );
+            }
 
             $this->dispatch('custom-alert', ['type' => 'success', 'message' => 'Borrower registered successfully.']);
             $this->reset(['name', 'email', 'phone', 'dob', 'gender', 'address', 'bvn', 'nin', 'passport_photo', 'biometric_data', 'identity_document', 'bank_statement', 'income_proof', 'credit_score', 'marital_status', 'dependents', 'password', 'password_confirmation', 'bank_name', 'account_number', 'bank_account_name', 'employer_name', 'job_title', 'salary', 'employer_address', 'next_of_kin_name', 'next_of_kin_relationship', 'next_of_kin_phone', 'guarantor_id', 'customData']);

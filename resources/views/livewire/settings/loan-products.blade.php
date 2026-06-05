@@ -20,7 +20,7 @@
                 <thead>
                 <tr class="bg-primary/5 dark:bg-zinc-800/50">
                     <th class="px-6 py-4 text-xs font-bold text-primary dark:text-white uppercase tracking-wider">Product Name</th>
-                    <th class="px-6 py-4 text-xs font-bold text-primary dark:text-white uppercase tracking-wider">Default Rate</th>
+                    <th class="px-6 py-4 text-xs font-bold text-primary dark:text-white uppercase tracking-wider">Default interest rate</th>
                     <th class="px-6 py-4 text-xs font-bold text-primary dark:text-white uppercase tracking-wider text-center">Default Duration</th>
                     <th class="px-6 py-4 text-xs font-bold text-primary dark:text-white uppercase tracking-wider text-right">Repayment Cycle</th>
                     <th class="px-6 py-4 text-xs font-bold text-primary dark:text-white uppercase tracking-wider text-right">Actions</th>
@@ -94,7 +94,7 @@
                         </div>
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-xs font-bold text-gray-500 uppercase">Default Rate</label>
+                                <label class="block text-xs font-bold text-gray-500 uppercase">Default interest rate</label>
                                 <input wire:model="default_interest_rate" type="number" step="0.01" class="w-full rounded-lg border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white" placeholder="0.00">
                             </div>
                             <div>

@@ -15,81 +15,84 @@
             </div>
             <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Savings Account</h2>
         </div>
-        <div class="flex gap-3">
+        <div class="flex flex-wrap gap-3">
             @can('export_and_print')
-                <a href="{{ fetch_data(route('savings.print', $user?->id) ?? null) }}" target="_blank" class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-white rounded-xl text-sm font-bold shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
+                <a href="{{ fetch_data(route('savings.print', $user?->id) ?? null) }}" target="_blank" class="flex-1 min-w-[120px] flex items-center justify-center gap-2 px-4 py-2 bg-white dark:bg-[#1a1f2b] border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-white rounded-xl text-sm font-bold shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
                     <span class="material-symbols-outlined text-lg">print</span>
                     Statement
                 </a>
             @endcan
-            <button wire:click="openTransactionModal('deposit')" class="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-green-600/30 hover:bg-green-700 transition-all">
+            <button wire:click="openTransactionModal('deposit')" class="flex-1 min-w-[140px] flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-green-600/30 hover:bg-green-700 transition-all">
                 <span class="material-symbols-outlined text-lg">add_circle</span>
                 Add Deposit
             </button>
         </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 px-1 lg:px-2 pb-8">
-        <!-- Left Column: Customer Summary Card -->
-        <div class="md:col-span-1 space-y-6">
-            <div class="bg-white dark:bg-[#1a1f2b] rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+    <div class="flex flex-wrap md:flex-nowrap gap-8 px-1 lg:px-2 pb-8 items-start">
+        <!-- Left Column: Customer Summary & Account Summary -->
+        <div class="w-full md:w-[320px] lg:w-[380px] shrink-0 space-y-6">
+            <div class="bg-white dark:bg-[#1a1f2b] rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden group hover:shadow-md transition-all duration-300">
                 <div class="p-8 text-center border-b border-slate-50 dark:border-slate-800">
-                    <div class="size-24 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-4 text-slate-400">
+                    <div class="size-24 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-4 text-slate-400 border-2 border-white dark:border-slate-700 shadow-lg">
                         <span class="material-symbols-outlined text-4xl">person</span>
                     </div>
                     <h3 class="text-xl font-bold text-slate-900 dark:text-white">{{ fetch_data($user?->name ?? null) }}</h3>
                     <p class="text-sm text-slate-500 font-medium uppercase tracking-widest mt-1">{{ fetch_data($user?->getRoleNames()?->first() ?? 'Customer' ?? null) }}</p>
                 </div>
                 <div class="p-6 space-y-4">
-                    <div class="flex justify-between items-center text-sm">
-                        <span class="text-slate-500">Phone Number</span>
-                        <span class="font-bold text-slate-900 dark:text-white">{{ fetch_data($user?->phone ?? null) }}</span>
+                    <div class="flex justify-between items-center text-sm gap-2">
+                        <span class="text-slate-500 font-bold uppercase text-[10px] tracking-wider whitespace-nowrap">Phone</span>
+                        <span class="font-bold text-slate-900 dark:text-white text-right break-all">{{ fetch_data($user?->phone ?? null) }}</span>
                     </div>
-                    <div class="flex justify-between items-center text-sm">
-                        <span class="text-slate-500">Email Address</span>
-                        <span class="font-bold text-slate-900 dark:text-white">{{ fetch_data($user?->email ?? 'N/A' ?? null) }}</span>
+                    <div class="flex justify-between items-center text-sm gap-2">
+                        <span class="text-slate-500 font-bold uppercase text-[10px] tracking-wider whitespace-nowrap">Email</span>
+                        <span class="font-bold text-slate-900 dark:text-white text-right break-all">{{ fetch_data($user?->email ?? 'N/A' ?? null) }}</span>
                     </div>
                 </div>
             </div>
 
             <!-- Account Status Card -->
-            <div class="bg-gradient-to-br from-green-600 to-emerald-800 rounded-2xl p-6 text-white shadow-xl shadow-green-600/20">
+            <div class="bg-gradient-to-br from-green-600 to-emerald-800 rounded-2xl p-6 text-white shadow-xl shadow-green-600/20 group relative overflow-hidden">
                 <h4 class="text-xs font-black uppercase tracking-widest opacity-60 mb-6 flex items-center gap-2">
                     <span class="material-symbols-outlined text-lg">account_balance</span>
                     Account Summary
                 </h4>
-                <div class="space-y-6">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
+                <div class="space-y-6 relative z-10">
+                    <div class="flex flex-wrap gap-4">
+                        <div class="flex-1 min-w-[120px]">
                             <p class="text-[9px] font-bold uppercase opacity-60 mb-1">Regular Balance</p>
                             <p class="text-xl font-black">₦{{ fetch_data($savingsAccount?->balance?->format() ?? null) }}</p>
                         </div>
-                        <div class="border-l border-white/10 pl-4">
+                        <div class="flex-1 min-w-[120px] sm:border-l border-white/10 sm:pl-4">
                             <p class="text-[9px] font-bold uppercase opacity-60 mb-1">Daily Thrift</p>
                             <p class="text-xl font-black">₦{{ fetch_data($savingsAccount?->daily_savings_balance?->format() ?? null) }}</p>
                         </div>
                     </div>
                     <div class="pt-4 border-t border-white/10 space-y-3">
-                        <div class="flex justify-between items-center">
-                            <span class="text-[10px] font-bold uppercase opacity-60">Account Number</span>
-                            <span class="text-xs font-black font-mono tracking-wider">{{ fetch_data($savingsAccount?->account_number ?? null) }}</span>
+                        <div class="flex justify-between items-center gap-2">
+                            <span class="text-[10px] font-bold uppercase opacity-60 whitespace-nowrap">Account Number</span>
+                            <span class="text-xs font-black font-mono tracking-wider text-right break-all">{{ fetch_data($savingsAccount?->account_number ?? null) }}</span>
                         </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-[10px] font-bold uppercase opacity-60">Interest Rate</span>
-                            <span class="text-xs font-black">{{ fetch_data($savingsAccount?->interest_rate ?? null) }}% P.A</span>
+                        <div class="flex justify-between items-center gap-2">
+                            <span class="text-[10px] font-bold uppercase opacity-60 whitespace-nowrap">Interest Rate</span>
+                            <span class="text-xs font-black text-right">{{ fetch_data($savingsAccount?->interest_rate ?? null) }}% P.A</span>
                         </div>
                     </div>
                 </div>
+                <div class="absolute -right-4 -bottom-4 opacity-10 rotate-12">
+                    <span class="material-symbols-outlined text-8xl">account_balance_wallet</span>
+                </div>
             </div>
 
-            <button wire:click="openTransactionModal('withdrawal')" class="w-full flex items-center justify-center gap-2 py-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-sm hover:bg-slate-50 transition-all">
+            <button wire:click="openTransactionModal('withdrawal')" class="w-full flex items-center justify-center gap-2 py-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-sm hover:shadow-md transition-all">
                 <span class="material-symbols-outlined">payments</span>
                 Withdraw Funds
             </button>
         </div>
 
         <!-- Right Column: Transactions Table -->
-        <div class="md:col-span-2 space-y-6">
+        <div class="flex-1 min-w-0 space-y-6">
             <div class="bg-white dark:bg-[#1a1f2b] rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
                 <div class="px-6 py-4 border-b border-slate-50 dark:border-slate-800 flex items-center justify-between">
                     <h3 class="font-bold text-slate-900 dark:text-white">Recent Transactions</h3>

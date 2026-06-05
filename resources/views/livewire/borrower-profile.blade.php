@@ -342,6 +342,105 @@
             <div class="bg-white dark:bg-[#1a1f2b] rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
                 <div class="px-6 py-5 border-b border-slate-100 dark:border-slate-800">
                     <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">folder_open</span>
+                        Uploaded Documents
+                    </h3>
+                </div>
+                <div class="p-8">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {{-- Passport Photograph --}}
+                        <div class="flex flex-col gap-3">
+                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Passport Photograph</span>
+                            @if($borrower->passport_photograph)
+                                <a href="{{ fetch_data($borrower?->passport_photograph_url ?? null) }}" target="_blank" class="group relative aspect-square rounded-xl bg-slate-100 dark:bg-slate-800 overflow-hidden border-2 border-slate-50 dark:border-slate-800 hover:border-primary transition-all">
+                                    <img src="{{ fetch_data($borrower?->passport_photograph_url ?? null) }}" class="size-full object-cover group-hover:scale-110 transition-transform duration-500">
+                                    <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <span class="text-white text-[10px] font-black uppercase tracking-widest">View Full</span>
+                                    </div>
+                                </a>
+                            @else
+                                <div class="aspect-square rounded-xl bg-slate-50 dark:bg-zinc-800/50 flex flex-col items-center justify-center text-slate-300 border-2 border-dashed border-slate-200 dark:border-slate-800">
+                                    <span class="material-symbols-outlined text-3xl">no_photography</span>
+                                    <span class="text-[9px] font-bold uppercase mt-2">Not Uploaded</span>
+                                </div>
+                            @endif
+                        </div>
+
+                        {{-- Identity Document --}}
+                        <div class="flex flex-col gap-3">
+                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Identity Document</span>
+                            @if($borrower->identity_document)
+                                <a href="{{ fetch_data($borrower?->identity_document_url ?? null) }}" target="_blank" class="group flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border-2 border-transparent hover:border-primary transition-all">
+                                    <div class="size-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                                        <span class="material-symbols-outlined text-2xl">badge</span>
+                                    </div>
+                                    <div class="flex-1">
+                                        <p class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-tight">ID Document</p>
+                                        <p class="text-[9px] text-slate-400 font-bold uppercase">Click to view</p>
+                                    </div>
+                                </a>
+                            @else
+                                <div class="flex items-center gap-4 p-4 bg-slate-50/50 dark:bg-zinc-800/30 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-800 opacity-50">
+                                    <div class="size-12 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-300">
+                                        <span class="material-symbols-outlined text-2xl">error</span>
+                                    </div>
+                                    <p class="text-[9px] font-bold text-slate-400 uppercase">Missing</p>
+                                </div>
+                            @endif
+                        </div>
+
+                        {{-- Bank Statement --}}
+                        <div class="flex flex-col gap-3">
+                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Bank Statement</span>
+                            @if($borrower->bank_statement)
+                                <a href="{{ fetch_data($borrower?->bank_statement_url ?? null) }}" target="_blank" class="group flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border-2 border-transparent hover:border-primary transition-all">
+                                    <div class="size-12 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600">
+                                        <span class="material-symbols-outlined text-2xl">account_balance_wallet</span>
+                                    </div>
+                                    <div class="flex-1">
+                                        <p class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-tight">Statement</p>
+                                        <p class="text-[9px] text-slate-400 font-bold uppercase">Click to view</p>
+                                    </div>
+                                </a>
+                            @else
+                                <div class="flex items-center gap-4 p-4 bg-slate-50/50 dark:bg-zinc-800/30 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-800 opacity-50">
+                                    <div class="size-12 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-300">
+                                        <span class="material-symbols-outlined text-2xl">error</span>
+                                    </div>
+                                    <p class="text-[9px] font-bold text-slate-400 uppercase">Missing</p>
+                                </div>
+                            @endif
+                        </div>
+
+                        {{-- Income Proof --}}
+                        <div class="flex flex-col gap-3">
+                            <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Income Proof</span>
+                            @if($borrower->income_proof)
+                                <a href="{{ fetch_data($borrower?->income_proof_url ?? null) }}" target="_blank" class="group flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border-2 border-transparent hover:border-primary transition-all">
+                                    <div class="size-12 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600">
+                                        <span class="material-symbols-outlined text-2xl">request_quote</span>
+                                    </div>
+                                    <div class="flex-1">
+                                        <p class="text-xs font-black text-slate-900 dark:text-white uppercase tracking-tight">Proof of Income</p>
+                                        <p class="text-[9px] text-slate-400 font-bold uppercase">Click to view</p>
+                                    </div>
+                                </a>
+                            @else
+                                <div class="flex items-center gap-4 p-4 bg-slate-50/50 dark:bg-zinc-800/30 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-800 opacity-50">
+                                    <div class="size-12 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-300">
+                                        <span class="material-symbols-outlined text-2xl">error</span>
+                                    </div>
+                                    <p class="text-[9px] font-bold text-slate-400 uppercase">Missing</p>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-[#1a1f2b] rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden">
+                <div class="px-6 py-5 border-b border-slate-100 dark:border-slate-800">
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
                         <span class="material-symbols-outlined text-primary">work</span>
                         Employment & Income
                     </h3>

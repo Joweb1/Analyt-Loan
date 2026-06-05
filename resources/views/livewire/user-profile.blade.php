@@ -294,128 +294,121 @@
             </div>
         </div>
 
-        <!-- KYC Tab (Borrowers Only) -->
+        <!-- KYC Documents Tab -->
         @if($is_borrower)
         <div x-show="tab === 'kyc'" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="max-w-4xl mx-auto space-y-8">
-            <!-- KYC Status Header -->
-            <div class="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-gray-100 dark:border-zinc-800 p-6 flex flex-col md:flex-row items-center justify-between gap-6">
-                <div class="flex items-center gap-4 text-center md:text-left">
-                    <div class="size-16 rounded-2xl {{ $kyc_status === 'approved' ? 'bg-green-100 text-green-600' : ($kyc_status === 'rejected' ? 'bg-red-100 text-red-600' : 'bg-yellow-100 text-yellow-600') }} flex items-center justify-center">
-                        <span class="material-symbols-outlined text-[32px]">{{ $kyc_status === 'approved' ? 'verified' : ($kyc_status === 'rejected' ? 'report' : 'pending_actions') }}</span>
-                    </div>
-                    <div>
-                        <h3 class="text-xl font-black text-gray-900 dark:text-white uppercase tracking-tight">KYC Verification: {{ ucfirst($kyc_status) }}</h3>
-                        <p class="text-gray-500 text-sm">
-                            @if($kyc_status === 'approved')
-                                Your identity has been verified. You have full access to lending features.
-                            @elseif($kyc_status === 'pending')
-                                Your documents are currently under review by our compliance team.
-                            @else
-                                Your KYC was rejected. Please update your details and resubmit.
-                            @endif
-                        </p>
-                    </div>
-                </div>
-                @if($kyc_status !== 'approved')
-                    <div class="px-4 py-2 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-400 rounded-lg text-xs font-bold uppercase border border-yellow-100 dark:border-yellow-800/30">
-                        Restricted Access
-                    </div>
-                @endif
-            </div>
-
-            <!-- KYC Form -->
             <div class="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-gray-100 dark:border-zinc-800 p-8">
-                <div class="mb-8 border-b border-gray-100 dark:border-zinc-800 pb-6">
-                    <h3 class="text-xl font-black text-gray-900 dark:text-white">Complete Verification</h3>
-                    <p class="text-gray-500 text-sm mt-1">Please provide accurate information to unlock higher loan limits.</p>
+                <div class="mb-8 border-b border-gray-100 dark:border-zinc-800 pb-6 flex items-center justify-between">
+                    <div>
+                        <h3 class="text-xl font-black text-gray-900 dark:text-white">Uploaded Documents</h3>
+                        <p class="text-gray-500 text-sm mt-1">Files provided during registration and verification.</p>
+                    </div>
+                    <div class="px-4 py-1.5 rounded-full {{ $kyc_status === 'approved' ? 'bg-green-100 text-green-600' : 'bg-amber-100 text-amber-600' }} text-[10px] font-black uppercase tracking-widest">
+                        Status: {{ $kyc_status }}
+                    </div>
                 </div>
 
-                <form wire:submit.prevent="completeKyc" class="space-y-8">
-                    <!-- Identification -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="md:col-span-2">
-                            <h4 class="text-xs font-black text-gray-400 uppercase tracking-widest mb-4">Personal Identification</h4>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Date of Birth</label>
-                            <input type="date" wire:model="dob" class="w-full rounded-xl border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 focus:border-primary focus:ring-primary shadow-sm text-sm">
-                            @error('dob') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
-                        </div>
-                        <div>
-                            <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Gender</label>
-                            <select wire:model="gender" class="w-full rounded-xl border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 focus:border-primary focus:ring-primary shadow-sm text-sm">
-                                <option value="">Select Gender</option>
-                                <option value="male">Male</option>
-                                <option value="female">Female</option>
-                                <option value="other">Other</option>
-                            </select>
-                            @error('gender') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
-                        </div>
-                        <div>
-                            <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">BVN (11 Digits)</label>
-                            <input type="text" wire:model="bvn" maxlength="11" class="w-full rounded-xl border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 focus:border-primary focus:ring-primary shadow-sm text-sm" placeholder="222XXXXXXXX">
-                            @error('bvn') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
-                        </div>
-                        <div>
-                            <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">NIN (11 Digits)</label>
-                            <input type="text" wire:model="nin" maxlength="11" class="w-full rounded-xl border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 focus:border-primary focus:ring-primary shadow-sm text-sm" placeholder="123XXXXXXXX">
-                            @error('nin') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
-                        </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                    {{-- Passport Photo --}}
+                    <div class="flex flex-col gap-4">
+                        <label class="text-xs font-black text-slate-400 uppercase tracking-widest">Passport Photograph</label>
+                        @if($passport_photo_url)
+                            <div class="relative group aspect-square rounded-3xl overflow-hidden border-2 border-slate-50 dark:border-zinc-800 shadow-xl">
+                                <img src="{{ fetch_data($passport_photo_url ?? null) }}" class="size-full object-cover transition-transform duration-500 group-hover:scale-110">
+                                <a href="{{ fetch_data($passport_photo_url ?? null) }}" target="_blank" class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <span class="text-white text-xs font-black uppercase tracking-widest">View Full Size</span>
+                                </a>
+                            </div>
+                        @else
+                            <div class="aspect-square rounded-3xl bg-slate-50 dark:bg-zinc-800/50 flex flex-col items-center justify-center text-slate-300 border-2 border-dashed border-slate-200 dark:border-zinc-800">
+                                <span class="material-symbols-outlined text-4xl">no_photography</span>
+                                <p class="text-[10px] font-bold uppercase mt-2">Not Provided</p>
+                            </div>
+                        @endif
                     </div>
 
-                    <!-- Residence -->
-                    <div class="grid grid-cols-1 gap-6">
-                        <div>
-                            <h4 class="text-xs font-black text-gray-400 uppercase tracking-widest mb-4">Residential Details</h4>
+                    <div class="space-y-6">
+                        {{-- Identity Document --}}
+                        <div class="flex flex-col gap-3">
+                            <label class="text-xs font-black text-slate-400 uppercase tracking-widest">Identity Document (NIN/ID)</label>
+                            @if($identity_document_url)
+                                <a href="{{ fetch_data($identity_document_url ?? null) }}" target="_blank" class="group flex items-center gap-4 p-4 bg-slate-50 dark:bg-zinc-800/50 rounded-2xl border-2 border-transparent hover:border-primary transition-all">
+                                    <div class="size-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                                        <span class="material-symbols-outlined text-2xl">badge</span>
+                                    </div>
+                                    <div class="flex-1">
+                                        <p class="text-sm font-black text-slate-900 dark:text-white uppercase">ID Card / Document</p>
+                                        <p class="text-[10px] text-slate-400 font-bold uppercase">Click to open file</p>
+                                    </div>
+                                </a>
+                            @else
+                                <div class="p-4 bg-slate-50/50 dark:bg-zinc-800/20 rounded-2xl border-2 border-dashed border-slate-100 dark:border-zinc-800 opacity-50 flex items-center gap-4">
+                                     <div class="size-12 rounded-xl bg-slate-100 dark:bg-zinc-800 flex items-center justify-center text-slate-300">
+                                        <span class="material-symbols-outlined">error</span>
+                                    </div>
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase">Missing</p>
+                                </div>
+                            @endif
                         </div>
-                        <div>
-                            <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Home Address</label>
-                            <textarea wire:model="address" rows="2" class="w-full rounded-xl border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 focus:border-primary focus:ring-primary shadow-sm text-sm"></textarea>
-                            @error('address') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
-                        </div>
-                    </div>
 
-                    <!-- Financial & Employment -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="md:col-span-2">
-                            <h4 class="text-xs font-black text-gray-400 uppercase tracking-widest mb-4">Financial Background</h4>
+                        {{-- Bank Statement --}}
+                        <div class="flex flex-col gap-3">
+                            <label class="text-xs font-black text-slate-400 uppercase tracking-widest">Bank Statement</label>
+                            @if($bank_statement_url)
+                                <a href="{{ fetch_data($bank_statement_url ?? null) }}" target="_blank" class="group flex items-center gap-4 p-4 bg-slate-50 dark:bg-zinc-800/50 rounded-2xl border-2 border-transparent hover:border-primary transition-all">
+                                    <div class="size-12 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600">
+                                        <span class="material-symbols-outlined text-2xl">account_balance_wallet</span>
+                                    </div>
+                                    <div class="flex-1">
+                                        <p class="text-sm font-black text-slate-900 dark:text-white uppercase">Bank Statement</p>
+                                        <p class="text-[10px] text-slate-400 font-bold uppercase">Click to open file</p>
+                                    </div>
+                                </a>
+                            @else
+                                <div class="p-4 bg-slate-50/50 dark:bg-zinc-800/20 rounded-2xl border-2 border-dashed border-slate-100 dark:border-zinc-800 opacity-50 flex items-center gap-4">
+                                     <div class="size-12 rounded-xl bg-slate-100 dark:bg-zinc-800 flex items-center justify-center text-slate-300">
+                                        <span class="material-symbols-outlined">error</span>
+                                    </div>
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase">Missing</p>
+                                </div>
+                            @endif
                         </div>
-                        <div>
-                            <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Marital Status</label>
-                            <select wire:model="marital_status" class="w-full rounded-xl border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 focus:border-primary focus:ring-primary shadow-sm text-sm">
-                                <option value="">Select Status</option>
-                                <option value="single">Single</option>
-                                <option value="married">Married</option>
-                                <option value="divorced">Divorced</option>
-                                <option value="widowed">Widowed</option>
-                            </select>
-                            @error('marital_status') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
-                        </div>
-                        <div>
-                            <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Number of Dependents</label>
-                            <input type="number" wire:model="dependents" class="w-full rounded-xl border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 focus:border-primary focus:ring-primary shadow-sm text-sm">
-                        </div>
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Employment Info (Employer & Role)</label>
-                            <textarea wire:model="employment_information" rows="2" class="w-full rounded-xl border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 focus:border-primary focus:ring-primary shadow-sm text-sm" placeholder="e.g. Acme Corp - Sales Manager"></textarea>
-                        </div>
-                        <div class="md:col-span-2">
-                            <label class="block text-sm font-bold text-gray-700 dark:text-gray-300 mb-2">Bank Account Details (Bank & Account Number)</label>
-                            <input type="text" wire:model="bank_account_details" class="w-full rounded-xl border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 focus:border-primary focus:ring-primary shadow-sm text-sm" placeholder="GTBank - 0123456789">
-                            @error('bank_account_details') <span class="text-red-500 text-xs mt-1 block">{{ $message }}</span> @enderror
-                        </div>
-                    </div>
 
-                    <div class="flex justify-end pt-6">
-                        <button type="submit" class="px-8 py-3 bg-primary text-white rounded-xl font-bold hover:bg-primary/90 transition shadow-lg shadow-primary/20">
-                            {{ $kyc_status === 'rejected' ? 'Resubmit for Review' : 'Submit for Verification' }}
-                        </button>
+                        {{-- Income Proof --}}
+                        <div class="flex flex-col gap-3">
+                            <label class="text-xs font-black text-slate-400 uppercase tracking-widest">Proof of Income</label>
+                            @if($income_proof_url)
+                                <a href="{{ fetch_data($income_proof_url ?? null) }}" target="_blank" class="group flex items-center gap-4 p-4 bg-slate-50 dark:bg-zinc-800/50 rounded-2xl border-2 border-transparent hover:border-primary transition-all">
+                                    <div class="size-12 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600">
+                                        <span class="material-symbols-outlined text-2xl">request_quote</span>
+                                    </div>
+                                    <div class="flex-1">
+                                        <p class="text-sm font-black text-slate-900 dark:text-white uppercase">Proof of Income</p>
+                                        <p class="text-[10px] text-slate-400 font-bold uppercase">Click to open file</p>
+                                    </div>
+                                </a>
+                            @else
+                                <div class="p-4 bg-slate-50/50 dark:bg-zinc-800/20 rounded-2xl border-2 border-dashed border-slate-100 dark:border-zinc-800 opacity-50 flex items-center gap-4">
+                                     <div class="size-12 rounded-xl bg-slate-100 dark:bg-zinc-800 flex items-center justify-center text-slate-300">
+                                        <span class="material-symbols-outlined">error</span>
+                                    </div>
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase">Missing</p>
+                                </div>
+                            @endif
+                        </div>
                     </div>
-                </form>
+                </div>
+
+                <div class="mt-12 p-6 bg-slate-50 dark:bg-zinc-800/50 rounded-3xl border border-slate-100 dark:border-zinc-800">
+                    <h4 class="text-sm font-black text-slate-900 dark:text-white uppercase tracking-wider mb-2 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">info</span>
+                        Need to update documents?
+                    </h4>
+                    <p class="text-xs text-slate-500 font-medium leading-relaxed">If you need to replace any of these documents, please contact your account officer or visit the nearest branch office. For security reasons, uploaded verification documents cannot be modified directly from this portal.</p>
+                </div>
             </div>
         </div>
         @endif
-
         <!-- Security Tab -->
         <div x-show="tab === 'security'" x-cloak x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-100 translate-y-0" class="max-w-2xl mx-auto space-y-8">
             <!-- Password Change -->

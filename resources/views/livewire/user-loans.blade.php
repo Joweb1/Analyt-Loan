@@ -23,9 +23,9 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 px-1 lg:px-2 pb-8">
+    <div class="flex flex-wrap gap-8 px-1 lg:px-2 pb-8 items-start">
         <!-- Left Column: Customer Summary Card (Borrowed from LoanDetails) -->
-        <div class="md:col-span-1 space-y-6">
+        <div class="w-full lg:w-[380px] shrink-0 space-y-6">
             <div class="bg-white dark:bg-[#1a1f2b] rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm overflow-hidden group hover:shadow-md transition-all duration-300">
                 <div class="p-6 relative">
                     <div class="absolute top-4 right-4">
@@ -48,7 +48,7 @@
                             @endif
                         </div>
                         <h3 class="text-xl font-bold text-slate-900 dark:text-white">{{ fetch_data($borrower?->user?->name ?? null) }}</h3>
-                        <p class="text-sm text-slate-500 font-medium mb-1">{{ fetch_data($borrower?->user?->email ?? null) }}</p>
+                        <p class="text-sm text-slate-500 font-medium mb-1 break-all">{{ fetch_data($borrower?->user?->email ?? null) }}</p>
                         <div class="flex items-center gap-1 text-xs text-slate-400">
                             <span class="material-symbols-outlined text-sm">location_on</span>
                             {{ fetch_data($borrower?->address ?? 'Lagos, Nigeria' ?? null) }}
@@ -56,25 +56,25 @@
                     </div>
                     
                     <div class="mt-8 space-y-4">
-                        <div class="flex justify-between items-center py-2 border-b border-slate-50 dark:border-slate-800/50">
-                            <span class="text-xs font-bold text-slate-500 uppercase tracking-wide">Phone</span>
-                            <span class="text-sm font-bold text-slate-900 dark:text-white">{{ fetch_data($borrower?->phone ?? 'N/A' ?? null) }}</span>
+                        <div class="flex justify-between items-center py-2 border-b border-slate-50 dark:border-slate-800/50 gap-2">
+                            <span class="text-xs font-bold text-slate-500 uppercase tracking-wide whitespace-nowrap">Phone</span>
+                            <span class="text-sm font-bold text-slate-900 dark:text-white text-right break-all">{{ fetch_data($borrower?->phone ?? 'N/A' ?? null) }}</span>
                         </div>
-                         <div class="flex justify-between items-center py-2 border-b border-slate-50 dark:border-slate-800/50">
-                            <span class="text-xs font-bold text-slate-500 uppercase tracking-wide">BVN</span>
-                            <span class="text-sm font-bold text-slate-900 dark:text-white font-mono">{{ fetch_data($borrower?->bvn ?? 'N/A' ?? null) }}</span>
+                         <div class="flex justify-between items-center py-2 border-b border-slate-50 dark:border-slate-800/50 gap-2">
+                            <span class="text-xs font-bold text-slate-500 uppercase tracking-wide whitespace-nowrap">BVN</span>
+                            <span class="text-sm font-bold text-slate-900 dark:text-white font-mono text-right break-all">{{ fetch_data($borrower?->bvn ?? 'N/A' ?? null) }}</span>
                         </div>
-                         <div class="flex justify-between items-center py-2 border-b border-slate-50 dark:border-slate-800/50">
-                            <span class="text-xs font-bold text-slate-500 uppercase tracking-wide">Credit Score</span>
-                            <span class="text-sm font-bold text-slate-900 dark:text-white">{{ fetch_data($borrower?->credit_score ?? '0' ?? null) }}</span>
+                         <div class="flex justify-between items-center py-2 border-b border-slate-50 dark:border-slate-800/50 gap-2">
+                            <span class="text-xs font-bold text-slate-500 uppercase tracking-wide whitespace-nowrap">Credit Score</span>
+                            <span class="text-sm font-bold text-slate-900 dark:text-white text-right">{{ fetch_data($borrower?->credit_score ?? '0' ?? null) }}</span>
                         </div>
-                         <div class="flex justify-between items-center py-2 border-b border-slate-50 dark:border-slate-800/50">
-                            <span class="text-xs font-bold text-slate-500 uppercase tracking-wide">Repayment Score</span>
-                            <span class="text-sm font-bold text-primary">{{ fetch_data($borrower?->trust_score ?? '0' ?? null) }}%</span>
+                         <div class="flex justify-between items-center py-2 border-b border-slate-50 dark:border-slate-800/50 gap-2">
+                            <span class="text-xs font-bold text-slate-500 uppercase tracking-wide whitespace-nowrap">Repayment Score</span>
+                            <span class="text-sm font-bold text-primary text-right">{{ fetch_data($borrower?->trust_score ?? '0' ?? null) }}%</span>
                         </div>
-                         <div class="flex justify-between items-center py-2 border-b border-slate-50 dark:border-slate-800/50">
-                            <span class="text-xs font-bold text-slate-500 uppercase tracking-wide">Total Loans</span>
-                            <span class="text-sm font-bold text-slate-900 dark:text-white">{{ fetch_data($borrower?->loans?->count() ?? null) }}</span>
+                         <div class="flex justify-between items-center py-2 border-b border-slate-50 dark:border-slate-800/50 gap-2">
+                            <span class="text-xs font-bold text-slate-500 uppercase tracking-wide whitespace-nowrap">Total Loans</span>
+                            <span class="text-sm font-bold text-slate-900 dark:text-white text-right">{{ fetch_data($borrower?->loans?->count() ?? null) }}</span>
                         </div>
                         <a href="{{ fetch_data(route('borrower.profile', $borrower?->id) ?? null) }}" class="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-primary/10 text-primary hover:bg-primary/20 transition-colors text-xs font-bold w-full mt-4">
                             <span class="material-symbols-outlined text-sm">account_circle</span> View User Profile
@@ -107,7 +107,7 @@
         </div>
 
         <!-- Right Column: Loans Grid -->
-        <div class="md:col-span-2 space-y-6">
+        <div class="flex-1 min-w-[320px] space-y-6">
             <div class="flex items-center justify-between">
                 <h3 class="text-lg font-bold text-slate-900 dark:text-white">Loan Records</h3>
                 <div class="flex bg-slate-100 dark:bg-slate-800 rounded-lg p-1">
@@ -130,7 +130,7 @@
                             default => 'yellow'
                         };
                     @endphp
-                    <div class="bg-white dark:bg-[#1a1f2b] p-5 rounded-none border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-xl transition-all duration-300 group cursor-pointer border-l-4 border-l-{{ fetch_data($statusColor }}-500" onclick="window.location='{{ route('loan.show', $loan?->id) ?? null) }}'">
+                    <div class="bg-white dark:bg-[#1a1f2b] p-5 rounded-none border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-xl transition-all duration-300 group cursor-pointer border-l-4 border-l-{{ $statusColor }}-500" onclick="window.location='{{ fetch_data(route('loan.show', $loan?->id) ?? null) }}'">
                         <div class="flex justify-between items-start mb-4">
                             <div>
                                 <span class="px-2 py-0.5 rounded-lg bg-{{ $statusColor }}-100 text-{{ $statusColor }}-700 text-[9px] font-black uppercase tracking-widest border border-{{ $statusColor }}-200">
@@ -152,7 +152,7 @@
                             </div>
                             <div class="flex justify-between items-center text-[10px] font-black uppercase tracking-wider">
                                 <span class="text-slate-400">{{ round($progress) }}% REPAID</span>
-                                <span class="text-{{ fetch_data($statusColor }}-600">BAL: ₦{{ fetch_data($loan?->amount?->subtract($paid)?->format() ?? null) ?? null) }}</span>
+                                <span class="text-{{ $statusColor }}-600">BAL: ₦{{ fetch_data($loan?->amount?->subtract($paid)?->format() ?? null) }}</span>
                             </div>
                         </div>
 

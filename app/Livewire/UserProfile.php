@@ -51,6 +51,15 @@ class UserProfile extends Component
 
     public $kyc_status = 'pending';
 
+    // File URLs
+    public $passport_photo_url;
+
+    public $identity_document_url;
+
+    public $bank_statement_url;
+
+    public $income_proof_url;
+
     // KYC Fields for completion
     public $dob;
 
@@ -100,6 +109,11 @@ class UserProfile extends Component
                 $this->employment_information = $this->borrower->employment_information;
                 $this->bank_account_details = $this->borrower->bank_account_details;
                 $this->custom_id = $this->borrower->custom_id;
+
+                $this->passport_photo_url = $this->borrower->passport_photograph_url;
+                $this->identity_document_url = $this->borrower->identity_document_url;
+                $this->bank_statement_url = $this->borrower->bank_statement_url;
+                $this->income_proof_url = $this->borrower->income_proof_url;
             }
         }
 

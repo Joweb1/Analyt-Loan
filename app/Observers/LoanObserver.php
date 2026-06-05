@@ -9,6 +9,7 @@ use App\Livewire\LoanDashboard;
 use App\Livewire\Reports;
 use App\Models\Loan;
 use App\Models\ScheduledRepayment;
+use App\Services\TransactionService;
 use App\ValueObjects\Money;
 
 class LoanObserver
@@ -76,6 +77,17 @@ class LoanObserver
                 'repaid' => [$title = 'Loan Fully Repaid', $type = 'success'],
                 default => null,
             };
+
+            if ($status === 'active') {
+                // Record Disbursement Transaction
+                TransactionService::record(
+                    type: 'loan_disbursement',
+                    amount: $loan->amount,
+                    user: $loan->borrower->user,
+                    related: $loan,
+                    notes: "Disbursement for Loan #{$loan->loan_number}"
+                );
+            }
 
             // 1. Notify the Borrower
             if ($loan->borrower && $loan->borrower->user_id) {

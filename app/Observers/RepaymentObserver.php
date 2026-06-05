@@ -10,6 +10,7 @@ use App\Livewire\LoanDashboard;
 use App\Livewire\Reports;
 use App\Models\Repayment;
 use App\Models\SavingsTransaction;
+use App\Services\TransactionService;
 
 class RepaymentObserver
 {
@@ -53,6 +54,17 @@ class RepaymentObserver
         }
 
         LoanRepaymentReceived::dispatch($loan, $repayment);
+
+        // Record Global Transaction
+        TransactionService::record(
+            type: 'repayment',
+            amount: $repayment->amount,
+            user: $loan->borrower->user,
+            related: $repayment,
+            paymentMethod: $repayment->payment_method,
+            notes: "Repayment for Loan #{$loan->loan_number}"
+        );
+
         DashboardUpdated::dispatch($repayment->loan->organization_id);
         LoanDashboard::clearCache($repayment->loan->organization_id);
         AdminDashboard::clearCache($repayment->loan->organization_id, $repayment->loan->portfolio_id);

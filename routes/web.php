@@ -59,6 +59,7 @@ use App\Livewire\Settings\RolesManagement;
 use App\Livewire\Settings\SecuritySettings;
 use App\Livewire\Settings\TeamManagement;
 use App\Livewire\StatusBoard;
+use App\Livewire\TransactionHistory;
 use App\Livewire\UserLoans;
 use App\Livewire\UserProfile;
 use App\Livewire\Vault;
@@ -149,6 +150,7 @@ Route::middleware(['auth', 'update_last_seen'])->group(function () {
         Route::get('kyc-approval', KycApproval::class)->middleware('permission:approve_kyc')->name('kyc.approval');
         Route::get('loan-approval', LoanApproval::class)->middleware('permission:approve_loans')->name('loan.approval');
         Route::get('repayments', RepaymentRecords::class)->middleware('permission:manage_collections')->name('repayments.records');
+        Route::get('transactions', TransactionHistory::class)->middleware('permission:view_reports')->name('transactions');
         Route::get('ledger', App\Livewire\Ledger\Dashboard::class)->middleware('permission:manage_collections')->name('ledger.dashboard');
         Route::get('ledger/group/{group}', GroupLedger::class)->middleware('permission:manage_collections')->name('ledger.group');
         Route::get('daily-savings', Record::class)->middleware('permission:manage_collections')->name('daily-savings.record');

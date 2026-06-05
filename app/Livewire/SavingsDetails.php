@@ -9,6 +9,7 @@ use App\Models\SavingsWithdrawal;
 use App\Models\SystemNotification;
 use App\Models\User;
 use App\Services\CashbookService;
+use App\Services\TransactionService;
 use App\ValueObjects\Money;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -124,6 +125,16 @@ class SavingsDetails extends Component
                 'transaction_date' => $this->transactionDate,
                 'payment_method' => $this->paymentMethod,
             ]);
+
+            // Master Transaction Log
+            TransactionService::record(
+                type: $dbType,
+                amount: $amountMoney,
+                user: $this->user,
+                related: $transaction,
+                paymentMethod: $this->paymentMethod,
+                notes: $this->notes
+            );
 
             // If it's a withdrawal, also create a record in the formal Withdrawal Ledger
             if ($this->transactionType === 'withdrawal') {

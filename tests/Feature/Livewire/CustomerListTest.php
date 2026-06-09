@@ -65,4 +65,19 @@ class CustomerListTest extends TestCase
             ->call('toggleView', 'list')
             ->assertSet('viewMode', 'list');
     }
+
+    public function test_it_has_correct_registration_links()
+    {
+        $this->seed(RoleSeeder::class);
+        $this->organization->update(['kyc_status' => 'approved']);
+        $this->admin->update(['type' => 'admin']);
+        $this->admin->assignRole('Admin');
+
+        Livewire::actingAs($this->admin)
+            ->test(CustomerList::class)
+            ->assertSee(route('customer.create', ['registration_type' => 'borrower']))
+            ->assertSee(route('customer.create', ['registration_type' => 'saver']))
+            ->assertSee(route('customer.create', ['registration_type' => 'guarantor']))
+            ->assertSee(route('customer.create', ['registration_type' => 'staff']));
+    }
 }

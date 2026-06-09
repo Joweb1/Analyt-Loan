@@ -17,7 +17,6 @@ use App\Livewire\Borrower\Account\Support;
 use App\Livewire\Borrower\Activity;
 use App\Livewire\Borrower\Alerts;
 use App\Livewire\Borrower\Borrow;
-use App\Livewire\Borrower\GuarantorRegistration;
 use App\Livewire\Borrower\Home;
 use App\Livewire\Borrower\Onboarding\Bank;
 use App\Livewire\Borrower\Onboarding\Employment;
@@ -165,10 +164,12 @@ Route::middleware(['auth', 'update_last_seen'])->group(function () {
         Route::get('settings/loan-products', LoanProducts::class)->middleware('permission:manage_settings')->name('settings.loan-products');
         Route::get('settings/portfolios', Portfolios::class)->middleware('permission:manage_settings')->name('settings.portfolios');
         Route::get('customers', CustomerList::class)->middleware('permission:manage_borrowers')->name('customer');
-        Route::get('customer/create/{type?}', function ($type = 'borrower') {
-            return view('pages.customer-registration', ['type' => $type]);
+        Route::get('customer/create', function () {
+            return view('pages.customer-registration');
         })->middleware('permission:manage_borrowers')->name('customer.create');
-        Route::get('customer/guarantor/create', GuarantorRegistration::class)->middleware('permission:manage_guarantors')->name('guarantor.create');
+        Route::get('customer/guarantor/create', function () {
+            return redirect()->route('customer.create', ['registration_type' => 'guarantor']);
+        })->middleware('permission:manage_guarantors')->name('guarantor.create');
         Route::get('vault', Vault::class)->middleware('permission:manage_vault')->name('vault');
         Route::get('cashbook', App\Livewire\Cashbook\Dashboard::class)->middleware('permission:manage_vault|record_cashbook')->name('cashbook');
         Route::get('cashbook/month-record', MonthRecord::class)->middleware('permission:manage_vault|record_cashbook')->name('cashbook.month-record');

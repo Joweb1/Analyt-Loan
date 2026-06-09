@@ -124,4 +124,21 @@ class TeamManagementTest extends TestCase
 
         $this->assertTrue($admin->fresh()->hasRole('Admin'));
     }
+
+    public function test_cannot_change_own_role()
+    {
+        $org = Organization::factory()->create();
+        $admin = User::factory()->create(['organization_id' => $org->id]);
+        $admin->assignRole('Admin');
+
+        Livewire::actingAs($admin)
+            ->test(TeamManagement::class)
+            ->call('changeRole', $admin->id, 'Loan Analyst')
+            ->assertDispatched('custom-alert', function ($name, $params) {
+                return $params[0]['type'] === 'error' && str_contains($params[0]['message'], 'cannot change your own role');
+            });
+
+        $this->assertTrue($admin->fresh()->hasRole('Admin'));
+        $this->assertFalse($admin->fresh()->hasRole('Loan Analyst'));
+    }
 }

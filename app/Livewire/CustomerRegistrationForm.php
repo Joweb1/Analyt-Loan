@@ -128,14 +128,16 @@ class CustomerRegistrationForm extends Component
 
     public $staff_role = 'Staff';
 
-    public function mount($type = 'borrower')
+    public function mount()
     {
         $allowedTypes = ['borrower', 'saver', 'guarantor'];
         if (Auth::check() && Auth::user()->isAdmin()) {
             $allowedTypes[] = 'staff';
         }
 
-        $this->registration_type = in_array($type, $allowedTypes) ? $type : 'borrower';
+        if (! in_array($this->registration_type, $allowedTypes)) {
+            $this->registration_type = 'borrower';
+        }
 
         if (Auth::check() && Auth::user()->organization_id) {
             $this->organization_id = Auth::user()->organization_id;
@@ -150,8 +152,7 @@ class CustomerRegistrationForm extends Component
     {
         if (Auth::check() && Auth::user()->isAdmin()) {
             // Staff and non-Admin/non-Borrower roles
-            $this->availableRoles = Role::where('name', '!=', 'Borrower')
-                ->where('name', '!=', 'Admin')
+            $this->availableRoles = Role::whereNotIn('name', ['Borrower', 'Saver', 'Guarantor', 'Admin', 'App Owner', 'Owner'])
                 ->pluck('name')
                 ->toArray();
 
@@ -327,13 +328,21 @@ class CustomerRegistrationForm extends Component
                     }
                 })->first();
 
+            $targetType = $this->registration_type === 'staff' ? 'staff' : 'customer';
+
             if ($user) {
+                // Determine new type carefully
+                $newType = $user->type;
+                if (! in_array($user->type, ['admin', 'owner', 'app owner'])) {
+                    $newType = $targetType;
+                }
+
                 // If user exists in same organization, we update them
                 $user->update([
                     'name' => $this->name,
                     'email' => $this->email,
                     'phone' => $this->phone,
-                    'type' => $this->registration_type === 'staff' ? 'staff' : $user->type,
+                    'type' => $newType,
                 ]);
             } else {
                 // Determine password
@@ -341,7 +350,7 @@ class CustomerRegistrationForm extends Component
 
                 $user = User::create([
                     'organization_id' => $this->organization_id,
-                    'type' => $this->registration_type === 'staff' ? 'staff' : 'customer',
+                    'type' => $targetType,
                     'name' => $this->name,
                     'email' => $this->email,
                     'phone' => $this->phone,
@@ -349,14 +358,32 @@ class CustomerRegistrationForm extends Component
                 ]);
             }
 
-            $roleName = $this->registration_type === 'staff' ? $this->staff_role : ucfirst($this->registration_type);
-            if (! $user->hasRole($roleName)) {
-                $user->assignRole($roleName);
+            // Role Management
+            $protectedRoles = ['Admin', 'Owner', 'App Owner'];
+            $currentRoles = $user->getRoleNames()->toArray();
+            $preservedRoles = array_intersect($currentRoles, $protectedRoles);
+
+            if ($this->registration_type === 'staff') {
+                // For staff, we sync only the staff role, removing any customer roles
+                $user->syncRoles(array_merge($preservedRoles, [$this->staff_role]));
+            } else {
+                // For customers (Borrower, Saver, Guarantor), we can have multiple
+                // But we must remove any staff roles
+                $customerRoles = ['Borrower', 'Saver', 'Guarantor'];
+                $intendedRole = ucfirst($this->registration_type);
+
+                $newRoles = array_intersect($currentRoles, $customerRoles);
+
+                if (! in_array($intendedRole, $newRoles)) {
+                    $newRoles[] = $intendedRole;
+                }
+
+                $user->syncRoles(array_merge($preservedRoles, $newRoles));
             }
 
             if ($this->registration_type === 'staff') {
                 $this->dispatch('custom-alert', ['type' => 'success', 'message' => 'Staff member registered successfully.']);
-                $this->reset(['name', 'email', 'phone', 'password', 'password_confirmation', 'registration_type']);
+                $this->reset(['name', 'email', 'phone', 'password', 'password_confirmation']);
                 $this->mount(); // Reset to default state
 
                 return;

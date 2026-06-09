@@ -43,17 +43,17 @@
 
             @if($isKycApproved)
                 <div class="flex flex-wrap items-center gap-2">
-                    <a href="{{ route('customer.create', ['type' => 'borrower']) }}" class="flex-1 min-w-[120px] px-4 py-2.5 bg-primary text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-zinc-800 transition-all shadow-md shadow-primary/10 flex items-center justify-center gap-2">
+                    <a href="{{ route('customer.create', ['registration_type' => 'borrower']) }}" class="flex-1 min-w-[120px] px-4 py-2.5 bg-primary text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-zinc-800 transition-all shadow-md shadow-primary/10 flex items-center justify-center gap-2">
                         <span class="material-symbols-outlined text-sm">add</span> Borrower
                     </a>
-                    <a href="{{ route('customer.create', ['type' => 'saver']) }}" class="flex-1 min-w-[100px] px-4 py-2.5 bg-green-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-zinc-800 transition-all shadow-md shadow-green-600/10 flex items-center justify-center gap-2">
+                    <a href="{{ route('customer.create', ['registration_type' => 'saver']) }}" class="flex-1 min-w-[100px] px-4 py-2.5 bg-green-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-zinc-800 transition-all shadow-md shadow-green-600/10 flex items-center justify-center gap-2">
                         <span class="material-symbols-outlined text-sm">add</span> Saver
                     </a>
-                    <a href="{{ route('customer.create', ['type' => 'guarantor']) }}" class="flex-1 min-w-[120px] px-4 py-2.5 bg-blue-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-zinc-800 transition-all shadow-md shadow-blue-600/10 flex items-center justify-center gap-2">
+                    <a href="{{ route('customer.create', ['registration_type' => 'guarantor']) }}" class="flex-1 min-w-[120px] px-4 py-2.5 bg-blue-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-zinc-800 transition-all shadow-md shadow-blue-600/10 flex items-center justify-center gap-2">
                         <span class="material-symbols-outlined text-sm">add</span> Guarantor
                     </a>
                     @if(auth()->user()->isAdmin())
-                        <a href="{{ route('customer.create', ['type' => 'staff']) }}" class="flex-1 min-w-[100px] px-4 py-2.5 bg-purple-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-zinc-800 transition-all shadow-md shadow-purple-600/10 flex items-center justify-center gap-2">
+                        <a href="{{ route('customer.create', ['registration_type' => 'staff']) }}" class="flex-1 min-w-[100px] px-4 py-2.5 bg-purple-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-zinc-800 transition-all shadow-md shadow-purple-600/10 flex items-center justify-center gap-2">
                             <span class="material-symbols-outlined text-sm">add</span> Staff
                         </a>
                     @endif

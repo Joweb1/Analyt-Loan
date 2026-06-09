@@ -85,6 +85,12 @@ class TeamManagement extends Component
 
     public function changeRole($userId, $newRole)
     {
+        if ($userId === Auth::id()) {
+            $this->dispatch('custom-alert', ['type' => 'error', 'message' => 'You cannot change your own role.']);
+
+            return;
+        }
+
         $user = User::findOrFail($userId);
 
         if ($user->organization_id !== Auth::user()->organization_id) {

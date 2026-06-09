@@ -65,8 +65,8 @@ return [
             'key' => env('SUPABASE_SECRET_KEY', env('SUPABASE_KEY')),
             'endpoint' => env('SUPABASE_URL'),
             'bucket' => env('SUPABASE_BUCKET'),
-            'is_configured' => ! empty(env('SUPABASE_URL')) 
-                && ! in_array(env('APP_ENV'), ['local', 'testing']) 
+            'is_configured' => ! empty(env('SUPABASE_URL'))
+                && ! in_array(env('APP_ENV'), ['local', 'testing'])
                 && ! app()->runningUnitTests(),
             'public' => true, // Set to false for private buckets
             'visibility' => 'public',

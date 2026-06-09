@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Jobs\ProcessLoanAttachment;
 use App\Livewire\CustomerRegistrationForm;
 use App\Livewire\LoanForm;
 use App\Models\Borrower;
@@ -21,6 +22,7 @@ class FileUploadTest extends TestCase
     use RefreshDatabase;
 
     protected Organization $organization;
+
     protected User $admin;
 
     protected function setUp(): void
@@ -69,13 +71,13 @@ class FileUploadTest extends TestCase
             ->assertHasNoErrors();
 
         $borrower = Borrower::latest()->first();
-        
+
         $this->assertNotNull($borrower->passport_photograph);
         $this->assertNotNull($borrower->identity_document);
 
         // Determine which disk it should have used
-        $expectedDisk = (config('filesystems.disks.supabase.is_configured') && ! app()->environment('testing')) 
-            ? 'supabase' 
+        $expectedDisk = (config('filesystems.disks.supabase.is_configured') && ! app()->environment('testing'))
+            ? 'supabase'
             : (config('filesystems.default') === 'local' ? 'public' : config('filesystems.default'));
 
         // Verify files exist on the expected disk
@@ -107,8 +109,8 @@ class FileUploadTest extends TestCase
             ->assertHasNoErrors();
 
         // Verify the job was dispatched
-        Queue::assertPushed(\App\Jobs\ProcessLoanAttachment::class);
-        
+        Queue::assertPushed(ProcessLoanAttachment::class);
+
         $loan = Loan::where('loan_number', 'LN-FILE-001')->first();
         $this->assertNotNull($loan);
     }
@@ -123,13 +125,13 @@ class FileUploadTest extends TestCase
         Storage::fake('supabase');
 
         $loan = Loan::factory()->create(['organization_id' => $this->organization->id]);
-        
+
         // Create a temp file
         $tempPath = 'temp-attachments/test_file.pdf';
         Storage::disk('local')->put($tempPath, 'dummy content');
 
         // Execute the job
-        $job = new \App\Jobs\ProcessLoanAttachment($loan, $tempPath, 'original_name.pdf');
+        $job = new ProcessLoanAttachment($loan, $tempPath, 'original_name.pdf');
         $job->handle();
 
         $loan->refresh();
@@ -137,8 +139,8 @@ class FileUploadTest extends TestCase
         $path = $loan->attachments[0];
 
         // Determine which disk it should have used
-        $expectedDisk = config('filesystems.disks.supabase.is_configured') 
-            ? 'supabase' 
+        $expectedDisk = config('filesystems.disks.supabase.is_configured')
+            ? 'supabase'
             : (config('filesystems.default') === 'local' ? 'public' : config('filesystems.default'));
 
         // Verify it moved to the expected disk

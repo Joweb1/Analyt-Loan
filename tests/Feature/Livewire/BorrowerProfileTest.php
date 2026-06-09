@@ -131,7 +131,7 @@ class BorrowerProfileTest extends TestCase
         $this->assertEquals('Updated Bank', $this->borrower->bank_account_details['bank_name']);
         $this->assertEquals('1234567890', $this->borrower->bank_account_details['account_number']);
         $this->assertEquals('NOK Name', $this->borrower->next_of_kin_details['name']);
-        
+
         $this->assertNotNull($this->borrower->getRawOriginal('photo_url'));
         $this->assertNotNull($this->borrower->passport_photograph);
         $this->assertNotNull($this->borrower->identity_document);

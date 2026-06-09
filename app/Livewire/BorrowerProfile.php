@@ -220,7 +220,7 @@ class BorrowerProfile extends Component
 
         $this->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,'.$this->borrower->user_id,
+            'email' => 'nullable|email|unique:users,email,'.$this->borrower->user_id,
             'bvn' => 'nullable|string|max:11',
             'national_identity_number' => 'nullable|string|max:11',
             'new_photo' => ['nullable', 'image', 'max:2048'],

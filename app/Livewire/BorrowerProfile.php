@@ -71,6 +71,8 @@ class BorrowerProfile extends Component
 
     public $rejection_reason;
 
+    public $confirmingDeletion = false;
+
     public function mount(Borrower $borrower)
     {
         if (! Auth::user()->hasPermissionTo('manage_borrowers')) {
@@ -181,6 +183,31 @@ class BorrowerProfile extends Component
         if (! $this->isEditing) {
             $this->loadFields();
         }
+    }
+
+    public function deleteCustomer()
+    {
+        if (! Auth::user()->isAdmin()) {
+            $this->dispatch('custom-alert', ['type' => 'error', 'message' => 'Only administrators can delete customers.']);
+
+            return;
+        }
+
+        $user = $this->borrower->user;
+        $name = $user->name;
+
+        // Deleting the user should trigger cascade deletes for borrower, saver, guarantor, etc.
+        $user->delete();
+
+        SystemLogger::danger(
+            'Customer Deleted',
+            "The customer account for {$name} and all related data have been permanently deleted.",
+            'customer_management'
+        );
+
+        session()->flash('custom-alert', ['type' => 'warning', 'message' => "Customer {$name} and all related records have been deleted."]);
+
+        return redirect()->route('customer');
     }
 
     public function save()

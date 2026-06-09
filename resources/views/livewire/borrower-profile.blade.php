@@ -21,6 +21,12 @@
             </h2>
         </div>
         <div class="flex gap-3">
+            @if(auth()->user()->isAdmin())
+                <button wire:click="$set('confirmingDeletion', true)" class="flex items-center gap-2 px-4 py-2 bg-red-50 text-red-600 border border-red-100 dark:bg-red-900/10 dark:border-red-900/20 dark:text-red-400 rounded-xl text-sm font-bold shadow-sm hover:bg-red-100 transition-all">
+                    <span class="material-symbols-outlined text-lg">delete</span>
+                    Delete Customer
+                </button>
+            @endif
              <button wire:click="toggleEdit" class="flex items-center gap-2 px-4 py-2 bg-surface border border-border-main text-slate-700 dark:text-white rounded-xl text-sm font-bold shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-all">
                 <span class="material-symbols-outlined text-lg">{{ $isEditing ? 'close' : 'edit' }}</span>
                 {{ $isEditing ? 'Cancel Edit' : 'Edit Profile' }}
@@ -589,4 +595,27 @@
             </div>
         </div>
     </div>
+
+    {{-- Delete Confirmation Modal --}}
+    @if($confirmingDeletion)
+        <div class="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" wire:click="$set('confirmingDeletion', false)"></div>
+            <div class="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-3xl shadow-2xl p-8 animate-in zoom-in-95 duration-200">
+                <div class="size-20 rounded-full bg-red-50 dark:bg-red-900/20 flex items-center justify-center text-red-600 mx-auto mb-6">
+                    <span class="material-symbols-outlined text-4xl">warning</span>
+                </div>
+                <h3 class="text-xl font-black text-slate-900 dark:text-white text-center mb-2 uppercase tracking-tight">Delete Customer Account?</h3>
+                <p class="text-sm text-slate-500 text-center mb-8 font-medium">This action is permanent. All related data including loans, savings, and guarantor information for <span class="font-black text-slate-900 dark:text-white">{{ $name }}</span> will be deleted immediately.</p>
+                
+                <div class="flex gap-3">
+                    <button wire:click="deleteCustomer" class="flex-1 py-4 bg-red-600 text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-red-700 transition-all shadow-lg shadow-red-600/30">
+                        Confirm Permanent Delete
+                    </button>
+                    <button wire:click="$set('confirmingDeletion', false)" class="flex-1 py-4 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-slate-200 transition-all">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    @endif
 </div>

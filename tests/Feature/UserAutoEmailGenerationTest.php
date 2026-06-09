@@ -24,7 +24,7 @@ class UserAutoEmailGenerationTest extends TestCase
         ]);
 
         $this->assertNotNull($user->email);
-        $this->assertStringContainsString('2348000000001@analyt-loan.com', $user->email);
+        $this->assertStringContainsString('2348000000001@analytloan.com', $user->email);
         $this->assertDatabaseHas('users', [
             'id' => $user->id,
             'email' => $user->email,

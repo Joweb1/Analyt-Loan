@@ -4,13 +4,14 @@ namespace App\Livewire\Borrower;
 
 use App\Models\Loan;
 use App\Models\PaymentProof;
+use App\Traits\HandlesStorageDisk;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
 class Repayment extends Component
 {
-    use WithFileUploads;
+    use HandlesStorageDisk, WithFileUploads;
 
     /** @var Loan|null */
     public $activeLoan;
@@ -64,7 +65,7 @@ class Repayment extends Component
 
         $path = null;
         if ($this->receipt) {
-            $path = $this->receipt->store('payment-proofs', 'supabase');
+            $path = $this->receipt->store('payment-proofs', $this->getStorageDisk());
         }
 
         PaymentProof::create([

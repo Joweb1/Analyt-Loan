@@ -3,6 +3,7 @@
 namespace App\Livewire\Settings;
 
 use App\Services\SystemMaintenanceService;
+use App\Traits\HandlesStorageDisk;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -12,7 +13,7 @@ use Livewire\WithFileUploads;
 
 class GeneralSettings extends Component
 {
-    use WithFileUploads;
+    use HandlesStorageDisk, WithFileUploads;
 
     public $organization;
 
@@ -169,7 +170,7 @@ class GeneralSettings extends Component
             $filename = Str::random(40).'.'.$this->logo->getClientOriginalExtension();
             $path = 'logos/'.$filename;
             $stream = fopen($this->logo->getRealPath(), 'r');
-            $disk = config('filesystems.disks.supabase.is_configured') ? 'supabase' : config('filesystems.default');
+            $disk = $this->getStorageDisk();
             Storage::disk($disk)->put($path, $stream);
             if (is_resource($stream)) {
                 fclose($stream);
@@ -182,7 +183,7 @@ class GeneralSettings extends Component
             $filename = Str::random(40).'.'.$this->signature->getClientOriginalExtension();
             $path = 'signatures/'.$filename;
             $stream = fopen($this->signature->getRealPath(), 'r');
-            $disk = config('filesystems.disks.supabase.is_configured') ? 'supabase' : config('filesystems.default');
+            $disk = $this->getStorageDisk();
             Storage::disk($disk)->put($path, $stream);
             if (is_resource($stream)) {
                 fclose($stream);
@@ -194,7 +195,7 @@ class GeneralSettings extends Component
             $filename = Str::random(40).'.'.$this->kyc_document->getClientOriginalExtension();
             $path = 'kyc-docs/'.$filename;
             $stream = fopen($this->kyc_document->getRealPath(), 'r');
-            $disk = config('filesystems.disks.supabase.is_configured') ? 'supabase' : config('filesystems.default');
+            $disk = $this->getStorageDisk();
             Storage::disk($disk)->put($path, $stream);
             if (is_resource($stream)) {
                 fclose($stream);

@@ -11,7 +11,7 @@ class LaravelStorageProvider implements StorageProvider
 
     public function __construct(?string $disk = null)
     {
-        $this->disk = $disk ?: (config('filesystems.disks.supabase.is_configured') ? 'supabase' : config('filesystems.default'));
+        $this->disk = $disk ?: (config('filesystems.disks.supabase.is_configured') ? 'supabase' : (config('filesystems.default') === 'local' ? 'public' : config('filesystems.default')));
     }
 
     public function url(string $path): ?string
@@ -36,5 +36,10 @@ class LaravelStorageProvider implements StorageProvider
     public function exists(string $path): bool
     {
         return Storage::disk($this->disk)->exists($path);
+    }
+
+    public function getDisk(): string
+    {
+        return $this->disk;
     }
 }

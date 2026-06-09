@@ -5,6 +5,7 @@ namespace App\Livewire\Borrower;
 use App\Livewire\Settings\FormBuilder;
 use App\Models\FormFieldConfig;
 use App\Models\Guarantor;
+use App\Traits\HandlesStorageDisk;
 use App\Traits\SterilizesPhone;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
@@ -16,7 +17,7 @@ use Livewire\WithFileUploads;
 
 class GuarantorRegistration extends Component
 {
-    use SterilizesPhone, WithFileUploads;
+    use HandlesStorageDisk, SterilizesPhone, WithFileUploads;
 
     public $name;
 
@@ -147,7 +148,7 @@ class GuarantorRegistration extends Component
             $guarantor->income = $this->income;
 
             // Handle file uploads in custom data
-            $disk = (config('filesystems.disks.supabase.is_configured') && ! app()->environment('testing')) ? 'supabase' : config('filesystems.default');
+            $disk = $this->getStorageDisk();
             foreach ($this->customData as $key => $value) {
                 if ($value instanceof UploadedFile) {
                     $filename = Str::random(40).'.'.$value->getClientOriginalExtension();

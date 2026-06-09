@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\Collateral;
 use App\Models\Loan;
+use App\Traits\HandlesStorageDisk;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -12,7 +13,7 @@ use Livewire\WithFileUploads;
 
 class CollateralForm extends Component
 {
-    use WithFileUploads;
+    use HandlesStorageDisk, WithFileUploads;
 
     public $loan_id;
 
@@ -161,7 +162,7 @@ class CollateralForm extends Component
             $filename = Str::random(40).'.'.$this->image->getClientOriginalExtension();
             $path = 'collaterals/'.$filename;
             $stream = fopen($this->image->getRealPath(), 'r');
-            $disk = (config('filesystems.disks.supabase.is_configured') && ! app()->environment('testing')) ? 'supabase' : config('filesystems.default');
+            $disk = $this->getStorageDisk();
             Storage::disk($disk)->put($path, $stream);
             if (is_resource($stream)) {
                 fclose($stream);

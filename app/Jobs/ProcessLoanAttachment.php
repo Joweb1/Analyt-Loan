@@ -52,7 +52,9 @@ class ProcessLoanAttachment implements ShouldQueue
         $filename = Str::random(40).'.'.$extension;
         $attachmentPath = 'loan-attachments/'.$filename;
 
-        $disk = config('filesystems.disks.supabase.is_configured') ? 'supabase' : config('filesystems.default');
+        $disk = config('filesystems.disks.supabase.is_configured') 
+            ? 'supabase' 
+            : (config('filesystems.default') === 'local' ? 'public' : config('filesystems.default'));
 
         $stream = Storage::disk('local')->readStream($this->tempPath);
         Storage::disk($disk)->put($attachmentPath, $stream);

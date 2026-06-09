@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\Organization;
 use App\Models\User;
+use App\Traits\HandlesStorageDisk;
 use App\Traits\SterilizesPhone;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -16,7 +17,7 @@ use Spatie\Permission\Models\Role;
 
 class OrgRegistrationForm extends Component
 {
-    use SterilizesPhone, WithFileUploads;
+    use HandlesStorageDisk, SterilizesPhone, WithFileUploads;
 
     public $orgName;
 
@@ -59,7 +60,7 @@ class OrgRegistrationForm extends Component
 
                 // Read from temporary local storage and put to supabase disk if configured, else default
                 $stream = fopen($this->orgLogo->getRealPath(), 'r');
-                $disk = config('filesystems.disks.supabase.is_configured') ? 'supabase' : config('filesystems.default');
+                $disk = $this->getStorageDisk();
                 Storage::disk($disk)->put($logoPath, $stream);
                 if (is_resource($stream)) {
                     fclose($stream);

@@ -11,6 +11,7 @@ use App\Models\Portfolio;
 use App\Models\Saver;
 use App\Models\User;
 use App\Services\TransactionService;
+use App\Traits\HandlesStorageDisk;
 use App\Traits\SterilizesPhone;
 use App\ValueObjects\Money;
 use Illuminate\Http\UploadedFile;
@@ -27,7 +28,7 @@ use Spatie\Permission\Models\Role;
 
 class CustomerRegistrationForm extends Component
 {
-    use SterilizesPhone, WithFileUploads;
+    use HandlesStorageDisk, SterilizesPhone, WithFileUploads;
 
     // Organization
     public $organization_id;
@@ -488,7 +489,7 @@ class CustomerRegistrationForm extends Component
             }
 
             // Handle standard file uploads
-            $disk = (config('filesystems.disks.supabase.is_configured') && ! app()->environment('testing')) ? 'supabase' : config('filesystems.default');
+            $disk = $this->getStorageDisk();
 
             if ($this->passport_photo) {
                 $filename = Str::random(40).'.'.$this->passport_photo->getClientOriginalExtension();

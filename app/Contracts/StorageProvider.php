@@ -23,4 +23,9 @@ interface StorageProvider
      * Check if a file exists.
      */
     public function exists(string $path): bool;
+
+    /**
+     * Get the active disk name.
+     */
+    public function getDisk(): string;
 }

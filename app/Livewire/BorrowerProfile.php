@@ -6,13 +6,14 @@ use App\Helpers\SystemLogger;
 use App\Models\Borrower;
 use App\Models\SystemNotification;
 use App\Models\User;
+use App\Traits\HandlesStorageDisk;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 
 class BorrowerProfile extends Component
 {
-    use WithFileUploads;
+    use HandlesStorageDisk, WithFileUploads;
 
     public Borrower $borrower;
 
@@ -44,13 +45,26 @@ class BorrowerProfile extends Component
 
     public $daily_target_amount;
 
-    public $employment_information;
+    public $employment_information = [];
+
+    public $bank_account_details = [];
+
+    public $next_of_kin_details = [];
 
     public $income_proof_path;
 
     public $new_photo;
 
     public $photo_url;
+
+    // Document Uploads
+    public $passport_photo;
+
+    public $identity_doc;
+
+    public $bank_stmt;
+
+    public $income_proof;
 
     // KYC Approval
     public $kyc_status;
@@ -80,7 +94,19 @@ class BorrowerProfile extends Component
         $this->collection_group = $this->borrower->collection_group;
         $this->is_daily_saver = $this->borrower->is_daily_saver;
         $this->daily_target_amount = $this->borrower->daily_target_amount ? $this->borrower->daily_target_amount->getMajorAmount() : 0;
-        $this->employment_information = $this->borrower->employment_information;
+
+        $this->employment_information = is_array($this->borrower->employment_information)
+            ? $this->borrower->employment_information
+            : ['employer_name' => '', 'job_title' => '', 'monthly_income' => 0, 'employment_status' => '', 'employer_address' => ''];
+
+        $this->bank_account_details = is_array($this->borrower->bank_account_details)
+            ? $this->borrower->bank_account_details
+            : ['bank_name' => '', 'account_number' => '', 'account_name' => ''];
+
+        $this->next_of_kin_details = is_array($this->borrower->next_of_kin_details)
+            ? $this->borrower->next_of_kin_details
+            : ['name' => '', 'relationship' => '', 'phone' => ''];
+
         $this->photo_url = $this->borrower->photo_url;
         $this->kyc_status = $this->borrower->kyc_status;
     }
@@ -168,10 +194,16 @@ class BorrowerProfile extends Component
         $this->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,'.$this->borrower->user_id,
-            // phone removed as it's read-only
             'bvn' => 'nullable|string|max:11',
             'national_identity_number' => 'nullable|string|max:11',
             'new_photo' => ['nullable', 'image', 'max:2048'],
+            'passport_photo' => ['nullable', 'image', 'max:2048'],
+            'identity_doc' => ['nullable', 'file', 'max:5120'],
+            'bank_stmt' => ['nullable', 'file', 'max:10240'],
+            'income_proof' => ['nullable', 'file', 'max:5120'],
+            'bank_account_details.bank_name' => 'nullable|string',
+            'bank_account_details.account_number' => 'nullable|string|max:15',
+            'bank_account_details.account_name' => 'nullable|string',
         ]);
 
         $user = $this->borrower->user;
@@ -181,7 +213,6 @@ class BorrowerProfile extends Component
         ]);
 
         $borrowerData = [
-            // phone removed as it's read-only
             'bvn' => $this->bvn,
             'national_identity_number' => $this->national_identity_number,
             'gender' => $this->gender,
@@ -192,17 +223,37 @@ class BorrowerProfile extends Component
             'is_daily_saver' => $this->is_daily_saver,
             'daily_target_amount' => $this->daily_target_amount,
             'employment_information' => $this->employment_information,
+            'bank_account_details' => $this->bank_account_details,
+            'next_of_kin_details' => $this->next_of_kin_details,
         ];
 
-        if ($this->new_photo) {
-            $path = $this->new_photo->store('borrower-photos');
-            $borrowerData['photo_url'] = $path;
+        $disk = $this->getStorageDisk();
 
-            // Allow model accessor to handle disk-aware URL generation
-            $this->borrower->update($borrowerData);
+        if ($this->new_photo) {
+            $path = $this->new_photo->store('borrower-photos', $disk);
+            $borrowerData['photo_url'] = $path;
+        }
+
+        if ($this->passport_photo) {
+            $borrowerData['passport_photograph'] = $this->passport_photo->store('passports', $disk);
+        }
+
+        if ($this->identity_doc) {
+            $borrowerData['identity_document'] = $this->identity_doc->store('identity-documents', $disk);
+        }
+
+        if ($this->bank_stmt) {
+            $borrowerData['bank_statement'] = $this->bank_stmt->store('bank-statements', $disk);
+        }
+
+        if ($this->income_proof) {
+            $borrowerData['income_proof'] = $this->income_proof->store('income-proofs', $disk);
+        }
+
+        $this->borrower->update($borrowerData);
+
+        if ($this->new_photo) {
             $this->photo_url = $this->borrower->fresh()->photo_url;
-        } else {
-            $this->borrower->update($borrowerData);
         }
 
         $this->isEditing = false;

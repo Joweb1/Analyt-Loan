@@ -102,6 +102,50 @@ class BorrowerProfileTest extends TestCase
         $this->assertNotNull($this->borrower->photo_url);
     }
 
+    public function test_it_can_edit_profile_including_bank_and_documents()
+    {
+        Storage::fake('public');
+        Storage::fake('local');
+        Storage::fake('supabase');
+
+        $photo = UploadedFile::fake()->create('new_photo.jpg', 100, 'image/jpeg');
+        $passport = UploadedFile::fake()->create('passport.jpg', 100, 'image/jpeg');
+        $id_doc = UploadedFile::fake()->create('id.pdf', 100);
+
+        Livewire::actingAs($this->admin)
+            ->test(BorrowerProfile::class, ['borrower' => $this->borrower])
+            ->call('toggleEdit')
+            ->set('name', 'Updated Name')
+            ->set('bank_account_details.bank_name', 'Updated Bank')
+            ->set('bank_account_details.account_number', '1234567890')
+            ->set('next_of_kin_details.name', 'NOK Name')
+            ->set('new_photo', $photo)
+            ->set('passport_photo', $passport)
+            ->set('identity_doc', $id_doc)
+            ->call('save')
+            ->assertHasNoErrors()
+            ->assertDispatched('custom-alert');
+
+        $this->borrower->refresh();
+        $this->assertEquals('Updated Name', $this->borrower->user->name);
+        $this->assertEquals('Updated Bank', $this->borrower->bank_account_details['bank_name']);
+        $this->assertEquals('1234567890', $this->borrower->bank_account_details['account_number']);
+        $this->assertEquals('NOK Name', $this->borrower->next_of_kin_details['name']);
+        
+        $this->assertNotNull($this->borrower->getRawOriginal('photo_url'));
+        $this->assertNotNull($this->borrower->passport_photograph);
+        $this->assertNotNull($this->borrower->identity_document);
+
+        // Determine which disk it should have used
+        $expectedDisk = (config('filesystems.disks.supabase.is_configured') && ! app()->environment('testing'))
+            ? 'supabase'
+            : (config('filesystems.default') === 'local' ? 'public' : config('filesystems.default'));
+
+        Storage::disk($expectedDisk)->assertExists($this->borrower->getRawOriginal('photo_url'));
+        Storage::disk($expectedDisk)->assertExists($this->borrower->passport_photograph);
+        Storage::disk($expectedDisk)->assertExists($this->borrower->identity_document);
+    }
+
     public function test_it_aborts_without_permission()
     {
         $staffWithoutPermission = User::factory()->create(['organization_id' => $this->organization->id]);

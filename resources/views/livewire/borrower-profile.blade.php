@@ -317,24 +317,41 @@
                     </h3>
                 </div>
                 <div class="p-8">
-                    @php $bank_details = $borrower->bank_account_details; @endphp
-                    @if(is_array($bank_details))
+                    @if($isEditing)
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div>
-                                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Bank Name</label>
-                                <p class="text-sm font-bold text-slate-900 dark:text-white">{{ $bank_details['bank_name'] ?? 'N/A' }}</p>
+                                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Bank Name</label>
+                                <input wire:model="bank_account_details.bank_name" type="text" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-sm font-black focus:ring-2 focus:ring-primary/20">
                             </div>
                             <div>
-                                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Account Number</label>
-                                <p class="text-sm font-black text-slate-900 dark:text-white font-mono tracking-widest">{{ $bank_details['account_number'] ?? 'N/A' }}</p>
+                                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Account Number</label>
+                                <input wire:model="bank_account_details.account_number" type="text" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-sm font-black focus:ring-2 focus:ring-primary/20">
                             </div>
                             <div>
-                                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Account Name</label>
-                                <p class="text-sm font-bold text-slate-900 dark:text-white uppercase">{{ $bank_details['account_name'] ?? 'N/A' }}</p>
+                                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Account Name</label>
+                                <input wire:model="bank_account_details.account_name" type="text" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-sm font-black focus:ring-2 focus:ring-primary/20">
                             </div>
                         </div>
                     @else
-                        <p class="text-sm font-medium text-slate-700 dark:text-slate-300 leading-relaxed">{{ $bank_details ?? 'NO BANK DATA RECORDED' }}</p>
+                        @php $bank_details = $borrower->bank_account_details; @endphp
+                        @if(is_array($bank_details))
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div>
+                                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Bank Name</label>
+                                    <p class="text-sm font-bold text-slate-900 dark:text-white">{{ $bank_details['bank_name'] ?? 'N/A' }}</p>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Account Number</label>
+                                    <p class="text-sm font-black text-slate-900 dark:text-white font-mono tracking-widest">{{ $bank_details['account_number'] ?? 'N/A' }}</p>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Account Name</label>
+                                    <p class="text-sm font-bold text-slate-900 dark:text-white uppercase">{{ $bank_details['account_name'] ?? 'N/A' }}</p>
+                                </div>
+                            </div>
+                        @else
+                            <p class="text-sm font-medium text-slate-700 dark:text-slate-300 leading-relaxed">{{ $bank_details ?? 'NO BANK DATA RECORDED' }}</p>
+                        @endif
                     @endif
                 </div>
             </div>
@@ -351,6 +368,15 @@
                         {{-- Passport Photograph --}}
                         <div class="flex flex-col gap-3">
                             <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Passport Photograph</span>
+                            @if($isEditing)
+                                <div class="flex flex-col gap-2">
+                                    <input type="file" wire:model="passport_photo" class="text-[10px]">
+                                    @error('passport_photo') <span class="text-[10px] font-bold text-red-500">{{ $message }}</span> @enderror
+                                    @if($passport_photo)
+                                        <p class="text-[10px] text-emerald-500 font-bold">Ready to upload</p>
+                                    @endif
+                                </div>
+                            @endif
                             @if($borrower->passport_photograph)
                                 <a href="{{ fetch_data($borrower?->passport_photograph_url ?? null) }}" target="_blank" class="group relative aspect-square rounded-xl bg-slate-100 dark:bg-slate-800 overflow-hidden border-2 border-slate-50 dark:border-slate-800 hover:border-primary transition-all">
                                     <img src="{{ fetch_data($borrower?->passport_photograph_url ?? null) }}" class="size-full object-cover group-hover:scale-110 transition-transform duration-500">
@@ -369,6 +395,15 @@
                         {{-- Identity Document --}}
                         <div class="flex flex-col gap-3">
                             <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Identity Document</span>
+                            @if($isEditing)
+                                <div class="flex flex-col gap-2">
+                                    <input type="file" wire:model="identity_doc" class="text-[10px]">
+                                    @error('identity_doc') <span class="text-[10px] font-bold text-red-500">{{ $message }}</span> @enderror
+                                    @if($identity_doc)
+                                        <p class="text-[10px] text-emerald-500 font-bold">Ready to upload</p>
+                                    @endif
+                                </div>
+                            @endif
                             @if($borrower->identity_document)
                                 <a href="{{ fetch_data($borrower?->identity_document_url ?? null) }}" target="_blank" class="group flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border-2 border-transparent hover:border-primary transition-all">
                                     <div class="size-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
@@ -392,6 +427,15 @@
                         {{-- Bank Statement --}}
                         <div class="flex flex-col gap-3">
                             <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Bank Statement</span>
+                            @if($isEditing)
+                                <div class="flex flex-col gap-2">
+                                    <input type="file" wire:model="bank_stmt" class="text-[10px]">
+                                    @error('bank_stmt') <span class="text-[10px] font-bold text-red-500">{{ $message }}</span> @enderror
+                                    @if($bank_stmt)
+                                        <p class="text-[10px] text-emerald-500 font-bold">Ready to upload</p>
+                                    @endif
+                                </div>
+                            @endif
                             @if($borrower->bank_statement)
                                 <a href="{{ fetch_data($borrower?->bank_statement_url ?? null) }}" target="_blank" class="group flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border-2 border-transparent hover:border-primary transition-all">
                                     <div class="size-12 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600">
@@ -415,6 +459,15 @@
                         {{-- Income Proof --}}
                         <div class="flex flex-col gap-3">
                             <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest px-1">Income Proof</span>
+                            @if($isEditing)
+                                <div class="flex flex-col gap-2">
+                                    <input type="file" wire:model="income_proof" class="text-[10px]">
+                                    @error('income_proof') <span class="text-[10px] font-bold text-red-500">{{ $message }}</span> @enderror
+                                    @if($income_proof)
+                                        <p class="text-[10px] text-emerald-500 font-bold">Ready to upload</p>
+                                    @endif
+                                </div>
+                            @endif
                             @if($borrower->income_proof)
                                 <a href="{{ fetch_data($borrower?->income_proof_url ?? null) }}" target="_blank" class="group flex items-center gap-4 p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border-2 border-transparent hover:border-primary transition-all">
                                     <div class="size-12 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600">
@@ -449,20 +502,31 @@
                     <div>
                         <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Employment Information</label>
                         @if($isEditing)
-                            @if(is_array($employment_information))
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <input wire:model="employment_information.employer_name" type="text" placeholder="Employer Name" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-sm font-medium focus:ring-2 focus:ring-primary/20">
-                                    <input wire:model="employment_information.job_title" type="text" placeholder="Job Title" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-sm font-medium focus:ring-2 focus:ring-primary/20">
-                                    <input wire:model="employment_information.monthly_income" type="number" placeholder="Monthly Income" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-sm font-medium focus:ring-2 focus:ring-primary/20">
-                                    <input wire:model="employment_information.employment_status" type="text" placeholder="Status" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-sm font-medium focus:ring-2 focus:ring-primary/20">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Employer Name</label>
+                                    <input wire:model="employment_information.employer_name" type="text" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-sm font-medium focus:ring-2 focus:ring-primary/20">
                                 </div>
-                            @else
-                                <textarea wire:model="employment_information" rows="3" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-sm font-medium focus:ring-2 focus:ring-primary/20" placeholder="E.g. Senior Software Engineer at Google..."></textarea>
-                            @endif
-                            <p class="text-[9px] text-slate-400 font-bold uppercase tracking-widest mt-1">Employer, Role, and income</p>
+                                <div>
+                                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Job Title</label>
+                                    <input wire:model="employment_information.job_title" type="text" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-sm font-medium focus:ring-2 focus:ring-primary/20">
+                                </div>
+                                <div>
+                                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Monthly Income (₦)</label>
+                                    <input wire:model="employment_information.monthly_income" type="number" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-sm font-medium focus:ring-2 focus:ring-primary/20">
+                                </div>
+                                <div>
+                                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Employment Status</label>
+                                    <input wire:model="employment_information.employment_status" type="text" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-sm font-medium focus:ring-2 focus:ring-primary/20">
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label class="block text-[9px] font-bold text-slate-400 uppercase mb-1">Employer Address</label>
+                                    <input wire:model="employment_information.employer_address" type="text" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-sm font-medium focus:ring-2 focus:ring-primary/20">
+                                </div>
+                            </div>
                             @error('employment_information') <span class="text-[10px] font-bold text-red-500 mt-1 block">{{ $message }}</span> @enderror
                         @else
-                            @if(is_array($employment_information))
+                            @if(is_array($employment_information) && !empty($employment_information['employer_name']))
                                 <div class="space-y-2">
                                     <p class="text-sm font-bold text-slate-900 dark:text-white">{{ $employment_information['job_title'] ?? 'N/A' }} at {{ $employment_information['employer_name'] ?? 'N/A' }}</p>
                                     <p class="text-xs text-slate-500 uppercase font-black tracking-tighter">Income: ₦{{ number_format($employment_information['monthly_income'] ?? 0, 2) }} ({{ $employment_information['employment_status'] ?? 'N/A' }})</p>
@@ -471,10 +535,56 @@
                                     @endif
                                 </div>
                             @else
-                                <p class="text-sm font-medium text-slate-700 dark:text-slate-300 leading-relaxed">{{ $employment_information ?? 'NO EMPLOYMENT DATA RECORDED' }}</p>
+                                <p class="text-sm font-medium text-slate-700 dark:text-slate-300 leading-relaxed">{{ is_array($employment_information) ? 'NO EMPLOYMENT DATA RECORDED' : $employment_information }}</p>
                             @endif
                         @endif
                     </div>
+                </div>
+            </div>
+            <div class="bg-surface rounded-2xl border border-border-main shadow-sm overflow-hidden">
+                <div class="px-6 py-5 border-b border-border-main">
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">family_restroom</span>
+                        Next of Kin Information
+                    </h3>
+                </div>
+                <div class="p-8">
+                    @if($isEditing)
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div>
+                                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Full Name</label>
+                                <input wire:model="next_of_kin_details.name" type="text" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-sm font-black focus:ring-2 focus:ring-primary/20">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Relationship</label>
+                                <input wire:model="next_of_kin_details.relationship" type="text" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-sm font-black focus:ring-2 focus:ring-primary/20">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Phone Number</label>
+                                <input wire:model="next_of_kin_details.phone" type="text" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-sm font-black focus:ring-2 focus:ring-primary/20">
+                            </div>
+                        </div>
+                    @else
+                        @php $nok = $borrower->next_of_kin_details; @endphp
+                        @if(is_array($nok) && !empty($nok['name']))
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div>
+                                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Full Name</label>
+                                    <p class="text-sm font-bold text-slate-900 dark:text-white">{{ $nok['name'] }}</p>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Relationship</label>
+                                    <p class="text-sm font-black text-slate-900 dark:text-white">{{ $nok['relationship'] }}</p>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Phone Number</label>
+                                    <p class="text-sm font-bold text-slate-900 dark:text-white">{{ $nok['phone'] }}</p>
+                                </div>
+                            </div>
+                        @else
+                            <p class="text-sm font-medium text-slate-700 dark:text-slate-300 leading-relaxed">NO NEXT OF KIN DATA RECORDED</p>
+                        @endif
+                    @endif
                 </div>
             </div>
         </div>

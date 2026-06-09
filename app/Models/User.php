@@ -97,7 +97,7 @@ class User extends Authenticatable
         static::saving(function ($user) {
             if (empty($user->email)) {
                 $phone = $user->phone ? preg_replace('/[^0-9]/', '', $user->phone) : Str::random(10);
-                $user->email = $phone.'@gmail.com';
+                $user->email = $phone.'@analytloan.com';
             }
         });
     }

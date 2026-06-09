@@ -30,7 +30,7 @@ class OmnibarSearch extends Component
         ['title' => 'Loan Approval', 'keywords' => 'loan, approval, review, pending', 'route' => 'loan.approval', 'permission' => 'approve_loans', 'icon' => 'fact_check'],
         ['title' => 'Manage Customers', 'keywords' => 'customers, borrowers, savers, guarantors, directory', 'route' => 'customer', 'permission' => 'manage_borrowers', 'icon' => 'group'],
         ['title' => 'Forms Hub', 'keywords' => 'forms, builder, custom, fields, borrower, saver, guarantor', 'route' => 'settings.form-builder', 'permission' => 'manage_settings', 'icon' => 'dynamic_form'],
-        ['title' => 'Team Management', 'keywords' => 'staff, users, management, permissions', 'route' => 'settings.team', 'permission' => 'manage_settings', 'icon' => 'group'],
+        ['title' => 'Team Management', 'keywords' => 'staff, users, management, permissions', 'route' => 'settings.team-members', 'permission' => 'manage_settings', 'icon' => 'group'],
         ['title' => 'General Settings', 'keywords' => 'organization, settings, logo, config', 'route' => 'settings', 'permission' => 'manage_settings', 'icon' => 'settings'],
         ['title' => 'Notification Settings', 'keywords' => 'notifications, alert, push, email', 'route' => 'settings.notifications', 'permission' => 'manage_settings', 'icon' => 'notifications'],
         ['title' => 'Security Settings', 'keywords' => 'password, security, two factor, account', 'route' => 'settings.security', 'permission' => 'manage_settings', 'icon' => 'security'],

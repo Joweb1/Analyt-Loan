@@ -83,7 +83,7 @@ class BorrowerProfileTest extends TestCase
     public function test_it_can_edit_profile()
     {
         Storage::fake('public');
-        $photo = UploadedFile::fake()->create('photo.jpg', 100);
+        $photo = UploadedFile::fake()->create('photo.jpg', 100, 'image/jpeg');
 
         Livewire::actingAs($this->admin)
             ->test(BorrowerProfile::class, ['borrower' => $this->borrower])
@@ -153,5 +153,40 @@ class BorrowerProfileTest extends TestCase
         Livewire::actingAs($staffWithoutPermission)
             ->test(BorrowerProfile::class, ['borrower' => $this->borrower])
             ->assertForbidden();
+    }
+
+    public function test_admin_can_delete_customer()
+    {
+        $borrowerUserId = $this->borrower->user_id;
+        $borrowerId = $this->borrower->id;
+
+        Livewire::actingAs($this->admin)
+            ->test(BorrowerProfile::class, ['borrower' => $this->borrower])
+            ->set('confirmingDeletion', true)
+            ->call('deleteCustomer')
+            ->assertRedirect(route('customer'));
+
+        $this->assertDatabaseMissing('users', ['id' => $borrowerUserId]);
+        $this->assertDatabaseMissing('borrowers', ['id' => $borrowerId]);
+    }
+
+    public function test_non_admin_cannot_delete_customer()
+    {
+        $staff = User::factory()->create([
+            'organization_id' => $this->organization->id,
+            'type' => 'staff',
+        ]);
+        $staff->givePermissionTo('manage_borrowers'); // Allow them to view but not necessarily delete if logic restricts to admin
+
+        $borrowerUserId = $this->borrower->user_id;
+
+        Livewire::actingAs($staff)
+            ->test(BorrowerProfile::class, ['borrower' => $this->borrower])
+            ->call('deleteCustomer')
+            ->assertDispatched('custom-alert', function ($name, $params) {
+                return $params[0]['type'] === 'error' && str_contains($params[0]['message'], 'Only administrators');
+            });
+
+        $this->assertDatabaseHas('users', ['id' => $borrowerUserId]);
     }
 }

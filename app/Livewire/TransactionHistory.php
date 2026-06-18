@@ -99,6 +99,9 @@ class TransactionHistory extends Component
             'penalty' => 'Penalty/Fee',
             'charge' => 'System Charge',
             'bonus' => 'System Bonus',
+            'adjustment' => 'Adjustment',
+            'balance_update' => 'Account Balance',
+            'budget_update' => 'Budget Update',
         ];
     }
 }

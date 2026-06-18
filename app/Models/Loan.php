@@ -126,10 +126,12 @@ class Loan extends Model
         'amount',
         'loan_number',
         'loan_product',
+        'collection_group',
         'release_date',
         'interest_rate',
         'interest_calculation_type',
         'interest_type',
+        'interest_cycle',
         'duration',
         'duration_unit',
         'repayment_cycle',
@@ -258,22 +260,61 @@ class Loan extends Model
     }
 
     /**
-     * Get the total expected interest for the loan (Flat model).
-     * Now independent of duration.
+     * Get the total expected interest for the loan (Cycle-based model).
      */
     public function getTotalExpectedInterest(): Money
     {
         $principal = $this->amount;
         $currency = $principal->getCurrency();
 
+        // Calculate the ratio between total duration and interest cycle
+        $durationDays = $this->getDurationInDays();
+        $cycleDays = $this->getCycleInDays($this->interest_cycle ?? 'month');
+
+        $ratio = $cycleDays > 0 ? ($durationDays / $cycleDays) : 1;
+
         if ($this->interest_calculation_type === 'fixed') {
-            return new Money((int) bcmul((string) ($this->interest_rate ?? 0), '100', 0), $currency);
+            $amountPerCycle = new Money((int) bcmul((string) ($this->interest_rate ?? 0), '100', 0), $currency);
+
+            return $amountPerCycle->multiply((string) $ratio);
         }
 
-        // Percentage logic: Principal * (Rate / 100)
-        $rate = (string) (($this->interest_rate ?? 0) / 100);
+        // Percentage logic: Principal * (Rate / 100) * Ratio
+        $ratePerCycle = ($this->interest_rate ?? 0) / 100;
+        $totalRate = (string) ($ratePerCycle * $ratio);
 
-        return $principal->multiply($rate);
+        return $principal->multiply($totalRate);
+    }
+
+    /**
+     * Helper to get duration in days.
+     */
+    protected function getDurationInDays(): int
+    {
+        $duration = $this->duration ?? 1;
+
+        return match ($this->duration_unit) {
+            'year' => $duration * 240,
+            'month' => $duration * 20,
+            'week' => $duration * 5,
+            'day' => $duration,
+            default => $duration * 20,
+        };
+    }
+
+    /**
+     * Helper to get cycle length in days.
+     */
+    protected function getCycleInDays(string $cycle): int
+    {
+        return match ($cycle) {
+            'year' => 240,
+            'month' => 20,
+            'biweekly' => 10,
+            'weekly', 'week' => 5,
+            'daily', 'day' => 1,
+            default => 20,
+        };
     }
 
     /**

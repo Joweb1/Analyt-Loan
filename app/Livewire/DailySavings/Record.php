@@ -155,7 +155,7 @@ class Record extends Component
 
             if ($existing) {
                 $this->gridData[$userId][$date] = $existing->amount->getMajorAmount();
-                $this->paymentMethods[$userId][$date] = $existing->payment_method ?? 'cash';
+                $this->paymentMethods[$userId][$date] = $existing->payment_method ?? 'bank_transfer';
             }
         }
     }
@@ -163,7 +163,7 @@ class Record extends Component
     public function recordSavings($userId, $date)
     {
         $amountMajor = $this->gridData[$userId][$date] ?? null;
-        $paymentMethod = $this->paymentMethods[$userId][$date] ?? 'cash';
+        $paymentMethod = $this->paymentMethods[$userId][$date] ?? 'bank_transfer';
 
         $isAdmin = auth()->user()->isAdmin() || auth()->user()->isAppOwner();
         $isToday = $date === $this->today;

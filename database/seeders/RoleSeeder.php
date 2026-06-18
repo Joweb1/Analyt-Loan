@@ -57,6 +57,7 @@ class RoleSeeder extends Seeder
             'access_minimal_staff_routes',
             'record_cashbook',
             'view_live_balance',
+            'view_records_hub_stats',
         ];
 
         foreach ($permissions as $p) {

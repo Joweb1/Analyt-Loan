@@ -136,7 +136,6 @@
                                     <option value="Wednesday Group">Wednesday Group</option>
                                     <option value="Thursday Group">Thursday Group</option>
                                     <option value="Friday Group">Friday Group</option>
-                                    <option value="Saturday Group">Saturday Group</option>
                                 </select>
                                 <p class="text-[10px] text-zinc-400 font-bold uppercase px-1 mt-1">Assigning a group enables easier tracking in the Collection Ledger.</p>
                             </div>

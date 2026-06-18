@@ -76,8 +76,10 @@
                     <tbody class="divide-y divide-slate-50 dark:divide-slate-800/50">
                         @forelse($transactions as $trx)
                             @php
-                                $isInflow = in_array($trx->type, ['deposit', 'daily_thrift', 'repayment', 'registration_fee', 'interest', 'penalty', 'charge']);
-                                $isNegative = in_array($trx->type, ['withdrawal', 'loan_disbursement', 'bonus']);
+                                $typeDirection = in_array($trx->type, ['deposit', 'daily_thrift', 'repayment', 'registration_fee', 'interest', 'penalty', 'charge', 'balance_update', 'budget_update']) ? 1 : -1;
+                                $effectiveSign = $trx->amount->getMinorAmount() * $typeDirection;
+                                $isPositive = $effectiveSign > 0;
+                                $isNegative = $effectiveSign < 0;
                             @endphp
                             <tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
                                 <td class="px-6 py-4">
@@ -86,11 +88,17 @@
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="flex flex-col">
-                                        <span class="text-[10px] font-black uppercase tracking-tight {{ $isInflow ? 'text-emerald-600' : 'text-rose-600' }}">
+                                        <span class="text-[10px] font-black uppercase tracking-tight {{ $isPositive ? 'text-emerald-600' : ($isNegative ? 'text-rose-600' : 'text-slate-500') }}">
                                             {{ fetch_data(str_replace('_', ' ', $trx?->type) ?? null) }}
                                         </span>
                                         @if($trx->notes)
                                             <span class="text-[9px] text-slate-400 italic mt-0.5">{{ fetch_data($trx?->notes ?? null) }}</span>
+                                        @endif
+                                        @if($trx->parent_id)
+                                            <div class="flex items-center gap-1 mt-1 opacity-60">
+                                                <span class="material-symbols-outlined text-[10px]">link</span>
+                                                <span class="text-[9px] font-mono uppercase tracking-tighter">REF: {{ fetch_data($trx?->parent?->reference ?? 'ORIGINAL' ?? null) }}</span>
+                                            </div>
                                         @endif
                                     </div>
                                 </td>
@@ -115,8 +123,8 @@
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 text-right">
-                                    <span class="text-sm font-black {{ $isInflow ? 'text-emerald-600' : 'text-rose-600' }}">
-                                        {{ $isNegative ? '-' : '+' }}₦{{ fetch_data($trx?->amount?->format() ?? null) }}
+                                    <span class="text-sm font-black {{ $isPositive ? 'text-emerald-600' : ($isNegative ? 'text-rose-600' : 'text-slate-900 dark:text-white') }}">
+                                        {{ $isPositive ? '+' : ($isNegative ? '-' : '') }}₦{{ fetch_data($trx?->amount?->absolute()->format() ?? null) }}
                                     </span>
                                 </td>
                             </tr>

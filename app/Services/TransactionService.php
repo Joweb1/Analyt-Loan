@@ -20,10 +20,11 @@ class TransactionService
         Money $amount,
         ?User $user = null,
         ?Model $related = null,
-        ?string $paymentMethod = 'cash',
+        ?string $paymentMethod = 'bank_transfer',
         ?string $notes = null,
         ?string $date = null,
-        ?string $reference = null
+        ?string $reference = null,
+        ?string $parentId = null
     ): Transaction {
         $org = Organization::current();
 
@@ -57,10 +58,15 @@ class TransactionService
                 'loan_disbursement' => 'DIS',
                 'repayment' => 'REP',
                 'daily_thrift' => 'THR',
+                'processing_fee' => 'PRF',
+                'insurance_fee' => 'INS',
                 'penalty' => 'PEN',
                 'interest' => 'INT',
                 'charge' => 'CHG',
                 'bonus' => 'BON',
+                'adjustment' => 'ADJ',
+                'balance_update' => 'BAL',
+                'budget_update' => 'BGT',
                 default => 'TRX'
             };
             $reference = $prefix.'-'.strtoupper(Str::random(8));
@@ -68,6 +74,7 @@ class TransactionService
 
         return Transaction::create([
             'organization_id' => $orgId,
+            'parent_id' => $parentId,
             'user_id' => $user?->id,
             'performer_id' => Auth::id(),
             'type' => $type,

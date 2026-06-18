@@ -403,16 +403,6 @@ class CustomerRegistrationForm extends Component
                     ]
                 );
 
-                // Record Registration Fee (₦1,000)
-                TransactionService::record(
-                    type: 'registration_fee',
-                    amount: new Money(100000, $org->currency_code ?? 'NGN'),
-                    user: $user,
-                    related: $saver,
-                    paymentMethod: 'cash',
-                    notes: 'Saver Registration Fee'
-                );
-
                 $this->dispatch('custom-alert', ['type' => 'success', 'message' => 'Saver registered successfully.']);
                 $this->reset(['name', 'email', 'phone', 'password', 'password_confirmation']);
 
@@ -428,15 +418,6 @@ class CustomerRegistrationForm extends Component
                         'name' => $this->name,
                         'phone' => $this->phone,
                     ]
-                );
-
-                TransactionService::record(
-                    type: 'registration_fee',
-                    amount: new Money(100000, $org->currency_code ?? 'NGN'),
-                    user: $user,
-                    related: $guarantor,
-                    paymentMethod: 'cash',
-                    notes: 'Guarantor Registration Fee'
                 );
 
                 $this->dispatch('custom-alert', ['type' => 'success', 'message' => 'Guarantor registered successfully.']);

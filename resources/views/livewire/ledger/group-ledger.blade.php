@@ -61,6 +61,14 @@
                     </div>
 
                     <div class="flex items-center gap-4">
+                        {{-- Overdue Warning --}}
+                        @if($member['status'] === 'Overdue')
+                            <div class="flex items-center gap-1 animate-pulse px-2 py-0.5 bg-rose-600 text-white rounded-sm text-[8px] font-black uppercase tracking-widest">
+                                <span class="material-symbols-outlined text-[10px]">warning</span>
+                                Overdue
+                            </div>
+                        @endif
+
                         {{-- Status Pill --}}
                         @php
                             $statusColors = [
@@ -103,6 +111,35 @@
                                     </div>
                                 </div>
 
+                                {{-- Period Repayments Aggregation --}}
+                                @if($member['paid_this_period'])
+                                    <div class="p-4 bg-emerald-50 rounded-sm border border-emerald-100 space-y-3">
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-[9px] font-black text-emerald-800 uppercase tracking-widest">Period Repayments</span>
+                                            <span class="material-symbols-outlined text-xs text-emerald-400">receipt_long</span>
+                                        </div>
+                                        <div class="space-y-2">
+                                            @foreach($member['period_repayments'] as $rep)
+                                                <div class="flex items-center justify-between group/rep">
+                                                    <div class="flex flex-col">
+                                                        <span class="text-xs font-black text-emerald-900">₦{{ number_format($rep->amount->getMajorAmount()) }}</span>
+                                                        <span class="text-[8px] font-bold text-emerald-600 uppercase">{{ $rep->paid_at->format('d M, h:i A') }} • {{ strtoupper($rep->payment_method) }}</span>
+                                                    </div>
+                                                    @if(auth()->user()->hasRole('Admin') || auth()->user()->type === 'owner')
+                                                        <button wire:click="editPayment('{{ $member['id'] }}', '{{ $rep->id }}')" class="opacity-0 group-hover/rep:opacity-100 transition-opacity text-[8px] font-black text-indigo-600 uppercase hover:underline">
+                                                            Edit
+                                                        </button>
+                                                    @endif
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                        <div class="pt-2 border-t border-emerald-100 flex items-center justify-between">
+                                            <span class="text-[8px] font-black text-emerald-800 uppercase tracking-widest">Total Period Paid</span>
+                                            <span class="text-xs font-black text-emerald-900">₦{{ number_format($member['period_repayments']->sum(fn($r) => $r->amount->getMajorAmount())) }}</span>
+                                        </div>
+                                    </div>
+                                @endif
+
                                 {{-- Savings Context --}}
                                 <div class="p-4 bg-blue-50/50 rounded-sm border border-blue-100">
                                     <div class="flex items-center justify-between mb-1">
@@ -115,82 +152,97 @@
 
                             {{-- Right: Quick Collection Entry --}}
                             <div class="lg:col-span-7 border-t lg:border-t-0 lg:border-l border-slate-100 pt-10 lg:pt-0 lg:pl-10">
-                                @if($member['status'] !== 'Paid' || ($editing[$member['id']] ?? false))
-                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
-                                        <div>
-                                            <div class="flex items-center justify-between mb-2">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
+                                    {{-- Loan Repayment Field (Locked if paid and NOT editing) --}}
+                                    <div>
+                                        <div class="flex items-center justify-between mb-2">
+                                            <div class="flex items-center gap-1.5">
                                                 <label class="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Loan Repayment</label>
-                                                <button wire:click="toggleMethod('{{ $member['id'] }}', 'repayment')" class="flex items-center gap-1 group">
-                                                    @if($paymentData[$member['id']]['repayment_method'] === 'cash')
-                                                        <span class="material-symbols-outlined text-xs text-emerald-500">payments</span>
-                                                        <span class="text-[8px] font-black text-slate-400 uppercase tracking-widest group-hover:text-indigo-600 transition-colors">Cash</span>
-                                                    @else
-                                                        <span class="material-symbols-outlined text-xs text-blue-500">account_balance</span>
-                                                        <span class="text-[8px] font-black text-slate-400 uppercase tracking-widest group-hover:text-indigo-600 transition-colors">Transfer</span>
-                                                    @endif
-                                                </button>
+                                                @if($member['paid_this_period'] && !($editing[$member['id']] ?? false))
+                                                    <span class="material-symbols-outlined text-[10px] text-emerald-500">lock</span>
+                                                @elseif(($editing[$member['id']] ?? null) && $editing[$member['id']] !== 'new')
+                                                    <span class="material-symbols-outlined text-[10px] text-indigo-500">edit</span>
+                                                @endif
                                             </div>
-                                            <div class="relative">
-                                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                    <span class="text-xs font-black text-slate-300 italic">₦</span>
-                                                </div>
-                                                <input type="number" wire:model.blur="paymentData.{{ $member['id'] }}.repayment" 
-                                                    class="block w-full pl-8 pr-4 py-3 bg-white border border-slate-200 rounded-sm text-sm font-black text-slate-900 focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-500 transition-all">
-                                            </div>
+                                            <button wire:click="toggleMethod('{{ $member['id'] }}', 'repayment')" 
+                                                @disabled($member['paid_this_period'] && !($editing[$member['id']] ?? false))
+                                                class="flex items-center gap-1 group disabled:opacity-50">
+                                                @if(($paymentData[$member['id']]['repayment_method'] ?? 'bank_transfer') === 'cash')
+                                                    <span class="material-symbols-outlined text-xs text-emerald-500">payments</span>
+                                                    <span class="text-[8px] font-black text-slate-400 uppercase tracking-widest group-hover:text-indigo-600 transition-colors">Cash</span>
+                                                @else
+                                                    <span class="material-symbols-outlined text-xs text-blue-500">account_balance</span>
+                                                    <span class="text-[8px] font-black text-slate-400 uppercase tracking-widest group-hover:text-indigo-600 transition-colors">Transfer</span>
+                                                @endif
+                                            </button>
                                         </div>
-                                        <div>
-                                            <div class="flex items-center justify-between mb-2">
-                                                <label class="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Savings Deposit</label>
-                                                <button wire:click="toggleMethod('{{ $member['id'] }}', 'savings')" class="flex items-center gap-1 group">
-                                                    @if($paymentData[$member['id']]['savings_method'] === 'cash')
-                                                        <span class="material-symbols-outlined text-xs text-emerald-500">payments</span>
-                                                        <span class="text-[8px] font-black text-slate-400 uppercase tracking-widest group-hover:text-indigo-600 transition-colors">Cash</span>
-                                                    @else
-                                                        <span class="material-symbols-outlined text-xs text-blue-500">account_balance</span>
-                                                        <span class="text-[8px] font-black text-slate-400 uppercase tracking-widest group-hover:text-indigo-600 transition-colors">Transfer</span>
-                                                    @endif
-                                                </button>
+                                        <div class="relative">
+                                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <span class="text-xs font-black text-slate-300 italic">₦</span>
                                             </div>
-                                            <div class="relative">
-                                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                                    <span class="text-xs font-black text-slate-300 italic">₦</span>
-                                                </div>
-                                                <input type="number" wire:model.blur="paymentData.{{ $member['id'] }}.savings" 
-                                                    class="block w-full pl-8 pr-4 py-3 bg-white border border-slate-200 rounded-sm text-sm font-black text-slate-900 focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 transition-all">
-                                            </div>
+                                            <input type="number" wire:model.blur="paymentData.{{ $member['id'] }}.repayment" 
+                                                @disabled($member['paid_this_period'] && !($editing[$member['id']] ?? false))
+                                                class="block w-full pl-8 pr-4 py-3 bg-white border border-slate-200 rounded-sm text-sm font-black text-slate-900 focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-500 transition-all disabled:bg-slate-50 disabled:text-slate-400 disabled:cursor-not-allowed"
+                                                placeholder="{{ $member['paid_this_period'] && !($editing[$member['id']] ?? false) ? 'PAID' : '0.00' }}">
                                         </div>
                                     </div>
 
-                                    <div class="mb-6">
-                                        <label class="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Collection Notes</label>
-                                        <input type="text" wire:model.blur="paymentData.{{ $member['id'] }}.notes" placeholder="Optional notes for this entry..." 
-                                            class="block w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-sm text-xs font-medium italic focus:bg-white transition-all">
+                                    {{-- Savings Deposit Field (Always Open) --}}
+                                    <div>
+                                        <div class="flex items-center justify-between mb-2">
+                                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Savings Deposit</label>
+                                            <button wire:click="toggleMethod('{{ $member['id'] }}', 'savings')" class="flex items-center gap-1 group">
+                                                @if($paymentData[$member['id']]['savings_method'] === 'cash')
+                                                    <span class="material-symbols-outlined text-xs text-emerald-500">payments</span>
+                                                    <span class="text-[8px] font-black text-slate-400 uppercase tracking-widest group-hover:text-indigo-600 transition-colors">Cash</span>
+                                                @else
+                                                    <span class="material-symbols-outlined text-xs text-blue-500">account_balance</span>
+                                                    <span class="text-[8px] font-black text-slate-400 uppercase tracking-widest group-hover:text-indigo-600 transition-colors">Transfer</span>
+                                                @endif
+                                            </button>
+                                        </div>
+                                        <div class="relative">
+                                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <span class="text-xs font-black text-slate-300 italic">₦</span>
+                                            </div>
+                                            <input type="number" wire:model.blur="paymentData.{{ $member['id'] }}.savings" 
+                                                class="block w-full pl-8 pr-4 py-3 bg-white border border-slate-200 rounded-sm text-sm font-black text-slate-900 focus:ring-4 focus:ring-blue-500/5 focus:border-blue-500 transition-all">
+                                        </div>
                                     </div>
+                                </div>
 
-                                    <div class="flex items-center gap-4">
-                                        <button wire:click="recordPayment('{{ $member['id'] }}')" 
-                                            class="flex-1 px-6 py-4 bg-slate-900 text-white rounded-sm text-[11px] font-black uppercase tracking-[0.3em] hover:bg-indigo-600 shadow-lg shadow-slate-200 transition-all active:scale-[0.98]">
-                                            {{ ($editing[$member['id']] ?? false) ? 'Update Entries' : 'Commit Entries' }}
-                                        </button>
-                                        @if($editing[$member['id']] ?? false)
-                                            <button wire:click="$set('editing.{{ $member['id'] }}', false)" 
-                                                class="px-6 py-4 bg-slate-100 text-slate-500 rounded-sm text-[11px] font-black uppercase tracking-[0.3em] hover:bg-slate-200 transition-all">
-                                                Cancel
+                                <div class="mb-6">
+                                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-2">Collection Notes</label>
+                                    <input type="text" wire:model.blur="paymentData.{{ $member['id'] }}.notes" placeholder="Optional notes for this entry..." 
+                                        class="block w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-sm text-xs font-medium italic focus:bg-white transition-all">
+                                </div>
+
+                                <div class="flex items-center gap-4">
+                                    <button wire:click="recordPayment('{{ $member['id'] }}')" 
+                                        class="flex-1 px-6 py-4 bg-slate-900 text-white rounded-sm text-[11px] font-black uppercase tracking-[0.3em] hover:bg-indigo-600 shadow-lg shadow-slate-200 transition-all active:scale-[0.98]">
+                                        {{ (($editing[$member['id']] ?? null) && $editing[$member['id']] !== 'new') ? 'Update Entry' : 'Commit Entry' }}
+                                    </button>
+                                    
+                                    @if($member['paid_this_period'] && !($editing[$member['id']] ?? false))
+                                        @if(auth()->user()->hasRole('Admin') || auth()->user()->type === 'owner')
+                                            <button wire:click="editPayment('{{ $member['id'] }}', 'new')" class="px-6 py-4 bg-white border border-slate-200 text-indigo-600 rounded-sm text-[11px] font-black uppercase tracking-widest hover:bg-slate-50 transition-all">
+                                                Add Another
                                             </button>
                                         @endif
-                                    </div>
-                                @else
-                                    <div class="h-full flex flex-col items-center justify-center text-center p-6 bg-emerald-50/30 rounded-sm border border-emerald-100 border-dashed">
-                                        <div class="w-12 h-12 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600 mb-4 shadow-sm">
-                                            <span class="material-symbols-outlined text-2xl">verified</span>
-                                        </div>
-                                        <h4 class="text-sm font-black text-emerald-900 uppercase tracking-tight">Ledger Entry Complete</h4>
-                                        <p class="mt-1 text-xs text-emerald-600 font-medium italic">Payments for today have been verified and applied.</p>
-                                        
-                                        <button wire:click="editPayment('{{ $member['id'] }}')" class="mt-4 flex items-center gap-1 text-[10px] font-black text-indigo-600 uppercase tracking-widest hover:text-indigo-800 transition-colors">
-                                            <span class="material-symbols-outlined text-sm">edit</span>
-                                            Edit Entry
+                                    @endif
+
+                                    @if($editing[$member['id']] ?? false)
+                                        <button wire:click="$set('editing.{{ $member['id'] }}', false)" 
+                                            class="px-6 py-4 bg-slate-100 text-slate-500 rounded-sm text-[11px] font-black uppercase tracking-[0.3em] hover:bg-slate-200 transition-all">
+                                            Cancel
                                         </button>
+                                    @endif
+                                </div>
+
+                                @if($member['paid_this_period'] && !($editing[$member['id']] ?? false))
+                                    <div class="mt-4 flex items-center gap-2 px-3 py-2 bg-emerald-50 rounded text-[10px] font-bold text-emerald-700 uppercase tracking-wider">
+                                        <span class="material-symbols-outlined text-sm">verified</span>
+                                        {{ $member['period_repayments']->count() }} Period {{ Str::plural('Repayment', $member['period_repayments']->count()) }} Logged
                                     </div>
                                 @endif
                             </div>

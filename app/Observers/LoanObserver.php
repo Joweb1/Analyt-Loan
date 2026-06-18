@@ -78,7 +78,7 @@ class LoanObserver
                 default => null,
             };
 
-            if ($status === 'active') {
+            if ($status === 'active' && ! $loan->getOriginal('status') === 'active') {
                 // Record Disbursement Transaction
                 TransactionService::record(
                     type: 'loan_disbursement',
@@ -87,6 +87,33 @@ class LoanObserver
                     related: $loan,
                     notes: "Disbursement for Loan #{$loan->loan_number}"
                 );
+            }
+
+            // Handle amount change adjustment for already active loans
+            if ($loan->status === 'active' && $loan->wasChanged('amount')) {
+                $oldAmountMinor = (int) $loan->getRawOriginal('amount');
+                $newAmountMinor = $loan->amount->getMinorAmount();
+                $differenceMinor = $newAmountMinor - $oldAmountMinor;
+
+                // Find the original disbursement transaction
+                $originalTransaction = \App\Models\Transaction::where('related_id', $loan->id)
+                    ->where('related_type', get_class($loan))
+                    ->where('type', 'loan_disbursement')
+                    ->whereNull('parent_id')
+                    ->first();
+
+                if ($originalTransaction) {
+                    $difference = new Money($differenceMinor, $loan->amount->getCurrency());
+                    
+                    TransactionService::record(
+                        type: 'adjustment',
+                        amount: $difference,
+                        user: $loan->borrower->user,
+                        related: $loan,
+                        notes: "Adjustment for Loan amount update. Original: ₦" . (new Money($oldAmountMinor, $loan->amount->getCurrency()))->format() . ", New: ₦" . $loan->amount->format(),
+                        parentId: $originalTransaction->id
+                    );
+                }
             }
 
             // 1. Notify the Borrower

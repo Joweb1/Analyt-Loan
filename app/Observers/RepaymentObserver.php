@@ -19,6 +19,8 @@ class RepaymentObserver
      */
     public function created(Repayment $repayment): void
     {
+        (new \App\Observers\CashbookUnlockObserver())->handle($repayment->paid_at->toDateString(), $repayment->organization_id);
+
         $loan = $repayment->loan;
         if (! $loan) {
             return;
@@ -76,6 +78,34 @@ class RepaymentObserver
      */
     public function updated(Repayment $repayment): void
     {
+        (new \App\Observers\CashbookUnlockObserver())->handle($repayment->paid_at->toDateString(), $repayment->organization_id);
+
+        if ($repayment->wasChanged('amount')) {
+            $oldAmountMinor = (int) $repayment->getRawOriginal('amount');
+            $newAmountMinor = $repayment->amount->getMinorAmount();
+            $differenceMinor = $newAmountMinor - $oldAmountMinor;
+
+            // Find the original transaction
+            $originalTransaction = \App\Models\Transaction::where('related_id', $repayment->id)
+                ->where('related_type', get_class($repayment))
+                ->where('type', 'repayment')
+                ->whereNull('parent_id')
+                ->first();
+
+            if ($originalTransaction) {
+                $difference = new Money($differenceMinor, $repayment->amount->getCurrency());
+                
+                \App\Services\TransactionService::record(
+                    type: 'adjustment',
+                    amount: $difference,
+                    user: $repayment->loan->borrower->user,
+                    related: $repayment,
+                    notes: "Adjustment for Repayment update. Original: ₦" . (new Money($oldAmountMinor, $repayment->amount->getCurrency()))->format() . ", New: ₦" . $repayment->amount->format(),
+                    parentId: $originalTransaction->id
+                );
+            }
+        }
+
         LoanRepaymentReceived::dispatch($repayment->loan, $repayment);
         DashboardUpdated::dispatch($repayment->loan->organization_id);
         LoanDashboard::clearCache($repayment->loan->organization_id);
@@ -88,6 +118,8 @@ class RepaymentObserver
      */
     public function deleted(Repayment $repayment): void
     {
+        (new \App\Observers\CashbookUnlockObserver())->handle($repayment->paid_at->toDateString(), $repayment->organization_id);
+
         LoanRepaymentReceived::dispatch($repayment->loan, null);
         DashboardUpdated::dispatch($repayment->loan->organization_id);
         LoanDashboard::clearCache($repayment->loan->organization_id);

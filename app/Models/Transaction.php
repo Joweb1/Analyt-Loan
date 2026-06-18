@@ -16,6 +16,7 @@ class Transaction extends Model
 
     protected $fillable = [
         'organization_id',
+        'parent_id',
         'user_id',
         'performer_id',
         'type',
@@ -35,6 +36,16 @@ class Transaction extends Model
             'amount' => MoneyCast::class,
             'transaction_date' => 'date:Y-m-d',
         ];
+    }
+
+    public function parent(): BelongsTo
+    {
+        return $this->belongsTo(Transaction::class, 'parent_id');
+    }
+
+    public function children(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(Transaction::class, 'parent_id');
     }
 
     public function user(): BelongsTo

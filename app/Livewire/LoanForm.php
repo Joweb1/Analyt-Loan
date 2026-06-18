@@ -58,6 +58,10 @@ class LoanForm extends Component
 
     public $num_repayments = 1;
 
+    public $interest_cycle = 'month';
+
+    public $termsLocked = false;
+
     // Fees & extras
     public $processing_fee;
 
@@ -74,6 +78,8 @@ class LoanForm extends Component
     public $attachments; // File upload
 
     public $loan_officer_id;
+
+    public $collection_group;
 
     public $guarantor_id;
 
@@ -119,6 +125,7 @@ class LoanForm extends Component
             'interest_rate' => 'required|numeric|min:0',
             'interest_calculation_type' => 'required|in:fixed,percentage',
             'interest_type' => 'required|in:year,month,week,day',
+            'interest_cycle' => 'required|in:year,month,biweekly,week,day',
             'duration' => 'required|integer|min:1',
             'duration_unit' => 'required|in:year,month,week,day',
             'repayment_cycle' => 'required|in:daily,weekly,biweekly,monthly,yearly',
@@ -128,6 +135,8 @@ class LoanForm extends Component
             'insurance_fee' => 'nullable|numeric|min:0',
             'insurance_fee_type' => 'nullable|in:fixed,percentage',
             'description' => 'nullable|string',
+            'portfolio_id' => 'nullable|exists:portfolios,id',
+            'collection_group' => 'nullable|string',
             'collateralId' => ['nullable', 'exists:collaterals,id'],
             'attachments' => ['nullable', 'file', 'max:10240'], // 10MB max
             'guarantor_id' => 'nullable|string',
@@ -156,6 +165,7 @@ class LoanForm extends Component
             $this->interest_rate = $loan->interest_rate;
             $this->interest_calculation_type = $loan->interest_calculation_type ?? 'percentage';
             $this->interest_type = $loan->interest_type;
+            $this->interest_cycle = $loan->interest_cycle ?? 'month';
             $this->duration = $loan->duration;
             $this->duration_unit = $loan->duration_unit;
             $this->repayment_cycle = $loan->repayment_cycle;
@@ -165,9 +175,11 @@ class LoanForm extends Component
             $this->insurance_fee = $loan->insurance_fee?->getMajorAmount();
             $this->insurance_fee_type = $loan->insurance_fee_type ?? 'fixed';
             $this->portfolio_id = $loan->portfolio_id;
+            $this->collection_group = $loan->collection_group;
             $this->description = $loan->description;
             $this->collateralId = $loan->collateral?->id;
             $this->loan_officer_id = $loan->loan_officer_id;
+            $this->termsLocked = (bool) $loan->loan_product;
 
             if ($loan->external_guarantor_id) {
                 $this->guarantor_id = $loan->external_guarantor_id;
@@ -178,6 +190,7 @@ class LoanForm extends Component
             }
         } else {
             $this->release_date = now()->format('Y-m-d');
+            $this->interest_cycle = 'month';
             // Default from Organization
             $org = Auth::user()->organization;
             if ($org) {
@@ -255,6 +268,7 @@ class LoanForm extends Component
         $this->selectedBorrower = $user->borrower;
         $this->borrowerUserId = $user->id;
         $this->portfolio_id = $user->borrower->portfolio_id;
+        $this->collection_group = $user->borrower->collection_group;
         if (! $this->isEditMode) {
             $this->generateLoanNumber();
         }
@@ -288,6 +302,7 @@ class LoanForm extends Component
         if ($product) {
             $this->interest_rate = $product->default_interest_rate;
             $this->interest_calculation_type = $product->interest_calculation_type;
+            $this->interest_cycle = $product->interest_cycle ?? 'month';
             $this->duration = $product->default_duration;
             $this->duration_unit = $product->duration_unit;
             $this->repayment_cycle = $product->repayment_cycle;
@@ -295,12 +310,22 @@ class LoanForm extends Component
             $this->processing_fee_type = $product->processing_fee_type;
             $this->insurance_fee = $product->insurance_fee ? $product->insurance_fee->getMajorAmount() : null;
             $this->insurance_fee_type = $product->insurance_fee_type;
+            $this->termsLocked = true;
+        } else {
+            $this->termsLocked = false;
         }
     }
 
     public function updated($propertyName)
     {
         $this->validateOnly($propertyName, $this->rules());
+    }
+
+    public function updatedRepaymentCycle($value)
+    {
+        if ($value === 'monthly') {
+            $this->collection_group = 'Monthly Collections';
+        }
     }
 
     public function saveLoan(LoanService $loanService)
@@ -323,7 +348,9 @@ class LoanForm extends Component
             'interest_rate' => $this->interest_rate,
             'interest_calculation_type' => $this->interest_calculation_type,
             'interest_type' => $this->interest_type,
+            'interest_cycle' => $this->interest_cycle,
             'portfolio_id' => $this->portfolio_id,
+            'collection_group' => $this->collection_group,
             'duration' => $this->duration,
             'duration_unit' => $this->duration_unit,
             'repayment_cycle' => $this->repayment_cycle,

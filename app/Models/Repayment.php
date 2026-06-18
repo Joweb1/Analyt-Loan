@@ -113,4 +113,40 @@ class Repayment extends Model
     {
         return $this->hasMany(SavingsTransaction::class);
     }
+
+    /**
+     * Check if the repayment is locked for editing/deletion by the given user.
+     */
+    public function isLocked(?User $user = null): bool
+    {
+        $user = $user ?: auth()->user();
+        if (! $user) {
+            return true;
+        }
+
+        // Admins and Owners can always edit
+        if ($user->hasRole('Admin') || $user->type === 'owner') {
+            return false;
+        }
+
+        $loan = $this->loan;
+        if (! $loan) {
+            return false;
+        }
+
+        // Logic: Once a repayment is logged for the period, it is locked for non-admins.
+        // We define the period based on the loan's cycle.
+        $paidAt = $this->paid_at;
+        $now = now();
+
+        if ($loan->repayment_cycle === 'monthly') {
+            // Locked if paid in current month or past months
+            return $paidAt->format('Y-m') <= $now->format('Y-m');
+        }
+
+        // Weekly/Biweekly/Daily: Locked if paid in current week or past weeks
+        $startOfWeek = $now->copy()->startOfWeek();
+
+        return $paidAt->lt($startOfWeek->copy()->addWeeks(1));
+    }
 }

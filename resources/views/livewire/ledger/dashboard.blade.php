@@ -96,17 +96,18 @@
                    class="group block bg-surface rounded-sm border border-border-main shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden relative">
                     
                     {{-- Passed Day Indicator --}}
-                    @if($group['is_passed'] && $group['unpaid_indicator'] > 0)
-                        <div class="absolute top-0 right-0 bg-rose-500 text-white px-3 py-1 rounded-bl-sm z-10 animate-pulse">
-                            <span class="text-[9px] font-black uppercase tracking-widest">{{ $group['unpaid_indicator'] }} UNPAID</span>
+                    @if($group['is_overdue_warning'])
+                        <div class="absolute top-0 right-0 bg-rose-600 text-white px-3 py-1 rounded-bl-sm z-10 animate-pulse shadow-lg flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-[10px]">warning</span>
+                            <span class="text-[9px] font-black uppercase tracking-widest">{{ $group['unpaid_indicator'] }} OVERDUE</span>
                         </div>
                     @endif
 
                     {{-- Card Header --}}
-                    <div class="px-6 py-5 border-b border-border-main flex items-center justify-between {{ isset($group['is_monthly']) ? 'bg-indigo-50/30 dark:bg-indigo-900/10' : ($group['is_passed'] ? 'bg-background-light/50' : 'bg-background-light/30') }}">
+                    <div class="px-6 py-5 border-b border-border-main flex items-center justify-between {{ $group['name'] === 'Monthly Collections' ? 'bg-indigo-50/30 dark:bg-indigo-900/10' : ($group['is_passed'] ? 'bg-background-light/50' : 'bg-background-light/30') }}">
                         <div>
                             <h3 class="text-lg font-black text-primary dark:text-white tracking-tight uppercase">{{ $group['name'] }}</h3>
-                            <span class="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">{{ $group['members_count'] }} Members</span>
+                            <span class="text-[10px] font-black text-slate-400 dark:text-slate-50 uppercase tracking-widest">{{ $group['members_count'] }} Members</span>
                         </div>
                         <div class="w-12 h-12 rounded-sm border border-border-main bg-surface flex items-center justify-center text-slate-400 group-hover:text-indigo-600 group-hover:border-indigo-100 transition-colors">
                             <span class="material-symbols-outlined text-2xl">arrow_forward</span>
@@ -117,7 +118,7 @@
                     <div class="p-6 space-y-6">
                         <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <span class="block text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">Week's Collection</span>
+                                <span class="block text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-1">{{ $group['name'] === 'Monthly Collections' ? 'Month\'s' : 'Week\'s' }} Collection</span>
                                 <p class="text-sm font-black text-primary dark:text-white tracking-tight">₦{{ fetch_data($group['collected_amount']?->format() ?? null) }}</p>
                             </div>
                             <div class="text-right">
@@ -128,7 +129,7 @@
 
                         <div>
                             <div class="flex items-center justify-between mb-2">
-                                <span class="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">Week's Coverage</span>
+                                <span class="text-[9px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest">{{ $group['name'] === 'Monthly Collections' ? 'Month\'s' : 'Week\'s' }} Coverage</span>
                                 <span class="text-[10px] font-black text-primary dark:text-white uppercase tracking-widest">{{ $group['performance'] }}%</span>
                             </div>
                             <div class="h-1.5 w-full bg-background-light rounded-full overflow-hidden">
@@ -139,10 +140,10 @@
 
                         <div class="pt-4 border-t border-border-main flex items-center justify-between">
                             <div class="flex items-center gap-1">
-                                <span class="material-symbols-outlined text-sm {{ $group['unpaid_indicator'] > 0 ? 'text-rose-500' : 'text-emerald-500' }}">
-                                    {{ $group['unpaid_indicator'] > 0 ? 'pending_actions' : 'check_circle' }}
+                                <span class="material-symbols-outlined text-sm {{ $group['unpaid_indicator'] > 0 ? ($group['is_passed'] ? 'text-rose-600 font-bold' : 'text-amber-500') : 'text-emerald-500' }}">
+                                    {{ $group['unpaid_indicator'] > 0 ? ($group['is_passed'] ? 'warning' : 'pending_actions') : 'check_circle' }}
                                 </span>
-                                <span class="text-[10px] font-black {{ $group['unpaid_indicator'] > 0 ? 'text-rose-600' : 'text-emerald-600' }} uppercase tracking-widest">
+                                <span class="text-[10px] font-black {{ $group['unpaid_indicator'] > 0 ? ($group['is_passed'] ? 'text-rose-700 font-bold' : 'text-amber-600') : 'text-emerald-600' }} uppercase tracking-widest">
                                     {{ $group['unpaid_indicator'] }} Yet to Pay
                                 </span>
                             </div>

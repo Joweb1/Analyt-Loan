@@ -223,6 +223,11 @@
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Repayment Cycle</p>
                         <p class="text-sm font-bold text-slate-700 dark:text-slate-300">{{ fetch_data(ucfirst($loan?->repayment_cycle ?? 'Monthly') ?? null) }}</p>
                     </div>
+
+                    <div>
+                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Collection Day</p>
+                        <p class="text-sm font-bold text-primary">{{ fetch_data($loan?->collection_group ?: 'Not Assigned' ?? null) }}</p>
+                    </div>
                     
                     <div>
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Interest Rate</p>

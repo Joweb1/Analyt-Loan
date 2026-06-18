@@ -48,6 +48,7 @@ class LoanProduct extends Model
         'description',
         'default_interest_rate',
         'interest_calculation_type',
+        'interest_cycle',
         'default_duration',
         'duration_unit',
         'repayment_cycle',

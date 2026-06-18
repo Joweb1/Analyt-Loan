@@ -26,9 +26,9 @@ class GroupLedger extends Component
 
     public $expanded = []; // [borrower_id => bool]
 
-    public $editing = []; // [borrower_id => bool]
+    public $editing = []; // [borrower_id => repayment_id|null]
 
-    public $paymentData = []; // [borrower_id => ['repayment' => 0, 'repayment_method' => 'cash', 'savings' => 0, 'savings_method' => 'cash', 'notes' => '']]
+    public $paymentData = []; // [borrower_id => ['repayment' => 0, 'repayment_method' => 'bank_transfer', 'savings' => 0, 'savings_method' => 'bank_transfer', 'notes' => '']]
 
     public function mount($group)
     {
@@ -41,26 +41,27 @@ class GroupLedger extends Component
         $this->expanded[$borrowerId] = ! ($this->expanded[$borrowerId] ?? false);
     }
 
-    public function editPayment($borrowerId)
+    public function editPayment($borrowerId, $repaymentId = null)
     {
         $org = Organization::current();
-        $today = $org->getSystemTime()->toDateString();
+        $systemTime = $org->getSystemTime();
+        $today = $systemTime->toDateString();
+
+        // Check if admin
+        $isAdmin = auth()->user()->hasRole('Admin') || auth()->user()->type === 'owner';
 
         $borrower = Borrower::find($borrowerId);
-
-        $loanQuery = $borrower->loans()->whereIn('status', ['active', 'overdue']);
-        if ($this->group === 'Monthly Collections') {
-            $loanQuery->where('repayment_cycle', 'monthly');
-        } else {
-            $loanQuery->where('repayment_cycle', '!=', 'monthly');
-        }
-        $activeLoan = $loanQuery->latest()->first();
-
         $repayment = null;
-        if ($activeLoan) {
-            $repayment = Repayment::where('loan_id', $activeLoan->id)
-                ->whereDate('paid_at', $today)
-                ->first();
+
+        if ($repaymentId) {
+            $repayment = Repayment::find($repaymentId);
+        }
+
+        // If period is already paid and user is NOT admin, deny edit
+        if ($repayment && ! $isAdmin) {
+            $this->dispatch('custom-alert', ['type' => 'error', 'message' => 'Only administrators can edit verified ledger entries.']);
+
+            return;
         }
 
         $savings = null;
@@ -73,26 +74,31 @@ class GroupLedger extends Component
 
         $this->paymentData[$borrowerId] = [
             'repayment' => $repayment ? $repayment->amount->getMajorAmount() : 0,
-            'repayment_method' => $repayment ? $repayment->payment_method : 'cash',
+            'repayment_method' => $repayment ? $repayment->payment_method : 'bank_transfer',
             'savings' => $savings ? $savings->amount->getMajorAmount() : 0,
-            'savings_method' => $savings ? $savings->payment_method : 'cash',
+            'savings_method' => $savings ? $savings->payment_method : 'bank_transfer',
             'notes' => ($repayment ? $repayment->notes : '') ?: ($savings ? $savings->notes : ''),
         ];
 
-        $this->editing[$borrowerId] = true;
+        $this->editing[$borrowerId] = $repaymentId ?: 'new';
         $this->expanded[$borrowerId] = true;
     }
 
     public function loadMembers()
     {
         $org = Organization::current();
-        $today = $org->getSystemTime()->toDateString();
+        $systemTime = $org->getSystemTime();
+        $today = $systemTime->toDateString();
         $currency = $org->currency_code ?? 'NGN';
+
+        $startOfWeek = $systemTime->copy()->startOfWeek();
+        $endOfWeek = $systemTime->copy()->endOfWeek();
 
         if ($this->group === 'Monthly Collections') {
             $query = Borrower::whereHas('loans', fn ($q) => $q->where('repayment_cycle', 'monthly'));
         } else {
-            $query = Borrower::where('collection_group', $this->group);
+            // Group by LOAN collection group
+            $query = Borrower::whereHas('loans', fn ($q) => $q->where('collection_group', $this->group));
         }
 
         if ($this->search) {
@@ -107,14 +113,14 @@ class GroupLedger extends Component
 
         $this->members = [];
         foreach ($borrowers as $borrower) {
-            // Get current active/overdue loan filtered by the group cycle
+            // Get current active/overdue loan filtered by the group cycle AND group name
             $loanQuery = $borrower->loans()->whereIn('status', ['active', 'overdue']);
 
             if ($this->group === 'Monthly Collections') {
                 $loanQuery->where('repayment_cycle', 'monthly');
             } else {
-                // Day groups are for weekly (and potentially daily) collections
-                $loanQuery->where('repayment_cycle', '!=', 'monthly');
+                $loanQuery->where('collection_group', $this->group)
+                    ->where('repayment_cycle', '!=', 'monthly');
             }
 
             $activeLoan = $loanQuery->latest()->first();
@@ -126,6 +132,8 @@ class GroupLedger extends Component
             $nextDue = null;
             $paymentStatus = 'Upcoming';
             $dueAmountMinor = 0;
+            $paidThisPeriod = false;
+            $periodRepayments = collect();
 
             if ($activeLoan) {
                 // Sum all overdue + today's pending installments
@@ -151,12 +159,21 @@ class GroupLedger extends Component
                     }
                 }
 
-                // Check if already paid today
-                $paidToday = Repayment::where('loan_id', $activeLoan->id)
-                    ->whereDate('paid_at', $today)
-                    ->exists();
+                // Check if already paid in the current period
+                if ($this->group === 'Monthly Collections') {
+                    $periodRepayments = Repayment::where('loan_id', $activeLoan->id)
+                        ->whereMonth('paid_at', $systemTime->month)
+                        ->whereYear('paid_at', $systemTime->year)
+                        ->get();
+                } else {
+                    $periodRepayments = Repayment::where('loan_id', $activeLoan->id)
+                        ->whereBetween('paid_at', [$startOfWeek->toDateString().' 00:00:00', $endOfWeek->toDateString().' 23:59:59'])
+                        ->get();
+                }
 
-                if ($paidToday) {
+                $paidThisPeriod = $periodRepayments->isNotEmpty();
+
+                if ($paidThisPeriod) {
                     $paymentStatus = 'Paid';
                 }
             }
@@ -172,15 +189,17 @@ class GroupLedger extends Component
                 'due_amount' => new Money($dueAmountMinor, $currency),
                 'outstanding_balance' => $activeLoan ? $activeLoan->balance : new Money(0, $currency),
                 'status' => $paymentStatus,
+                'paid_this_period' => $paidThisPeriod,
+                'period_repayments' => $periodRepayments,
                 'last_payment_date' => $borrower->repayments()->latest('paid_at')->value('paid_at')?->format('d M Y') ?: 'None',
             ];
 
             if (! isset($this->paymentData[$borrower->id])) {
                 $this->paymentData[$borrower->id] = [
                     'repayment' => 0,
-                    'repayment_method' => 'cash',
+                    'repayment_method' => 'bank_transfer',
                     'savings' => 0,
-                    'savings_method' => 'cash',
+                    'savings_method' => 'bank_transfer',
                     'notes' => '',
                 ];
             }
@@ -229,8 +248,12 @@ class GroupLedger extends Component
 
         $borrower = Borrower::find($borrowerId);
         $org = Organization::current();
-        $today = $org->getSystemTime()->toDateString();
+        $systemTime = $org->getSystemTime();
+        $today = $systemTime->toDateString();
         $currency = $org->currency_code ?? config('app.currency', 'NGN');
+
+        $startOfWeek = $systemTime->copy()->startOfWeek();
+        $endOfWeek = $systemTime->copy()->endOfWeek();
 
         try {
             DB::beginTransaction();
@@ -240,18 +263,23 @@ class GroupLedger extends Component
             if ($this->group === 'Monthly Collections') {
                 $loanQuery->where('repayment_cycle', 'monthly');
             } else {
-                $loanQuery->where('repayment_cycle', '!=', 'monthly');
+                $loanQuery->where('collection_group', $this->group)
+                    ->where('repayment_cycle', '!=', 'monthly');
             }
             $activeLoan = $loanQuery->latest()->first();
 
             if ($activeLoan) {
-                $repayment = Repayment::where('loan_id', $activeLoan->id)
-                    ->whereDate('paid_at', $today)
-                    ->first();
+                $repaymentId = $this->editing[$borrowerId] ?? null;
+                $repayment = null;
+
+                if ($repaymentId && $repaymentId !== 'new') {
+                    $repayment = Repayment::find($repaymentId);
+                }
 
                 if ($repaymentAmount > 0) {
                     $newAmountMoney = Money::fromMajor($repaymentAmount, $currency);
 
+                    // Split logic remains the same...
                     // 1. Get total of ALL OTHER repayments (to know where this one starts)
                     $otherRepaymentsTotalMinor = (int) Repayment::where('loan_id', $activeLoan->id)
                         ->where('id', '!=', $repayment->id ?? 'non-existent-uuid')
@@ -328,7 +356,7 @@ class GroupLedger extends Component
                         $repayment->loan_id = $activeLoan->id;
                         $repayment->borrower_id = $borrower->id;
                         $repayment->organization_id = $org->id;
-                        $repayment->paid_at = $org->getSystemTime();
+                        $repayment->paid_at = $systemTime;
                         $repayment->recorded_by = auth()->id();
                         $repayment->collected_by = auth()->id();
                     }
@@ -352,10 +380,14 @@ class GroupLedger extends Component
             // 2. Record/Update Savings Deposit
             $savingsAccount = $borrower->savingsAccount;
             if ($savingsAccount) {
-                $transaction = SavingsTransaction::where('savings_account_id', $savingsAccount->id)
-                    ->where('type', 'deposit')
-                    ->whereDate('transaction_date', $today)
-                    ->first();
+                $transaction = null;
+                // If editing, we find the transaction for today to update it
+                if ($this->editing[$borrowerId] ?? false) {
+                    $transaction = SavingsTransaction::where('savings_account_id', $savingsAccount->id)
+                        ->where('type', 'deposit')
+                        ->whereDate('transaction_date', $today)
+                        ->first();
+                }
 
                 $newSavingsMoney = Money::fromMajor($savingsAmount, $currency);
 
@@ -383,7 +415,7 @@ class GroupLedger extends Component
                     $transaction->payment_method = $savingsMethod;
                     $transaction->notes = $notes;
                     $transaction->staff_id = auth()->id();
-                    $transaction->transaction_date = $org->getSystemTime();
+                    $transaction->transaction_date = $systemTime;
                     $transaction->save();
 
                     $savingsAccount->balance = $savingsAccount->balance->add($transaction->amount);
@@ -399,8 +431,8 @@ class GroupLedger extends Component
             $cashbookService->fetchSystemData($entry);
 
             $this->paymentData[$borrowerId] = [
-                'repayment' => 0, 'repayment_method' => 'cash',
-                'savings' => 0, 'savings_method' => 'cash',
+                'repayment' => 0, 'repayment_method' => 'bank_transfer',
+                'savings' => 0, 'savings_method' => 'bank_transfer',
                 'notes' => '',
             ];
 

@@ -46,6 +46,8 @@ class RolesManagement extends Component
         'communicate_with_customers',
         'export_and_print',
         'view_live_balance',
+        'view_records_hub_stats',
+        'change_system_date',
     ];
 
     public function mount()

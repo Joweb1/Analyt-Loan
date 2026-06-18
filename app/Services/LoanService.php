@@ -13,6 +13,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class LoanService
 {
@@ -25,6 +26,11 @@ class LoanService
             $user = Auth::user();
             $data = $dto->toArray();
             $data['organization_id'] ??= $user->organization_id;
+            $data['loan_officer_id'] ??= $user->id;
+
+            if (($data['repayment_cycle'] ?? null) === 'monthly') {
+                $data['collection_group'] = 'Monthly Collections';
+            }
 
             // Apply Risk-Based Pricing if interest_rate is not explicitly set (or 0)
             if ($data['interest_rate'] <= 0) {
@@ -50,11 +56,20 @@ class LoanService
             $data['release_date'] ??= $systemNow;
             Log::info('Loan Creation - Release Date set to: '.($data['release_date'] instanceof Carbon ? $data['release_date']->toDateTimeString() : $data['release_date']));
 
+            // Ensure loan_number is set
+            if (empty($data['loan_number'])) {
+                $year = now()->year;
+                $data['loan_number'] = 'LN-'.$year.'-'.strtoupper(Str::random(5));
+            }
+
             $loan = Loan::create($data);
 
             if ($collateralId) {
                 $this->linkCollateral($loan, $collateralId);
             }
+
+            // Record Upfront Fees immediately upon creation/application
+            $this->recordUpfrontFees($loan);
 
             // Automatically generate schedule upon creation
             $this->generateRepaymentSchedule($loan);
@@ -82,56 +97,100 @@ class LoanService
         $principal = $loan->amount;
         $principalShare = $principal->divide($numRepayments);
 
-        // Interest and Insurance are now distributed evenly
+        // Interest is distributed evenly.
         $totalInterest = $loan->getTotalExpectedInterest();
         $interestShare = $totalInterest->divide($numRepayments);
-
-        $totalInsurance = $loan->getCalculatedInsuranceFee();
-        $insuranceShare = $totalInsurance->divide($numRepayments);
-
-        // Processing Fee remains front-loaded (Added only to installment #1)
-        $processingFee = $loan->getCalculatedProcessingFee();
 
         $currency = $principal->getCurrency();
         $startDate = Carbon::parse($loan->release_date ?? now());
         $cycle = $loan->repayment_cycle ?? 'monthly';
 
-        // Delete existing schedules if any (to allow regeneration)
+        // Collection Day Mapping
+        $dayMap = [
+            'Monday Group' => 1,
+            'Tuesday Group' => 2,
+            'Wednesday Group' => 3,
+            'Thursday Group' => 4,
+            'Friday Group' => 5,
+        ];
+        $targetDayIndex = $loan->collection_group ? ($dayMap[$loan->collection_group] ?? null) : null;
+
+        // Delete existing schedules
         $loan->scheduledRepayments()->delete();
 
+        $currentDate = $startDate->copy();
+
         for ($i = 1; $i <= $numRepayments; $i++) {
-            $dueDate = $startDate->copy();
+            if ($cycle === 'daily') {
+                $currentDate->addDay();
+                // Skip Saturday (6) and Sunday (0)
+                while ($currentDate->isWeekend()) {
+                    $currentDate->addDay();
+                }
+            } else {
+                match ($cycle) {
+                    'weekly' => $currentDate->addWeek(),
+                    'biweekly' => $currentDate->addWeeks(2),
+                    'monthly' => $currentDate->addWeeks(4), // 4 weeks = 1 month
+                    'yearly' => $currentDate->addWeeks(48), // 12 months * 4 weeks
+                    default => $currentDate->addWeeks(4),
+                };
+            }
 
-            match ($cycle) {
-                'daily' => $dueDate->addDays($i),
-                'weekly' => $dueDate->addWeeks($i),
-                'biweekly' => $dueDate->addWeeks($i * 2),
-                'monthly' => $dueDate->addMonths($i),
-                'yearly' => $dueDate->addYears($i),
-                default => $dueDate->addMonths($i),
-            };
+            $dueDate = $currentDate->copy();
 
-            // Combine Interest Share and Insurance Share
-            $totalInterestAndInsurance = $interestShare->add($insuranceShare);
-
-            /** @var Money $upfrontFee */
-            $upfrontFee = new Money(0, $currency);
-            if ($i === 1) {
-                $upfrontFee = $processingFee;
+            // Snap to collection day for non-daily and non-monthly cycles
+            // Monthly loans follow their release date offset precisely
+            if ($targetDayIndex !== null && ! in_array($cycle, ['daily', 'monthly'])) {
+                // Find the nearest target day in the same week
+                // If it's already past that day in the week, it goes to the target day of that week
+                // We use setISODate to force it to the target day of the current week of $dueDate
+                $dueDate->setISODate($dueDate->year, $dueDate->weekOfYear, $targetDayIndex);
             }
 
             ScheduledRepayment::create([
+                'organization_id' => $loan->organization_id,
                 'loan_id' => $loan->id,
                 'due_date' => $dueDate,
                 'principal_amount' => $principalShare,
-                'interest_amount' => $totalInterestAndInsurance,
-                'penalty_amount' => $upfrontFee, // Using 'penalty_amount' as a catch-all for upfront fees
+                'interest_amount' => $interestShare,
+                'penalty_amount' => new Money(0, $currency),
                 'installment_number' => $i,
                 'status' => 'applied',
             ]);
         }
 
         $loan->refreshRepaymentStatus();
+    }
+
+    /**
+     * Record upfront fees as transactions.
+     */
+    protected function recordUpfrontFees(Loan $loan): void
+    {
+        $processingFee = $loan->getCalculatedProcessingFee();
+        if ($processingFee->isPositive()) {
+            TransactionService::record(
+                type: 'processing_fee',
+                amount: $processingFee,
+                user: $loan->borrower->user,
+                related: $loan,
+                paymentMethod: 'bank_transfer',
+                notes: "Upfront Processing Fee for Loan #{$loan->loan_number}"
+            );
+        }
+
+        $insuranceFee = $loan->getCalculatedInsuranceFee();
+        if ($insuranceFee->isPositive()) {
+            TransactionService::record(
+                type: 'insurance_fee',
+                amount: $insuranceFee,
+                user: $loan->borrower->user,
+                related: $loan,
+                paymentMethod: 'bank_transfer',
+                notes: "Upfront Insurance Fee for Loan #{$loan->loan_number}"
+            );
+        }
     }
 
     /**
@@ -164,8 +223,7 @@ class LoanService
     public function updateLoan(Loan $loan, LoanApplicationDTO $dto, $attachment = null, $collateralId = null): Loan
     {
         DB::transaction(function () use ($loan, $dto, $collateralId) {
-            $data = array_filter($dto->toArray(), fn ($value) => ! is_null($value));
-            $loan->update($data);
+            $loan->update($dto->toArray());
 
             if ($collateralId) {
                 $this->linkCollateral($loan, $collateralId);

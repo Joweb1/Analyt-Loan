@@ -71,6 +71,10 @@ class BorrowerProfile extends Component
 
     public $rejection_reason;
 
+    public $external_guarantor_id;
+
+    public $all_guarantors = [];
+
     public $confirmingDeletion = false;
 
     public function mount(Borrower $borrower)
@@ -78,8 +82,9 @@ class BorrowerProfile extends Component
         if (! Auth::user()->hasPermissionTo('manage_borrowers')) {
             abort(403);
         }
-        $this->borrower = $borrower->load('user');
+        $this->borrower = $borrower->load(['user', 'externalGuarantor']);
         $this->loadFields();
+        $this->all_guarantors = \App\Models\Guarantor::where('organization_id', Auth::user()->organization_id)->get();
     }
 
     public function loadFields()
@@ -96,6 +101,7 @@ class BorrowerProfile extends Component
         $this->collection_group = $this->borrower->collection_group;
         $this->is_daily_saver = $this->borrower->is_daily_saver;
         $this->daily_target_amount = $this->borrower->daily_target_amount ? $this->borrower->daily_target_amount->getMajorAmount() : 0;
+        $this->external_guarantor_id = $this->borrower->external_guarantor_id;
 
         $this->employment_information = is_array($this->borrower->employment_information)
             ? $this->borrower->employment_information
@@ -223,6 +229,7 @@ class BorrowerProfile extends Component
             'email' => 'nullable|email|unique:users,email,'.$this->borrower->user_id,
             'bvn' => 'nullable|string|max:11',
             'national_identity_number' => 'nullable|string|max:11',
+            'external_guarantor_id' => 'nullable|exists:guarantors,id',
             'new_photo' => ['nullable', 'image', 'max:2048'],
             'passport_photo' => ['nullable', 'image', 'max:2048'],
             'identity_doc' => ['nullable', 'file', 'max:5120'],
@@ -249,6 +256,7 @@ class BorrowerProfile extends Component
             'collection_group' => $this->collection_group,
             'is_daily_saver' => $this->is_daily_saver,
             'daily_target_amount' => $this->daily_target_amount,
+            'external_guarantor_id' => $this->external_guarantor_id,
             'employment_information' => $this->employment_information,
             'bank_account_details' => $this->bank_account_details,
             'next_of_kin_details' => $this->next_of_kin_details,

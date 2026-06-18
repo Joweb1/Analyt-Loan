@@ -27,6 +27,8 @@ class Dashboard extends Component
 
     protected $queryString = ['currentDate' => ['as' => 'date']];
 
+    protected $listeners = ['validation-complete' => 'loadEntry'];
+
     public $manualFields = [
         'description' => '',
         'card_payments' => 0,
@@ -38,6 +40,7 @@ class Dashboard extends Component
         'daily_expense_amount' => 0,
         'actual_cash_at_hand' => 0,
         'bank_deposit_amount' => 0,
+        'shortfall_report' => '',
     ];
 
     public function mount()
@@ -156,6 +159,7 @@ class Dashboard extends Component
         $this->entry->status = 'pending';
         $this->entry->verified_at = null;
         $this->entry->audit_hash = null;
+        $this->entry->shortfall_report = null;
         $this->entry->save();
 
         $this->dispatch('notify', type: 'success', message: $message);
@@ -166,39 +170,18 @@ class Dashboard extends Component
         $service = app(CashbookService::class);
         $this->errorMessage = '';
 
-        $systemCashInflow = $this->entry->total_inflow->subtract($this->entry->expected_bank_transfers);
-        $minimumCritical = $this->entry->registration_fees->add($this->entry->card_payments);
-
-        // Validation: If there is a shortfall in physical cash...
-        if ($this->entry->actual_cash_at_hand->getMinorAmount() < $systemCashInflow->getMinorAmount()) {
-
-            // If no report has been provided yet, we check if we should show the modal or an error.
-            if (empty($this->entry->shortfall_report)) {
-                // The user specifically requested a report if cash is less than (Reg Fees + Card Payments)
-                if ($this->entry->actual_cash_at_hand->getMinorAmount() < $minimumCritical->getMinorAmount()) {
-                    $this->showShortfallModal = true;
-
-                    return;
-                }
-
-                // For other cash shortfalls, we'll also allow them to be explained via the same modal
-                // since the user mentioned "it should not prevent the verification".
-                $this->showShortfallModal = true;
-
-                return;
-            }
-
-            // If a report IS present, we allow the code to proceed to the bank deposit check.
+        // Requirement: Bank Deposit must have a value
+        if ($this->entry->bank_deposit_amount->isZero()) {
+            $this->errorMessage = 'Verification Failed: Bank Deposit Amount is mandatory to close the day.';
+            return;
         }
 
-        // New Validation Rule: Total Bank Deposit must cover physical cash plus mandatory recorded inflows.
-        $otherCashInflows = $systemCashInflow->subtract($minimumCritical);
-        $threshold = $this->entry->actual_cash_at_hand->add($otherCashInflows);
-
-        if ($this->entry->bank_deposit_amount->getMinorAmount() < $threshold->getMinorAmount()) {
-            $this->errorMessage = 'Verification Failed: Total bank deposit is less than physical cash plus mandatory inflows. Please ensure all cash is accounted for.';
-
-            return;
+        // Requirement: Bank Deposit must match Expected Deposit (unless Admin)
+        if ($this->entry->bank_deposit_amount->getMinorAmount() < $this->entry->expected_deposit->getMinorAmount()) {
+            if (!auth()->user()->isAdmin()) {
+                $this->errorMessage = 'Verification Failed: Entered bank deposit is lower than the expected bank deposit (' . $this->entry->expected_deposit->format() . '). Please reconcile or contact Admin.';
+                return;
+            }
         }
 
         if ($service->verifyEntry($this->entry)) {

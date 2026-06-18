@@ -35,7 +35,7 @@ class SavingsEntry extends Component
     // Savings Form Fields
     public $amount;
 
-    public $payment_method = 'Cash';
+    public $payment_method = 'Bank Transfer';
 
     public $transaction_date;
 
@@ -64,7 +64,7 @@ class SavingsEntry extends Component
     {
         $this->selectedCustomerId = $id;
         $this->amount = null;
-        $this->payment_method = 'Cash';
+        $this->payment_method = 'Bank Transfer';
         $this->transaction_date = now()->format('Y-m-d');
         $this->notes = '';
         $this->showSavingsModal = true;

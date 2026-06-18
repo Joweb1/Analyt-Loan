@@ -5,6 +5,7 @@ namespace App\Traits;
 use App\Models\Borrower;
 use App\Models\Loan;
 use App\Models\Organization;
+use App\Models\User;
 use App\Services\TenantSession;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -30,10 +31,19 @@ trait BelongsToOrganization
         });
 
         static::addGlobalScope('organization', function (Builder $builder) {
+            if (app()->runningInConsole()) {
+                return;
+            }
+
             if (Auth::check()) {
                 $user = Auth::user();
 
-                // Exempt App Owner from global scope to allow platform-wide visibility
+                // 1. Prevent recursion for the User model itself
+                if (get_class($builder->getModel()) === User::class) {
+                    return;
+                }
+
+                // Exempt App Owner from global scope
                 if ($user->isAppOwner()) {
                     return;
                 }

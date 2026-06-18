@@ -237,20 +237,7 @@
     </nav>
     
     <div class="px-4 pb-6 shrink-0">
-        @php
-            $realDate = (new \DateTime())->format('Y-m-d');
-        @endphp
-        @if($org && $org->system_date && $org->system_date->toDateString() !== $realDate)
-            <div class="mb-4 px-4 py-3 bg-orange-50 dark:bg-orange-900/20 border border-orange-100 dark:border-orange-900/30 rounded-2xl sidebar-nav-text">
-                <div class="flex items-center gap-2 text-orange-700 dark:text-orange-400 mb-1">
-                    <span class="material-symbols-outlined text-sm font-black">calendar_today</span>
-                    <span class="text-[10px] font-black uppercase tracking-widest">System Date</span>
-                </div>
-                <p class="text-xs font-bold text-orange-800 dark:text-orange-300">
-                    {{ fetch_data(now()?->format('M d, Y') ?? null) }}
-                </p>
-            </div>
-        @endif
+        <livewire:components.sidebar-date-editor />
         <livewire:components.sidebar-profile />
     </div>
 </aside>

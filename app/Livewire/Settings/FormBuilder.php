@@ -81,7 +81,7 @@ class FormBuilder extends Component
                 ['name' => 'dob', 'label' => 'Date of Birth', 'type' => 'date', 'required' => true],
                 ['name' => 'gender', 'label' => 'Gender', 'type' => 'select', 'options' => ['male', 'female', 'other'], 'required' => true],
                 ['name' => 'marital_status', 'label' => 'Marital Status', 'type' => 'select', 'options' => ['Single', 'Married', 'Divorced', 'Widowed'], 'required' => true],
-                ['name' => 'collection_group', 'label' => 'Collection Group', 'type' => 'select', 'options' => ['Monday Group', 'Tuesday Group', 'Wednesday Group', 'Thursday Group', 'Friday Group', 'Saturday Group'], 'required' => false],
+                ['name' => 'collection_group', 'label' => 'Collection Group', 'type' => 'select', 'options' => ['Monday Group', 'Tuesday Group', 'Wednesday Group', 'Thursday Group', 'Friday Group'], 'required' => false],
                 ['name' => 'dependents', 'label' => 'Number of Dependents', 'type' => 'number', 'required' => true],
                 ['name' => 'address', 'label' => 'Residential Address', 'type' => 'textarea', 'required' => true],
             ],

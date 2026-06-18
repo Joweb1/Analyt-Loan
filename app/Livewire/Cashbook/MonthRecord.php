@@ -35,14 +35,18 @@ class MonthRecord extends Component
 
     public $liveBalance;
 
+    public $entry;
+
     protected $queryString = ['dateString' => ['as' => 'date']];
 
-    public function mount()
+    public function mount(CashbookService $service)
     {
         $org = Organization::current();
         if (! $this->dateString) {
             $this->dateString = $org->getSystemTime()->toDateString();
         }
+
+        $this->entry = $service->getEntryForDate(Carbon::parse($this->dateString), $org);
 
         $date = Carbon::parse($this->dateString);
         $this->month = $date->month;
@@ -107,14 +111,47 @@ class MonthRecord extends Component
         }
 
         $org = Organization::current();
+        $amount = Money::fromMajor($this->newOpeningBalanceAmount, $org->currency_code);
 
-        AccountBalance::updateOrCreate([
+        $existing = AccountBalance::where('organization_id', $org->id)
+            ->where('month', $this->month)
+            ->where('year', $this->year)
+            ->first();
+
+        $balance = AccountBalance::updateOrCreate([
             'organization_id' => $org->id,
             'month' => $this->month,
             'year' => $this->year,
         ], [
-            'opening_balance' => Money::fromMajor($this->newOpeningBalanceAmount, $org->currency_code),
+            'opening_balance' => $amount,
         ]);
+
+        if ($existing) {
+            $oldAmount = $existing->opening_balance;
+            $difference = $amount->subtract($oldAmount);
+
+            // Find previous transaction
+            $originalTransaction = \App\Models\Transaction::where('related_id', $balance->id)
+                ->where('related_type', get_class($balance))
+                ->where('type', 'balance_update')
+                ->whereNull('parent_id')
+                ->first();
+
+            \App\Services\TransactionService::record(
+                type: 'adjustment',
+                amount: $difference,
+                related: $balance,
+                notes: "Adjustment for Monthly opening balance update. Original: ₦" . $oldAmount->format() . ", New: ₦" . $amount->format(),
+                parentId: $originalTransaction?->id
+            );
+        } else {
+            \App\Services\TransactionService::record(
+                type: 'balance_update',
+                amount: $amount,
+                related: $balance,
+                notes: "Monthly opening balance set for " . Carbon::create($this->year, $this->month, 1)->format('F Y')
+            );
+        }
 
         $this->showBalanceModal = false;
         $this->loadBalanceData();
@@ -129,14 +166,47 @@ class MonthRecord extends Component
         }
 
         $org = Organization::current();
+        $amount = Money::fromMajor($this->newBudgetAmount, $org->currency_code);
+
+        $existing = ExpenseBudget::where('organization_id', $org->id)
+            ->where('month', $this->month)
+            ->where('year', $this->year)
+            ->first();
 
         $budget = ExpenseBudget::updateOrCreate([
             'organization_id' => $org->id,
             'month' => $this->month,
             'year' => $this->year,
         ], [
-            'total_budget_amount' => Money::fromMajor($this->newBudgetAmount, $org->currency_code),
+            'total_budget_amount' => $amount,
         ]);
+
+        if ($existing) {
+            $oldAmount = $existing->total_budget_amount;
+            $difference = $amount->subtract($oldAmount);
+
+            // Find previous transaction
+            $originalTransaction = \App\Models\Transaction::where('related_id', $budget->id)
+                ->where('related_type', get_class($budget))
+                ->where('type', 'budget_update')
+                ->whereNull('parent_id')
+                ->first();
+
+            \App\Services\TransactionService::record(
+                type: 'adjustment',
+                amount: $difference,
+                related: $budget,
+                notes: "Adjustment for Monthly expense budget update. Original: ₦" . $oldAmount->format() . ", New: ₦" . $amount->format(),
+                parentId: $originalTransaction?->id
+            );
+        } else {
+            \App\Services\TransactionService::record(
+                type: 'budget_update',
+                amount: $amount,
+                related: $budget,
+                notes: "Monthly expense budget set for " . Carbon::create($this->year, $this->month, 1)->format('F Y')
+            );
+        }
 
         $this->showBudgetModal = false;
         $this->loadBudgetData();
@@ -161,6 +231,7 @@ class MonthRecord extends Component
         ];
 
         return view('livewire.cashbook.month-record', [
+            'entry' => $this->entry,
             'groupedEntries' => $entries->groupBy(fn ($e) => 'Week '.($e->entry_date->weekOfMonth)),
             'stats' => $stats,
             'currentMonthName' => Carbon::create($this->year, $this->month, 1)->format('F Y'),

@@ -36,7 +36,9 @@ class CollectionEntry extends Component
 
     public $amount;
 
-    public $payment_method = 'Cash';
+    public $payment_method = 'Bank Transfer';
+
+    public $notes;
 
     public $paid_at;
 
@@ -86,6 +88,31 @@ class CollectionEntry extends Component
 
     public function addRepayment()
     {
+        $user = auth()->user();
+        $isAdmin = $user->hasRole('Admin') || $user->type === 'owner';
+
+        $loan = Loan::findOrFail($this->selectedLoanId);
+
+        // Period Locking Check
+        $now = now();
+        $hasRepaymentThisPeriod = false;
+        if ($loan->repayment_cycle === 'monthly') {
+            $hasRepaymentThisPeriod = $loan->repayments()
+                ->whereMonth('paid_at', $now->month)
+                ->whereYear('paid_at', $now->year)
+                ->exists();
+        } else {
+            $hasRepaymentThisPeriod = $loan->repayments()
+                ->whereBetween('paid_at', [$now->copy()->startOfWeek(), $now->copy()->endOfWeek()])
+                ->exists();
+        }
+
+        if ($hasRepaymentThisPeriod && ! $isAdmin) {
+            $this->dispatch('custom-alert', ['type' => 'error', 'message' => 'The current period is locked. Only administrators can add multiple repayments per period.']);
+
+            return;
+        }
+
         $this->validate([
             'amount' => 'required|numeric|min:0.01',
             'payment_method' => 'required|string',
@@ -94,8 +121,6 @@ class CollectionEntry extends Component
         ]);
 
         $paidAt = $this->paid_at ?: now();
-
-        $loan = Loan::findOrFail($this->selectedLoanId);
 
         // Simple Split Logic (Priority: Interest -> Principal -> Extra)
         $currency = $loan->organization->currency_code ?? 'NGN';

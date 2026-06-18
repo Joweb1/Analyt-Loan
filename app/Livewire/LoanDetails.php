@@ -73,7 +73,7 @@ class LoanDetails extends Component
     // Repayment Form Fields
     public $amount;
 
-    public $payment_method = 'Cash';
+    public $payment_method = 'Bank Transfer';
 
     public $collected_by;
 
@@ -362,6 +362,29 @@ class LoanDetails extends Component
 
     public function addRepayment()
     {
+        $user = auth()->user();
+        $isAdmin = $user->hasRole('Admin') || $user->type === 'owner';
+
+        // Period Locking Check
+        $now = now();
+        $hasRepaymentThisPeriod = false;
+        if ($this->loan->repayment_cycle === 'monthly') {
+            $hasRepaymentThisPeriod = $this->loan->repayments()
+                ->whereMonth('paid_at', $now->month)
+                ->whereYear('paid_at', $now->year)
+                ->exists();
+        } else {
+            $hasRepaymentThisPeriod = $this->loan->repayments()
+                ->whereBetween('paid_at', [$now->copy()->startOfWeek(), $now->copy()->endOfWeek()])
+                ->exists();
+        }
+
+        if ($hasRepaymentThisPeriod && ! $isAdmin) {
+            $this->dispatch('custom-alert', ['type' => 'error', 'message' => 'The current period is locked. Only administrators can add multiple repayments per period.']);
+
+            return;
+        }
+
         $allowFlexible = Auth::user()->organization->allow_flexible_repayments ?? false;
         $minRequired = $this->suggestedPrincipal + $this->suggestedInterest;
 
@@ -428,9 +451,15 @@ class LoanDetails extends Component
 
     public function editRepayment($id)
     {
+        $repayment = Repayment::find($id);
+        if ($repayment->isLocked()) {
+            $this->dispatch('custom-alert', ['type' => 'error', 'message' => 'This repayment is locked. Only administrators can edit verified period entries.']);
+
+            return;
+        }
+
         $this->editingRepaymentId = $id;
         $this->showAddForm = true;
-        $repayment = Repayment::find($id);
         $this->amount = $repayment->amount->getMajorAmount();
         $this->payment_method = $repayment->payment_method;
         $this->collected_by = $repayment->collected_by;
@@ -499,6 +528,13 @@ class LoanDetails extends Component
 
     public function deleteRepayment($id)
     {
+        $repayment = Repayment::find($id);
+        if ($repayment->isLocked()) {
+            $this->dispatch('custom-alert', ['type' => 'error', 'message' => 'This repayment is locked. Only administrators can delete verified period entries.']);
+
+            return;
+        }
+
         Repayment::destroy($id);
         $this->loan->load(['repayments.collector', 'scheduledRepayments']);
         $this->calculateSuggestions();
@@ -516,7 +552,7 @@ class LoanDetails extends Component
     private function resetRepaymentForm()
     {
         $this->amount = $this->suggestedPrincipal + $this->suggestedInterest;
-        $this->payment_method = 'Cash';
+        $this->payment_method = 'Bank Transfer';
         $this->collected_by = null;
         $this->paid_at = now()->format('Y-m-d');
         $this->principal_amount = $this->suggestedPrincipal;

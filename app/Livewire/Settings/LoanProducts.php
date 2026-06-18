@@ -23,6 +23,8 @@ class LoanProducts extends Component
 
     public $interest_calculation_type = 'percentage';
 
+    public $interest_cycle = 'month';
+
     public $default_duration;
 
     public $duration_unit = 'month';
@@ -42,6 +44,7 @@ class LoanProducts extends Component
         'description' => 'nullable|string',
         'default_interest_rate' => 'nullable|numeric|min:0',
         'interest_calculation_type' => 'required|in:fixed,percentage',
+        'interest_cycle' => 'required|in:day,week,biweekly,month,year',
         'default_duration' => 'nullable|integer|min:1',
         'duration_unit' => 'required|in:year,month,week,day',
         'repayment_cycle' => 'required|in:daily,weekly,biweekly,monthly,yearly',
@@ -60,6 +63,7 @@ class LoanProducts extends Component
             'description' => $this->description,
             'default_interest_rate' => $this->default_interest_rate,
             'interest_calculation_type' => $this->interest_calculation_type,
+            'interest_cycle' => $this->interest_cycle,
             'default_duration' => $this->default_duration,
             'duration_unit' => $this->duration_unit,
             'repayment_cycle' => $this->repayment_cycle,
@@ -91,6 +95,7 @@ class LoanProducts extends Component
         $this->description = $product->description;
         $this->default_interest_rate = $product->default_interest_rate;
         $this->interest_calculation_type = $product->interest_calculation_type;
+        $this->interest_cycle = $product->interest_cycle;
         $this->default_duration = $product->default_duration;
         $this->duration_unit = $product->duration_unit;
         $this->repayment_cycle = $product->repayment_cycle;

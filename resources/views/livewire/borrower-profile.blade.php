@@ -278,7 +278,6 @@
                                 <option value="Wednesday Group">Wednesday Group</option>
                                 <option value="Thursday Group">Thursday Group</option>
                                 <option value="Friday Group">Friday Group</option>
-                                <option value="Saturday Group">Saturday Group</option>
                             </select>
                         @else
                             <p class="text-sm font-black text-slate-900 dark:text-white uppercase">{{ $collection_group ?? 'NOT ASSIGNED' }}</p>
@@ -312,6 +311,66 @@
                             </div>
                         @endif
                     </div>
+                </div>
+            </div>
+
+            <div class="bg-surface rounded-2xl border border-border-main shadow-sm overflow-hidden">
+                <div class="px-6 py-5 border-b border-border-main">
+                    <h3 class="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">security</span>
+                        Guarantor Information
+                    </h3>
+                </div>
+                <div class="p-8">
+                    @if($isEditing)
+                        <div>
+                            <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">Select Guarantor</label>
+                            <select wire:model="external_guarantor_id" class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-800 border-none rounded-xl text-sm font-black focus:ring-2 focus:ring-primary/20">
+                                <option value="">No Guarantor Assigned</option>
+                                @foreach($all_guarantors as $g)
+                                    <option value="{{ $g->id }}">{{ $g->name }} ({{ $g->phone }})</option>
+                                @endforeach
+                            </select>
+                            @error('external_guarantor_id') <span class="text-[10px] font-bold text-red-500 mt-1 block">{{ $message }}</span> @enderror
+                        </div>
+                    @else
+                        @if($borrower->externalGuarantor)
+                            <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 p-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800">
+                                <div class="flex items-center gap-4">
+                                    <div class="size-14 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                                        <span class="material-symbols-outlined text-3xl">shield_person</span>
+                                    </div>
+                                    <div>
+                                        <p class="text-lg font-black text-slate-900 dark:text-white">{{ fetch_data($borrower?->externalGuarantor?->name ?? null) }}</p>
+                                        <div class="flex flex-wrap gap-x-4 gap-y-1 mt-1">
+                                            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1">
+                                                <span class="material-symbols-outlined text-xs">call</span>
+                                                {{ fetch_data($borrower?->externalGuarantor?->phone ?? 'N/A' ?? null) }}
+                                            </p>
+                                            <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-1">
+                                                <span class="material-symbols-outlined text-xs">work</span>
+                                                {{ fetch_data($borrower?->externalGuarantor?->employer ?? 'N/A' ?? null) }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <a href="{{ route('guarantor.profile', $borrower->externalGuarantor->id) }}" class="flex items-center gap-2 px-6 py-2.5 bg-white dark:bg-slate-900 text-primary dark:text-white border border-primary/20 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-primary hover:text-white transition-all shadow-sm">
+                                    More Info
+                                    <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                                </a>
+                            </div>
+                        @else
+                            <div class="flex items-center gap-4 p-6 bg-slate-50/50 dark:bg-zinc-800/30 rounded-2xl border-2 border-dashed border-border-main opacity-50">
+                                <div class="size-14 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-300">
+                                    <span class="material-symbols-outlined text-3xl">person_off</span>
+                                </div>
+                                <div>
+                                    <p class="text-xs font-black text-slate-400 uppercase tracking-widest">No assigned guarantor</p>
+                                    <p class="text-[10px] font-medium text-slate-400 mt-1">Assignments can be made by clicking 'Edit Profile'</p>
+                                </div>
+                            </div>
+                        @endif
+                    @endif
                 </div>
             </div>
 

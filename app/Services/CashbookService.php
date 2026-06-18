@@ -10,6 +10,7 @@ use App\Models\Loan;
 use App\Models\Organization;
 use App\Models\Repayment;
 use App\Models\SavingsTransaction;
+use App\Models\Transaction;
 use App\ValueObjects\Money;
 use Illuminate\Support\Carbon;
 
@@ -86,41 +87,36 @@ class CashbookService
             ->count();
         $entry->registration_fees = new Money($borrowerCount * 100000, $currency);
 
-        // 6. Fees (Processing & Insurance) - NOW FROM REPAYMENTS
-        $repaymentsWithFees = Repayment::whereDate('paid_at', $date)
-            ->whereHas('loan', fn ($q) => $q->where('organization_id', $orgId))
-            ->where('fee_amount', '>', 0)
-            ->get();
+        // 6. Fees (Processing & Insurance) - NOW FROM TRANSACTIONS TABLE
+        $entry->loan_processing_fees = new Money(
+            (int) Transaction::where('organization_id', $orgId)
+                ->where('type', 'processing_fee')
+                ->whereDate('transaction_date', $date)
+                ->sum('amount'),
+            $currency
+        );
 
-        $processingFeesMinor = 0;
-        $insuranceFeesMinor = 0;
-
-        foreach ($repaymentsWithFees as $repayment) {
-            $loan = $repayment->loan;
-            $pFee = $loan->getCalculatedProcessingFee()->getMinorAmount();
-            $iFee = $loan->insurance_fee ? $loan->insurance_fee->getMinorAmount() : 0;
-            $totalFees = $pFee + $iFee;
-
-            if ($totalFees > 0) {
-                $paidFee = $repayment->fee_amount->getMinorAmount();
-                // Pro-rate based on the loan's fee configuration
-                $processingFeesMinor += (int) round(($pFee / $totalFees) * $paidFee);
-                $insuranceFeesMinor += (int) ($paidFee - (int) round(($pFee / $totalFees) * $paidFee));
-            } else {
-                // Fallback: if no fees defined but fee paid, put in processing
-                $processingFeesMinor += $repayment->fee_amount->getMinorAmount();
-            }
-        }
-
-        $entry->loan_processing_fees = new Money($processingFeesMinor, $currency);
-        $entry->insurance_fees = new Money($insuranceFeesMinor, $currency);
+        $entry->insurance_fees = new Money(
+            (int) Transaction::where('organization_id', $orgId)
+                ->where('type', 'insurance_fee')
+                ->whereDate('transaction_date', $date)
+                ->sum('amount'),
+            $currency
+        );
 
         // 7. Calculate Expected Bank Transfers
         $bankMethods = ['bank_transfer', 'transfer', 'Bank Transfer', 'Bank transfer', 'Transfer'];
         $bankRepayments = (int) (clone $repaymentsQuery)->whereIn('payment_method', $bankMethods)->sum('amount');
         $bankSavings = (int) (clone $savingsQuery)->whereIn('type', ['deposit', 'daily_thrift'])->whereIn('payment_method', $bankMethods)->sum('amount');
 
-        $entry->expected_bank_transfers = new Money($bankRepayments + $bankSavings, $currency);
+        // Include upfront fees paid via bank transfer
+        $bankFees = (int) Transaction::where('organization_id', $orgId)
+            ->whereIn('type', ['processing_fee', 'insurance_fee'])
+            ->whereIn('payment_method', $bankMethods)
+            ->whereDate('transaction_date', $date)
+            ->sum('amount');
+
+        $entry->expected_bank_transfers = new Money($bankRepayments + $bankSavings + $bankFees, $currency);
 
         $this->recalculateExpectedCash($entry);
         $entry->save();

@@ -106,6 +106,18 @@
                             </div>
                         </div>
 
+                        <div>
+                            <label class="block text-xs font-bold text-gray-500 uppercase">Interest Cycle</label>
+                            <select wire:model="interest_cycle" class="w-full rounded-lg border-gray-200 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white text-sm">
+                                <option value="day">Per Day</option>
+                                <option value="week">Per Week</option>
+                                <option value="biweekly">Per Bi-Weekly</option>
+                                <option value="month">Per Month</option>
+                                <option value="year">Per Year</option>
+                            </select>
+                            <p class="text-[10px] text-gray-400 mt-1 italic">The interest rate will be applied once per this cycle for the total duration.</p>
+                        </div>
+
                         <div class="grid grid-cols-2 gap-4">
                             <div>
                                 <label class="block text-xs font-bold text-gray-500 uppercase">Insurance Fee</label>

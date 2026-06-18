@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Casts\MoneyCast;
+use App\Traits\BelongsToOrganization;
 use App\ValueObjects\Money;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -44,9 +45,10 @@ use Illuminate\Support\Carbon;
  */
 class ScheduledRepayment extends Model
 {
-    use HasFactory, HasUuids;
+    use BelongsToOrganization, HasFactory, HasUuids;
 
     protected $fillable = [
+        'organization_id',
         'loan_id',
         'due_date',
         'principal_amount',

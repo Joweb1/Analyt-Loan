@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Helpers\SystemLogger;
 use App\Models\Borrower;
+use App\Models\Guarantor;
 use App\Models\SystemNotification;
 use App\Models\User;
 use App\Traits\HandlesStorageDisk;
@@ -84,7 +85,7 @@ class BorrowerProfile extends Component
         }
         $this->borrower = $borrower->load(['user', 'externalGuarantor']);
         $this->loadFields();
-        $this->all_guarantors = \App\Models\Guarantor::where('organization_id', Auth::user()->organization_id)->get();
+        $this->all_guarantors = Guarantor::where('organization_id', Auth::user()->organization_id)->get();
     }
 
     public function loadFields()

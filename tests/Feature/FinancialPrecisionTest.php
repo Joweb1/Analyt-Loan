@@ -52,6 +52,7 @@ class FinancialPrecisionTest extends TestCase
             'duration' => 1,
             'duration_unit' => 'year',
             'interest_type' => 'year',
+            'interest_cycle' => 'year',
         ]);
 
         $interest = $loan->getTotalExpectedInterest();
@@ -68,6 +69,7 @@ class FinancialPrecisionTest extends TestCase
             'duration' => 1,
             'duration_unit' => 'year',
             'interest_type' => 'year',
+            'interest_cycle' => 'year',
         ]);
 
         // Create a partial repayment

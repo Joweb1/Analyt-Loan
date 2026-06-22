@@ -198,10 +198,17 @@ class LoanServiceTest extends TestCase
         $schedules = $loan->scheduledRepayments;
         $this->assertCount(2, $schedules);
 
-        // ₦2,000 insurance / 2 installments = ₦1,000 = 100,000 minor per installment
+        // Insurance fees are recorded as upfront transactions, not distributed into scheduled repayments.
+        // With a tiny interest rate, interest_amount in the schedule should be near zero.
         foreach ($schedules as $schedule) {
-            $this->assertEquals(100000, $schedule->interest_amount->getMinorAmount());
+            $this->assertLessThanOrEqual(1, $schedule->interest_amount->getMinorAmount());
         }
+
+        // Verify the insurance fee was recorded as an upfront transaction
+        $this->assertDatabaseHas('transactions', [
+            'type' => 'insurance_fee',
+            'related_id' => $loan->id,
+        ]);
     }
 
     public function test_it_applies_risk_based_pricing_discount()

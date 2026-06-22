@@ -75,13 +75,13 @@ class DashboardTest extends TestCase
     {
         $borrower = Borrower::factory()->create([
             'organization_id' => $this->organization->id,
-            'collection_group' => 'Monday Group',
         ]);
         Loan::factory()->create([
             'borrower_id' => $borrower->id,
             'organization_id' => $this->organization->id,
             'status' => 'active',
             'repayment_cycle' => 'weekly',
+            'collection_group' => 'Monday Group',
         ]);
 
         Livewire::actingAs($this->admin)

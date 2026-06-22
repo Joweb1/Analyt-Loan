@@ -52,6 +52,9 @@ class LoanDetailsTest extends TestCase
             'borrower_id' => $borrower->id,
             'amount' => 100000,
             'interest_rate' => 10, // 10%
+            'duration' => 1,
+            'duration_unit' => 'month',
+            'interest_cycle' => 'month',
             'repayment_cycle' => 'monthly',
             'num_repayments' => 5, // 5 months
             'status' => 'active',
@@ -89,6 +92,7 @@ class LoanDetailsTest extends TestCase
     {
         // First generate schedule
         $this->loan->scheduledRepayments()->create([
+            'organization_id' => $this->organization->id,
             'due_date' => now()->subDay(),
             'principal_amount' => 20000,
             'interest_amount' => 2000,
@@ -104,9 +108,16 @@ class LoanDetailsTest extends TestCase
             ->set('collected_by', $this->admin->id)
             ->set('paid_at', now()->format('Y-m-d'))
             ->call('addRepayment')
+            ->assertHasNoErrors()
             ->assertDispatched('custom-alert', function ($event, $params) {
                 return $params[0]['type'] === 'success';
             });
+
+        // Debug output
+        dump('REPAYMENTS:');
+        dump(Repayment::all()->toArray());
+        dump('SCHEDULES:');
+        dump(ScheduledRepayment::all()->toArray());
 
         $this->assertDatabaseHas('repayments', [
             'loan_id' => $this->loan->id,
@@ -131,7 +142,8 @@ class LoanDetailsTest extends TestCase
             ->set('payment_method', 'Cash')
             ->set('collected_by', $this->admin->id)
             ->set('paid_at', now()->format('Y-m-d'))
-            ->call('addRepayment');
+            ->call('addRepayment')
+            ->assertHasNoErrors();
 
         $this->loan->refresh();
         $this->assertEquals('repaid', $this->loan->status);

@@ -71,7 +71,7 @@ class LoanApplicationDTO
      */
     public function toArray(): array
     {
-        return [
+        $data = [
             'borrower_id' => $this->borrower_id,
             'loan_product' => $this->loan_product,
             'amount' => $this->amount,
@@ -94,7 +94,12 @@ class LoanApplicationDTO
             'guarantor_id' => $this->guarantor_id,
             'external_guarantor_id' => $this->external_guarantor_id,
             'description' => $this->description,
-            'loan_number' => $this->loan_number,
         ];
+
+        if ($this->loan_number !== null) {
+            $data['loan_number'] = $this->loan_number;
+        }
+
+        return $data;
     }
 }

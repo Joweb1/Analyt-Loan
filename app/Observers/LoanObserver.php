@@ -9,6 +9,7 @@ use App\Livewire\LoanDashboard;
 use App\Livewire\Reports;
 use App\Models\Loan;
 use App\Models\ScheduledRepayment;
+use App\Models\Transaction;
 use App\Services\TransactionService;
 use App\ValueObjects\Money;
 
@@ -78,7 +79,7 @@ class LoanObserver
                 default => null,
             };
 
-            if ($status === 'active' && ! $loan->getOriginal('status') === 'active') {
+            if ($status === 'active' && $loan->getOriginal('status') !== 'active') {
                 // Record Disbursement Transaction
                 TransactionService::record(
                     type: 'loan_disbursement',
@@ -96,7 +97,7 @@ class LoanObserver
                 $differenceMinor = $newAmountMinor - $oldAmountMinor;
 
                 // Find the original disbursement transaction
-                $originalTransaction = \App\Models\Transaction::where('related_id', $loan->id)
+                $originalTransaction = Transaction::where('related_id', $loan->id)
                     ->where('related_type', get_class($loan))
                     ->where('type', 'loan_disbursement')
                     ->whereNull('parent_id')
@@ -104,13 +105,13 @@ class LoanObserver
 
                 if ($originalTransaction) {
                     $difference = new Money($differenceMinor, $loan->amount->getCurrency());
-                    
+
                     TransactionService::record(
                         type: 'adjustment',
                         amount: $difference,
                         user: $loan->borrower->user,
                         related: $loan,
-                        notes: "Adjustment for Loan amount update. Original: ₦" . (new Money($oldAmountMinor, $loan->amount->getCurrency()))->format() . ", New: ₦" . $loan->amount->format(),
+                        notes: 'Adjustment for Loan amount update. Original: ₦'.(new Money($oldAmountMinor, $loan->amount->getCurrency()))->format().', New: ₦'.$loan->amount->format(),
                         parentId: $originalTransaction->id
                     );
                 }

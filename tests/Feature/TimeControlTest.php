@@ -99,6 +99,7 @@ class TimeControlTest extends TestCase
 
         $dueDate = $startDate->copy()->addDays(4); // 2026-01-05
         $schedule = ScheduledRepayment::create([
+            'organization_id' => $org->id,
             'loan_id' => $loan->id,
             'installment_number' => 1,
             'amount' => 10000,
@@ -140,6 +141,7 @@ class TimeControlTest extends TestCase
         ]);
 
         ScheduledRepayment::create([
+            'organization_id' => $org->id,
             'loan_id' => $loan->id,
             'installment_number' => 1,
             'amount' => 1000,
@@ -177,6 +179,7 @@ class TimeControlTest extends TestCase
         $borrower = Borrower::factory()->create(['organization_id' => $org->id]);
         $loan = Loan::factory()->create(['organization_id' => $org->id]);
         $repayment = Repayment::create([
+            'organization_id' => $org->id,
             'loan_id' => $loan->id,
             'amount' => 500,
             'paid_at' => now(),
@@ -207,6 +210,7 @@ class TimeControlTest extends TestCase
 
         $pastDueDate = $today->copy()->subDays(1);
         ScheduledRepayment::create([
+            'organization_id' => $org->id,
             'loan_id' => $loan->id,
             'installment_number' => 1,
             'principal_amount' => 1000,

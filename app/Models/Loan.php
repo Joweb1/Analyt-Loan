@@ -274,7 +274,7 @@ class Loan extends Model
         $ratio = $cycleDays > 0 ? ($durationDays / $cycleDays) : 1;
 
         if ($this->interest_calculation_type === 'fixed') {
-            $amountPerCycle = new Money((int) bcmul((string) ($this->interest_rate ?? 0), '100', 0), $currency);
+            $amountPerCycle = new Money((int) \bcmul((string) ($this->interest_rate ?? 0), '100', 0), $currency);
 
             return $amountPerCycle->multiply((string) $ratio);
         }

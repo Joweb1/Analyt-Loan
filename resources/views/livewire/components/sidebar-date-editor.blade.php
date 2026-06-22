@@ -12,7 +12,7 @@
                 <span class="text-[10px] font-black uppercase tracking-widest">System Date</span>
             </div>
             <p class="text-xs font-bold text-orange-800 dark:text-orange-300">
-                {{ fetch_data(\App\Models\Organization::current()->system_date?->format('M d, Y') ?? null) }}
+                {{ fetch_data(\App\Models\Organization::current()?->system_date?->format('M d, Y') ?? null) }}
             </p>
         </div>
     @if($canEdit)

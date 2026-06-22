@@ -31,7 +31,7 @@ trait BelongsToOrganization
         });
 
         static::addGlobalScope('organization', function (Builder $builder) {
-            if (app()->runningInConsole()) {
+            if (app()->runningInConsole() && ! app()->runningUnitTests()) {
                 return;
             }
 

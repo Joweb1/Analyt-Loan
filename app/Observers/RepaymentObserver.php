@@ -10,7 +10,9 @@ use App\Livewire\LoanDashboard;
 use App\Livewire\Reports;
 use App\Models\Repayment;
 use App\Models\SavingsTransaction;
+use App\Models\Transaction;
 use App\Services\TransactionService;
+use App\ValueObjects\Money;
 
 class RepaymentObserver
 {
@@ -19,7 +21,7 @@ class RepaymentObserver
      */
     public function created(Repayment $repayment): void
     {
-        (new \App\Observers\CashbookUnlockObserver())->handle($repayment->paid_at->toDateString(), $repayment->organization_id);
+        (new CashbookUnlockObserver)->handle($repayment->paid_at->toDateString(), $repayment->organization_id);
 
         $loan = $repayment->loan;
         if (! $loan) {
@@ -78,7 +80,7 @@ class RepaymentObserver
      */
     public function updated(Repayment $repayment): void
     {
-        (new \App\Observers\CashbookUnlockObserver())->handle($repayment->paid_at->toDateString(), $repayment->organization_id);
+        (new CashbookUnlockObserver)->handle($repayment->paid_at->toDateString(), $repayment->organization_id);
 
         if ($repayment->wasChanged('amount')) {
             $oldAmountMinor = (int) $repayment->getRawOriginal('amount');
@@ -86,7 +88,7 @@ class RepaymentObserver
             $differenceMinor = $newAmountMinor - $oldAmountMinor;
 
             // Find the original transaction
-            $originalTransaction = \App\Models\Transaction::where('related_id', $repayment->id)
+            $originalTransaction = Transaction::where('related_id', $repayment->id)
                 ->where('related_type', get_class($repayment))
                 ->where('type', 'repayment')
                 ->whereNull('parent_id')
@@ -94,13 +96,13 @@ class RepaymentObserver
 
             if ($originalTransaction) {
                 $difference = new Money($differenceMinor, $repayment->amount->getCurrency());
-                
-                \App\Services\TransactionService::record(
+
+                TransactionService::record(
                     type: 'adjustment',
                     amount: $difference,
                     user: $repayment->loan->borrower->user,
                     related: $repayment,
-                    notes: "Adjustment for Repayment update. Original: ₦" . (new Money($oldAmountMinor, $repayment->amount->getCurrency()))->format() . ", New: ₦" . $repayment->amount->format(),
+                    notes: 'Adjustment for Repayment update. Original: ₦'.(new Money($oldAmountMinor, $repayment->amount->getCurrency()))->format().', New: ₦'.$repayment->amount->format(),
                     parentId: $originalTransaction->id
                 );
             }
@@ -118,7 +120,7 @@ class RepaymentObserver
      */
     public function deleted(Repayment $repayment): void
     {
-        (new \App\Observers\CashbookUnlockObserver())->handle($repayment->paid_at->toDateString(), $repayment->organization_id);
+        (new CashbookUnlockObserver)->handle($repayment->paid_at->toDateString(), $repayment->organization_id);
 
         LoanRepaymentReceived::dispatch($repayment->loan, null);
         DashboardUpdated::dispatch($repayment->loan->organization_id);

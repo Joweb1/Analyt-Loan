@@ -5,15 +5,18 @@ namespace App\Observers;
 use App\Models\CashbookEntry;
 use App\Models\SystemNotification;
 use App\Models\User;
-use Illuminate\Support\Carbon;
 
 class CashbookUnlockObserver
 {
     /**
      * Unlock cashbook if it was already verified.
      */
-    public function handle(string $date, int $organizationId): void
+    public function handle(string $date, ?string $organizationId): void
     {
+        if (! $organizationId) {
+            return;
+        }
+
         $entry = CashbookEntry::where('organization_id', $organizationId)
             ->where('entry_date', $date)
             ->where('status', 'verified')

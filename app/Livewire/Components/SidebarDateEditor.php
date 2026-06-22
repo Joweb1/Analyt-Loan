@@ -10,6 +10,7 @@ use Livewire\Component;
 class SidebarDateEditor extends Component
 {
     public $system_date;
+
     public $showModal = false;
 
     protected $rules = [
@@ -18,16 +19,17 @@ class SidebarDateEditor extends Component
 
     public function mount()
     {
-        $org = Auth::user()->organization;
-        $this->system_date = $org->system_date 
+        $org = Auth::user()?->organization;
+        $this->system_date = ($org && $org->system_date)
             ? Carbon::parse($org->system_date)->format('Y-m-d')
             : now()->format('Y-m-d');
     }
 
     public function updateDate()
     {
-        if (!Auth::user()->can('change_system_date') && !Auth::user()->hasRole('Admin')) {
+        if (! Auth::user()->can('change_system_date') && ! Auth::user()->hasRole('Admin')) {
             $this->dispatch('custom-alert', ['type' => 'error', 'message' => 'Unauthorized.']);
+
             return;
         }
 

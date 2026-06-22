@@ -3,7 +3,9 @@
 namespace App\Observers;
 
 use App\Models\SavingsTransaction;
+use App\Models\Transaction;
 use App\Services\TransactionService;
+use App\ValueObjects\Money;
 
 class SavingsTransactionObserver
 {
@@ -12,7 +14,7 @@ class SavingsTransactionObserver
      */
     public function created(SavingsTransaction $savingsTransaction): void
     {
-        (new \App\Observers\CashbookUnlockObserver())->handle($savingsTransaction->transaction_date->toDateString(), $savingsTransaction->savingsAccount->organization_id);
+        (new CashbookUnlockObserver)->handle($savingsTransaction->transaction_date->toDateString(), $savingsTransaction->savingsAccount->organization_id);
 
         // Don't duplicate if it's already linked to a repayment (RepaymentObserver handles that)
         if ($savingsTransaction->repayment_id) {
@@ -34,7 +36,7 @@ class SavingsTransactionObserver
      */
     public function updated(SavingsTransaction $savingsTransaction): void
     {
-        (new \App\Observers\CashbookUnlockObserver())->handle($savingsTransaction->transaction_date->toDateString(), $savingsTransaction->savingsAccount->organization_id);
+        (new CashbookUnlockObserver)->handle($savingsTransaction->transaction_date->toDateString(), $savingsTransaction->savingsAccount->organization_id);
 
         if ($savingsTransaction->wasChanged('amount')) {
             $oldAmountMinor = (int) $savingsTransaction->getRawOriginal('amount');
@@ -42,7 +44,7 @@ class SavingsTransactionObserver
             $differenceMinor = $newAmountMinor - $oldAmountMinor;
 
             // Find the original transaction in the master ledger
-            $originalTransaction = \App\Models\Transaction::where('related_id', $savingsTransaction->id)
+            $originalTransaction = Transaction::where('related_id', $savingsTransaction->id)
                 ->where('related_type', get_class($savingsTransaction))
                 ->whereIn('type', ['deposit', 'withdrawal'])
                 ->whereNull('parent_id')
@@ -50,13 +52,13 @@ class SavingsTransactionObserver
 
             if ($originalTransaction) {
                 $difference = new Money($differenceMinor, $savingsTransaction->amount->getCurrency());
-                
+
                 TransactionService::record(
                     type: 'adjustment',
                     amount: $difference,
                     user: $savingsTransaction->savingsAccount->user,
                     related: $savingsTransaction,
-                    notes: "Adjustment for Savings Transaction update. Original: ₦" . (new Money($oldAmountMinor, $savingsTransaction->amount->getCurrency()))->format() . ", New: ₦" . $savingsTransaction->amount->format(),
+                    notes: 'Adjustment for Savings Transaction update. Original: ₦'.(new Money($oldAmountMinor, $savingsTransaction->amount->getCurrency()))->format().', New: ₦'.$savingsTransaction->amount->format(),
                     parentId: $originalTransaction->id
                 );
             }
@@ -68,7 +70,7 @@ class SavingsTransactionObserver
      */
     public function deleted(SavingsTransaction $savingsTransaction): void
     {
-        (new \App\Observers\CashbookUnlockObserver())->handle($savingsTransaction->transaction_date->toDateString(), $savingsTransaction->savingsAccount->organization_id);
+        (new CashbookUnlockObserver)->handle($savingsTransaction->transaction_date->toDateString(), $savingsTransaction->savingsAccount->organization_id);
     }
 
     /**

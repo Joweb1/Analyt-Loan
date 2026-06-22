@@ -26,5 +26,9 @@
         "@fontsource/manrope": "^5.2.8",
         "alpinejs": "^3.15.4",
         "material-symbols": "^0.40.2"
+    }, 
+    "overrides": {
+        "rollup": "npm:@rollup/wasm-node"
     }
+	
 }

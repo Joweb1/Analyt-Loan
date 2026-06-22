@@ -3,12 +3,14 @@
 namespace Tests\Feature;
 
 use App\DTOs\LoanApplicationDTO;
+use App\Livewire\Ledger\GroupLedger;
 use App\Models\Borrower;
 use App\Models\Loan;
 use App\Models\Organization;
 use App\Models\User;
 use App\Services\LoanService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Livewire\Livewire;
 use Tests\TestCase;
 
 class LoanCollectionOverhaulTest extends TestCase
@@ -217,13 +219,13 @@ class LoanCollectionOverhaulTest extends TestCase
             'organization_id' => $this->organization->id,
         ]);
 
-        $component = \Livewire\Livewire::test(\App\Livewire\Ledger\GroupLedger::class, ['group' => 'Monday Group']);
-        
+        $component = Livewire::test(GroupLedger::class, ['group' => 'Monday Group']);
+
         $component->call('toggleExpand', $this->borrower->id);
-        
+
         $component->assertSee('5,000')
-                  ->assertSee('3,000')
-                  ->assertSee('Total Period Paid')
-                  ->assertSee('8,000');
+            ->assertSee('3,000')
+            ->assertSee('Total Period Paid')
+            ->assertSee('8,000');
     }
 }

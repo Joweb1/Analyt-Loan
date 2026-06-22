@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\ValueObjects;
 
 use InvalidArgumentException;
@@ -45,7 +47,7 @@ class Money implements JsonSerializable, Wireable
     public static function fromMajor(float|string $amount, string $currency = 'NGN'): self
     {
         // Use string conversion to avoid float precision issues
-        $minor = (int) bcmul((string) $amount, '100', 0);
+        $minor = (int) \bcmul((string) $amount, '100', 0);
 
         return new self($minor, $currency);
     }
@@ -57,7 +59,7 @@ class Money implements JsonSerializable, Wireable
 
     public function getMajorAmount(): float
     {
-        return (float) bcdiv((string) $this->amount, '100', 2);
+        return (float) \bcdiv((string) $this->amount, '100', 2);
     }
 
     public function getCurrency(): string
@@ -85,7 +87,7 @@ class Money implements JsonSerializable, Wireable
         $multiplierStr = is_numeric($multiplier) ? number_format((float) $multiplier, 10, '.', '') : (string) $multiplier;
 
         // Keep 0 scale for minor units as they are integers
-        $result = bcmul((string) $this->amount, $multiplierStr, 0);
+        $result = \bcmul((string) $this->amount, $multiplierStr, 0);
 
         return new self((int) $result, $this->currency, $this->isMissing);
     }
@@ -95,7 +97,7 @@ class Money implements JsonSerializable, Wireable
      */
     public function divide(float|string $divisor, int $roundingMode = PHP_ROUND_HALF_UP): self
     {
-        $result = bcdiv((string) $this->amount, (string) $divisor, 0);
+        $result = \bcdiv((string) $this->amount, (string) $divisor, 0);
 
         return new self((int) $result, $this->currency, $this->isMissing);
     }

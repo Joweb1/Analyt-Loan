@@ -19,14 +19,16 @@ class ValidationModalTest extends TestCase
     use RefreshDatabase;
 
     protected Organization $organization;
+
     protected User $user;
+
     protected User $admin;
 
     protected function setUp(): void
     {
         parent::setUp();
         $this->organization = Organization::factory()->create([
-            'currency_code' => 'NGN'
+            'currency_code' => 'NGN',
         ]);
         app(TenantSession::class)->setTenantId($this->organization->id);
         $this->seed(RoleSeeder::class);

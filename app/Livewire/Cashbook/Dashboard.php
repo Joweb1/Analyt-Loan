@@ -173,13 +173,15 @@ class Dashboard extends Component
         // Requirement: Bank Deposit must have a value
         if ($this->entry->bank_deposit_amount->isZero()) {
             $this->errorMessage = 'Verification Failed: Bank Deposit Amount is mandatory to close the day.';
+
             return;
         }
 
         // Requirement: Bank Deposit must match Expected Deposit (unless Admin)
         if ($this->entry->bank_deposit_amount->getMinorAmount() < $this->entry->expected_deposit->getMinorAmount()) {
-            if (!auth()->user()->isAdmin()) {
-                $this->errorMessage = 'Verification Failed: Entered bank deposit is lower than the expected bank deposit (' . $this->entry->expected_deposit->format() . '). Please reconcile or contact Admin.';
+            if (! auth()->user()->isAdmin()) {
+                $this->errorMessage = 'Verification Failed: Entered bank deposit is lower than the expected bank deposit ('.$this->entry->expected_deposit->format().'). Please reconcile or contact Admin.';
+
                 return;
             }
         }

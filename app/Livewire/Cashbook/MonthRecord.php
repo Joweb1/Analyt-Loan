@@ -6,7 +6,9 @@ use App\Models\AccountBalance;
 use App\Models\CashbookEntry;
 use App\Models\ExpenseBudget;
 use App\Models\Organization;
+use App\Models\Transaction;
 use App\Services\CashbookService;
+use App\Services\TransactionService;
 use App\ValueObjects\Money;
 use Illuminate\Support\Carbon;
 use Livewire\Component;
@@ -131,25 +133,25 @@ class MonthRecord extends Component
             $difference = $amount->subtract($oldAmount);
 
             // Find previous transaction
-            $originalTransaction = \App\Models\Transaction::where('related_id', $balance->id)
+            $originalTransaction = Transaction::where('related_id', $balance->id)
                 ->where('related_type', get_class($balance))
                 ->where('type', 'balance_update')
                 ->whereNull('parent_id')
                 ->first();
 
-            \App\Services\TransactionService::record(
+            TransactionService::record(
                 type: 'adjustment',
                 amount: $difference,
                 related: $balance,
-                notes: "Adjustment for Monthly opening balance update. Original: ₦" . $oldAmount->format() . ", New: ₦" . $amount->format(),
+                notes: 'Adjustment for Monthly opening balance update. Original: ₦'.$oldAmount->format().', New: ₦'.$amount->format(),
                 parentId: $originalTransaction?->id
             );
         } else {
-            \App\Services\TransactionService::record(
+            TransactionService::record(
                 type: 'balance_update',
                 amount: $amount,
                 related: $balance,
-                notes: "Monthly opening balance set for " . Carbon::create($this->year, $this->month, 1)->format('F Y')
+                notes: 'Monthly opening balance set for '.Carbon::create($this->year, $this->month, 1)->format('F Y')
             );
         }
 
@@ -186,25 +188,25 @@ class MonthRecord extends Component
             $difference = $amount->subtract($oldAmount);
 
             // Find previous transaction
-            $originalTransaction = \App\Models\Transaction::where('related_id', $budget->id)
+            $originalTransaction = Transaction::where('related_id', $budget->id)
                 ->where('related_type', get_class($budget))
                 ->where('type', 'budget_update')
                 ->whereNull('parent_id')
                 ->first();
 
-            \App\Services\TransactionService::record(
+            TransactionService::record(
                 type: 'adjustment',
                 amount: $difference,
                 related: $budget,
-                notes: "Adjustment for Monthly expense budget update. Original: ₦" . $oldAmount->format() . ", New: ₦" . $amount->format(),
+                notes: 'Adjustment for Monthly expense budget update. Original: ₦'.$oldAmount->format().', New: ₦'.$amount->format(),
                 parentId: $originalTransaction?->id
             );
         } else {
-            \App\Services\TransactionService::record(
+            TransactionService::record(
                 type: 'budget_update',
                 amount: $amount,
                 related: $budget,
-                notes: "Monthly expense budget set for " . Carbon::create($this->year, $this->month, 1)->format('F Y')
+                notes: 'Monthly expense budget set for '.Carbon::create($this->year, $this->month, 1)->format('F Y')
             );
         }
 

@@ -3,7 +3,6 @@
          xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
          bootstrap="vendor/autoload.php"
          colors="true"
-         excludeGroups="skip"
 >
     <testsuites>
         <testsuite name="Unit">
@@ -13,6 +12,11 @@
             <directory>tests/Feature</directory>
         </testsuite>
     </testsuites>
+    <groups>
+        <exclude>
+            <group>skip</group>
+        </exclude>
+    </groups>
     <source>
         <include>
             <directory>app</directory>

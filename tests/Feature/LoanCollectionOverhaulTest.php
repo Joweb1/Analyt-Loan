@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Services\LoanService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
+use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class LoanCollectionOverhaulTest extends TestCase
@@ -40,7 +41,7 @@ class LoanCollectionOverhaulTest extends TestCase
         $this->actingAs($this->admin);
     }
 
-    /** @test */
+    #[Test]
     public function it_calculates_installments_based_on_20_day_month()
     {
         // 1 Month loan with Daily repayments should have 20 installments
@@ -71,7 +72,7 @@ class LoanCollectionOverhaulTest extends TestCase
         $this->assertFalse($hasWeekend, 'Repayment schedule should not contain weekends.');
     }
 
-    /** @test */
+    #[Test]
     public function it_snaps_weekly_repayments_to_loan_collection_day()
     {
         // Released on Monday (June 15), but assigned to Wednesday Group
@@ -106,7 +107,7 @@ class LoanCollectionOverhaulTest extends TestCase
         $this->assertEquals('2026-06-24', $schedules[0]->due_date->toDateString());
     }
 
-    /** @test */
+    #[Test]
     public function it_automatically_assigns_monthly_loans_to_monthly_collection_group()
     {
         $dto = LoanApplicationDTO::fromArray([
@@ -135,7 +136,7 @@ class LoanCollectionOverhaulTest extends TestCase
         $this->assertEquals('2026-07-13', $schedules[0]->due_date->toDateString());
     }
 
-    /** @test */
+    #[Test]
     public function it_defaults_to_bank_transfer_for_new_loans()
     {
         $loan = Loan::factory()->create([
@@ -145,7 +146,7 @@ class LoanCollectionOverhaulTest extends TestCase
         $this->assertEquals('bank_transfer', $loan->getRawOriginal('payment_method') ?? 'bank_transfer');
     }
 
-    /** @test */
+    #[Test]
     public function it_regenerates_schedule_when_loan_is_edited()
     {
         $dto = LoanApplicationDTO::fromArray([
@@ -190,7 +191,7 @@ class LoanCollectionOverhaulTest extends TestCase
         $this->assertEquals('weekly', $loan->repayment_cycle);
     }
 
-    /** @test */
+    #[Test]
     public function it_aggregates_multiple_repayments_in_the_ledger()
     {
         $loan = Loan::factory()->create([
